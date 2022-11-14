@@ -43,10 +43,10 @@ jobs:
           echo ::set-output name=current_version::$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}'))
 
       - name: Native Image for CLI
-        run: ./gradlew :cli:shadowJar :cli:nativeImage -Prelease
+        run: ./gradlew shadowJar nativeImage -Prelease
 
       - name: Push kafkactl
-        run: ./gradlew dockerBuild api:dockerPush cli:dockerPush -Prelease
+        run: ./gradlew dockerBuild dockerPush -Prelease
 
       - name: Upload Linux native Kafkactl
         uses: actions/upload-artifact@v3
@@ -110,7 +110,7 @@ jobs:
       - name: Native image for CLI
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
-          gradlew.bat :cli:shadowJar :cli:nativeImage
+          gradlew.bat shadowJar nativeImage
         shell: cmd
 
       - name: Upload Windows native Kafkactl
