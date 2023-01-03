@@ -1,14 +1,15 @@
-name: Snapshot
+name: Continuous integration
+
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build-linux:
+  build-jar:
     runs-on: ubuntu-latest
     environment: Build
     steps:
-      - name: Docker Login
+      - name: Docker login
         uses: docker/login-action@v1.8.0
         with:
           username: ${{ secrets.MICHELIN_DOCKER_HUB_USERNAME }}
@@ -17,17 +18,14 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
 
-      - name: Set up GraalVM
-        uses: graalvm/setup-graalvm@v1
-        with:
-          version: '21.1.0'
-          java-version: '11'
-          components: 'native-image'
-
-      - name: Install native image
-        run: gu install native-image
+      - name: Set up JDK 11
+          uses: actions/setup-java@v3
+          with:
+            java-version: '11'
+            distribution: 'temurin'
+            cache: maven
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
@@ -49,23 +47,54 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew build jacocoTestReport sonarqube --info
 
-      - name: Push Kafkactl
+      - name: Docker
         run: ./gradlew dockerBuild dockerPush
 
-      - name: Native image for CLI
-        run: ./gradlew shadowJar nativeImage
-
-      - name: Upload Linux native Kafkactl
-        uses: actions/upload-artifact@v3
-        with:
-          name: native-image-linux
-          path: ${{ github.workspace }}/build/native-image/kafkactl-*
-
-      - name: Upload JAR Kafkactl
+      - name: Upload
         uses: actions/upload-artifact@v2
         with:
-          name: jar
+          name: kafkactl-jar
           path: ${{ github.workspace }}/build/libs/kafkactl-*.jar
+
+  build-linux:
+    runs-on: ubuntu-latest
+    environment: Build
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          version: '21.1.0'
+          java-version: '11'
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+
+      - name: Native image
+        run: ./gradlew shadowJar nativeImage
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: kafkactl-linux
+          path: ${{ github.workspace }}/build/native-image/kafkactl-*
 
   build-windows:
     runs-on: windows-latest
@@ -83,9 +112,6 @@ jobs:
           java-version: '11'
           components: 'native-image'
 
-      - name: Install native image
-        run: ${{ env.JAVA_HOME }}\bin\gu.cmd install native-image
-
       - name: Cache Gradle packages
         uses: actions/cache@v3
         with:
@@ -96,14 +122,14 @@ jobs:
       - name: Configure Pagefile
         uses: al-cheb/configure-pagefile-action@v1.3
 
-      - name: Native image for CLI
+      - name: Build
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
           gradlew.bat shadowJar nativeImage
         shell: cmd
 
-      - name: Upload Windows native Kafkactl
+      - name: Upload
         uses: actions/upload-artifact@v3
         with:
-          name: native-image-windows
+          name: kafkactl-windows
           path: ${{ github.workspace }}/build/native-image/kafkactl-*.exe

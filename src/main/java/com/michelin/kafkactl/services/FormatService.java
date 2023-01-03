@@ -7,6 +7,7 @@ import com.michelin.kafkactl.KafkactlConfig;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.models.Status;
 import io.micronaut.core.naming.conventions.StringConvention;
+import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import org.ocpsoft.prettytime.PrettyTime;
 import org.yaml.snakeyaml.DumperOptions;
@@ -26,7 +27,6 @@ public class FormatService {
     private static final String YAML = "yaml";
     private static final String TABLE = "table";
     private final List<String> defaults = List.of("KIND:/kind", "NAME:/metadata/name", "AGE:/metadata/creationTimestamp%AGO");
-
     @Inject
     public KafkactlConfig kafkactlConfig;
 
@@ -198,7 +198,7 @@ public class FormatService {
                             cell.elements().forEachRemaining(jsonNode -> childs.add(jsonNode.asText()));
                             output = "[" + String.join(",", childs) + "]";
                         } else {
-                            output = cell.asText();
+                            output = cell.asText(StringUtils.EMPTY_STRING);
                         }
                         break;
                 }

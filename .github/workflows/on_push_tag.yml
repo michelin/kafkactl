@@ -1,14 +1,15 @@
 name: Release
+
 on:
   push:
     tags: [ '*' ]
 
 jobs:
-  build-linux:
+  build-jar:
     runs-on: ubuntu-latest
     environment: Build
     steps:
-      - name: Docker Login
+      - name: Docker login
         uses: docker/login-action@v1.8.0
         with:
           username: ${{ secrets.MICHELIN_DOCKER_HUB_USERNAME }}
@@ -17,17 +18,21 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
 
-      - name: Set up GraalVM
-        uses: graalvm/setup-graalvm@v1
+      - name: Set up JDK 11
+          uses: actions/setup-java@v3
+          with:
+            java-version: '11'
+            distribution: 'temurin'
+            cache: maven
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
         with:
-          version: '21.1.0'
-          java-version: '11'
-          components: 'native-image'
-
-      - name: Install Native Image
-        run: gu install native-image
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
       - name: Cache Gradle packages
         uses: actions/cache@v3
@@ -42,22 +47,13 @@ jobs:
           ./gradlew build check -Prelease
           echo ::set-output name=current_version::$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}'))
 
-      - name: Native Image for CLI
-        run: ./gradlew shadowJar nativeImage -Prelease
-
-      - name: Push kafkactl
+      - name: Docker
         run: ./gradlew dockerBuild dockerPush -Prelease
 
-      - name: Upload Linux native Kafkactl
-        uses: actions/upload-artifact@v3
+      - name: Upload
+        uses: actions/upload-artifact@v2
         with:
-          name: native-image-linux
-          path: ${{ github.workspace }}/build/native-image/kafkactl-*
-
-      - name: Upload JAR Kafkactl
-        uses: actions/upload-artifact@v3
-        with:
-          name: jar
+          name: kafkactl-jar
           path: ${{ github.workspace }}/build/libs/kafkactl-*.jar
 
       - name: Generate Release Changelog
@@ -73,7 +69,57 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: ${{ github.workspace }}/build/native-image/kafkactl-${{ steps.build_and_test.outputs.current_version }},${{ github.workspace }}/cli/build/libs/kafkactl-*.jar
+          artifacts: ${{ github.workspace }}/cli/build/libs/kafkactl-*.jar
+          draft: true
+          prerelease: true
+          allowUpdates: true
+
+  build-linux:
+    runs-on: ubuntu-latest
+    environment: Build
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          version: '21.1.0'
+          java-version: '11'
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+
+      - name: Build
+        run: ./gradlew shadowJar nativeImage -Prelease
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: kafkactl-linux
+          path: ${{ github.workspace }}/build/native-image/kafkactl-*
+
+      - name: Update release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: ${{ steps.build_changelog.outputs.changelog }}
+          artifacts: ${{ github.workspace }}/build/native-image/kafkactl-${{ steps.build_and_test.outputs.current_version }}
           draft: true
           prerelease: true
           allowUpdates: true
@@ -85,7 +131,7 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
 
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
@@ -93,9 +139,6 @@ jobs:
           version: '20.3.2'
           java-version: '11'
           components: 'native-image'
-
-      - name: Install native image
-        run: ${{ env.JAVA_HOME }}\bin\gu.cmd install native-image
 
       - name: Cache Gradle packages
         uses: actions/cache@v3
@@ -107,16 +150,16 @@ jobs:
       - name: Configure Pagefile
         uses: al-cheb/configure-pagefile-action@v1.3
 
-      - name: Native image for CLI
+      - name: Build
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
           gradlew.bat shadowJar nativeImage
         shell: cmd
 
-      - name: Upload Windows native Kafkactl
+      - name: Upload
         uses: actions/upload-artifact@v3
         with:
-          name: native-image-windows
+          name: kafkactl-windows
           path: ${{ github.workspace }}/build/native-image/kafkactl-*.exe
 
       - name: Update release
