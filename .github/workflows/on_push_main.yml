@@ -110,6 +110,7 @@ jobs:
           version: '20.3.2'
           java-version: '11'
           components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache Gradle packages
         uses: actions/cache@v3
