@@ -12,10 +12,10 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.projectlombok:lombok:1.18.16'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
     compileOnly "org.graalvm.nativeimage:svm"
 
-    annotationProcessor 'org.projectlombok:lombok:1.18.16'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
     annotationProcessor("info.picocli:picocli-codegen:4.6.1")
     annotationProcessor "io.micronaut:micronaut-graal"
 
