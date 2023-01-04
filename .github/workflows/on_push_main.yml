@@ -46,6 +46,12 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew build jacocoTestReport sonarqube --info
 
+      - name: Publish test report
+        if: always()
+        uses: mikepenz/action-junit-report@v3
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'
+
       - name: Docker
         run: ./gradlew dockerBuild dockerPush
 
@@ -118,9 +124,6 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
-
-      - name: Configure Pagefile
-        uses: al-cheb/configure-pagefile-action@v1.3
 
       - name: Build
         run: |
