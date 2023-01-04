@@ -17,6 +17,7 @@
 * [Download](#download)
 * [Install](#install)
   * [Configuration file](#configuration-file)
+* [Usage](#usage)
 
 # Download
 
@@ -76,4 +77,43 @@ Check your current context:
 
 ```command
 kafkactl config current-context
+```
+
+# Usage
+
+```console
+Usage: kafkactl [-hvV] [-n=<optionalNamespace>] [COMMAND]
+  -h, --help      Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                  Override namespace defined in config or yaml resource
+  -v, --verbose   ...
+  -V, --version   Print version information and exit.
+Commands:
+  apply           Create or update a resource
+  get             Get resources by resource type for the current namespace
+  delete          Delete a resource
+  api-resources   Print the supported API resources on the server
+  diff            Get differences between the new resources and the old resource
+  reset-offsets   Reset Consumer Group offsets
+  delete-records  Deletes all records within a topic
+  import          Import resources already present on the Kafka Cluster in
+                    ns4kafka
+  connectors      Interact with connectors (Pause/Resume/Restart)
+  schemas         Update schema compatibility mode
+  reset-password  Reset your Kafka password
+  config          Manage configuration
+```
+
+## Config
+
+This command allows you to manage your Kafka contexts.
+
+```console
+Usage: kafkactl config [-v] [-n=<optionalNamespace>] <action> <context>
+Manage configuration
+      <action>    (get-contexts | current-context | use-context)
+      <context>   Context
+  -n, --namespace=<optionalNamespace>
+                           Override namespace defined in config or yaml resource
+  -v, --verbose            ...
 ```
