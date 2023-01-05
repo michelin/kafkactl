@@ -25,7 +25,8 @@
     * [Connector](#connector)
     * [Connect Cluster](#connect-cluster)
     * [Kafka Streams](#kafka-streams)
-
+  * [Delete](#delete)
+  * [Get](#get)
 
 
 
@@ -318,3 +319,50 @@ This example assumes there is a subject named "commons.address-value" with a ver
 
 Your schemas ACLs are the same as your topics ACLs.
 If you are allowed to create a topic "myPrefix.topic", then you are automatically allowed to create subject myPrefix.topic-key and myPrefix.topic-value.
+
+## Delete
+
+This command allows you to delete a resource.
+
+Deleting a resource is permanent and instantaneous. There is no coming back after deleting it.
+- if the topic contained data, this data is lost.
+- if the ACL was associated to live/running user, the user will instantly lose access to the resource.
+
+```yml
+Usage: kafkactl delete [-v] [--dry-run] [-n=<optionalNamespace>]
+                       ([<resourceType> <name>] | [[-f=<file>] [-R]])
+Delete a resource
+      <resourceType>   Resource type
+      <name>           Resource name
+      --dry-run        Does not persist operation. Validate only
+  -f, --file=<file>    YAML File or Directory containing YAML resources
+  -n, --namespace=<optionalNamespace>
+                       Override namespace defined in config or yaml resource
+  -R, --recursive      Enable recursive search in Directory
+  -v, --verbose        ...
+```
+
+## Get
+
+This command allows you to consult one or multiple resources.
+
+```yml
+Usage: kafkactl get [-v] [-n=<optionalNamespace>] [-o=<output>] <resourceType>
+                    [<resourceName>]
+Get resources by resource type for the current namespace
+Examples:
+  kafkactl get topic topic1 : Display topic1 configuration
+  kafkactl get topics : Display all topics
+  kafkactl get all : Display all resources
+Parameters:
+      <resourceType>      Resource type or 'all' to display resources for all
+                            types
+      [<resourceName>]    Resource name
+  -n, --namespace=<optionalNamespace>
+                          Override namespace defined in config or yaml resource
+  -o, --output=<output>   Output format. One of: yaml|table
+  -v, --verbose           ...
+```
+
+- **resourceType** is one of the managed resources: topic, connector, acl, schema, stream or **all** to fetch all the resources.
+- **resourceName** is the name of the resource to consult.
