@@ -18,57 +18,30 @@ import java.util.stream.Collectors;
 
 @CommandLine.Command(name = "connectors", description = "Interact with connectors (Pause/Resume/Restart)")
 public class ConnectorsSubcommand implements Callable<Integer> {
-    /**
-     * Kafkactl command
-     */
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
-    /**
-     * Action to perform on connectors
-     */
     @CommandLine.Parameters(index = "0", description = "(pause | resume | restart)", arity = "1")
     public ConnectorAction action;
 
-    /**
-     * List of connectors
-     */
     @CommandLine.Parameters(index="1..*", description = "Connector names separated by space (use `ALL` for all connectors)", arity = "1..*")
     public List<String> connectors;
 
-    /**
-     * Login service
-     */
     @Inject
     public LoginService loginService;
 
-    /**
-     * Kafkactl configuration
-     */
     @Inject
     public KafkactlConfig kafkactlConfig;
 
-    /**
-     * Resource service
-     */
     @Inject
     public ResourceService resourceService;
 
-    /**
-     * API resources service
-     */
     @Inject
     public ApiResourcesService apiResourcesService;
 
-    /**
-     * Format service
-     */
     @Inject
     public FormatService formatService;
 
-    /**
-     * Current command
-     */
     @CommandLine.Spec
     public CommandLine.Model.CommandSpec commandSpec;
 

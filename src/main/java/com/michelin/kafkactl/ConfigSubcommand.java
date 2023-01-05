@@ -48,7 +48,7 @@ public class ConfigSubcommand implements Callable<Integer> {
      * Context name to set on use-context
      */
     @CommandLine.Parameters(index="1", defaultValue = "", description = "Context", arity = "1")
-    public String contextNameToSet;
+    public String context;
 
     /**
      * Run the "config" command
@@ -108,16 +108,16 @@ public class ConfigSubcommand implements Callable<Integer> {
             return 0;
         }
 
-        Optional<KafkactlConfig.Context> optionalContextToSet = configService.getContextByName(contextNameToSet);
+        Optional<KafkactlConfig.Context> optionalContextToSet = configService.getContextByName(context);
         if (optionalContextToSet.isEmpty()) {
-            System.out.println("error: no context exists with the name: " + contextNameToSet);
+            System.out.println("error: no context exists with the name: " + context);
             return 1;
         }
 
         KafkactlConfig.Context contextToSet = optionalContextToSet.get();
         if (action.equals(ConfigAction.USE_CONTEXT)) {
             configService.updateConfigurationContext(contextToSet);
-            System.out.println("Switched to context \"" + contextNameToSet + "\".");
+            System.out.println("Switched to context \"" + context + "\".");
             return 0;
         }
 
