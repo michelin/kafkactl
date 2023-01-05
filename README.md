@@ -31,6 +31,8 @@
   * [Diff](#diff)
   * [Import](#import)
   * [Reset Offsets](#reset-offsets)
+  * [Delete Records](#delete-records)
+  * [Connectors](#connectors)
   
 # Download
 
@@ -413,3 +415,67 @@ Import unsynchronized resources
 ## Reset Offsets
 
 This command allows you to reset the offsets of consumer groups and topics.
+
+```yml
+Usage: kafkactl reset-offsets [-v] [--dry-run] --group=<group>
+                              [-n=<optionalNamespace>] (--topic=<topic> |
+                              --all-topics) (--to-earliest | --to-latest |
+                              --to-datetime=<datetime> | --shift-by=<shiftBy> |
+                              --by-duration=<duration> | --to-offset=<offset>)
+Reset Consumer Group offsets
+      --all-topics           All topics
+      --by-duration=<duration>
+                             Shift offset by a duration format [ PnDTnHnMnS ]
+      --dry-run              Does not persist resources. Validate only
+      --group=<group>        Consumer group name
+  -n, --namespace=<optionalNamespace>
+                             Override namespace defined in config or yaml
+                               resource
+      --shift-by=<shiftBy>   Shift offset by a number [ negative to reprocess,
+                               positive to skip ]
+      --to-datetime=<datetime>
+                             Set offset to a specific ISO 8601 DateTime with
+                               Time zone [ yyyy-MM-dd'T'HH:mm:ss.SSSXXX ]
+      --to-earliest          Set offset to its earliest value [ reprocess all ]
+      --to-latest            Set offset to its latest value [ skip all ]
+      --to-offset=<offset>   Set offset to a specific index
+      --topic=<topic>        Topic or Topic:Partition [ topic[:partition] ]
+  -v, --verbose              ...
+```
+
+- **--group** is one of your consumer group to reset.
+- **--topic/--all-topics** is a given topic or all the topics to reset.
+- **method** can be: --to-earliest, --to-latest, --to-offset, --to-datetime, --shift-by
+
+## Delete Records
+
+This command allows you to delete all records within "delete" typed topics.
+
+```yml
+Usage: kafkactl delete-records [-v] [--dry-run] [-n=<optionalNamespace>] <topic>
+Deletes all records within a topic
+      <topic>     Name of the topic
+      --dry-run   Does not persist resources. Validate only
+  -n, --namespace=<optionalNamespace>
+                  Override namespace defined in config or yaml resource
+  -v, --verbose   ...
+```
+
+## Connectors
+
+This command allows you to interact with connectors.
+
+```yml
+Usage: kafkactl connectors [-v] [-n=<optionalNamespace>] <action>
+                           <connectors>...
+Interact with connectors (Pause/Resume/Restart)
+      <action>          (pause | resume | restart)
+      <connectors>...   Connector names separated by space (use `ALL` for all
+                          connectors)
+  -n, --namespace=<optionalNamespace>
+                        Override namespace defined in config or yaml resource
+  -v, --verbose         ...
+```
+
+- **action** can be pause, resume, restart
+- **connectors** is a list of connector names separated by space.
