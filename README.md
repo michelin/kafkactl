@@ -18,6 +18,16 @@
 * [Install](#install)
   * [Configuration file](#configuration-file)
 * [Usage](#usage)
+  * [Config](#config)
+  * [Apply](#apply)
+    * [Topic](#topic)
+    * [ACL](#acl)
+    * [Connector](#connector)
+
+
+
+
+
 
 # Download
 
@@ -29,7 +39,7 @@ Kafkactl can be downloaded at https://github.com/michelin/kafkactl/releases and 
 # Install
 
 Kafkactl requires 3 variables to work:
-- The url of Ns4kafka
+- The url of Ns4Kafka
 - Your namespace
 - Your security token (e.g., a Gitlab token)
   
@@ -205,3 +215,36 @@ spec:
 
 - **spec.connectCluster** must refer to one of the Kafka Connect clusters declared in the Ns4Kafka configuration, and authorized to your namespace. It can also refer to a Kafka Connect cluster that you self deployed or you have been granted access.
 - Everything else depend on the connect validation rules associated to your namespace.
+
+### Connect Cluster
+
+This resource declares a Connect cluster that has been self-deployed, so namespaces are autonomous to deploy connectors on it without any Ns4Kafka outage.
+
+```yaml
+---
+apiVersion: v1
+kind: ConnectCluster
+metadata:
+  name: myPrefix.myConnectCluster
+spec:
+  url: http://localhost:8083
+  username: myUsername
+  password: myPassword
+```
+
+- **metadata.name** should not collide with the name of a Connect cluster declared in the Ns4Kafka configuration. An error message will be thrown otherwise.
+- Owners of Connect clusters can authorize other namespaces to deploy connectors on their own Connect clusters by giving an ACL with the WRITE permission to the grantees.
+
+### Kafka Streams
+
+This resource grants the necessary ACLs for your Kafka Streams to work properly if you have internal topics.
+
+```yaml
+---
+apiVersion: v1
+kind: KafkaStream
+metadata:
+  name: myKafkaStreamsApplicationId
+```
+
+- **metadata.name** must correspond to your Kafka Streams **application.id**.
