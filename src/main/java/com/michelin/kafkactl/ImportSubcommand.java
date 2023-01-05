@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-@Command(name = "import", description = "Import resources already present on the Kafka Cluster in ns4kafka")
+@Command(name = "import", description = "Import unsynchronized resources")
 public class ImportSubcommand implements Callable<Integer> {
     /**
      * Login service
