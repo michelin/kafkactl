@@ -33,6 +33,7 @@
   * [Reset Offsets](#reset-offsets)
   * [Delete Records](#delete-records)
   * [Connectors](#connectors)
+  * [Reset Password](#reset-password)
   
 # Download
 
@@ -479,3 +480,40 @@ Interact with connectors (Pause/Resume/Restart)
 
 - **action** can be pause, resume, restart
 - **connectors** is a list of connector names separated by space.
+
+## Schemas
+
+This command allows you to modify schema compatibility.
+
+```yml
+Usage: kafkactl schemas [-v] [-n=<optionalNamespace>] <compatibility>
+                        <subjects>...
+Update schema compatibility mode
+      <compatibility>   Compatibility mode to set [GLOBAL, BACKWARD,
+                          BACKWARD_TRANSITIVE, FORWARD, FORWARD_TRANSITIVE,
+                          FULL, FULL_TRANSITIVE, NONE]. GLOBAL will revert to
+                          Schema Registry's compatibility level
+      <subjects>...     Subject names separated by space
+  -n, --namespace=<optionalNamespace>
+                        Override namespace defined in config or yaml resource
+  -v, --verbose         ...
+```
+
+- **compatibility** is the compatibility mode to apply.
+- **subject** is the subject to update the compatibility.
+
+## Reset Password
+
+This command allows you to reset the password of a user.
+
+```yml
+Usage: kafkactl reset-password [-v] [--execute] [-n=<optionalNamespace>]
+                               [-o=<output>] <user>
+Reset your Kafka password
+      <user>              The user to reset password
+      --execute           This option is mandatory to change the password
+  -n, --namespace=<optionalNamespace>
+                          Override namespace defined in config or yaml resource
+  -o, --output=<output>   Output format. One of: yaml|table
+  -v, --verbose           ...
+```
