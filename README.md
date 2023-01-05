@@ -23,7 +23,8 @@
     * [Topic](#topic)
     * [ACL](#acl)
     * [Connector](#connector)
-
+    * [Connect Cluster](#connect-cluster)
+    * [Kafka Streams](#kafka-streams)
 
 
 
@@ -248,3 +249,72 @@ metadata:
 ```
 
 - **metadata.name** must correspond to your Kafka Streams **application.id**.
+
+### Schema
+
+Subjects can be declared by referencing a local _avsc_ file with **spec.schemaFile** or directly inline with **spec.schema**.
+
+#### Local file
+
+```yml
+---
+apiVersion: v1
+kind: Schema
+metadata:
+  name: myPrefix.topic-value # your subject name
+spec:
+  schemaFile: schemas/topic.avsc # relative to kafkactl binary
+```
+
+#### Inline
+
+```yml
+---
+apiVersion: v1
+kind: Schema
+metadata:
+  name: myPrefix.topic-value
+spec:
+  schema: |
+    {
+      "type": "long"
+    }
+```
+
+#### Reference
+
+If your schema references a type which is already stored in the Schema Registry, you can do this:
+
+```yml
+---
+apiVersion: v1
+kind: Schema
+metadata:
+  name: myPrefix.topic-value
+spec: 
+  schema: |
+    {
+      "type": "record",
+      "namespace": "com.schema.avro",
+      "name": "Client",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "address",
+          "type": "com.schema.avro.Address"
+        }
+      ]
+    }
+  references:
+    - name: com.schema.avro.Address
+      subject: commons.address-value
+      version: 1
+```
+
+This example assumes there is a subject named "commons.address-value" with a version 1 already available in the Schema Registry.
+
+Your schemas ACLs are the same as your topics ACLs.
+If you are allowed to create a topic "myPrefix.topic", then you are automatically allowed to create subject myPrefix.topic-key and myPrefix.topic-value.
