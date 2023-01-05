@@ -29,7 +29,7 @@
   * [Delete Records](#delete-records)
   * [Connectors](#connectors)
   * [Reset Password](#reset-password)
-* [CI/CD](#ci-cd)
+* [CI/CD](#cicd)
   
 # Download
 
