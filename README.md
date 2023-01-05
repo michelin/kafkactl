@@ -117,3 +117,91 @@ Manage configuration
                            Override namespace defined in config or yaml resource
   -v, --verbose            ...
 ```
+
+## Apply
+
+This command allows you to deploy a resource.
+
+```console
+Usage: kafkactl apply [-Rv] [--dry-run] [-f=<file>] [-n=<optionalNamespace>]
+Create or update a resource
+      --dry-run       Does not persist resources. Validate only
+  -f, --file=<file>   YAML File or Directory containing YAML resources
+  -n, --namespace=<optionalNamespace>
+                      Override namespace defined in config or yaml resource
+  -R, --recursive     Enable recursive search of file
+  -v, --verbose       ...
+```
+
+Resources have to be described in yaml manifests.
+
+### Topic
+
+```yaml
+---
+apiVersion: v1
+kind: Topic
+metadata:
+  name: myPrefix.topic
+spec:
+  replicationFactor: 3
+  partitions: 3
+  configs:
+    min.insync.replicas: '2'
+    cleanup.policy: delete
+    retention.ms: '60000'
+```
+
+- **metadata.name** must be part of your allowed ACLs. Visit your namespace ACLs to understand which topics you are allowed to manage.
+- **spec** properties and more importantly **spec.config** properties validation dependend on the topic validation rules associated to your namespace.
+- **spec.replicationFactor** and **spec.partitions** are immutable. They cannot be modified once the topic is created.
+
+### ACL
+
+In order to provide access to your topics to another namespace, you can add an ACL using the following example, where "daaagbl0" is your namespace and "dbbbgbl0" the namespace that needs access your topics.
+
+
+```yaml
+---
+apiVersion: v1
+kind: AccessControlEntry
+metadata:
+  name: acl-topic-a-b
+  namespace: daaagbl0
+spec:
+  resourceType: TOPIC
+  resource: aaa.
+  resourcePatternType: PREFIXED
+  permission: READ
+  grantedTo: dbbbgbl0
+```
+
+- **spec.resourceType** can be TOPIC, GROUP, CONNECT, CONNECT_CLUSTER.
+- **spec.resourcePatternType** can be PREFIXED, LITERAL.
+- **spec.permission** can be READ, WRITE.
+- **spec.grantedTo** must reference a namespace on the same Kafka cluster as yours.
+- **spec.resource** must reference any “sub-resource” that you are owner of. For example, if you are owner of the prefix “aaa”, you can grant READ or WRITE access such as:
+  - the whole prefix: “aaa” 
+  - a sub prefix: “aaa_subprefix”
+  - a literal topic name: “aaa_myTopic”
+
+### Connector
+
+```yaml
+---
+apiVersion: v1
+kind: Connector
+metadata:
+  name: myPrefix.myConnector
+spec:
+  connectCluster: myConnectCluster
+  config:
+    connector.class: myConnectorClass
+    tasks.max: '1'
+    topics: myPrefix.myTopic
+    file: /tmp/output.out
+    consumer.override.sasl.jaas.config: o.a.k.s.s.ScramLoginModule required username="<user>" password="<password>";
+```
+
+- **spec.connectCluster** must refer to one of the Kafka Connect clusters declared in the Ns4Kafka configuration, and authorized to your namespace. It can also refer to a Kafka Connect cluster that you self deployed or you have been granted access.
+- Everything else depend on the connect validation rules associated to your namespace.
