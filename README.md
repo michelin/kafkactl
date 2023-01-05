@@ -27,10 +27,11 @@
     * [Kafka Streams](#kafka-streams)
   * [Delete](#delete)
   * [Get](#get)
-
-
-
-
+  * [Api Resources](#api-resources)
+  * [Diff](#diff)
+  * [Import](#import)
+  * [Reset Offsets](#reset-offsets)
+  
 # Download
 
 Kafkactl can be downloaded at https://github.com/michelin/kafkactl/releases and is available in 3 different formats:
@@ -366,3 +367,49 @@ Parameters:
 
 - **resourceType** is one of the managed resources: topic, connector, acl, schema, stream or **all** to fetch all the resources.
 - **resourceName** is the name of the resource to consult.
+
+## Api Resources 
+
+This command allows you to consult which resources can be access.
+
+```yml
+Usage: kafkactl api-resources [-v] [-n=<optionalNamespace>]
+Print the supported API resources on the server
+  -n, --namespace=<optionalNamespace>
+                  Override namespace defined in config or yaml resource
+  -v, --verbose   ...
+```
+
+## Diff
+
+This command allows you to check differences between a new yaml descriptor and the current one deployed in Ns4Kafka.
+
+```yml
+Usage: kafkactl diff [-Rv] [-f=<file>] [-n=<optionalNamespace>]
+Get differences between the new resources and the old resource
+  -f, --file=<file>   YAML File or Directory containing YAML resources
+  -n, --namespace=<optionalNamespace>
+                      Override namespace defined in config or yaml resource
+  -R, --recursive     Enable recursive search of file
+  -v, --verbose       ...
+```
+
+## Import
+
+This command allows you to import unsynchronized resources between Ns4Kafka, and the Kafka broker/Kafka Connect cluster.
+
+```yml
+Usage: kafkactl import [-v] [--dry-run] [-n=<optionalNamespace>] <resourceType>
+Import unsynchronized resources
+      <resourceType>   Resource type
+      --dry-run        Does not persist resources. Validate only
+  -n, --namespace=<optionalNamespace>
+                       Override namespace defined in config or yaml resource
+  -v, --verbose        ...
+```
+
+- **resourceType** can be topic or connector
+
+## Reset Offsets
+
+This command allows you to reset the offsets of consumer groups and topics.
