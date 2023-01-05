@@ -20,11 +20,6 @@
 * [Usage](#usage)
   * [Config](#config)
   * [Apply](#apply)
-    * [Topic](#topic)
-    * [ACL](#acl)
-    * [Connector](#connector)
-    * [Connect Cluster](#connect-cluster)
-    * [Kafka Streams](#kafka-streams)
   * [Delete](#delete)
   * [Get](#get)
   * [Api Resources](#api-resources)
@@ -34,6 +29,7 @@
   * [Delete Records](#delete-records)
   * [Connectors](#connectors)
   * [Reset Password](#reset-password)
+* [CI/CD](#ci-cd)
   
 # Download
 
@@ -517,3 +513,28 @@ Reset your Kafka password
   -o, --output=<output>   Output format. One of: yaml|table
   -v, --verbose           ...
 ```
+
+# CI/CD
+
+A Docker image with Kafkactl is available at [https://hub.docker.com/repository/docker/michelin/kafkactl](https://hub.docker.com/repository/docker/michelin/kafkactl).
+
+Here is how to use it with GitLab CI.
+
+
+```yaml
+kafkactl:
+  stage: kafkactl
+  image:
+    name: michelin/kafkactl:1.10.1
+    entrypoint: ['/bin/sh', '-c']
+  before_script:
+    - export KAFKACTL_CURRENT_NAMESPACE=test
+    - export KAFKACTL_API=http://ns4kafka-dev-api.domain.com
+    - export KAFKACTL_USER_TOKEN=${GITLAB_TOKEN}
+  script:
+    - java -jar /home/app/application.jar get all
+```
+
+- **KAFKACTL_CURRENT_NAMESPACE** is the namespace to use.
+- **KAFKACTL_API** is the URL of Ns4Kafka in which to deploy
+- **KAFKACTL_USER_TOKEN** is a CI/CD variable that contains the GitLab token.
