@@ -16,7 +16,7 @@
 
 * [Download](#download)
 * [Install](#install)
-  * [Configuration file](#configuration-file)
+* [Configuration](#configuration)
 * [Usage](#usage)
   * [Config](#config)
   * [Apply](#apply)
@@ -47,7 +47,7 @@ Kafkactl requires 3 variables to work:
   
 These variable can be defined in the dedicated configuration file.
 
-## Configuration file
+# Configuration
 
 Create a folder .kafkactl in your home directory:
 
