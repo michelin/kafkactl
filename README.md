@@ -28,6 +28,9 @@
   * [Delete Records](#delete-records)
   * [Connectors](#connectors)
   * [Reset Password](#reset-password)
+* [Resources](#resources)
+  * [User](#user)
+  * [Administrator](#administrator)
 * [CI/CD](#cicd)
   
 # Download
@@ -145,179 +148,6 @@ Create or update a resource
 ```
 
 Resources have to be described in yaml manifests.
-
-### Topic
-
-```yaml
----
-apiVersion: v1
-kind: Topic
-metadata:
-  name: myPrefix.topic
-spec:
-  replicationFactor: 3
-  partitions: 3
-  configs:
-    min.insync.replicas: '2'
-    cleanup.policy: delete
-    retention.ms: '60000'
-```
-
-- **metadata.name** must be part of your allowed ACLs. Visit your namespace ACLs to understand which topics you are allowed to manage.
-- **spec** properties and more importantly **spec.config** properties validation dependend on the topic validation rules associated to your namespace.
-- **spec.replicationFactor** and **spec.partitions** are immutable. They cannot be modified once the topic is created.
-
-### ACL
-
-In order to provide access to your topics to another namespace, you can add an ACL using the following example, where "daaagbl0" is your namespace and "dbbbgbl0" the namespace that needs access your topics.
-
-
-```yaml
----
-apiVersion: v1
-kind: AccessControlEntry
-metadata:
-  name: acl-topic-a-b
-  namespace: daaagbl0
-spec:
-  resourceType: TOPIC
-  resource: aaa.
-  resourcePatternType: PREFIXED
-  permission: READ
-  grantedTo: dbbbgbl0
-```
-
-- **spec.resourceType** can be TOPIC, GROUP, CONNECT, CONNECT_CLUSTER.
-- **spec.resourcePatternType** can be PREFIXED, LITERAL.
-- **spec.permission** can be READ, WRITE.
-- **spec.grantedTo** must reference a namespace on the same Kafka cluster as yours.
-- **spec.resource** must reference any “sub-resource” that you are owner of. For example, if you are owner of the prefix “aaa”, you can grant READ or WRITE access such as:
-  - the whole prefix: “aaa” 
-  - a sub prefix: “aaa_subprefix”
-  - a literal topic name: “aaa_myTopic”
-
-### Connector
-
-```yaml
----
-apiVersion: v1
-kind: Connector
-metadata:
-  name: myPrefix.myConnector
-spec:
-  connectCluster: myConnectCluster
-  config:
-    connector.class: myConnectorClass
-    tasks.max: '1'
-    topics: myPrefix.myTopic
-    file: /tmp/output.out
-    consumer.override.sasl.jaas.config: o.a.k.s.s.ScramLoginModule required username="<user>" password="<password>";
-```
-
-- **spec.connectCluster** must refer to one of the Kafka Connect clusters declared in the Ns4Kafka configuration, and authorized to your namespace. It can also refer to a Kafka Connect cluster that you self deployed or you have been granted access.
-- Everything else depend on the connect validation rules associated to your namespace.
-
-### Connect Cluster
-
-This resource declares a Connect cluster that has been self-deployed, so namespaces are autonomous to deploy connectors on it without any Ns4Kafka outage.
-
-```yaml
----
-apiVersion: v1
-kind: ConnectCluster
-metadata:
-  name: myPrefix.myConnectCluster
-spec:
-  url: http://localhost:8083
-  username: myUsername
-  password: myPassword
-```
-
-- **metadata.name** should not collide with the name of a Connect cluster declared in the Ns4Kafka configuration. An error message will be thrown otherwise.
-- Owners of Connect clusters can authorize other namespaces to deploy connectors on their own Connect clusters by giving an ACL with the WRITE permission to the grantees.
-
-### Kafka Streams
-
-This resource grants the necessary ACLs for your Kafka Streams to work properly if you have internal topics.
-
-```yaml
----
-apiVersion: v1
-kind: KafkaStream
-metadata:
-  name: myKafkaStreamsApplicationId
-```
-
-- **metadata.name** must correspond to your Kafka Streams **application.id**.
-
-### Schema
-
-Subjects can be declared by referencing a local _avsc_ file with **spec.schemaFile** or directly inline with **spec.schema**.
-
-#### Local file
-
-```yml
----
-apiVersion: v1
-kind: Schema
-metadata:
-  name: myPrefix.topic-value # your subject name
-spec:
-  schemaFile: schemas/topic.avsc # relative to kafkactl binary
-```
-
-#### Inline
-
-```yml
----
-apiVersion: v1
-kind: Schema
-metadata:
-  name: myPrefix.topic-value
-spec:
-  schema: |
-    {
-      "type": "long"
-    }
-```
-
-#### Reference
-
-If your schema references a type which is already stored in the Schema Registry, you can do this:
-
-```yml
----
-apiVersion: v1
-kind: Schema
-metadata:
-  name: myPrefix.topic-value
-spec: 
-  schema: |
-    {
-      "type": "record",
-      "namespace": "com.schema.avro",
-      "name": "Client",
-      "fields": [
-        {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "address",
-          "type": "com.schema.avro.Address"
-        }
-      ]
-    }
-  references:
-    - name: com.schema.avro.Address
-      subject: commons.address-value
-      version: 1
-```
-
-This example assumes there is a subject named "commons.address-value" with a version 1 already available in the Schema Registry.
-
-Your schemas ACLs are the same as your topics ACLs.
-If you are allowed to create a topic "myPrefix.topic", then you are automatically allowed to create subject myPrefix.topic-key and myPrefix.topic-value.
 
 ## Delete
 
@@ -512,6 +342,262 @@ Reset your Kafka password
   -o, --output=<output>   Output format. One of: yaml|table
   -v, --verbose           ...
 ```
+
+# Resources
+
+## User
+
+This is the list of resources a simple Ns4Kafka user can manage.
+
+### Topic
+
+```yaml
+---
+apiVersion: v1
+kind: Topic
+metadata:
+  name: myPrefix.topic
+spec:
+  replicationFactor: 3
+  partitions: 3
+  configs:
+    min.insync.replicas: '2'
+    cleanup.policy: delete
+    retention.ms: '60000'
+```
+
+- **metadata.name** must be part of your allowed ACLs. Visit your namespace ACLs to understand which topics you are allowed to manage.
+- **spec** properties and more importantly **spec.config** properties validation dependend on the topic validation rules associated to your namespace.
+- **spec.replicationFactor** and **spec.partitions** are immutable. They cannot be modified once the topic is created.
+
+### ACL
+
+In order to provide access to your topics to another namespace, you can add an ACL using the following example, where "daaagbl0" is your namespace and "dbbbgbl0" the namespace that needs access your topics.
+
+
+```yaml
+---
+apiVersion: v1
+kind: AccessControlEntry
+metadata:
+  name: acl-topic-a-b
+  namespace: daaagbl0
+spec:
+  resourceType: TOPIC
+  resource: aaa.
+  resourcePatternType: PREFIXED
+  permission: READ
+  grantedTo: dbbbgbl0
+```
+
+- **spec.resourceType** can be TOPIC, GROUP, CONNECT, CONNECT_CLUSTER.
+- **spec.resourcePatternType** can be PREFIXED, LITERAL.
+- **spec.permission** can be READ, WRITE.
+- **spec.grantedTo** must reference a namespace on the same Kafka cluster as yours.
+- **spec.resource** must reference any “sub-resource” that you are owner of. For example, if you are owner of the prefix “aaa”, you can grant READ or WRITE access such as:
+  - the whole prefix: “aaa” 
+  - a sub prefix: “aaa_subprefix”
+  - a literal topic name: “aaa_myTopic”
+
+### Connector
+
+```yaml
+---
+apiVersion: v1
+kind: Connector
+metadata:
+  name: myPrefix.myConnector
+spec:
+  connectCluster: myConnectCluster
+  config:
+    connector.class: myConnectorClass
+    tasks.max: '1'
+    topics: myPrefix.myTopic
+    file: /tmp/output.out
+    consumer.override.sasl.jaas.config: o.a.k.s.s.ScramLoginModule required username="<user>" password="<password>";
+```
+
+- **spec.connectCluster** must refer to one of the Kafka Connect clusters authorized to your namespace. It can also refer to a Kafka Connect cluster that you self deployed or you have been granted access.
+- Everything else depend on the connect validation rules associated to your namespace.
+
+### Connect Cluster
+
+This resource declares a Connect cluster that has been self-deployed, so namespaces are autonomous to deploy connectors on it without any Ns4Kafka outage.
+
+```yaml
+---
+apiVersion: v1
+kind: ConnectCluster
+metadata:
+  name: myPrefix.myConnectCluster
+spec:
+  url: http://localhost:8083
+  username: myUsername
+  password: myPassword
+```
+
+- **metadata.name** should not collide with the name of a Connect cluster declared in the Ns4Kafka configuration. An error message will be thrown otherwise.
+- Owners of Connect clusters can authorize other namespaces to deploy connectors on their own Connect clusters by giving an ACL with the WRITE permission to the grantees.
+
+### Kafka Streams
+
+This resource grants the necessary ACLs for your Kafka Streams to work properly if you have internal topics.
+
+```yaml
+---
+apiVersion: v1
+kind: KafkaStream
+metadata:
+  name: myKafkaStreamsApplicationId
+```
+
+- **metadata.name** must correspond to your Kafka Streams **application.id**.
+
+### Schema
+
+Subjects can be declared by referencing a local _avsc_ file with **spec.schemaFile** or directly inline with **spec.schema**.
+
+#### Local file
+
+```yml
+---
+apiVersion: v1
+kind: Schema
+metadata:
+  name: myPrefix.topic-value # your subject name
+spec:
+  schemaFile: schemas/topic.avsc # relative to kafkactl binary
+```
+
+#### Inline
+
+```yml
+---
+apiVersion: v1
+kind: Schema
+metadata:
+  name: myPrefix.topic-value
+spec:
+  schema: |
+    {
+      "type": "long"
+    }
+```
+
+#### Reference
+
+If your schema references a type which is already stored in the Schema Registry, you can do this:
+
+```yml
+---
+apiVersion: v1
+kind: Schema
+metadata:
+  name: myPrefix.topic-value
+spec: 
+  schema: |
+    {
+      "type": "record",
+      "namespace": "com.schema.avro",
+      "name": "Client",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "address",
+          "type": "com.schema.avro.Address"
+        }
+      ]
+    }
+  references:
+    - name: com.schema.avro.Address
+      subject: commons.address-value
+      version: 1
+```
+
+This example assumes there is a subject named "commons.address-value" with a version 1 already available in the Schema Registry.
+
+Your schemas ACLs are the same as your topics ACLs.
+If you are allowed to create a topic "myPrefix.topic", then you are automatically allowed to create subject myPrefix.topic-key and myPrefix.topic-value.
+
+## Administrator
+
+Here is the list of resources a Ns4Kafka administrator can manage.
+
+### Namespace
+
+Namespace resources are the core of Ns4Kafka.
+
+```yml
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: myNamespace
+  cluster: myCluster
+  labels:
+    contacts: namespace.owner@mail.com
+spec:
+  kafkaUser: kafkaServiceAccount
+  connectClusters: 
+    - myConnectCluster
+  topicValidator:
+    validationConstraints:
+      partitions:
+        validation-type: Range
+        min: 1
+        max: 6
+      replication.factor:
+        validation-type: Range
+        min: 3
+        max: 3
+      min.insync.replicas:
+        validation-type: Range
+        min: 2
+        max: 2
+      retention.ms:
+        optional: true
+        validation-type: Range
+        min: 60000
+        max: 604800000
+      cleanup.policy:
+        validation-type: ValidList
+        validStrings:
+        - delete
+        - compact
+  connectValidator:
+    validationConstraints:
+      key.converter:
+        validation-type: NonEmptyString
+      value.converter:
+        validation-type: NonEmptyString
+      connector.class:
+        validation-type: ValidString
+        validStrings:
+          - io.confluent.connect.jdbc.JdbcSinkConnector
+          - io.confluent.connect.jdbc.JdbcSourceConnector
+    sourceValidationConstraints:
+      producer.override.sasl.jaas.config:
+        validation-type: NonEmptyString
+    sinkValidationConstraints:
+      consumer.override.sasl.jaas.config:
+        validation-type: NonEmptyString
+    classValidationConstraints:
+      io.confluent.connect.jdbc.JdbcSourceConnector:
+        db.timezone:
+          validation-type: NonEmptyString
+      io.confluent.connect.jdbc.JdbcSinkConnector:
+        db.timezone:
+          validation-type: NonEmptyString
+```
+
+- **metadata.cluster** is the name of the Kakfa cluster. It should refer a cluster defined in the Ns4Kafka configuration.
+- **spec.kafkaUser** is the Kafka principal. It should refer to an Account ID. It will be used to create ACLs on this service account.
+- **spec.connectClusters** is the list of Kafka Connect clusters. It should refer to a Kafka Connect cluster declared in the Ns4Kafka configuration
+- **spec.topicValidator** is the list of constraints for topics.
+- **spec.connectValidator** is the list of constraints for connectors.
 
 # CI/CD
 
