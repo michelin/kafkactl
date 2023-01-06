@@ -16,7 +16,6 @@
 
 * [Download](#download)
 * [Install](#install)
-* [Configuration](#configuration)
 * [Usage](#usage)
   * [Config](#config)
   * [Apply](#apply)
@@ -46,8 +45,6 @@ Kafkactl requires 3 variables to work:
 - Your security token (e.g., a Gitlab token)
   
 These variable can be defined in the dedicated configuration file.
-
-# Configuration
 
 Create a folder .kafkactl in your home directory:
 
