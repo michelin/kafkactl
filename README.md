@@ -37,7 +37,7 @@ Kafkactl can be downloaded at https://github.com/michelin/kafkactl/releases and 
 - Windows
 - Linux
 
-A Docker image of Kafkactl is available at [https://hub.docker.com/repository/docker/michelin/kafkactl](https://hub.docker.com/repository/docker/michelin/kafkactl).
+A Docker image is available at [https://hub.docker.com/repository/docker/michelin/kafkactl](https://hub.docker.com/repository/docker/michelin/kafkactl).
 
 # Install
 
