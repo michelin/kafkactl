@@ -599,6 +599,87 @@ spec:
 - **spec.topicValidator** is the list of constraints for topics.
 - **spec.connectValidator** is the list of constraints for connectors.
 
+### ACL Owner
+
+ACLs with owner permission can only be deployed by administrators.
+
+  
+```yml
+---
+apiVersion: v1
+kind: AccessControlEntry
+metadata:
+  name: acl-topic-myNamespace
+  namespace: myNamespace
+spec:
+  resourceType: TOPIC
+  resource: myPrefix.
+  resourcePatternType: PREFIXED
+  permission: OWNER
+  grantedTo: myNamespace
+```
+
+- With this ACL, the namespace "myNamespace" will be owner of topics prefixed by "myPrefix.". No one else is able to modify these resources.
+- **resourceType** can be topic, connect or group.
+
+### Role Binding
+
+This resource links a namespace to a project team.
+
+```yaml
+---
+apiVersion: v1
+kind: RoleBinding
+metadata:
+  name: rb-myNamespace
+  namespace: myNamespace
+spec:
+  role:
+    resourceTypes:
+    - schemas
+    - schemas/config
+    - topics
+    - topics/delete-records
+    - connectors
+    - connectors/change-state
+    - acls
+    - consumer-groups/reset
+    - streams
+    verbs:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+  subject:
+    subjectType: GROUP
+    subjectName: myGitLabGroup
+```
+
+- With this role binding, members of the group "myGitLabGroup" can use Ns4Kafka to manage topics starting with "myPrefix." on the "myCluster" Kafka cluster.  
+
+### Quota
+
+It is possible to define quotas on a namespace. 
+
+```yml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: quota-myNamespace
+  namespace: myNamespace
+spec:
+  count/topics: 10
+  count/partitions: 60
+  count/connectors: 5
+  disk/topics: 500MiB
+```
+
+- **count/topics** is the maximum number of deployable topics
+- **count/partitions** is the maximum number of deployable partitions
+- **count/connectors** is the maximum number of deployable connectors
+- **disk/topics** is the maximum size of all topics. It is computed from the sum of _retention.bytes_ * _number of partitions_ of all topics. 
+Unit of measure accepted is byte (B), kibibyte (KiB), mebibyte (MiB), gibibyte (GiB)
+
 # CI/CD
 
 Kafkactl can be run in CI/CD using the [Docker image](https://hub.docker.com/repository/docker/michelin/kafkactl).
