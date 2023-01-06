@@ -37,6 +37,8 @@ Kafkactl can be downloaded at https://github.com/michelin/kafkactl/releases and 
 - Windows
 - Linux
 
+A Docker image of Kafkactl is available at [https://hub.docker.com/repository/docker/michelin/kafkactl](https://hub.docker.com/repository/docker/michelin/kafkactl).
+
 # Install
 
 Kafkactl requires 3 variables to work:
@@ -513,16 +515,13 @@ Reset your Kafka password
 
 # CI/CD
 
-A Docker image with Kafkactl is available at [https://hub.docker.com/repository/docker/michelin/kafkactl](https://hub.docker.com/repository/docker/michelin/kafkactl).
-
-Here is how to use it with GitLab CI.
-
+Kafkactl can be run in CI/CD using the [Docker image](https://hub.docker.com/repository/docker/michelin/kafkactl).
 
 ```yaml
 kafkactl:
   stage: kafkactl
   image:
-    name: michelin/kafkactl:1.10.1
+    name: michelin/kafkactl:<version>
     entrypoint: ['/bin/sh', '-c']
   before_script:
     - export KAFKACTL_CURRENT_NAMESPACE=test
