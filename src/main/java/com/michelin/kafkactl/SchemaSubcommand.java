@@ -5,9 +5,9 @@ import com.michelin.kafkactl.models.SchemaCompatibility;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import jakarta.inject.Inject;
 import picocli.CommandLine;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -15,53 +15,29 @@ import java.util.stream.Collectors;
 
 @CommandLine.Command(name = "schemas", description = "Update schema compatibility mode")
 public class SchemaSubcommand implements Callable<Integer> {
-    /**
-     * Login service
-     */
     @Inject
     public LoginService loginService;
 
-    /**
-     * Resource service
-     */
     @Inject
     public ResourceService resourceService;
 
-    /**
-     * Current command
-     */
     @CommandLine.Spec
     public CommandLine.Model.CommandSpec commandSpec;
 
-    /**
-     * Kafkactl configuration
-     */
     @Inject
     public KafkactlConfig kafkactlConfig;
 
-    /**
-     * Format service
-     */
     @Inject
     public FormatService formatService;
 
-    /**
-     * Kafkactl command
-     */
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
-    /**
-     * Compatibility to set
-     */
     @CommandLine.Parameters(index="0",  description = "Compatibility mode to set [GLOBAL, BACKWARD, " +
             "BACKWARD_TRANSITIVE, FORWARD, FORWARD_TRANSITIVE, FULL, FULL_TRANSITIVE, NONE]. " +
             "GLOBAL will revert to Schema Registry's compatibility level", arity = "1")
     public SchemaCompatibility compatibility;
 
-    /**
-     * List of subjects to update
-     */
     @CommandLine.Parameters(index="1..*", description = "Subject names separated by space", arity = "1..*")
     public List<String> subjects;
 
@@ -81,7 +57,7 @@ public class SchemaSubcommand implements Callable<Integer> {
 
         List<Resource> updatedSchemas = subjects
                 .stream()
-                .map(subject -> this.resourceService.changeSchemaCompatibility(namespace, subject,
+                .map(subject -> resourceService.changeSchemaCompatibility(namespace, subject,
                         compatibility))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());

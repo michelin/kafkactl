@@ -62,7 +62,7 @@ jobs:
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          version: '21.1.0'
+          version: '22.3.0'
           java-version: '11'
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -82,7 +82,7 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
 
       - name: Native image
-        run: ./gradlew shadowJar nativeImage
+        run: ./gradlew nativeCompile
 
       - name: Upload
         uses: actions/upload-artifact@v3
@@ -101,7 +101,7 @@ jobs:
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          version: '20.3.2'
+          version: '22.3.0'
           java-version: '11'
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -119,7 +119,7 @@ jobs:
       - name: Build
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
-          gradlew.bat shadowJar nativeImage
+          gradlew.bat nativeCompile
         shell: cmd
 
       - name: Upload

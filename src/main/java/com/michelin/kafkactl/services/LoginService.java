@@ -9,8 +9,8 @@ import com.michelin.kafkactl.client.UserInfoResponse;
 import com.michelin.kafkactl.client.UsernameAndPasswordRequest;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import jakarta.inject.Singleton;
 
-import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;

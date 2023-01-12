@@ -6,12 +6,12 @@ import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import jakarta.inject.Inject;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,57 +20,30 @@ import java.util.stream.Collectors;
 
 @Command(name = "import", description = "Import unsynchronized resources")
 public class ImportSubcommand implements Callable<Integer> {
-    /**
-     * Login service
-     */
     @Inject
     public LoginService loginService;
 
-    /**
-     * Resource service
-     */
     @Inject
     public ResourceService resourceService;
 
-    /**
-     * API resources service
-     */
     @Inject
     public ApiResourcesService apiResourcesService;
 
-    /**
-     * Format service
-     */
     @Inject
     public FormatService formatService;
 
-    /**
-     * Kafkactl configuration
-     */
     @Inject
     public KafkactlConfig kafkactlConfig;
 
-    /**
-     * Kafkactl command
-     */
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
-    /**
-     * Resource type to import
-     */
     @Parameters(index = "0", description = "Resource type", arity = "1")
     public String resourceType;
 
-    /**
-     * Does not persist resources. Validate only
-     */
     @Option(names = {"--dry-run"}, description = "Does not persist resources. Validate only")
     public boolean dryRun;
 
-    /**
-     * Current command
-     */
     @CommandLine.Spec
     CommandLine.Model.CommandSpec commandSpec;
 

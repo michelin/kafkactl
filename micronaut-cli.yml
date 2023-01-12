@@ -3,4 +3,4 @@ defaultPackage: com.michelin.kafkactl
 testFramework: junit
 sourceLanguage: java
 buildTool: gradle
-features: [annotation-api, app-name, gradle, java, junit, logback, picocli, picocli-java-application, picocli-junit, readme, shade, yaml]
+features: [annotation-api, app-name, gradle, java, junit, logback, micronaut-build, picocli, picocli-java-application, picocli-junit, readme, shade, yaml]

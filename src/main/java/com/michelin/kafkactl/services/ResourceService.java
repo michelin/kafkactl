@@ -9,9 +9,9 @@ import com.michelin.kafkactl.models.Status;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -205,6 +205,7 @@ public class ResourceService {
         }
         return null;
     }
+
     public Resource resetPassword(String namespace, String user) {
         try {
             Resource resource = namespacedClient.resetPassword(namespace, user, loginService.getAuthorization());

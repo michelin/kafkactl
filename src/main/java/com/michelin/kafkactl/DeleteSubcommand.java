@@ -7,13 +7,13 @@ import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FileService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import jakarta.inject.Inject;
 import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -22,46 +22,25 @@ import java.util.stream.Collectors;
 
 @Command(name = "delete", description = "Delete a resource")
 public class DeleteSubcommand implements Callable<Integer> {
-    /**
-     * Kafkactl config
-     */
     @Inject
     public KafkactlConfig kafkactlConfig;
 
-    /**
-     * Resource service
-     */
     @Inject
     public ResourceService resourceService;
 
-    /**
-     * Login service
-     */
     @Inject
     public LoginService loginService;
 
-    /**
-     * API resources service
-     */
     @Inject
     public ApiResourcesService apiResourcesService;
 
-    /**
-     * File service
-     */
     @Inject
     public FileService fileService;
 
-    /**
-     * Kafkactl command
-     */
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
-    /**
-     * Handle deletion either by resource name or by file
-     */
-    @ArgGroup(exclusive = true, multiplicity = "1")
+    @ArgGroup(multiplicity = "1")
     public EitherOf config;
 
     static class EitherOf {
@@ -87,15 +66,9 @@ public class DeleteSubcommand implements Callable<Integer> {
         public boolean recursive;
     }
 
-    /**
-     * Does not persist resources. Validate only
-     */
     @Option(names = {"--dry-run"}, description = "Does not persist operation. Validate only")
     public boolean dryRun;
 
-    /**
-     * Current command
-     */
     @CommandLine.Spec
     public CommandLine.Model.CommandSpec commandSpec;
 

@@ -4,9 +4,9 @@ import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import jakarta.inject.Inject;
 import picocli.CommandLine;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.Callable;
 

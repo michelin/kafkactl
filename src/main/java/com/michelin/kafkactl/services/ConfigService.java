@@ -1,14 +1,14 @@
 package com.michelin.kafkactl.services;
 
 import com.michelin.kafkactl.KafkactlConfig;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 import picocli.CommandLine;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,22 +17,15 @@ import java.util.TreeMap;
 
 @Singleton
 public class ConfigService {
-    /**
-     * The current Kafkactl configuration
-     */
     @Inject
     public KafkactlConfig kafkactlConfig;
 
-    /**
-     * Login service
-     */
     @Inject
     public LoginService loginService;
 
     /**
      * Return the name of the current context according to the current api, namespace
      * and token properties
-     *
      * @return The current context name
      */
     public String getCurrentContextName() {
@@ -48,7 +41,6 @@ public class ConfigService {
 
     /**
      * Get the current context infos if it exists
-     *
      * @return The current context
      */
     public Optional<KafkactlConfig.Context> getContextByName(String name) {
@@ -60,7 +52,6 @@ public class ConfigService {
 
     /**
      * Update the current configuration context with the given new context
-     *
      * @param contextToSet The context to set
      * @throws IOException Any exception during file writing
      */

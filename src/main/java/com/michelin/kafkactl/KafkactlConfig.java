@@ -13,39 +13,13 @@ import java.util.Map;
 @Setter
 @ConfigurationProperties("kafkactl")
 public class KafkactlConfig {
-    /**
-     * Configuration version
-     */
-    public String version;
+    private String version;
+    private String configPath;
+    private String api;
+    private String userToken;
+    private String currentNamespace;
+    private List<Context> contexts;
 
-    /**
-     * Configuration file path
-     */
-    public String configPath;
-
-    /**
-     * Current API
-     */
-    String api;
-
-    /**
-     * Current user token
-     */
-    String userToken;
-
-    /**
-     * Current namespace
-     */
-    String currentNamespace;
-
-    /**
-     * List of available contexts
-     */
-    List<Context> contexts;
-
-    /**
-     * All table formats
-     */
     @MapFormat(transformation = MapFormat.MapTransformation.FLAT)
     public Map<String, List<String>> tableFormat;
 
@@ -53,34 +27,16 @@ public class KafkactlConfig {
     @Setter
     @Introspected
     public static class Context {
-        /**
-         * Context name
-         */
-        String name;
-
-        /**
-         * Context information
-         */
-        ApiContext context;
+        private String name;
+        private ApiContext context;
 
         @Getter
         @Setter
         @Introspected
         public static class ApiContext {
-            /**
-             * Context API
-             */
-            String api;
-
-            /**
-             * Context user token
-             */
-            String userToken;
-
-            /**
-             * Context namespace
-             */
-            String namespace;
+            private String api;
+            private String userToken;
+            private String namespace;
         }
     }
 }

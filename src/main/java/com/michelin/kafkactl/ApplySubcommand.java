@@ -8,11 +8,11 @@ import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpResponse;
+import jakarta.inject.Inject;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
@@ -23,63 +23,33 @@ import java.util.stream.Collectors;
 
 @Command(name = "apply", description = "Create or update a resource")
 public class ApplySubcommand implements Callable<Integer> {
-    /**
-     * Login service
-     */
     @Inject
     public LoginService loginService;
 
-    /**
-     * API resources service
-     */
     @Inject
     public ApiResourcesService apiResourcesService;
 
-    /**
-     * File service
-     */
     @Inject
     public FileService fileService;
 
-    /**
-     * Resource service
-     */
     @Inject
     public ResourceService resourceService;
 
-    /**
-     * Kafkactl configuration
-     */
     @Inject
     public KafkactlConfig kafkactlConfig;
 
-    /**
-     * Kafkactl command
-     */
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
-    /**
-     * YAML file or directory containing YAML resources to apply
-     */
     @Option(names = {"-f", "--file"}, description = "YAML File or Directory containing YAML resources")
     public Optional<File> file;
 
-    /**
-     * Enable recursive search of file
-     */
     @Option(names = {"-R", "--recursive"}, description = "Enable recursive search of file")
     public boolean recursive;
 
-    /**
-     * Does not persist resources. Validate only
-     */
     @Option(names = {"--dry-run"}, description = "Does not persist resources. Validate only")
     public boolean dryRun;
 
-    /**
-     * Current command
-     */
     @CommandLine.Spec
     public CommandLine.Model.CommandSpec commandSpec;
 

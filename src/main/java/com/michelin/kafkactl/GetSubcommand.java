@@ -9,12 +9,12 @@ import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import jakarta.inject.Inject;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,75 +30,39 @@ import java.util.stream.Collectors;
         "Parameters: "
 })
 public class GetSubcommand implements Callable<Integer> {
-    /**
-     * Namespaced resource client
-     */
     @Inject
     public NamespacedResourceClient namespacedClient;
 
-    /**
-     * Cluster resource client
-     */
     @Inject
     public ClusterResourceClient nonNamespacedClient;
 
-    /**
-     * Login service
-     */
     @Inject
     public LoginService loginService;
 
-    /**
-     * API resources service
-     */
     @Inject
     public ApiResourcesService apiResourcesService;
 
-    /**
-     * Resource service
-     */
     @Inject
     public ResourceService resourceService;
 
-    /**
-     * Format service
-     */
     @Inject
     public FormatService formatService;
 
-    /**
-     * Kafkactl configuration
-     */
     @Inject
     public KafkactlConfig kafkactlConfig;
 
-    /**
-     * Kafkactl command
-     */
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
-    /**
-     * Resource type to get
-     */
     @Parameters(index = "0", description = "Resource type or 'all' to display resources for all types", arity = "1")
     public String resourceType;
 
-    /**
-     * Resource name to get
-     */
     @Parameters(index = "1", description = "Resource name", arity = "0..1")
     public Optional<String> resourceName;
 
-    /**
-     * Output format
-     */
     @Option(names = {"-o", "--output"}, description = "Output format. One of: yaml|table", defaultValue = "table")
     public String output;
 
-    /**
-     * Current command
-     */
     @CommandLine.Spec
     CommandLine.Model.CommandSpec commandSpec;
 

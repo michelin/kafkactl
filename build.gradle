@@ -1,10 +1,12 @@
 plugins {
-    id("com.github.johnrengelman.shadow") version "7.0.0"
-    id("io.micronaut.application") version "1.5.0"
-    id 'jacoco'
-    id "org.sonarqube" version "3.5.0.2730"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("io.micronaut.application") version "3.7.0"
+    id("jacoco")
+    id("org.sonarqube") version "3.5.0.2730"
+    id("pl.allegro.tech.build.axion-release") version "1.14.3"
 }
 
+version = scmVersion.version
 group = "com.michelin.kafkactl"
 
 repositories {
@@ -12,24 +14,22 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.projectlombok:lombok:1.18.24'
-    compileOnly "org.graalvm.nativeimage:svm"
+    annotationProcessor("info.picocli:picocli-codegen")
+    annotationProcessor("org.projectlombok:lombok")
 
-    annotationProcessor 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor("info.picocli:picocli-codegen:4.6.1")
-    annotationProcessor "io.micronaut:micronaut-graal"
-
-    implementation("info.picocli:picocli:4.6.1")
+    implementation("info.picocli:picocli")
     implementation("io.micronaut.picocli:micronaut-picocli")
     implementation("io.micronaut:micronaut-validation")
-    implementation("io.micronaut:micronaut-runtime")
-    implementation("javax.annotation:javax.annotation-api")
+    implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("io.micronaut:micronaut-http-client")
-    
     implementation("org.ocpsoft.prettytime:prettytime:5.0.1.Final")
     implementation("io.github.java-diff-utils:java-diff-utils:4.9")
 
     runtimeOnly("ch.qos.logback:logback-classic")
+
+    compileOnly("org.projectlombok:lombok")
+    compileOnly("org.graalvm.nativeimage:svm")
+
     testImplementation("io.micronaut:micronaut-http-client")
 }
 
@@ -50,22 +50,26 @@ micronaut {
     }
 }
 
-shadowJar {
-    archiveFileName = "kafkactl-${version}.jar"
+graalvmNative {
+    binaries {
+        main {
+            imageName.set("kafkactl-" + project.version)
+            buildArgs.add("-H:Class=com.michelin.kafkactl.KafkactlCommand")
+            buildArgs.add("-H:IncludeResourceBundles=org.ocpsoft.prettytime.i18n.Resources")
+            buildArgs.add("-H:+ReportUnsupportedElementsAtRuntime")
+            buildArgs.add("-H:+ReportExceptionStackTraces")
+            buildArgs.add("-H:+TraceNativeToolUsage")
+            buildArgs.add("-H:Log=*ShimDLL:3,link:3,copy:3")
+        }
+    }
 }
 
-nativeImage {
-    imageName('kafkactl-'+rootProject.version)
-    args = ['-H:Class=com.michelin.kafkactl.KafkactlCommand',
-            '-H:IncludeResourceBundles=org.ocpsoft.prettytime.i18n.Resources',
-            '-H:+ReportUnsupportedElementsAtRuntime',
-            '-H:+ReportExceptionStackTraces',
-            '-H:+TraceNativeToolUsage',
-            '-H:Log=*ShimDLL:3,link:3,copy:3']
+dockerfile {
+    baseImage = "eclipse-temurin:11-jre-alpine"
 }
 
 dockerBuild {
-    images = ["michelin/kafkactl:"+version]
+    images = ["michelin/kafkactl:" + version]
 }
 
 sonarqube {
@@ -86,7 +90,7 @@ jacocoTestReport {
 
 import org.apache.tools.ant.filters.ReplaceTokens
 processResources {
-    filesMatching("application.yml"){
+    filesMatching("application.yml") {
         filter(ReplaceTokens, tokens: [version: project.version])
     }
 }

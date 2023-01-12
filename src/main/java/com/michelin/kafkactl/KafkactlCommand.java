@@ -1,12 +1,12 @@
 package com.michelin.kafkactl;
 
 import io.micronaut.configuration.picocli.PicocliRunner;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
@@ -29,14 +29,8 @@ import java.util.concurrent.Callable;
         versionProvider = KafkactlCommand.ConfigVersionProvider.class,
         mixinStandardHelpOptions = true)
 public class KafkactlCommand implements Callable<Integer> {
-    /**
-     * Verbose mode
-     */
     public static boolean VERBOSE = false;
 
-    /**
-     * Get Kafkactl version
-     */
     @Inject
     public ConfigVersionProvider versionProvider;
 

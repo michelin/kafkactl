@@ -2,28 +2,19 @@ package com.michelin.kafkactl;
 
 import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.LoginService;
+import jakarta.inject.Inject;
 import picocli.CommandLine;
 
-import javax.inject.Inject;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "api-resources", description = "Print the supported API resources on the server")
 public class ApiResourcesSubcommand implements Callable<Integer> {
-    /**
-     * API resources service
-     */
     @Inject
     public ApiResourcesService apiResourcesService;
 
-    /**
-     * Login service
-     */
     @Inject
     public LoginService loginService;
 
-    /**
-     * Current command
-     */
     @CommandLine.Spec
     CommandLine.Model.CommandSpec commandSpec;
 
