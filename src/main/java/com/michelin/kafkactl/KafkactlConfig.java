@@ -11,6 +11,7 @@ import java.util.Map;
 
 @Getter
 @Setter
+@Introspected
 @ConfigurationProperties("kafkactl")
 public class KafkactlConfig {
     private String version;
