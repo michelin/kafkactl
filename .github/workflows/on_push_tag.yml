@@ -33,10 +33,7 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
 
       - name: Build and test
-        id: build_and_test
-        run: |
-          ./gradlew build check
-          echo ::set-output name=current_version::$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}'))
+        run: ./gradlew build check
 
       - name: Publish test report
         if: always()
@@ -47,13 +44,7 @@ jobs:
       - name: Docker
         run: ./gradlew dockerBuild dockerPush
 
-      - name: Upload
-        uses: actions/upload-artifact@v3
-        with:
-          name: kafkactl-jar
-          path: ${{ github.workspace }}/build/libs/kafkactl-*.jar
-
-      - name: Generate Release Changelog
+      - name: Generate release changelog
         uses: mikepenz/release-changelog-builder-action@v1
         id: build_changelog
         with:
@@ -95,20 +86,16 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
 
       - name: Build
-        run: ./gradlew nativeCompile
-
-      - name: Upload
-        uses: actions/upload-artifact@v3
-        with:
-          name: kafkactl-linux
-          path: ${{ github.workspace }}/build/native-image/kafkactl-*
+        id: build_and_test
+        run: |
+          ./gradlew nativeCompile
+          echo ::set-output name=current_version::$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}'))
 
       - name: Update release
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: ${{ github.workspace }}/build/native-image/kafkactl-${{ steps.build_and_test.outputs.current_version }}
+          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_and_test.outputs.current_version }}
           draft: true
           prerelease: true
           allowUpdates: true
@@ -141,23 +128,13 @@ jobs:
         uses: al-cheb/configure-pagefile-action@v1.3
         
       - name: Build
-        run: |
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
-          gradlew.bat nativeCompile
-        shell: cmd
-
-      - name: Upload
-        uses: actions/upload-artifact@v3
-        with:
-          name: kafkactl-windows
-          path: ${{ github.workspace }}/build/native-image/kafkactl-*.exe
+        run: gradlew.bat nativeCompile
 
       - name: Update release
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: ${{ github.workspace }}/cli/build/native-image/kafkactl-*.exe
+          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-*.exe
           draft: true
           prerelease: true
           allowUpdates: true
