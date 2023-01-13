@@ -19,6 +19,7 @@ dependencies {
 
     implementation("info.picocli:picocli")
     implementation("io.micronaut.picocli:micronaut-picocli")
+    implementation("io.micronaut:micronaut-jackson-databind")
     implementation("io.micronaut:micronaut-validation")
     implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("io.micronaut:micronaut-http-client")

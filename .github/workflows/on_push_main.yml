@@ -90,14 +90,17 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Native image
-        run: ./gradlew nativeCompile
+      - name: Build
+        id: build_native
+        run: |
+          ./gradlew nativeCompile
+          echo ::set-output name=current_version::$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}'))
 
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
           name: kafkactl-linux
-          path: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-*
+          path: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}
 
   build-windows:
     runs-on: windows-latest

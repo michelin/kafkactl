@@ -7,9 +7,9 @@ import lombok.Setter;
 
 import java.util.Collection;
 
-@Introspected
 @Getter
 @Setter
+@Introspected
 public class BearerAccessRefreshToken {
     private String username;
     private Collection<String> roles;

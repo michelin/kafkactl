@@ -86,7 +86,7 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
 
       - name: Build
-        id: build_and_test
+        id: build_native
         run: |
           ./gradlew nativeCompile
           echo ::set-output name=current_version::$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}'))
@@ -95,7 +95,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_and_test.outputs.current_version }}
+          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}
           draft: true
           prerelease: true
           allowUpdates: true
