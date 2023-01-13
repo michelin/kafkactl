@@ -80,7 +80,7 @@ public class FormatService {
      */
     private void printTable(String kind, List<Resource> resources) {
         String hyphenatedKind = StringConvention.HYPHENATED.format(kind);
-        List<String> formats = kafkactlConfig.tableFormat.getOrDefault(hyphenatedKind, defaults);
+        List<String> formats = kafkactlConfig.getTableFormat().getOrDefault(hyphenatedKind, defaults);
 
         PrettyTextTable ptt = new PrettyTextTable(formats, resources);
         System.out.println(ptt);

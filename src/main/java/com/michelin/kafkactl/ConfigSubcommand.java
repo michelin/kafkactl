@@ -72,9 +72,9 @@ public class ConfigSubcommand implements Callable<Integer> {
             List<Resource> allContextsAsResources = new ArrayList<>();
             kafkactlConfig.getContexts().forEach(userContext -> {
                 Map<String,Object> specs = new HashMap<>();
-                specs.put("namespace", userContext.getContext().getNamespace());
-                specs.put("api", userContext.getContext().getApi());
-                specs.put("token", userContext.getContext().getUserToken());
+                specs.put("namespace", userContext.getDefinition().getNamespace());
+                specs.put("api", userContext.getDefinition().getApi());
+                specs.put("token", userContext.getDefinition().getUserToken());
 
                 Resource currentContextAsResource = Resource.builder()
                         .metadata(ObjectMeta.builder()

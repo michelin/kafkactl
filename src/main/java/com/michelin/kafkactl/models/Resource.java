@@ -2,6 +2,7 @@ package com.michelin.kafkactl.models;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.micronaut.core.annotation.Introspected;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import lombok.*;
 
 import java.util.Map;
@@ -9,7 +10,7 @@ import java.util.Map;
 @Data
 @Getter
 @Builder
-@Introspected
+@ReflectiveAccess
 @NoArgsConstructor
 @AllArgsConstructor
 public class Resource {

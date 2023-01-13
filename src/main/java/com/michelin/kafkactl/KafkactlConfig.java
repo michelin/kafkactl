@@ -1,7 +1,10 @@
 package com.michelin.kafkactl;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.core.annotation.Introspected;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.convert.format.MapFormat;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,14 +25,16 @@ public class KafkactlConfig {
     private List<Context> contexts;
 
     @MapFormat(transformation = MapFormat.MapTransformation.FLAT)
-    public Map<String, List<String>> tableFormat;
+    private Map<String, List<String>> tableFormat;
 
     @Getter
     @Setter
     @Introspected
     public static class Context {
         private String name;
-        private ApiContext context;
+
+        @JsonProperty("context")
+        private ApiContext definition;
 
         @Getter
         @Setter

@@ -5,11 +5,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-@Introspected
 @Getter
 @Setter
 @Builder
+@Introspected
 public class UsernameAndPasswordRequest {
     private String username;
     private String password;
 }
+
+

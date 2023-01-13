@@ -2,6 +2,7 @@ package com.michelin.kafkactl.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.micronaut.core.annotation.Introspected;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,13 +13,13 @@ import lombok.ToString;
 import java.util.Date;
 import java.util.Map;
 
-@Introspected
 @Getter
 @Setter
-@ToString
 @Builder
-@AllArgsConstructor
+@ToString
+@ReflectiveAccess
 @NoArgsConstructor
+@AllArgsConstructor
 public class ObjectMeta {
 	private String name;
 	private String namespace;
