@@ -40,10 +40,13 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
 
       - name: Build and analyze
+        id: build_jar
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew build jacocoTestReport sonarqube --info
+        run: |
+          ./gradlew build jacocoTestReport sonarqube --info
+          echo ::set-output name=current_version::$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}'))
 
       - name: Publish test report
         if: always()
@@ -58,7 +61,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: kafkactl-jar
-          path: ${{ github.workspace }}/build/libs/kafkactl-*.jar
+          path: ${{ github.workspace }}/build/libs/kafkactl-${{ steps.build_jar.outputs.current_version }}.jar
 
   build-linux:
     runs-on: ubuntu-latest

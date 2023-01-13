@@ -51,6 +51,11 @@ micronaut {
     }
 }
 
+shadowJar {
+    archiveClassifier.set('')
+    dependsOn(distTar, distZip)
+}
+
 graalvmNative {
     binaries {
         main {
