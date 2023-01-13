@@ -117,10 +117,7 @@ jobs:
         uses: al-cheb/configure-pagefile-action@v1.3
 
       - name: Build
-        run: |
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
-          gradlew.bat nativeCompile
-        shell: cmd
+        run: gradlew.bat nativeCompile
 
       - name: Upload
         uses: actions/upload-artifact@v3
