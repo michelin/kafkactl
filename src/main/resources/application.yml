@@ -4,6 +4,9 @@ micronaut:
   http:
     client:
       read-timeout: 30s
+      ssl:
+        insecure-trust-all-certificates: true
+
 logger:
   levels:
     ROOT: OFF
