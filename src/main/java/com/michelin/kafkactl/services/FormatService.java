@@ -64,10 +64,9 @@ public class FormatService {
         Optional<Status> statusOptional = e.getResponse().getBody(Status.class);
         if (statusOptional.isPresent() && statusOptional.get().getDetails() != null && !statusOptional.get().getDetails().getCauses().isEmpty()) {
             Status status = statusOptional.get();
-            String causes = status.getDetails().getCauses().size() > 1 ?
-                    "\n - " + String.join("\n - ", status.getDetails().getCauses()) : status.getDetails().getCauses().get(0);
+            String causes = "\n - " + String.join("\n - ", status.getDetails().getCauses());
 
-            System.out.printf("Failed %s/%s %s for causes: %s%n", kind, name, status.getMessage(), causes);
+            System.out.printf("Failed %s/%s %s for cause(s): %s%n", kind, name, status.getMessage(), causes);
         } else {
             System.out.printf("Failed %s/%s %s%n", kind, name, e.getMessage());
         }

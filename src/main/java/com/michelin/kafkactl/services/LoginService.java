@@ -40,14 +40,26 @@ public class LoginService {
         }
     }
 
+    /**
+     * Get the authorization header
+     * @return The authorization header
+     */
     public String getAuthorization() {
         return "Bearer " + accessToken;
     }
 
+    /**
+     * Check if the user is authenticated, or authenticate him otherwise
+     * @return true if the user is authenticated, false otherwise
+     */
     public boolean doAuthenticate() {
         return isAuthenticated() || login("gitlab", kafkactlConfig.getUserToken());
     }
 
+    /**
+     * Is the user authenticated already
+     * @return true if he is, false otherwise
+     */
     public boolean isAuthenticated() {
         try {
             if (!jwtFile.exists()) {
@@ -60,7 +72,7 @@ public class LoginService {
             if (KafkactlCommand.VERBOSE) {
                 Date expiry = new Date(userInfo.getExp() * 1000);
                 System.out.println("Authentication reused, welcome " + userInfo.getUsername() + "!");
-                System.out.println("Your session is valid until " + expiry);
+                System.out.println("Your session is valid until " + expiry + ".");
             }
 
             accessToken = token.getAccessToken();
@@ -75,14 +87,23 @@ public class LoginService {
         return false;
     }
 
+    /**
+     * Authenticate the user
+     * @param user The user
+     * @param password The password
+     * @return true if he is authenticated, false otherwise
+     */
     public boolean login(String user, String password) {
         try {
-            System.out.print("Authenticating... ");
+            if (KafkactlCommand.VERBOSE) {
+                System.out.println("Authenticating...");
+            }
+
             BearerAccessRefreshToken tokenResponse = clusterResourceClient.login(UsernameAndPasswordRequest
-                            .builder()
-                            .username(user)
-                            .password(password)
-                            .build());
+                    .builder()
+                    .username(user)
+                    .password(password)
+                    .build());
 
             accessToken = tokenResponse.getAccessToken();
 
@@ -91,8 +112,6 @@ public class LoginService {
                 calendar.add(Calendar.SECOND, tokenResponse.getExpiresIn());
                 System.out.println("Authentication successful, welcome " + tokenResponse.getUsername() + "!");
                 System.out.println("Your session is valid until " + calendar.getTime() + ".");
-            } else {
-                System.out.println("Done.");
             }
 
             try {
