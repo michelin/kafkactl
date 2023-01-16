@@ -40,7 +40,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           ./gradlew build jacocoTestReport sonarqube --info
-          echo ::set-output name=current_version::$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}'))
+          echo name=current_version::$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
 
       - name: Publish test report
         if: always()
@@ -88,7 +88,7 @@ jobs:
         id: build_native
         run: |
           ./gradlew nativeCompile
-          echo ::set-output name=current_version::$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}'))
+          echo name=current_version::$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
 
       - name: Upload
         uses: actions/upload-artifact@v3
