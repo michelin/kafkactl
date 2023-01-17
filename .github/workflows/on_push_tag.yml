@@ -59,7 +59,7 @@ jobs:
         uses: ncipollo/release-action@v1.12.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          body: ${{ steps.build_changelog.outputs.changelog }}
+          body: '${{ steps.build_changelog.outputs.changelog }}'
           artifacts: ${{ github.workspace }}/build/libs/kafkactl-${{ steps.build_jar.outputs.current_version }}.jar
           draft: true
           prerelease: true
@@ -105,7 +105,6 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
-    environment: Build
     steps:
       - name: Checkout project
         uses: actions/checkout@v3
