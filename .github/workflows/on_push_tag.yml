@@ -60,7 +60,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: ${{ github.workspace }}/cli/build/libs/kafkactl-${{ steps.build_jar.outputs.current_version }}.jar
+          artifacts: ${{ github.workspace }}/build/libs/kafkactl-${{ steps.build_jar.outputs.current_version }}.jar
           draft: true
           prerelease: true
           allowUpdates: true
