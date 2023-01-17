@@ -9,6 +9,8 @@ import com.michelin.kafkactl.models.Status;
 import io.micronaut.core.naming.conventions.StringConvention;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.ocpsoft.prettytime.PrettyTime;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -16,8 +18,6 @@ import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 import picocli.CommandLine;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +27,7 @@ public class FormatService {
     private static final String YAML = "yaml";
     private static final String TABLE = "table";
     private final List<String> defaults = List.of("KIND:/kind", "NAME:/metadata/name", "AGE:/metadata/creationTimestamp%AGO");
+
     @Inject
     public KafkactlConfig kafkactlConfig;
 
@@ -63,10 +64,9 @@ public class FormatService {
         Optional<Status> statusOptional = e.getResponse().getBody(Status.class);
         if (statusOptional.isPresent() && statusOptional.get().getDetails() != null && !statusOptional.get().getDetails().getCauses().isEmpty()) {
             Status status = statusOptional.get();
-            String causes = status.getDetails().getCauses().size() > 1 ?
-                    "\n - " + String.join("\n - ", status.getDetails().getCauses()) : status.getDetails().getCauses().get(0);
+            String causes = "\n - " + String.join("\n - ", status.getDetails().getCauses());
 
-            System.out.printf("Failed %s/%s %s for causes: %s%n", kind, name, status.getMessage(), causes);
+            System.out.printf("Failed %s/%s %s for cause(s): %s%n", kind, name, status.getMessage(), causes);
         } else {
             System.out.printf("Failed %s/%s %s%n", kind, name, e.getMessage());
         }
@@ -79,7 +79,7 @@ public class FormatService {
      */
     private void printTable(String kind, List<Resource> resources) {
         String hyphenatedKind = StringConvention.HYPHENATED.format(kind);
-        List<String> formats = kafkactlConfig.tableFormat.getOrDefault(hyphenatedKind, defaults);
+        List<String> formats = kafkactlConfig.getTableFormat().getOrDefault(hyphenatedKind, defaults);
 
         PrettyTextTable ptt = new PrettyTextTable(formats, resources);
         System.out.println(ptt);

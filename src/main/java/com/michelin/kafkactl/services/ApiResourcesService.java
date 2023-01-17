@@ -3,9 +3,9 @@ package com.michelin.kafkactl.services;
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,7 +19,6 @@ public class ApiResourcesService {
     public LoginService loginService;
 
     public List<ApiResource> getListResourceDefinition() {
-        //TODO Add Cache to reduce the number of http requests
         return resourceClient.listResourceDefinitions(loginService.getAuthorization());
     }
 
@@ -29,12 +28,14 @@ public class ApiResourcesService {
                 .filter(resource -> resource.getKind().equals(kind))
                 .findFirst();
     }
+
     public Optional<ApiResource> getResourceDefinitionFromCommandName(String name) {
         List<ApiResource> apiResources = getListResourceDefinition();
         return apiResources.stream()
                 .filter(resource -> resource.getNames().contains(name))
                 .findFirst();
     }
+
     public List<Resource> validateResourceTypes(List<Resource> resources) {
         List<String> allowedKinds = this.getListResourceDefinition()
                 .stream()

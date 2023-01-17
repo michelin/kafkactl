@@ -1,10 +1,10 @@
 package com.michelin.kafkactl.services;
 
 import com.michelin.kafkactl.models.Resource;
+import jakarta.inject.Singleton;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,7 +16,6 @@ import java.util.stream.StreamSupport;
 
 @Singleton
 public class FileService {
-
     public List<File> computeYamlFileList(File fileOrDirectory, boolean recursive) {
         return listAllFiles(new File[]{fileOrDirectory}, recursive)
                 .collect(Collectors.toList());
@@ -41,10 +40,11 @@ public class FileService {
         return parseResourceStreamFromString(content)
                 .collect(Collectors.toList());
     }
+
     private Stream<Resource> parseResourceStreamFromString(String content){
         Yaml yaml = new Yaml(new Constructor(Resource.class));
         return StreamSupport.stream(yaml.loadAll(content).spliterator(), false)
-                .map(o -> (Resource) o);
+                .map(Resource.class::cast);
     }
 
     private Stream<File> listAllFiles(File[] rootDir, boolean recursive) {

@@ -34,10 +34,13 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
 
       - name: Build and analyze
+        id: build_jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew build jacocoTestReport sonarqube --info
+        run: |
+          ./gradlew build jacocoTestReport sonarqube --info
+          echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
 
       - name: Publish test report
         if: always()
@@ -49,7 +52,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: kafkactl-jar
-          path: ${{ github.workspace }}/build/libs/kafkactl-*.jar
+          path: ${{ github.workspace }}/build/libs/kafkactl-${{ steps.build_jar.outputs.current_version }}.jar
 
   build-linux:
     runs-on: ubuntu-latest
@@ -62,7 +65,7 @@ jobs:
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          version: '21.1.0'
+          version: '22.3.0'
           java-version: '11'
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -81,14 +84,17 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Native image
-        run: ./gradlew shadowJar nativeImage
+      - name: Build
+        id: build_native
+        run: |
+          ./gradlew nativeCompile
+          echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
 
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
           name: kafkactl-linux
-          path: ${{ github.workspace }}/build/native-image/kafkactl-*
+          path: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}
 
   build-windows:
     runs-on: windows-latest
@@ -101,7 +107,7 @@ jobs:
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          version: '20.3.2'
+          version: '22.3.0'
           java-version: '11'
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -118,12 +124,12 @@ jobs:
 
       - name: Build
         run: |
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
-          gradlew.bat shadowJar nativeImage
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          gradlew.bat nativeCompile
         shell: cmd
 
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
           name: kafkactl-windows
-          path: ${{ github.workspace }}/build/native-image/kafkactl-*.exe
+          path: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-*.exe

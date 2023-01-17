@@ -1,7 +1,10 @@
 package com.michelin.kafkactl;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.core.annotation.Introspected;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.convert.format.MapFormat;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,76 +14,35 @@ import java.util.Map;
 
 @Getter
 @Setter
+@Introspected
 @ConfigurationProperties("kafkactl")
 public class KafkactlConfig {
-    /**
-     * Configuration version
-     */
-    public String version;
+    private String version;
+    private String configPath;
+    private String api;
+    private String userToken;
+    private String currentNamespace;
+    private List<Context> contexts;
 
-    /**
-     * Configuration file path
-     */
-    public String configPath;
-
-    /**
-     * Current API
-     */
-    String api;
-
-    /**
-     * Current user token
-     */
-    String userToken;
-
-    /**
-     * Current namespace
-     */
-    String currentNamespace;
-
-    /**
-     * List of available contexts
-     */
-    List<Context> contexts;
-
-    /**
-     * All table formats
-     */
     @MapFormat(transformation = MapFormat.MapTransformation.FLAT)
-    public Map<String, List<String>> tableFormat;
+    private Map<String, List<String>> tableFormat;
 
     @Getter
     @Setter
     @Introspected
     public static class Context {
-        /**
-         * Context name
-         */
-        String name;
+        private String name;
 
-        /**
-         * Context information
-         */
-        ApiContext context;
+        @JsonProperty("context")
+        private ApiContext definition;
 
         @Getter
         @Setter
         @Introspected
         public static class ApiContext {
-            /**
-             * Context API
-             */
-            String api;
-
-            /**
-             * Context user token
-             */
-            String userToken;
-
-            /**
-             * Context namespace
-             */
-            String namespace;
+            private String api;
+            private String userToken;
+            private String namespace;
         }
     }
 }

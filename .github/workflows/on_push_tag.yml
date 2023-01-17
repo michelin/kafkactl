@@ -33,10 +33,10 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
 
       - name: Build and test
-        id: build_and_test
+        id: build_jar
         run: |
-          ./gradlew build check -Prelease
-          echo ::set-output name=current_version::$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}'))
+          ./gradlew build check
+          echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
 
       - name: Publish test report
         if: always()
@@ -45,15 +45,9 @@ jobs:
           report_paths: '**/build/test-results/test/TEST-*.xml'
 
       - name: Docker
-        run: ./gradlew dockerBuild dockerPush -Prelease
+        run: ./gradlew dockerBuild dockerPush
 
-      - name: Upload
-        uses: actions/upload-artifact@v3
-        with:
-          name: kafkactl-jar
-          path: ${{ github.workspace }}/build/libs/kafkactl-*.jar
-
-      - name: Generate Release Changelog
+      - name: Generate release changelog
         uses: mikepenz/release-changelog-builder-action@v1
         id: build_changelog
         with:
@@ -66,7 +60,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: ${{ github.workspace }}/cli/build/libs/kafkactl-*.jar
+          artifacts: ${{ github.workspace }}/cli/build/libs/kafkactl-${{ steps.build_jar.outputs.current_version }}.jar
           draft: true
           prerelease: true
           allowUpdates: true
@@ -82,7 +76,7 @@ jobs:
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          version: '21.1.0'
+          version: '22.3.0'
           java-version: '11'
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -95,20 +89,16 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
 
       - name: Build
-        run: ./gradlew shadowJar nativeImage -Prelease
-
-      - name: Upload
-        uses: actions/upload-artifact@v3
-        with:
-          name: kafkactl-linux
-          path: ${{ github.workspace }}/build/native-image/kafkactl-*
+        id: build_native
+        run: |
+          ./gradlew nativeCompile
+          echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
 
       - name: Update release
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: ${{ github.workspace }}/build/native-image/kafkactl-${{ steps.build_and_test.outputs.current_version }}
+          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}
           draft: true
           prerelease: true
           allowUpdates: true
@@ -125,7 +115,7 @@ jobs:
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          version: '20.3.2'
+          version: '22.3.0'
           java-version: '11'
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -142,22 +132,15 @@ jobs:
         
       - name: Build
         run: |
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
-          gradlew.bat shadowJar nativeImage
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          gradlew.bat nativeCompile
         shell: cmd
-
-      - name: Upload
-        uses: actions/upload-artifact@v3
-        with:
-          name: kafkactl-windows
-          path: ${{ github.workspace }}/build/native-image/kafkactl-*.exe
 
       - name: Update release
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: ${{ github.workspace }}/cli/build/native-image/kafkactl-*.exe
+          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-*.exe
           draft: true
           prerelease: true
           allowUpdates: true

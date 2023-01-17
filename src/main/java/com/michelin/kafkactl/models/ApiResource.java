@@ -6,9 +6,9 @@ import lombok.Setter;
 
 import java.util.List;
 
-@Introspected
 @Getter
 @Setter
+@Introspected
 public class ApiResource {
     private String kind;
     private boolean namespaced;

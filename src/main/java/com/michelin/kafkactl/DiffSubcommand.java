@@ -11,6 +11,7 @@ import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpResponse;
+import jakarta.inject.Inject;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
@@ -19,7 +20,6 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
@@ -30,57 +30,30 @@ import java.util.stream.Collectors;
 
 @Command(name = "diff", description = "Get differences between the new resources and the old resource")
 public class DiffSubcommand implements Callable<Integer> {
-    /**
-     * Login service
-     */
     @Inject
     public LoginService loginService;
 
-    /**
-     * API resources service
-     */
     @Inject
     public ApiResourcesService apiResourcesService;
 
-    /**
-     * File service
-     */
     @Inject
     public FileService fileService;
 
-    /**
-     * Resource service
-     */
     @Inject
     public ResourceService resourceService;
 
-    /**
-     * Kafkactl configuration
-     */
     @Inject
     public KafkactlConfig kafkactlConfig;
 
-    /**
-     * Kafkactl command
-     */
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
-    /**
-     * YAML file or directory containing YAML resources to diff
-     */
     @Option(names = {"-f", "--file"}, description = "YAML File or Directory containing YAML resources")
     public Optional<File> file;
 
-    /**
-     * Enable recursive search of file
-     */
     @Option(names = {"-R", "--recursive"}, description = "Enable recursive search of file")
     public boolean recursive;
 
-    /**
-     * Current command
-     */
     @CommandLine.Spec
     public CommandLine.Model.CommandSpec commandSpec;
 
