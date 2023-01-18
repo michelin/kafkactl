@@ -1,23 +1,23 @@
 {
   "categories": [
     {
-      "title": "## :sparkles: News",
+      "title": "# :sparkles: News",
       "labels": ["feature"]
     },
     {
-      "title": "## :zap: Improvements",
+      "title": "# :zap: Improvements",
       "labels": ["enhancement"]
     },
     {
-      "title": "## :bug: Bugfixes",
+      "title": "# :bug: Bugfixes",
       "labels": ["bug"]
     },
     {
-      "title": "## :memo: Documentation",
+      "title": "# :memo: Documentation",
       "labels": ["documentation"]
     },
     {
-      "title": "## :speech_balloon: Other",
+      "title": "# :speech_balloon: Other",
       "labels": ["refactor", "test"]
     }
   ],

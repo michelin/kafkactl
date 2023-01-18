@@ -94,10 +94,19 @@ jobs:
           ./gradlew nativeCompile
           echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
 
+      - name: Generate release changelog
+        uses: mikepenz/release-changelog-builder-action@v3.6.0
+        id: build_changelog
+        with:
+          configuration: "changelog-builder.json"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Update release
         uses: ncipollo/release-action@v1.12.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          body: ${{ steps.build_changelog.outputs.changelog }}
           artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}
           draft: true
           prerelease: true
@@ -135,10 +144,19 @@ jobs:
           gradlew.bat nativeCompile
         shell: cmd
 
+      - name: Generate release changelog
+        uses: mikepenz/release-changelog-builder-action@v3.6.0
+        id: build_changelog
+        with:
+          configuration: "changelog-builder.json"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Update release
         uses: ncipollo/release-action@v1.12.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          body: ${{ steps.build_changelog.outputs.changelog }}
           artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-*.exe
           draft: true
           prerelease: true
