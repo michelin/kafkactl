@@ -6,7 +6,13 @@
 version: 2
 updates:
   - package-ecosystem: "gradle"
-    directory: "/" # Location of package manifests
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: "weekly"
     labels:
