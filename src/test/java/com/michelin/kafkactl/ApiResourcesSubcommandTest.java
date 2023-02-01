@@ -44,4 +44,22 @@ class ApiResourcesSubcommandTest {
         int code = new CommandLine(apiResourcesSubcommand).execute();
         assertEquals(0, code);
     }
+
+    @Test
+    void shouldNotDisplayApiResourcesWhenNotAuthenticated() {
+        ApiResource apiResource = new ApiResource();
+        apiResource.setKind("Topic");
+        apiResource.setPath("topics");
+        apiResource.setNames(List.of("topics", "topic", "to"));
+        apiResource.setNamespaced(true);
+        apiResource.setSynchronizable(true);
+
+        when(loginService.doAuthenticate())
+                .thenReturn(false);
+        when(apiResourcesService.getListResourceDefinition())
+                .thenReturn(Collections.singletonList(apiResource));
+
+        int code = new CommandLine(apiResourcesSubcommand).execute();
+        assertEquals(2, code);
+    }
 }
