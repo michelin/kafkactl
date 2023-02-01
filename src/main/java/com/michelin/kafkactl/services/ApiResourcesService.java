@@ -41,9 +41,9 @@ public class ApiResourcesService {
                 .stream()
                 .map(ApiResource::getKind)
                 .collect(Collectors.toList());
+
         return resources.stream()
                 .filter(resource -> !allowedKinds.contains(resource.getKind()))
                 .collect(Collectors.toList());
-
     }
 }
