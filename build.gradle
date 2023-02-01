@@ -32,6 +32,11 @@ dependencies {
     compileOnly("org.graalvm.nativeimage:svm")
 
     testImplementation("io.micronaut:micronaut-http-client")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.1.0")
+    testImplementation("org.mockito:mockito-core")
+
+    testAnnotationProcessor("org.projectlombok:lombok")
+    testCompileOnly("org.projectlombok:lombok")
 }
 
 application {
