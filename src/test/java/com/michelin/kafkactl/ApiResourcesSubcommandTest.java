@@ -29,12 +29,13 @@ class ApiResourcesSubcommandTest {
 
     @Test
     void shouldDisplayApiResources() {
-        ApiResource apiResource = new ApiResource();
-        apiResource.setKind("Topic");
-        apiResource.setPath("topics");
-        apiResource.setNames(List.of("topics", "topic", "to"));
-        apiResource.setNamespaced(true);
-        apiResource.setSynchronizable(true);
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
         when(loginService.doAuthenticate())
                 .thenReturn(true);
