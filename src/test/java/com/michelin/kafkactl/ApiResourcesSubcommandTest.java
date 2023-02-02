@@ -10,10 +10,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,7 +32,7 @@ class ApiResourcesSubcommandTest {
 
     @Test
     void shouldDisplayApiResources() {
-        ApiResource apiResource = ApiResource.builder()
+      ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
                 .path("topics")
                 .names(List.of("topics", "topic", "to"))
@@ -42,8 +45,14 @@ class ApiResourcesSubcommandTest {
         when(apiResourcesService.getListResourceDefinition())
                 .thenReturn(Collections.singletonList(apiResource));
 
-        int code = new CommandLine(apiResourcesSubcommand).execute();
+        CommandLine cmd = new CommandLine(apiResourcesSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute();
         assertEquals(0, code);
+        assertEquals("KIND                            NAMES                         NAMESPACED\r\n" +
+                "Topic                           topics,topic,to               true\r\n\r\n", sw.toString());
     }
 
     @Test
@@ -51,7 +60,12 @@ class ApiResourcesSubcommandTest {
         when(loginService.doAuthenticate())
                 .thenReturn(false);
 
-        int code = new CommandLine(apiResourcesSubcommand).execute();
+        CommandLine cmd = new CommandLine(apiResourcesSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        int code = cmd.execute();
         assertEquals(2, code);
+        assertTrue(sw.toString().contains("Login failed."));
     }
 }

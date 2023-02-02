@@ -17,7 +17,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Status {
+    @Builder.Default
     private String apiVersion = "v1";
+    @Builder.Default
     private String kind = "Status";
     private StatusPhase status;
     private String message;

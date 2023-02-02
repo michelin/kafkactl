@@ -26,12 +26,12 @@ public class ApiResourcesSubcommand implements Callable<Integer> {
     public Integer call() {
         boolean authenticated = loginService.doAuthenticate();
         if (!authenticated) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
         }
 
         CommandLine.Help.TextTable textTable = CommandLine.Help.TextTable.forColumns(
                 CommandLine.Help.defaultColorScheme(CommandLine.Help.Ansi.AUTO),
-                new CommandLine.Help.Column(30, 2, CommandLine.Help.Column.Overflow.SPAN),
+                new CommandLine.Help.Column(30, 0, CommandLine.Help.Column.Overflow.SPAN),
                 new CommandLine.Help.Column(30, 2, CommandLine.Help.Column.Overflow.SPAN),
                 new CommandLine.Help.Column(30, 2, CommandLine.Help.Column.Overflow.SPAN));
 
@@ -40,7 +40,7 @@ public class ApiResourcesSubcommand implements Callable<Integer> {
         apiResourcesService.getListResourceDefinition().forEach(rd ->
                 textTable.addRowValues(rd.getKind(), String.join(",", rd.getNames()), String.valueOf(rd.isNamespaced())));
 
-        System.out.println(textTable);
+        commandSpec.commandLine().getOut().println(textTable);
         return 0;
     }
 }

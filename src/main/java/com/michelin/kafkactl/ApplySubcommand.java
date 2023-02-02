@@ -8,6 +8,7 @@ import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -23,6 +24,8 @@ import java.util.stream.Collectors;
 
 @Command(name = "apply", description = "Create or update a resource")
 public class ApplySubcommand implements Callable<Integer> {
+    private static final String SCHEMA_FILE = "schemaFile";
+
     @Inject
     public LoginService loginService;
 
@@ -41,13 +44,13 @@ public class ApplySubcommand implements Callable<Integer> {
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
-    @Option(names = {"-f", "--file"}, description = "YAML File or Directory containing YAML resources")
+    @Option(names = {"-f", "--file"}, description = "YAML file or directory containing resources.")
     public Optional<File> file;
 
-    @Option(names = {"-R", "--recursive"}, description = "Enable recursive search of file")
+    @Option(names = {"-R", "--recursive"}, description = "Search file recursively.")
     public boolean recursive;
 
-    @Option(names = {"--dry-run"}, description = "Does not persist resources. Validate only")
+    @Option(names = {"--dry-run"}, description = "Does not persist resources. Validate only.")
     public boolean dryRun;
 
     @CommandLine.Spec
@@ -61,18 +64,18 @@ public class ApplySubcommand implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         if (dryRun) {
-            System.out.println("Dry run execution");
+            commandSpec.commandLine().getOut().println("Dry run execution.");
         }
 
         boolean authenticated = loginService.doAuthenticate();
         if (!authenticated) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
         }
 
         // If we have none or both stdin and File set, we stop
         boolean hasStdin = System.in.available() > 0;
         if (hasStdin == file.isPresent()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Required one of -f or stdin");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Required one of -f or stdin.");
         }
 
         List<Resource> resources;
@@ -80,7 +83,7 @@ public class ApplySubcommand implements Callable<Integer> {
             // List all files to process
             List<File> yamlFiles = fileService.computeYamlFileList(file.get(), recursive);
             if (yamlFiles.isEmpty()) {
-                throw new CommandLine.ParameterException(commandSpec.commandLine(), "Could not find yaml/yml files in " + file.get().getName());
+                throw new CommandLine.ParameterException(commandSpec.commandLine(), "Could not find YAML or YML files in " + file.get().getName() + ".");
             }
             // Load each files
             resources = fileService.parseResourceListFromFiles(yamlFiles);
@@ -94,7 +97,7 @@ public class ApplySubcommand implements Callable<Integer> {
         List<Resource> invalidResources = apiResourcesService.validateResourceTypes(resources);
         if (!invalidResources.isEmpty()) {
             String invalid = invalidResources.stream().map(Resource::getKind).distinct().collect(Collectors.joining(", "));
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server doesn't have resource type [" + invalid + "]");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type(s) " + invalid + ".");
         }
 
         // Validate namespace mismatch
@@ -103,20 +106,20 @@ public class ApplySubcommand implements Callable<Integer> {
                 .filter(resource -> resource.getMetadata().getNamespace() != null && !resource.getMetadata().getNamespace().equals(namespace))
                 .collect(Collectors.toList());
         if (!nsMismatch.isEmpty()) {
-            String invalid = String.join(", ", nsMismatch.stream().map(resource -> resource.getKind() + "/" + resource.getMetadata().getName()).distinct().collect(Collectors.toList()));
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Namespace mismatch between kafkactl and yaml document [" + invalid + "]");
+            String invalid = nsMismatch.stream().map(resource -> resource.getKind() + "/" + resource.getMetadata().getName()).distinct().collect(Collectors.joining(", "));
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Namespace mismatch between Kafkactl and YAML document " + invalid + ".");
         }
 
         List<ApiResource> apiResources = apiResourcesService.getListResourceDefinition();
 
         // Load schema content
         resources.stream()
-                .filter(resource -> resource.getKind().equals("Schema") && resource.getSpec().get("schemaFile") != null && StringUtils.isNotEmpty(resource.getSpec().get("schemaFile").toString()))
+                .filter(resource -> resource.getKind().equals("Schema") && resource.getSpec().get(SCHEMA_FILE) != null && StringUtils.isNotEmpty(resource.getSpec().get(SCHEMA_FILE).toString()))
                 .forEach(resource -> {
                     try {
-                        resource.getSpec().put("schema", Files.readString(new File(resource.getSpec().get("schemaFile").toString()).toPath()));
+                        resource.getSpec().put("schema", Files.readString(new File(resource.getSpec().get(SCHEMA_FILE).toString()).toPath()));
                     } catch (Exception e) {
-                        throw new CommandLine.ParameterException(commandSpec.commandLine(), "Cannot open schema file " + resource.getSpec().get("schemaFile") +
+                        throw new CommandLine.ParameterException(commandSpec.commandLine(), "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE) +
                                 ". Schema path must be relative to the CLI. "+e.getClass().getName()+": " + e.getMessage());
                     }
                 });
@@ -131,18 +134,19 @@ public class ApplySubcommand implements Callable<Integer> {
 
                     HttpResponse<Resource> response = resourceService.apply(apiResource, namespace, resource, dryRun);
                     if (response == null) {
+                        commandSpec.commandLine().getErr().println("Cannot handle Ns4Kafka response.");
                         return null;
                     }
 
-                    Resource merged = response.body();
+                    Resource body = response.body();
                     String resourceState = "";
                     if (response.header("X-Ns4kafka-Result") != null) {
                         resourceState = " (" +response.header("X-Ns4kafka-Result") + ")";
                     }
 
-                    System.out.println(CommandLine.Help.Ansi.AUTO.string("@|bold,green Success |@") + merged.getKind() + "/" + merged.getMetadata().getName() + resourceState);
+                    commandSpec.commandLine().getOut().println(CommandLine.Help.Ansi.AUTO.string("@|bold,green Success |@") + body.getKind() + "/" + body.getMetadata().getName() + resourceState + ".");
 
-                    return merged;
+                    return body;
                 })
                 .mapToInt(value -> value != null ? 0 : 1)
                 .sum();
