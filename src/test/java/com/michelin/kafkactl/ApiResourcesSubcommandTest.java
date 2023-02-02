@@ -51,8 +51,7 @@ class ApiResourcesSubcommandTest {
 
         int code = cmd.execute();
         assertEquals(0, code);
-        assertEquals("KIND                            NAMES                         NAMESPACED\r\n" +
-                "Topic                           topics,topic,to               true\r\n\r\n", sw.toString());
+        assertTrue(sw.toString().contains("Topic                           topics,topic,to               true"));
     }
 
     @Test

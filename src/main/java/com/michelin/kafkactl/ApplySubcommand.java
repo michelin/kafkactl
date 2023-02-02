@@ -83,7 +83,7 @@ public class ApplySubcommand implements Callable<Integer> {
             // List all files to process
             List<File> yamlFiles = fileService.computeYamlFileList(file.get(), recursive);
             if (yamlFiles.isEmpty()) {
-                throw new CommandLine.ParameterException(commandSpec.commandLine(), "Could not find YAML or YML files in " + file.get().getName() + ".");
+                throw new CommandLine.ParameterException(commandSpec.commandLine(), "Could not find YAML or YML files in " + file.get().getName() + " directory.");
             }
             // Load each files
             resources = fileService.parseResourceListFromFiles(yamlFiles);

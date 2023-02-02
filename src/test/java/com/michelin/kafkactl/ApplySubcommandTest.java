@@ -92,9 +92,9 @@ class ApplySubcommandTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic.yml");
+        int code = cmd.execute("-f", "topic");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains("Could not find yaml/yml files in topic.yml."));
+        assertTrue(sw.toString().contains("Could not find YAML or YML files in topic directory."));
     }
 
     @Test
