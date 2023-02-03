@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @Command(name = "apply", description = "Create or update a resource")
 public class ApplySubcommand implements Callable<Integer> {
-    private static final String SCHEMA_FILE = "schemaFile";
+    public static final String SCHEMA_FILE = "schemaFile";
 
     @Inject
     public LoginService loginService;
@@ -120,7 +120,7 @@ public class ApplySubcommand implements Callable<Integer> {
                         resource.getSpec().put("schema", Files.readString(new File(resource.getSpec().get(SCHEMA_FILE).toString()).toPath()));
                     } catch (Exception e) {
                         throw new CommandLine.ParameterException(commandSpec.commandLine(), "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE) +
-                                ". Schema path must be relative to the CLI. "+e.getClass().getName()+": " + e.getMessage());
+                                ". Schema path must be relative to the CLI.");
                     }
                 });
 
