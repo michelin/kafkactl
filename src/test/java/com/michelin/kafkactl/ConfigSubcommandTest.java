@@ -36,9 +36,6 @@ class ConfigSubcommandTest {
     @Mock
     public FormatService formatService;
 
-    @Mock
-    public KafkactlCommand kafkactlCommand;
-
     @InjectMocks
     private ConfigSubcommand configSubcommand;
 

@@ -31,9 +31,6 @@ public class ConfigSubcommand implements Callable<Integer> {
     @CommandLine.Parameters(index="1", defaultValue = "", description = "Context to use.", arity = "1")
     public String context;
 
-    @CommandLine.ParentCommand
-    public KafkactlCommand kafkactlCommand;
-
     @CommandLine.Spec
     public CommandLine.Model.CommandSpec commandSpec;
 

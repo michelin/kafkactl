@@ -89,6 +89,7 @@ public class ConnectorsSubcommand implements Callable<Integer> {
             return 0;
         }
 
+        commandSpec.commandLine().getErr().println("Cannot change state of given connectors.");
         return 1;
     }
 }

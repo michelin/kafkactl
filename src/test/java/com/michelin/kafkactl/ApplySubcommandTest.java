@@ -138,9 +138,7 @@ class ApplySubcommandTest {
                 .spec(Collections.emptyMap())
                 .build();
 
-        KafkactlCommand parentCmd = new KafkactlCommand();
-        parentCmd.optionalNamespace = Optional.of("namespaceMismatch");
-        applySubcommand.kafkactlCommand = parentCmd;
+        kafkactlCommand.optionalNamespace = Optional.of("namespaceMismatch");
 
         when(loginService.doAuthenticate())
                 .thenReturn(true);
@@ -180,9 +178,7 @@ class ApplySubcommandTest {
                 .synchronizable(true)
                 .build();
 
-        KafkactlCommand parentCmd = new KafkactlCommand();
-        parentCmd.optionalNamespace = Optional.empty();
-        applySubcommand.kafkactlCommand = parentCmd;
+        kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate())
                 .thenReturn(true);
@@ -228,9 +224,7 @@ class ApplySubcommandTest {
                 .synchronizable(true)
                 .build();
 
-        KafkactlCommand parentCmd = new KafkactlCommand();
-        parentCmd.optionalNamespace = Optional.empty();
-        applySubcommand.kafkactlCommand = parentCmd;
+        kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate())
                 .thenReturn(true);
