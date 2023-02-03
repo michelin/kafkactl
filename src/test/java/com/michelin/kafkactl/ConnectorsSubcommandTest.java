@@ -57,7 +57,7 @@ class ConnectorsSubcommandTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        int code = cmd.execute();
+        int code = cmd.execute("pause", "my-connector");
         assertEquals(2, code);
         assertTrue(sw.toString().contains("Login failed."));
     }

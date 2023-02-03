@@ -57,14 +57,14 @@ public class ConnectorsSubcommand implements Callable<Integer> {
     public Integer call() throws Exception {
         boolean authenticated = loginService.doAuthenticate();
         if (!authenticated) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
         }
 
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
 
         if (connectors.stream().anyMatch(s -> s.equalsIgnoreCase("ALL"))) {
             ApiResource connectType = apiResourcesService.getResourceDefinitionFromKind("Connector")
-                    .orElseThrow(() -> new CommandLine.ParameterException(commandSpec.commandLine(), "`Connector` Kind not found in ApiResources Service"));
+                    .orElseThrow(() -> new CommandLine.ParameterException(commandSpec.commandLine(), "\"Connector\" kind not found."));
             connectors = resourceService.listResourcesWithType(connectType, namespace)
                     .stream()
                     .map(resource -> resource.getMetadata().getName())
