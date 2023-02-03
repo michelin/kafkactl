@@ -13,6 +13,8 @@ import picocli.CommandLine.Parameters;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import static com.michelin.kafkactl.services.FormatService.TABLE;
+
 @Command(name = "delete-records", description = "Deletes all records within a topic")
 public class DeleteRecordsSubcommand implements Callable<Integer> {
     @Inject
@@ -59,7 +61,7 @@ public class DeleteRecordsSubcommand implements Callable<Integer> {
 
         List<Resource> resources = resourceService.deleteRecords(namespace, topic, dryRun);
         if (!resources.isEmpty()) {
-            formatService.displayList("DeleteRecordsResponse", resources, "table");
+            formatService.displayList("DeleteRecordsResponse", resources, TABLE, commandSpec.commandLine().getOut());
             return 0;
         }
 

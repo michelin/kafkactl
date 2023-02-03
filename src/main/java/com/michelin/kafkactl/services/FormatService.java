@@ -18,14 +18,15 @@ import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 import picocli.CommandLine;
 
+import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Singleton
 public class FormatService {
-    private static final String YAML = "yaml";
-    private static final String TABLE = "table";
+    public static final String YAML = "yaml";
+    public static final String TABLE = "table";
     private final List<String> defaults = List.of("KIND:/kind", "NAME:/metadata/name", "AGE:/metadata/creationTimestamp%AGO");
 
     @Inject
@@ -36,12 +37,13 @@ public class FormatService {
      * @param kind The kind of resource
      * @param resources The list of resources
      * @param output The type of display
+     * @param printWriter The print writer
      */
-    public void displayList(String kind, List<Resource> resources, String output) {
+    public void displayList(String kind, List<Resource> resources, String output, PrintWriter printWriter) {
         if (output.equals(TABLE)) {
-            printTable(kind, resources);
+            printTable(kind, resources, printWriter);
         } else if (output.equals(YAML)) {
-            printYaml(resources);
+            printYaml(resources, printWriter);
         }
     }
 
@@ -49,9 +51,10 @@ public class FormatService {
      * Display a single resource
      * @param resource The resource
      * @param output The type of display
+     * @param printWriter The print writer
      */
-    public void displaySingle(Resource resource, String output) {
-        displayList(resource.getKind(), List.of(resource), output);
+    public void displaySingle(Resource resource, String output, PrintWriter printWriter) {
+        displayList(resource.getKind(), List.of(resource), output, printWriter);
     }
 
     /**
@@ -76,27 +79,29 @@ public class FormatService {
      * Print the list of resources to table format
      * @param kind The kind of resources
      * @param resources The list of resources
+     * @param printWriter The print writer
      */
-    private void printTable(String kind, List<Resource> resources) {
+    private void printTable(String kind, List<Resource> resources, PrintWriter printWriter) {
         String hyphenatedKind = StringConvention.HYPHENATED.format(kind);
         List<String> formats = kafkactlConfig.getTableFormat().getOrDefault(hyphenatedKind, defaults);
 
         PrettyTextTable ptt = new PrettyTextTable(formats, resources);
-        System.out.println(ptt);
+        printWriter.println(ptt);
     }
 
     /**
      * Print the list of resources to yaml format
      * @param resources The list of resources
+     * @param printWriter The print writer
      */
-    private void printYaml(List<Resource> resources) {
+    private void printYaml(List<Resource> resources, PrintWriter printWriter) {
         DumperOptions options = new DumperOptions();
         options.setExplicitStart(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         Representer representer = new Representer();
         representer.addClassTag(Resource.class, Tag.MAP);
         Yaml yaml = new Yaml(representer, options);
-        System.out.println(yaml.dumpAll(resources.iterator()));
+        printWriter.println(yaml.dumpAll(resources.iterator()));
     }
 
     public static class PrettyTextTable {

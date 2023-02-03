@@ -12,6 +12,8 @@ import picocli.CommandLine;
 import java.util.*;
 import java.util.concurrent.Callable;
 
+import static com.michelin.kafkactl.services.FormatService.TABLE;
+
 @CommandLine.Command(name = "config", description = "Manage configuration")
 public class ConfigSubcommand implements Callable<Integer> {
     @Inject
@@ -23,14 +25,17 @@ public class ConfigSubcommand implements Callable<Integer> {
     @Inject
     public FormatService formatService;
 
+    @CommandLine.Parameters(index = "0", description = "Action to perform (${COMPLETION-CANDIDATES})", arity = "1")
+    public ConfigAction action;
+
+    @CommandLine.Parameters(index="1", defaultValue = "", description = "Context to use", arity = "1")
+    public String context;
+
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
-    @CommandLine.Parameters(index = "0", description = "(get-contexts | current-context | use-context)", arity = "1")
-    public ConfigAction action;
-
-    @CommandLine.Parameters(index="1", defaultValue = "", description = "Context", arity = "1")
-    public String context;
+    @CommandLine.Spec
+    public CommandLine.Model.CommandSpec commandSpec;
 
     /**
      * Run the "config" command
@@ -59,12 +64,13 @@ public class ConfigSubcommand implements Callable<Integer> {
                     .spec(specs)
                     .build();
 
-            formatService.displayList("Context", List.of(currentContextAsResource), "table");
+            formatService.displayList("Context", List.of(currentContextAsResource), TABLE,
+                    commandSpec.commandLine().getOut());
             return 0;
         }
 
         if (kafkactlConfig.getContexts().isEmpty()) {
-            System.out.println("No context pre-defined.");
+            commandSpec.commandLine().getOut().println("No context pre-defined.");
             return 0;
         }
 
@@ -86,20 +92,20 @@ public class ConfigSubcommand implements Callable<Integer> {
                 allContextsAsResources.add(currentContextAsResource);
             });
 
-            formatService.displayList("Context", allContextsAsResources, "table");
+            formatService.displayList("Context", allContextsAsResources, TABLE, commandSpec.commandLine().getOut());
             return 0;
         }
 
         Optional<KafkactlConfig.Context> optionalContextToSet = configService.getContextByName(context);
         if (optionalContextToSet.isEmpty()) {
-            System.out.println("error: no context exists with the name: " + context);
+            commandSpec.commandLine().getErr().println("No context exists with the name: " + context);
             return 1;
         }
 
         KafkactlConfig.Context contextToSet = optionalContextToSet.get();
         if (action.equals(ConfigAction.USE_CONTEXT)) {
             configService.updateConfigurationContext(contextToSet);
-            System.out.println("Switched to context \"" + context + "\".");
+            commandSpec.commandLine().getOut().println("Switched to context \"" + context + "\".");
             return 0;
         }
 

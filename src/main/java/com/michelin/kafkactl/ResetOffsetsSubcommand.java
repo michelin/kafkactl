@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import static com.michelin.kafkactl.services.FormatService.TABLE;
+
 @Command(name = "reset-offsets", description = "Reset Consumer Group offsets")
 public class ResetOffsetsSubcommand implements Callable<Integer> {
     @Inject
@@ -131,7 +133,7 @@ public class ResetOffsetsSubcommand implements Callable<Integer> {
 
         List<Resource> resources = resourceService.resetOffsets(namespace, group, consumerGroupResetOffset, dryRun);
         if (!resources.isEmpty()) {
-            formatService.displayList("ConsumerGroupResetOffsetsResponse", resources, "table");
+            formatService.displayList("ConsumerGroupResetOffsetsResponse", resources, TABLE, commandSpec.commandLine().getOut());
             return 0;
         }
 

@@ -16,6 +16,8 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import static com.michelin.kafkactl.services.FormatService.TABLE;
+
 @CommandLine.Command(name = "connectors", description = "Interact with connectors (Pause/Resume/Restart)")
 public class ConnectorsSubcommand implements Callable<Integer> {
     @CommandLine.ParentCommand
@@ -82,7 +84,7 @@ public class ConnectorsSubcommand implements Callable<Integer> {
                 .collect(Collectors.toList());
 
         if (!changeConnectorResponseList.isEmpty()) {
-            formatService.displayList("ChangeConnectorState", changeConnectorResponseList, "table");
+            formatService.displayList("ChangeConnectorState", changeConnectorResponseList, TABLE, commandSpec.commandLine().getOut());
             return 0;
         }
 

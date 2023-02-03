@@ -13,6 +13,8 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import static com.michelin.kafkactl.services.FormatService.TABLE;
+
 @CommandLine.Command(name = "schemas", description = "Update schema compatibility mode")
 public class SchemaSubcommand implements Callable<Integer> {
     @Inject
@@ -63,7 +65,7 @@ public class SchemaSubcommand implements Callable<Integer> {
                 .collect(Collectors.toList());
 
         if (!updatedSchemas.isEmpty()) {
-            formatService.displayList("SchemaCompatibilityState", updatedSchemas, "table");
+            formatService.displayList("SchemaCompatibilityState", updatedSchemas, TABLE, commandSpec.commandLine().getOut());
             return 0;
         }
 

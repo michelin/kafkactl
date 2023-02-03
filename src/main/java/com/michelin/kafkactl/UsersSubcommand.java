@@ -63,7 +63,7 @@ public class UsersSubcommand implements Callable<Integer> {
 
         Resource res = resourceService.resetPassword(namespace, user);
         if (res != null) {
-            formatService.displaySingle(res, output);
+            formatService.displaySingle(res, output, commandSpec.commandLine().getOut());
         }
 
         return 0;

@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import static com.michelin.kafkactl.services.FormatService.TABLE;
+
 @Command(name = "import", description = "Import unsynchronized resources")
 public class ImportSubcommand implements Callable<Integer> {
     @Inject
@@ -69,7 +71,7 @@ public class ImportSubcommand implements Callable<Integer> {
         Map<ApiResource, List<Resource>> resources = resourceService.importAll(apiResources, namespace, dryRun);
 
         // Display all resources by type
-        resources.forEach((k, v) -> formatService.displayList(k.getKind(), v, "table"));
+        resources.forEach((k, v) -> formatService.displayList(k.getKind(), v, TABLE, commandSpec.commandLine().getOut()));
         return 0;
     }
 

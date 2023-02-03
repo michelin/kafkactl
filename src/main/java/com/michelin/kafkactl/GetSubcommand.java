@@ -98,7 +98,7 @@ public class GetSubcommand implements Callable<Integer> {
                     resources.entrySet()
                             .stream()
                             .filter(kv -> !kv.getValue().isEmpty())
-                            .forEach(kv -> formatService.displayList(kv.getValue().get(0).getKind(), kv.getValue(), output));
+                            .forEach(kv -> formatService.displayList(kv.getValue().get(0).getKind(), kv.getValue(), output, commandSpec.commandLine().getOut()));
                 }
             } catch (HttpClientResponseException e) {
                 formatService.displayError(e, apiResources.get(0).getKind(), null);
@@ -109,7 +109,7 @@ public class GetSubcommand implements Callable<Integer> {
             try {
                 // Get individual resources for given types (k get topic topic1)
                 Resource singleResource = resourceService.getSingleResourceWithType(apiResources.get(0), namespace, resourceName.get(), true);
-                formatService.displaySingle(singleResource, output);
+                formatService.displaySingle(singleResource, output, commandSpec.commandLine().getOut());
             } catch (HttpClientResponseException e) {
                 formatService.displayError(e, apiResources.get(0).getKind(), resourceName.get());
             } catch (Exception e) {
