@@ -8,6 +8,7 @@ import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import jakarta.inject.Inject;
+import lombok.Getter;
 import picocli.CommandLine;
 
 import java.util.List;
@@ -20,15 +21,6 @@ import static com.michelin.kafkactl.services.FormatService.TABLE;
 
 @CommandLine.Command(name = "connectors", description = "Interact with connectors (Pause/Resume/Restart)")
 public class ConnectorsSubcommand implements Callable<Integer> {
-    @CommandLine.ParentCommand
-    public KafkactlCommand kafkactlCommand;
-
-    @CommandLine.Parameters(index = "0", description = "(pause | resume | restart)", arity = "1")
-    public ConnectorAction action;
-
-    @CommandLine.Parameters(index="1..*", description = "Connector names separated by space (use `ALL` for all connectors)", arity = "1..*")
-    public List<String> connectors;
-
     @Inject
     public LoginService loginService;
 
@@ -43,6 +35,15 @@ public class ConnectorsSubcommand implements Callable<Integer> {
 
     @Inject
     public FormatService formatService;
+
+    @CommandLine.Parameters(index = "0", description = "Action to perform (${COMPLETION-CANDIDATES}).", arity = "1")
+    public ConnectorAction action;
+
+    @CommandLine.Parameters(index="1..*", description = "Connector names separated by space or \"all\" for all connectors.", arity = "1..*")
+    public List<String> connectors;
+
+    @CommandLine.ParentCommand
+    public KafkactlCommand kafkactlCommand;
 
     @CommandLine.Spec
     public CommandLine.Model.CommandSpec commandSpec;
@@ -93,7 +94,19 @@ public class ConnectorsSubcommand implements Callable<Integer> {
 }
 
 enum ConnectorAction {
-    pause,
-    resume,
-    restart
+    PAUSE("pause"),
+    RESUME("resume"),
+    RESTART("restart");
+
+    @Getter
+    private final String realName;
+
+    ConnectorAction(String realName) {
+        this.realName = realName;
+    }
+
+    @Override
+    public String toString() {
+        return realName;
+    }
 }

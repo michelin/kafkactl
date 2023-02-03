@@ -25,10 +25,10 @@ public class ConfigSubcommand implements Callable<Integer> {
     @Inject
     public FormatService formatService;
 
-    @CommandLine.Parameters(index = "0", description = "Action to perform (${COMPLETION-CANDIDATES})", arity = "1")
+    @CommandLine.Parameters(index = "0", description = "Action to perform (${COMPLETION-CANDIDATES}).", arity = "1")
     public ConfigAction action;
 
-    @CommandLine.Parameters(index="1", defaultValue = "", description = "Context to use", arity = "1")
+    @CommandLine.Parameters(index="1", defaultValue = "", description = "Context to use.", arity = "1")
     public String context;
 
     @CommandLine.ParentCommand
