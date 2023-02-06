@@ -22,7 +22,7 @@ public class ConnectorsSubcommand implements Callable<Integer> {
     public KafkactlCommand kafkactlCommand;
 
     @CommandLine.Parameters(index = "0", description = "(pause | resume | restart)", arity = "1")
-    public ConnectorAction action;
+    public ConnectClustersAction action;
 
     @CommandLine.Parameters(index="1..*", description = "Connector names separated by space (use `ALL` for all connectors)", arity = "1..*")
     public List<String> connectors;
