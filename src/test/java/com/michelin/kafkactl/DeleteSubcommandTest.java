@@ -67,9 +67,11 @@ class DeleteSubcommandTest {
 
     @Test
     void shouldNotDeleteByFileWhenYmlFileNotFound() {
-        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+        kafkactlCommand.optionalNamespace = Optional.empty();
         when(loginService.doAuthenticate())
                 .thenReturn(true);
+        when(kafkactlConfig.getCurrentNamespace())
+                .thenReturn("namespace");
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.emptyList());
 
@@ -201,6 +203,80 @@ class DeleteSubcommandTest {
 
         int code = cmd.execute("-f", "topic");
         assertEquals(0, code);
+        assertTrue(sw.toString().contains("Success Topic/prefix.topic (Deleted)."));
+    }
+
+    @Test
+    void shouldDeleteByName() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+        when(loginService.doAuthenticate())
+                .thenReturn(true);
+        when(apiResourcesService.getResourceDefinitionFromCommandName(any()))
+                .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.validateResourceTypes(any()))
+                .thenReturn(Collections.emptyList());
+        when(apiResourcesService.getListResourceDefinition())
+                .thenReturn(Collections.singletonList(apiResource));
+        when(resourceService.delete(any(), any(), any(), anyBoolean()))
+                .thenReturn(true);
+
+        CommandLine cmd = new CommandLine(deleteSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("topic", "prefix.topic");
+        assertEquals(0, code);
+        assertTrue(sw.toString().contains("Success Topic/prefix.topic (Deleted)."));
+    }
+
+    @Test
+    void shouldDeleteByFileDryRun() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        Resource resource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .build())
+                .spec(Collections.emptyMap())
+                .build();
+
+        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+        when(loginService.doAuthenticate())
+                .thenReturn(true);
+        when(fileService.computeYamlFileList(any(), anyBoolean()))
+                .thenReturn(Collections.singletonList(new File("path")));
+        when(fileService.parseResourceListFromFiles(any()))
+                .thenReturn(Collections.singletonList(resource));
+        when(apiResourcesService.validateResourceTypes(any()))
+                .thenReturn(Collections.emptyList());
+        when(apiResourcesService.getListResourceDefinition())
+                .thenReturn(Collections.singletonList(apiResource));
+        when(resourceService.delete(any(), any(), any(), anyBoolean()))
+                .thenReturn(true);
+
+        CommandLine cmd = new CommandLine(deleteSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("-f", "topic", "--dry-run");
+        assertEquals(0, code);
+        assertTrue(sw.toString().contains("Dry run execution."));
         assertTrue(sw.toString().contains("Success Topic/prefix.topic (Deleted)."));
     }
 
