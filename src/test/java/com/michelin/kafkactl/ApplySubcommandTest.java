@@ -22,8 +22,7 @@ import java.io.StringWriter;
 import java.util.*;
 
 import static com.michelin.kafkactl.ApplySubcommand.SCHEMA_FILE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
@@ -346,7 +345,58 @@ class ApplySubcommandTest {
 
         int code = cmd.execute("-f", "topic.yml");
         assertEquals(0, code);
+        assertFalse(resource.getSpec().get("schema").toString().isBlank());
         assertTrue(sw.toString().contains("Success Schema/prefix.schema (Created)."));
+    }
+
+    @Test
+    void shouldApplyInlineSchema() {
+        Map<String, Object> specs = new HashMap<>();
+        specs.put("schema", "{schema}");
+
+        Resource resource = Resource.builder()
+                .kind("Schema")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.schema")
+                        .namespace("namespace")
+                        .build())
+                .spec(specs)
+                .build();
+
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Schema")
+                .namespaced(true)
+                .synchronizable(false)
+                .path("schemas")
+                .names(List.of("schemas", "schema", "sc"))
+                .build();
+
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(loginService.doAuthenticate())
+                .thenReturn(true);
+        when(fileService.computeYamlFileList(any(), anyBoolean()))
+                .thenReturn(Collections.singletonList(new File("path")));
+        when(fileService.parseResourceListFromFiles(any()))
+                .thenReturn(Collections.singletonList(resource));
+        when(apiResourcesService.validateResourceTypes(any()))
+                .thenReturn(Collections.emptyList());
+        when(kafkactlConfig.getCurrentNamespace())
+                .thenReturn("namespace");
+        when(apiResourcesService.getListResourceDefinition())
+                .thenReturn(Collections.singletonList(apiResource));
+        when(resourceService.apply(any(), any(), any(), anyBoolean()))
+                .thenReturn(HttpResponse
+                        .ok(resource));
+
+        CommandLine cmd = new CommandLine(applySubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("-f", "topic.yml");
+        assertEquals(0, code);
+        assertTrue(sw.toString().contains("Success Schema/prefix.schema."));
     }
 
     @Test

@@ -8,7 +8,7 @@
       "type": [
         "string"
       ],
-      "doc": "First name of the persone"
+      "doc": "First name of the person"
     },
     {
       "name": "lastName",
