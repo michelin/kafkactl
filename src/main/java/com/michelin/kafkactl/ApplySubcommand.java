@@ -134,7 +134,7 @@ public class ApplySubcommand implements Callable<Integer> {
 
                     HttpResponse<Resource> response = resourceService.apply(apiResource, namespace, resource, dryRun);
                     if (response == null) {
-                        commandSpec.commandLine().getErr().println("Cannot handle Ns4Kafka response.");
+                        commandSpec.commandLine().getErr().println(CommandLine.Help.Ansi.AUTO.string("@|bold,red Failed |@") + resource.getKind() + "/" + resource.getMetadata().getName() + ".");
                         return null;
                     }
 

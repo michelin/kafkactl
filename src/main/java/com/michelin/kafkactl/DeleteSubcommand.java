@@ -46,27 +46,28 @@ public class DeleteSubcommand implements Callable<Integer> {
     static class EitherOf {
         @ArgGroup(exclusive = false)
         public ByName nameConfig;
+
         @ArgGroup(exclusive = false)
         public ByFile fileConfig;
     }
 
     static class ByName {
-        @Parameters(index = "0", description = "Resource type", arity = "1")
+        @Parameters(index = "0", description = "Resource type.", arity = "1")
         public String resourceType;
 
-        @Parameters(index = "1", description = "Resource name", arity = "1")
+        @Parameters(index = "1", description = "Resource name.", arity = "1")
         public String name;
     }
 
     static class ByFile {
-        @Option(names = {"-f", "--file"}, description = "YAML File or Directory containing YAML resources")
+        @Option(names = {"-f", "--file"}, description = "YAML file or directory containing resources.")
         public Optional<File> file;
 
-        @Option(names = {"-R", "--recursive"}, description = "Enable recursive search in Directory")
+        @Option(names = {"-R", "--recursive"}, description = "Search file recursively.")
         public boolean recursive;
     }
 
-    @Option(names = {"--dry-run"}, description = "Does not persist operation. Validate only")
+    @Option(names = {"--dry-run"}, description = "Does not persist operation. Validate only.")
     public boolean dryRun;
 
     @CommandLine.Spec
@@ -79,12 +80,12 @@ public class DeleteSubcommand implements Callable<Integer> {
     @Override
     public Integer call() {
         if (dryRun) {
-            System.out.println("Dry run execution");
+            commandSpec.commandLine().getOut().println("Dry run execution.");
         }
 
         boolean authenticated = loginService.doAuthenticate();
         if (!authenticated) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
         }
 
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
@@ -93,14 +94,14 @@ public class DeleteSubcommand implements Callable<Integer> {
             // List all files to process
             List<File> yamlFiles = fileService.computeYamlFileList(config.fileConfig.file.get(), config.fileConfig.recursive);
             if (yamlFiles.isEmpty()) {
-                throw new CommandLine.ParameterException(commandSpec.commandLine(), "Could not find yaml/yml files in " + config.fileConfig.file.get().getName());
+                throw new CommandLine.ParameterException(commandSpec.commandLine(), "Could not find YAML or YML files in " + config.fileConfig.file.get().getName() + " directory.");
             }
             // Load each files
             resources = fileService.parseResourceListFromFiles(yamlFiles);
         } else {
             Optional<ApiResource> optionalApiResource = apiResourcesService.getResourceDefinitionFromCommandName(config.nameConfig.resourceType);
             if (optionalApiResource.isEmpty()) {
-                throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server doesn't have resource type [" + config.nameConfig.resourceType + "]");
+                throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type(s) " + config.nameConfig.resourceType + ".");
             }
             // Generate a single resource with minimum details from input
             resources = List.of(Resource.builder()
@@ -116,7 +117,7 @@ public class DeleteSubcommand implements Callable<Integer> {
         List<Resource> invalidResources = apiResourcesService.validateResourceTypes(resources);
         if (!invalidResources.isEmpty()) {
             String invalid = invalidResources.stream().map(Resource::getKind).distinct().collect(Collectors.joining(", "));
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server doesn't have resource type [" + invalid + "]");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type(s) " + invalid + ".");
         }
 
         // Validate namespace mismatch
@@ -125,8 +126,9 @@ public class DeleteSubcommand implements Callable<Integer> {
                 .collect(Collectors.toList());
         if (!nsMismatch.isEmpty()) {
             String invalid = String.join(", ", nsMismatch.stream().map(resource -> resource.getKind() + "/" + resource.getMetadata().getName()).distinct().collect(Collectors.toList()));
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Namespace mismatch between kafkactl and yaml document [" + invalid + "]");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Namespace mismatch between Kafkactl and YAML document " + invalid + ".");
         }
+
         List<ApiResource> apiResources = apiResourcesService.getListResourceDefinition();
 
         // Process each document individually, return 0 when all succeed
@@ -138,7 +140,9 @@ public class DeleteSubcommand implements Callable<Integer> {
                             .orElseThrow();
                     boolean success = resourceService.delete(apiResource, namespace, resource.getMetadata().getName(), dryRun);
                     if (success) {
-                        System.out.println(CommandLine.Help.Ansi.AUTO.string("@|bold,green Success |@") + apiResource.getKind() + "/" + resource.getMetadata().getName() + " (deleted)");
+                        commandSpec.commandLine().getOut().println(CommandLine.Help.Ansi.AUTO.string("@|bold,green Success |@") + apiResource.getKind() + "/" + resource.getMetadata().getName() + " (Deleted).");
+                    } else {
+                        commandSpec.commandLine().getErr().println(CommandLine.Help.Ansi.AUTO.string("@|bold,red Failed |@") + apiResource.getKind() + "/" + resource.getMetadata().getName() + ".");
                     }
                     return success;
                 })

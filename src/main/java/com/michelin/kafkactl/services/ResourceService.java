@@ -91,14 +91,13 @@ public class ResourceService {
         try {
             if (apiResource.isNamespaced()) {
                 HttpResponse<Void> response = namespacedClient.delete(namespace, apiResource.getPath(), resource, loginService.getAuthorization(), dryRun);
-                if(response.getStatus() != HttpStatus.NO_CONTENT){
+                if(response.getStatus() != HttpStatus.NO_CONTENT) {
                     throw new HttpClientResponseException("Resource not Found", response);
                 }
-                return true;
             } else {
                 nonNamespacedClient.delete(loginService.getAuthorization(), apiResource.getPath(), resource, dryRun);
-                return true;
             }
+            return true;
         } catch (HttpClientResponseException e) {
             formatService.displayError(e, apiResource.getKind(), resource);
         }

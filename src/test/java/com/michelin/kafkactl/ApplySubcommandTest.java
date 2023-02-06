@@ -198,7 +198,7 @@ class ApplySubcommandTest {
 
         int code = cmd.execute("-f", "topic.yml");
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("Cannot handle Ns4Kafka response."));
+        assertTrue(sw.toString().contains("Failed Topic/prefix.topic."));
     }
 
     @Test
