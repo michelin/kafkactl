@@ -1,13 +1,10 @@
 package com.michelin.kafkactl;
 
-import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
-import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,166 +15,137 @@ import picocli.CommandLine;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ConnectorsSubcommandTest {
+class DeleteRecordsSubcommandTest {
     @Mock
     public LoginService loginService;
-
-    @Mock
-    public KafkactlConfig kafkactlConfig;
 
     @Mock
     public ResourceService resourceService;
 
     @Mock
-    public ApiResourcesService apiResourcesService;
+    public FormatService formatService;
 
     @Mock
-    public FormatService formatService;
+    public KafkactlConfig kafkactlConfig;
 
     @Mock
     public KafkactlCommand kafkactlCommand;
 
     @InjectMocks
-    private ConnectorsSubcommand connectorsSubcommand;
+    private DeleteRecordsSubcommand deleteRecordsSubcommand;
 
     @Test
-    void shouldNotChangeStateWhenNotAuthenticated() {
+    void shouldNotDeleteWhenNotAuthenticated() {
         when(loginService.doAuthenticate())
                 .thenReturn(false);
 
-        CommandLine cmd = new CommandLine(connectorsSubcommand);
+        CommandLine cmd = new CommandLine(deleteRecordsSubcommand);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        int code = cmd.execute("pause", "my-connector");
+        int code = cmd.execute("topic");
         assertEquals(2, code);
         assertTrue(sw.toString().contains("Login failed."));
     }
 
     @Test
-    void shouldChangeStateWhenEmptyConnectorsList() {
-        when(loginService.doAuthenticate())
-                .thenReturn(true);
-        when(resourceService.changeConnectorState(any(), any(), any()))
-                .thenReturn(null);
+    void shouldDeleteDryRun() {
+        Resource resource = Resource.builder()
+                .kind("DeleteRecordsResponse")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.connector")
+                        .namespace("namespace")
+                        .build())
+                .spec(Collections.emptyMap())
+                .build();
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
+        when(loginService.doAuthenticate())
+                .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-
-        CommandLine cmd = new CommandLine(connectorsSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setErr(new PrintWriter(sw));
-
-        int code = cmd.execute("pause", "my-connector");
-        assertEquals(1, code);
-        assertTrue(sw.toString().contains("Cannot change state of given connectors."));
-    }
-
-    @Test
-    void shouldChangeState() {
-        Resource resource = Resource.builder()
-                .kind("Connector")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.connector")
-                        .namespace("namespace")
-                        .build())
-                .spec(Collections.emptyMap())
-                .build();
-
-        when(loginService.doAuthenticate())
-                .thenReturn(true);
-        when(resourceService.changeConnectorState(any(), any(), any()))
-                .thenReturn(resource);
-        doAnswer(answer -> {
-            PrintWriter cdmPrintWriter = answer.getArgument(3, PrintWriter.class);
-            cdmPrintWriter.println("Called display list");
-            return null;
-        }).when(formatService).displayList(any(), any(), any(), any());
-
-        kafkactlCommand.optionalNamespace = Optional.of("namespace");
-
-        CommandLine cmd = new CommandLine(connectorsSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setOut(new PrintWriter(sw));
-
-        int code = cmd.execute("pause", "my-connector");
-        assertEquals(0, code);
-        assertTrue(sw.toString().contains("Called display list"));
-    }
-
-    @Test
-    void shouldChangeStateOfAll() {
-        Resource resource = Resource.builder()
-                .kind("Connector")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.connector")
-                        .namespace("namespace")
-                        .build())
-                .spec(Collections.emptyMap())
-                .build();
-
-        ApiResource apiResource = ApiResource.builder()
-                .kind("Connector")
-                .namespaced(true)
-                .synchronizable(true)
-                .path("connectors")
-                .names(List.of("connects", "connect", "co"))
-                .build();
-
-        when(loginService.doAuthenticate())
-                .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionFromKind(any()))
-                .thenReturn(Optional.of(apiResource));
-        when(resourceService.listResourcesWithType(any(), any()))
+        when(resourceService.deleteRecords(any(), any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(resource));
-        when(resourceService.changeConnectorState(any(), any(), any()))
-                .thenReturn(resource);
         doAnswer(answer -> {
             PrintWriter cdmPrintWriter = answer.getArgument(3, PrintWriter.class);
             cdmPrintWriter.println("Called display list");
             return null;
         }).when(formatService).displayList(any(), any(), any(), any());
 
-        kafkactlCommand.optionalNamespace = Optional.of("namespace");
-
-        CommandLine cmd = new CommandLine(connectorsSubcommand);
+        CommandLine cmd = new CommandLine(deleteRecordsSubcommand);
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("pause", "all");
+        int code = cmd.execute("topic", "--dry-run");
+        assertEquals(0, code);
+        assertTrue(sw.toString().contains("Dry run execution."));
+        assertTrue(sw.toString().contains("Called display list"));
+    }
+
+    @Test
+    void shouldDelete() {
+        Resource resource = Resource.builder()
+                .kind("DeleteRecordsResponse")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.connector")
+                        .namespace("namespace")
+                        .build())
+                .spec(Collections.emptyMap())
+                .build();
+
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(loginService.doAuthenticate())
+                .thenReturn(true);
+        when(kafkactlConfig.getCurrentNamespace())
+                .thenReturn("namespace");
+        when(resourceService.deleteRecords(any(), any(), anyBoolean()))
+                .thenReturn(Collections.singletonList(resource));
+        doAnswer(answer -> {
+            PrintWriter cdmPrintWriter = answer.getArgument(3, PrintWriter.class);
+            cdmPrintWriter.println("Called display list");
+            return null;
+        }).when(formatService).displayList(any(), any(), any(), any());
+
+        CommandLine cmd = new CommandLine(deleteRecordsSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("topic");
         assertEquals(0, code);
         assertTrue(sw.toString().contains("Called display list"));
     }
 
     @Test
-    void shouldThrowExceptionWhenChangeStateOfAll() {
+    void shouldDeleteEmptyResult() {
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
         when(loginService.doAuthenticate())
                 .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionFromKind(any()))
-                .thenReturn(Optional.empty());
+        when(kafkactlConfig.getCurrentNamespace())
+                .thenReturn("namespace");
+        when(resourceService.deleteRecords(any(), any(), anyBoolean()))
+                .thenReturn(Collections.emptyList());
 
-        kafkactlCommand.optionalNamespace = Optional.of("namespace");
-
-        CommandLine cmd = new CommandLine(connectorsSubcommand);
+        CommandLine cmd = new CommandLine(deleteRecordsSubcommand);
         StringWriter sw = new StringWriter();
-        cmd.setErr(new PrintWriter(sw));
+        cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("pause", "all");
-        assertEquals(2, code);
-        assertTrue(sw.toString().contains("\"Connector\" kind not found."));
+        int code = cmd.execute("topic");
+        assertEquals(0, code);
+        assertTrue(sw.toString().contains("No records to delete for the topic topic."));
     }
 }

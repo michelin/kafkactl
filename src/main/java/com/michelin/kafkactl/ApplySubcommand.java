@@ -114,7 +114,7 @@ public class ApplySubcommand implements Callable<Integer> {
 
         // Load schema content
         resources.stream()
-                .filter(resource -> resource.getKind().equals("Schema") && resource.getSpec().get(SCHEMA_FILE) != null && StringUtils.isNotEmpty(resource.getSpec().get(SCHEMA_FILE).toString()))
+                .filter(resource -> resource.getKind().equals("Schema") && StringUtils.isNotEmpty((CharSequence) resource.getSpec().get(SCHEMA_FILE)))
                 .forEach(resource -> {
                     try {
                         resource.getSpec().put("schema", Files.readString(new File(resource.getSpec().get(SCHEMA_FILE).toString()).toPath()));

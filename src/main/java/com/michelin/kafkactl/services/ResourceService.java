@@ -130,7 +130,7 @@ public class ResourceService {
      * @param namespace The namespace
      * @param topic The topic to delete records
      * @param dryrun Is dry run mode or not ?
-     * @return The delete records response
+     * @return The deleted records response
      */
     public List<Resource> deleteRecords(String namespace, String topic, boolean dryrun) {
         List<Resource> resources = List.of();

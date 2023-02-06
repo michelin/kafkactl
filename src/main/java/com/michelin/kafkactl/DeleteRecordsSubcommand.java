@@ -32,10 +32,10 @@ public class DeleteRecordsSubcommand implements Callable<Integer> {
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
-    @Parameters(description = "Name of the topic", arity = "1")
+    @Parameters(description = "Name of the topic.", arity = "1")
     public String topic;
 
-    @Option(names = {"--dry-run"}, description = "Does not persist resources. Validate only")
+    @Option(names = {"--dry-run"}, description = "Does not persist resources. Validate only.")
     public boolean dryRun;
 
     @CommandLine.Spec
@@ -49,12 +49,12 @@ public class DeleteRecordsSubcommand implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         if (dryRun) {
-            System.out.println("Dry run execution");
+            commandSpec.commandLine().getOut().println("Dry run execution.");
         }
 
         boolean authenticated = loginService.doAuthenticate();
         if (!authenticated) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
         }
 
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
@@ -62,7 +62,8 @@ public class DeleteRecordsSubcommand implements Callable<Integer> {
         List<Resource> resources = resourceService.deleteRecords(namespace, topic, dryRun);
         if (!resources.isEmpty()) {
             formatService.displayList("DeleteRecordsResponse", resources, TABLE, commandSpec.commandLine().getOut());
-            return 0;
+        } else {
+            commandSpec.commandLine().getOut().println("No records to delete for the topic " + topic + ".");
         }
 
         return 0;
