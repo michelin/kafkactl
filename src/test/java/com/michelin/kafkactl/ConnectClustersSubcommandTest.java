@@ -2,7 +2,6 @@ package com.michelin.kafkactl;
 
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
-import com.michelin.kafkactl.services.ConfigService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
@@ -22,7 +21,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,9 +28,6 @@ import static org.mockito.Mockito.when;
 class ConnectClustersSubcommandTest {
     @Mock
     public KafkactlConfig kafkactlConfig;
-
-    @Mock
-    public ConfigService configService;
 
     @Mock
     public FormatService formatService;
@@ -77,7 +72,7 @@ class ConnectClustersSubcommandTest {
 
         int code = cmd.execute("vaults");
         assertEquals(0, code);
-        verify(formatService).displayList(eq("ConnectCluster"), eq(List.of()), eq("table"));
+        verify(formatService).displayList("ConnectCluster", List.of(), "table");
     }
 
     @Test
@@ -103,7 +98,7 @@ class ConnectClustersSubcommandTest {
 
         int code = cmd.execute("vaults");
         assertEquals(0, code);
-        verify(formatService).displayList(eq("ConnectCluster"), eq(List.of(resource)), eq("table"));
+        verify(formatService).displayList("ConnectCluster", List.of(resource), "table");
     }
 
     @Test
@@ -150,7 +145,7 @@ class ConnectClustersSubcommandTest {
         cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("vaults", "connectCluster", "secret1", "secret2");
-        assertEquals(0, code);
-        verify(formatService).displayList(eq("VaultResponse"), eq(List.of(resource1, resource2)), eq("table"));
+        assertEquals(1, code);
+        verify(formatService).displayList("VaultResponse", List.of(resource1, resource2), "table");
     }
 }

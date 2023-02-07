@@ -24,6 +24,12 @@ public class ConnectClustersSubcommand implements Callable<Integer> {
     public KafkactlCommand kafkactlCommand;
 
     /**
+     * Gets or sets the command specification.
+     */
+    @CommandLine.Spec
+    public CommandLine.Model.CommandSpec commandSpec;
+
+    /**
      * Gets or sets the sub command action.
      */
     @CommandLine.Parameters(index = "0", description = "vaults", arity = "1")
@@ -66,12 +72,6 @@ public class ConnectClustersSubcommand implements Callable<Integer> {
     public FormatService formatService;
 
     /**
-     * Gets or sets the command specification.
-     */
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
-
-    /**
      * Run the "connect-clusters" command
      *
      * @return The command return code
@@ -79,8 +79,7 @@ public class ConnectClustersSubcommand implements Callable<Integer> {
      */
     @Override
     public Integer call() throws Exception {
-        boolean authenticated = loginService.doAuthenticate();
-        if (!authenticated) {
+        if (!loginService.doAuthenticate()) {
             throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
         }
 
@@ -94,14 +93,14 @@ public class ConnectClustersSubcommand implements Callable<Integer> {
         }
 
         // if connect cluster define but no secrets to encrypt => show error no secrets to encrypt.
-        if (secrets == null || secrets.isEmpty()) {
+        if (secrets == null) {
             throw new CommandLine.ParameterException(commandSpec.commandLine(), "No secrets to encrypt.");
         }
 
         // if connect cluster and secrets define.
         List<Resource> results = resourceService.vaultsOnConnectClusters(namespace, connectCluster, secrets);
         formatService.displayList("VaultResponse", results, "table");
-        return 0;
+        return 1;
     }
 }
 
