@@ -1,7 +1,6 @@
 package com.michelin.kafkactl;
 
 import com.michelin.kafkactl.models.Resource;
-import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
@@ -61,12 +60,6 @@ public class ConnectClustersSubcommand implements Callable<Integer> {
     public ResourceService resourceService;
 
     /**
-     * Gets or sets the api resources service.
-     */
-    @Inject
-    public ApiResourcesService apiResourcesService;
-
-    /**
      * Gets or sets the console format service.
      */
     @Inject
@@ -88,7 +81,7 @@ public class ConnectClustersSubcommand implements Callable<Integer> {
     public Integer call() throws Exception {
         boolean authenticated = loginService.doAuthenticate();
         if (!authenticated) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
         }
 
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
@@ -102,8 +95,7 @@ public class ConnectClustersSubcommand implements Callable<Integer> {
 
         // if connect cluster define but no secrets to encrypt => show error no secrets to encrypt.
         if (secrets == null || secrets.isEmpty()) {
-            System.out.println("No secrets to encrypt.");
-            return 1;
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "No secrets to encrypt.");
         }
 
         // if connect cluster and secrets define.
