@@ -17,12 +17,14 @@ import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Optional;
 
+import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DeleteRecordsSubcommandTest {
@@ -78,11 +80,6 @@ class DeleteRecordsSubcommandTest {
                 .thenReturn("namespace");
         when(resourceService.deleteRecords(any(), any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(resource));
-        doAnswer(answer -> {
-            PrintWriter cdmPrintWriter = answer.getArgument(3, PrintWriter.class);
-            cdmPrintWriter.println("Called display list");
-            return null;
-        }).when(formatService).displayList(any(), any(), any(), any());
 
         CommandLine cmd = new CommandLine(deleteRecordsSubcommand);
         StringWriter sw = new StringWriter();
@@ -91,7 +88,9 @@ class DeleteRecordsSubcommandTest {
         int code = cmd.execute("topic", "--dry-run");
         assertEquals(0, code);
         assertTrue(sw.toString().contains("Dry run execution."));
-        assertTrue(sw.toString().contains("Called display list"));
+        verify(formatService).displayList(eq("DeleteRecordsResponse"),
+                argThat(deleteRecords -> deleteRecords.get(0).equals(resource)),
+                eq(TABLE), eq(cmd.getOut()));
     }
 
     @Test
@@ -114,11 +113,6 @@ class DeleteRecordsSubcommandTest {
                 .thenReturn("namespace");
         when(resourceService.deleteRecords(any(), any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(resource));
-        doAnswer(answer -> {
-            PrintWriter cdmPrintWriter = answer.getArgument(3, PrintWriter.class);
-            cdmPrintWriter.println("Called display list");
-            return null;
-        }).when(formatService).displayList(any(), any(), any(), any());
 
         CommandLine cmd = new CommandLine(deleteRecordsSubcommand);
         StringWriter sw = new StringWriter();
@@ -126,7 +120,9 @@ class DeleteRecordsSubcommandTest {
 
         int code = cmd.execute("topic");
         assertEquals(0, code);
-        assertTrue(sw.toString().contains("Called display list"));
+        verify(formatService).displayList(eq("DeleteRecordsResponse"),
+                argThat(deleteRecords -> deleteRecords.get(0).equals(resource)),
+                eq(TABLE), eq(cmd.getOut()));
     }
 
     @Test

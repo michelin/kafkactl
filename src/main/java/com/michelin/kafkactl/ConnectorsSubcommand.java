@@ -56,8 +56,7 @@ public class ConnectorsSubcommand implements Callable<Integer> {
      */
     @Override
     public Integer call() throws Exception {
-        boolean authenticated = loginService.doAuthenticate();
-        if (!authenticated) {
+        if (!loginService.doAuthenticate()) {
             throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
         }
 

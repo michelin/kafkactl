@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,11 +50,6 @@ class ConfigSubcommandTest {
                 .thenReturn("user-token");
         when(configService.getCurrentContextName())
                 .thenReturn("current-context");
-        doAnswer(answer -> {
-            PrintWriter cdmPrintWriter = answer.getArgument(3, PrintWriter.class);
-            cdmPrintWriter.println("Called display list");
-            return null;
-        }).when(formatService).displayList(any(), any(), any(), any());
 
         CommandLine cmd = new CommandLine(configSubcommand);
         StringWriter sw = new StringWriter();
@@ -61,7 +57,9 @@ class ConfigSubcommandTest {
 
         int code = cmd.execute("current-context");
         assertEquals(0, code);
-        assertTrue(sw.toString().contains("Called display list"));
+        verify(formatService).displayList(eq("Context"),
+                argThat(currentContext -> currentContext.get(0).getMetadata().getName().equals("current-context")),
+                eq(TABLE), eq(cmd.getOut()));
     }
 
     @Test
@@ -91,11 +89,6 @@ class ConfigSubcommandTest {
 
         when(kafkactlConfig.getContexts())
                 .thenReturn(Collections.singletonList(context));
-        doAnswer(answer -> {
-            PrintWriter cdmPrintWriter = answer.getArgument(3, PrintWriter.class);
-            cdmPrintWriter.println("Called display list");
-            return null;
-        }).when(formatService).displayList(any(), any(), any(), any());
 
         CommandLine cmd = new CommandLine(configSubcommand);
         StringWriter sw = new StringWriter();
@@ -103,7 +96,9 @@ class ConfigSubcommandTest {
 
         int code = cmd.execute("get-contexts");
         assertEquals(0, code);
-        assertTrue(sw.toString().contains("Called display list"));
+        verify(formatService).displayList(eq("Context"),
+                argThat(currentContext -> currentContext.get(0).getMetadata().getName().equals("name")),
+                eq(TABLE), eq(cmd.getOut()));
     }
 
     @Test
@@ -132,7 +127,7 @@ class ConfigSubcommandTest {
     }
 
     @Test
-    void shouldUseContext() throws IOException {
+    void shouldUseContext() {
         KafkactlConfig.Context context = KafkactlConfig.Context.builder()
                 .name("name")
                 .definition(KafkactlConfig.Context.ApiContext.builder()
@@ -146,8 +141,6 @@ class ConfigSubcommandTest {
                 .thenReturn(Collections.singletonList(context));
         when(configService.getContextByName(any()))
                 .thenReturn(Optional.of(context));
-        doNothing().when(configService)
-                .updateConfigurationContext(any());
 
         CommandLine cmd = new CommandLine(configSubcommand);
         StringWriter sw = new StringWriter();

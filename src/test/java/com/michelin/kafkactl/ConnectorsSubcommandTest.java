@@ -21,11 +21,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ConnectorsSubcommandTest {
@@ -101,11 +101,6 @@ class ConnectorsSubcommandTest {
                 .thenReturn(true);
         when(resourceService.changeConnectorState(any(), any(), any()))
                 .thenReturn(resource);
-        doAnswer(answer -> {
-            PrintWriter cdmPrintWriter = answer.getArgument(3, PrintWriter.class);
-            cdmPrintWriter.println("Called display list");
-            return null;
-        }).when(formatService).displayList(any(), any(), any(), any());
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
 
@@ -115,7 +110,9 @@ class ConnectorsSubcommandTest {
 
         int code = cmd.execute("pause", "my-connector");
         assertEquals(0, code);
-        assertTrue(sw.toString().contains("Called display list"));
+        verify(formatService).displayList(eq("ChangeConnectorState"),
+                argThat(connectors -> connectors.get(0).equals(resource)),
+                eq(TABLE), eq(cmd.getOut()));
     }
 
     @Test
@@ -146,11 +143,6 @@ class ConnectorsSubcommandTest {
                 .thenReturn(Collections.singletonList(resource));
         when(resourceService.changeConnectorState(any(), any(), any()))
                 .thenReturn(resource);
-        doAnswer(answer -> {
-            PrintWriter cdmPrintWriter = answer.getArgument(3, PrintWriter.class);
-            cdmPrintWriter.println("Called display list");
-            return null;
-        }).when(formatService).displayList(any(), any(), any(), any());
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
 
@@ -160,7 +152,9 @@ class ConnectorsSubcommandTest {
 
         int code = cmd.execute("pause", "all");
         assertEquals(0, code);
-        assertTrue(sw.toString().contains("Called display list"));
+        verify(formatService).displayList(eq("ChangeConnectorState"),
+                argThat(connectors -> connectors.get(0).equals(resource)),
+                eq(TABLE), eq(cmd.getOut()));
     }
 
     @Test

@@ -83,8 +83,7 @@ public class DeleteSubcommand implements Callable<Integer> {
             commandSpec.commandLine().getOut().println("Dry run execution.");
         }
 
-        boolean authenticated = loginService.doAuthenticate();
-        if (!authenticated) {
+        if (!loginService.doAuthenticate()) {
             throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
         }
 

@@ -24,8 +24,7 @@ public class ApiResourcesSubcommand implements Callable<Integer> {
      */
     @Override
     public Integer call() {
-        boolean authenticated = loginService.doAuthenticate();
-        if (!authenticated) {
+        if (!loginService.doAuthenticate()) {
             throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
         }
 

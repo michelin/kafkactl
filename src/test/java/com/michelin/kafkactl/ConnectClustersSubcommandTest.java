@@ -21,8 +21,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ConnectClustersSubcommandTest {
@@ -62,7 +61,6 @@ class ConnectClustersSubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
-
         when(resourceService.listAvailableVaultsConnectClusters("namespace"))
                 .thenReturn(List.of());
 
@@ -72,7 +70,7 @@ class ConnectClustersSubcommandTest {
 
         int code = cmd.execute("vaults");
         assertEquals(0, code);
-        verify(formatService).displayList("ConnectCluster", List.of(), "table");
+        verify(formatService).displayList("ConnectCluster", List.of(), "table", cmd.getOut());
     }
 
     @Test
@@ -98,7 +96,7 @@ class ConnectClustersSubcommandTest {
 
         int code = cmd.execute("vaults");
         assertEquals(0, code);
-        verify(formatService).displayList("ConnectCluster", List.of(resource), "table");
+        verify(formatService).displayList("ConnectCluster", List.of(resource), "table", cmd.getOut());
     }
 
     @Test
@@ -146,6 +144,6 @@ class ConnectClustersSubcommandTest {
 
         int code = cmd.execute("vaults", "connectCluster", "secret1", "secret2");
         assertEquals(0, code);
-        verify(formatService).displayList("VaultResponse", List.of(resource1, resource2), "table");
+        verify(formatService).displayList("VaultResponse", List.of(resource1, resource2), "table", cmd.getOut());
     }
 }
