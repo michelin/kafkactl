@@ -91,7 +91,7 @@ public class ResourceService {
         try {
             if (apiResource.isNamespaced()) {
                 HttpResponse<Void> response = namespacedClient.delete(namespace, apiResource.getPath(), resource, loginService.getAuthorization(), dryRun);
-                if(response.getStatus() != HttpStatus.NO_CONTENT){
+                if (response.getStatus() != HttpStatus.NO_CONTENT) {
                     throw new HttpClientResponseException("Resource not Found", response);
                 }
                 return true;
@@ -127,9 +127,10 @@ public class ResourceService {
 
     /**
      * Delete records for a given topic
+     *
      * @param namespace The namespace
-     * @param topic The topic to delete records
-     * @param dryrun Is dry run mode or not ?
+     * @param topic     The topic to delete records
+     * @param dryrun    Is dry run mode or not ?
      * @return The delete records response
      */
     public List<Resource> deleteRecords(String namespace, String topic, boolean dryrun) {
@@ -146,10 +147,11 @@ public class ResourceService {
 
     /**
      * Reset offsets for a given topic and consumer group
+     *
      * @param namespace The namespace
-     * @param group The consumer group
-     * @param resource The information about how to reset
-     * @param dryRun Is dry run mode or not ?
+     * @param group     The consumer group
+     * @param resource  The information about how to reset
+     * @param dryRun    Is dry run mode or not ?
      * @return The reset offsets response
      */
     public List<Resource> resetOffsets(String namespace, String group, Resource resource, boolean dryRun) {
@@ -225,5 +227,45 @@ public class ResourceService {
             formatService.displayError(e, "KafkaUserResetPassword", namespace);
         }
         return null;
+    }
+
+    /**
+     * List all available connect clusters for vaulting
+     *
+     * @param namespace The namespace
+     * @return The list of connect clusters
+     */
+    public List<Resource> listAvailableVaultsConnectClusters(String namespace) {
+        List<Resource> resources = List.of();
+
+        try {
+            resources = namespacedClient.listAvailableVaultsConnectClusters(namespace, loginService.getAuthorization());
+        } catch (HttpClientResponseException e) {
+            formatService.displayError(e, "ConnectCluster", "vaults");
+        }
+
+        return resources;
+    }
+
+    /**
+     * Vault a list of passwords for a specific Kafka Connect Cluster.
+     *
+     * @param namespace      The namespace
+     * @param connectCluster The Kafka connect cluster to use for vaulting secret.
+     * @param passwords      The list of passwords to encrypt.
+     * @return The encrypted secret.
+     */
+    public List<Resource> vaultsOnConnectClusters(final String namespace, final String connectCluster, final List<String> passwords) {
+        List<Resource> result = List.of();
+        try {
+            return namespacedClient.vaultsOnConnectClusters(
+                    namespace,
+                    connectCluster, passwords,
+                    loginService.getAuthorization()
+            );
+        } catch (HttpClientResponseException e) {
+            formatService.displayError(e, "ConnectCluster", "vaults");
+        }
+        return result;
     }
 }

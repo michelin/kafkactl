@@ -49,6 +49,9 @@ kafkactl:
       - "URL:/spec/url"
       - "USERNAME:/spec/username"
       - "PASSWORD:/spec/password"
+      - "AES256 KEY:/spec/aes256Key"
+      - "AES256 SALT:/spec/aes256Salt"
+      - "AES256 FORMAT:/spec/aes256Format"
     RoleBinding:
       - "ROLEBINDING:/metadata/name"
       - "GROUP:/spec/subject/subjectName"
@@ -94,6 +97,9 @@ kafkactl:
       - "NAMESPACE:/spec/namespace"
       - "API:/spec/api"
       - "TOKEN:/spec/token"
+    VaultResponse:
+      - "CLEAR TEXT:/spec/clearText"
+      - "ENCRYPTED TEXT:/spec/encrypted"
   retry:
     apply:
       delay: "2s"

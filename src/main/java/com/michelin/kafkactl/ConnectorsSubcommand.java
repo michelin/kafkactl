@@ -24,7 +24,7 @@ public class ConnectorsSubcommand implements Callable<Integer> {
     @CommandLine.Parameters(index = "0", description = "(pause | resume | restart)", arity = "1")
     public ConnectorAction action;
 
-    @CommandLine.Parameters(index="1..*", description = "Connector names separated by space (use `ALL` for all connectors)", arity = "1..*")
+    @CommandLine.Parameters(index = "1..*", description = "Connector names separated by space (use `ALL` for all connectors)", arity = "1..*")
     public List<String> connectors;
 
     @Inject
@@ -47,6 +47,7 @@ public class ConnectorsSubcommand implements Callable<Integer> {
 
     /**
      * Run the "connectors" command
+     *
      * @return The command return code
      * @throws Exception Any exception during the run
      */

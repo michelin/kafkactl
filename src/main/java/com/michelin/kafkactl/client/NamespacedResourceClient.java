@@ -15,11 +15,12 @@ import java.util.Map;
 public interface NamespacedResourceClient {
     /**
      * Delete a given resource
-     * @param namespace The namespace
-     * @param kind The kind of resource
+     *
+     * @param namespace    The namespace
+     * @param kind         The kind of resource
      * @param resourceName The name of the resource
-     * @param token The auth token
-     * @param dryrun is dry-run mode or not ?
+     * @param token        The auth token
+     * @param dryrun       is dry-run mode or not ?
      * @return The delete response
      */
     @Delete("{namespace}/{kind}/{resourceName}{?dryrun}")
@@ -36,11 +37,12 @@ public interface NamespacedResourceClient {
 
     /**
      * Apply a given resource
+     *
      * @param namespace The namespace
-     * @param kind The kind of resource
-     * @param token The auth token
-     * @param resource The resource to apply
-     * @param dryrun is dry-run mode or not ?
+     * @param kind      The kind of resource
+     * @param token     The auth token
+     * @param resource  The resource to apply
+     * @param dryrun    is dry-run mode or not ?
      * @return The resource
      */
     @Post("{namespace}/{kind}{?dryrun}")
@@ -57,9 +59,10 @@ public interface NamespacedResourceClient {
 
     /**
      * List all resources
+     *
      * @param namespace The namespace
-     * @param kind The kind of resource
-     * @param token The auth token
+     * @param kind      The kind of resource
+     * @param token     The auth token
      * @return The list of resources
      */
     @Get("{namespace}/{kind}")
@@ -70,10 +73,11 @@ public interface NamespacedResourceClient {
 
     /**
      * Get a resource
-     * @param namespace The namespace
-     * @param kind The kind of resource
+     *
+     * @param namespace    The namespace
+     * @param kind         The kind of resource
      * @param resourceName The name of the resource
-     * @param token The auth token
+     * @param token        The auth token
      * @return The resource
      */
     @Get("{namespace}/{kind}/{resourceName}")
@@ -85,10 +89,11 @@ public interface NamespacedResourceClient {
 
     /**
      * Imports the unsynchronized given type of resource
+     *
      * @param namespace The namespace
-     * @param kind The kind of resource
-     * @param token The auth token
-     * @param dryrun is dry-run mode or not ?
+     * @param kind      The kind of resource
+     * @param token     The auth token
+     * @param dryrun    is dry-run mode or not ?
      * @return The list of imported resources
      */
     @Post("{namespace}/{kind}/_/import{?dryrun}")
@@ -100,10 +105,11 @@ public interface NamespacedResourceClient {
 
     /**
      * Delete records for a given topic
-     * @param token The authentication token
+     *
+     * @param token     The authentication token
      * @param namespace The namespace
-     * @param topic The topic to delete records
-     * @param dryrun Is dry run mode or not ?
+     * @param topic     The topic to delete records
+     * @param dryrun    Is dry run mode or not ?
      * @return The deleted records response
      */
     @Post("{namespace}/topics/{topic}/delete-records{?dryrun}")
@@ -115,11 +121,12 @@ public interface NamespacedResourceClient {
 
     /**
      * Reset offsets for a given topic and consumer group
-     * @param token The authentication token
-     * @param namespace The namespace
+     *
+     * @param token             The authentication token
+     * @param namespace         The namespace
      * @param consumerGroupName The consumer group
-     * @param json The information about how to reset
-     * @param dryrun Is dry run mode or not ?
+     * @param json              The information about how to reset
+     * @param dryrun            Is dry run mode or not ?
      * @return The reset offsets response
      */
     @Post("{namespace}/consumer-groups/{consumerGroupName}/reset{?dryrun}")
@@ -132,10 +139,11 @@ public interface NamespacedResourceClient {
 
     /**
      * Change the state of a given connector
-     * @param namespace The namespace
-     * @param connector The connector to change
+     *
+     * @param namespace            The namespace
+     * @param connector            The connector to change
      * @param changeConnectorState The state
-     * @param token The auth token
+     * @param token                The auth token
      * @return The change state response
      */
     @Post("{namespace}/connectors/{connector}/change-state")
@@ -147,10 +155,11 @@ public interface NamespacedResourceClient {
 
     /**
      * Change the schema compatibility mode
-     * @param namespace The namespace
-     * @param subject The subject
+     *
+     * @param namespace     The namespace
+     * @param subject       The subject
      * @param compatibility The compatibility to apply
-     * @param token The auth token
+     * @param token         The auth token
      * @return The change compatibility response
      */
     @Post("{namespace}/schemas/{subject}/config")
@@ -162,11 +171,38 @@ public interface NamespacedResourceClient {
 
     /**
      * Reset password of a given user
+     *
      * @param namespace The namespace
-     * @param user The user
-     * @param token The auth token
+     * @param user      The user
+     * @param token     The auth token
      * @return The reset password response
      */
     @Post("{namespace}/users/{user}/reset-password")
     Resource resetPassword(String namespace, String user, @Header("Authorization") String token);
+
+    /**
+     * List all available connect clusters for vaulting
+     *
+     * @param namespace The namespace
+     * @return The list of connect clusters
+     */
+    @Get("{namespace}/connect-clusters/_/vaults")
+    List<Resource> listAvailableVaultsConnectClusters(
+            String namespace,
+            @Header("Authorization") String token);
+
+    /**
+     * Vault a secret for a specific Kafka Connect Cluster.
+     *
+     * @param namespace      The namespace
+     * @param connectCluster The Kafka connect cluster to use for vaulting secret.
+     * @param passwords      The list of passwords to encrypt.
+     * @return The list of VaultResult.
+     */
+    @Post("{namespace}/connect-clusters/{connectCluster}/vaults")
+    List<Resource> vaultsOnConnectClusters(
+            final String namespace,
+            final String connectCluster,
+            @Body List<String> passwords,
+            @Header("Authorization") String token);
 }
