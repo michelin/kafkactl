@@ -89,17 +89,15 @@ public class ConnectClustersSubcommand implements Callable<Integer> {
         if (connectCluster.isEmpty()) {
             List<Resource> availableConnectClusters = resourceService.listAvailableVaultsConnectClusters(namespace);
             formatService.displayList("ConnectCluster", availableConnectClusters, "table");
-            return 0;
-        }
-
-        // if connect cluster define but no secrets to encrypt => show error no secrets to encrypt.
-        if (secrets == null) {
+        } else if (secrets == null) {
+            // if connect cluster define but no secrets to encrypt => show error no secrets to encrypt.
             throw new CommandLine.ParameterException(commandSpec.commandLine(), "No secrets to encrypt.");
+        } else {
+            // if connect cluster and secrets define.
+            List<Resource> results = resourceService.vaultsOnConnectClusters(namespace, connectCluster, secrets);
+            formatService.displayList("VaultResponse", results, "table");
         }
 
-        // if connect cluster and secrets define.
-        List<Resource> results = resourceService.vaultsOnConnectClusters(namespace, connectCluster, secrets);
-        formatService.displayList("VaultResponse", results, "table");
         return 0;
     }
 }
