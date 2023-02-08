@@ -30,22 +30,22 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ConnectorsSubcommandTest {
     @Mock
-    public LoginService loginService;
+    private LoginService loginService;
 
     @Mock
-    public KafkactlConfig kafkactlConfig;
+    private KafkactlConfig kafkactlConfig;
 
     @Mock
-    public ResourceService resourceService;
+    private ResourceService resourceService;
 
     @Mock
-    public ApiResourcesService apiResourcesService;
+    private ApiResourcesService apiResourcesService;
 
     @Mock
-    public FormatService formatService;
+    private FormatService formatService;
 
     @Mock
-    public KafkactlCommand kafkactlCommand;
+    private KafkactlCommand kafkactlCommand;
 
     @InjectMocks
     private ConnectorsSubcommand connectorsSubcommand;

@@ -98,7 +98,7 @@ public class FormatService {
         DumperOptions options = new DumperOptions();
         options.setExplicitStart(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        Representer representer = new Representer();
+        Representer representer = new Representer(new DumperOptions());
         representer.addClassTag(Resource.class, Tag.MAP);
         Yaml yaml = new Yaml(representer, options);
         printWriter.println(yaml.dumpAll(resources.iterator()));

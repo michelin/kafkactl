@@ -29,13 +29,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ConfigSubcommandTest {
     @Mock
-    public KafkactlConfig kafkactlConfig;
+    private KafkactlConfig kafkactlConfig;
 
     @Mock
-    public ConfigService configService;
+    private ConfigService configService;
 
     @Mock
-    public FormatService formatService;
+    private FormatService formatService;
 
     @InjectMocks
     private ConfigSubcommand configSubcommand;

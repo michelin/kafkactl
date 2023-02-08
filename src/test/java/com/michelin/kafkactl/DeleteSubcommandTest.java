@@ -31,22 +31,22 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DeleteSubcommandTest {
     @Mock
-    public KafkactlConfig kafkactlConfig;
+    private KafkactlConfig kafkactlConfig;
 
     @Mock
-    public ResourceService resourceService;
+    private ResourceService resourceService;
 
     @Mock
-    public LoginService loginService;
+    private LoginService loginService;
 
     @Mock
-    public ApiResourcesService apiResourcesService;
+    private ApiResourcesService apiResourcesService;
 
     @Mock
-    public FileService fileService;
+    private FileService fileService;
 
     @Mock
-    public KafkactlCommand kafkactlCommand;
+    private KafkactlCommand kafkactlCommand;
 
     @InjectMocks
     private DeleteSubcommand deleteSubcommand;

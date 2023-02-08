@@ -28,7 +28,9 @@ import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-@Command(name = "diff", description = "Get differences between the new resources and the old resource")
+import static com.michelin.kafkactl.ApplySubcommand.SCHEMA_FILE;
+
+@Command(name = "diff", description = "Get differences between a new resource and a old resource")
 public class DiffSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;
@@ -48,10 +50,10 @@ public class DiffSubcommand implements Callable<Integer> {
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
-    @Option(names = {"-f", "--file"}, description = "YAML File or Directory containing YAML resources")
+    @Option(names = {"-f", "--file"}, description = "YAML file or directory containing resources.")
     public Optional<File> file;
 
-    @Option(names = {"-R", "--recursive"}, description = "Enable recursive search of file")
+    @Option(names = {"-R", "--recursive"}, description = "Search file recursively.")
     public boolean recursive;
 
     @CommandLine.Spec
@@ -63,15 +65,14 @@ public class DiffSubcommand implements Callable<Integer> {
      */
     @Override
     public Integer call() throws Exception {
-        boolean authenticated = loginService.doAuthenticate();
-        if (!authenticated) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed");
+        if (!loginService.doAuthenticate()) {
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
         }
 
         // If we have none or both stdin and File set, we stop
         boolean hasStdin = System.in.available() > 0;
         if (hasStdin == file.isPresent()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Required one of -f or stdin");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Required one of -f or stdin.");
         }
 
         List<Resource> resources;
@@ -79,7 +80,7 @@ public class DiffSubcommand implements Callable<Integer> {
             // List all files to process
             List<File> yamlFiles = fileService.computeYamlFileList(file.get(), recursive);
             if (yamlFiles.isEmpty()) {
-                throw new CommandLine.ParameterException(commandSpec.commandLine(), "Could not find yaml/yml files in " + file.get().getName());
+                throw new CommandLine.ParameterException(commandSpec.commandLine(), "Could not find YAML or YML files in " + file.get().getName() + " directory.");
             }
             // Load each files
             resources = fileService.parseResourceListFromFiles(yamlFiles);
@@ -93,7 +94,7 @@ public class DiffSubcommand implements Callable<Integer> {
         List<Resource> invalidResources = apiResourcesService.validateResourceTypes(resources);
         if (!invalidResources.isEmpty()) {
             String invalid = invalidResources.stream().map(Resource::getKind).distinct().collect(Collectors.joining(", "));
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server doesn't have resource type [" + invalid + "]");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type(s) " + invalid + ".");
         }
 
         // Validate namespace mismatch
@@ -102,21 +103,21 @@ public class DiffSubcommand implements Callable<Integer> {
                 .filter(resource -> resource.getMetadata().getNamespace() != null && !resource.getMetadata().getNamespace().equals(namespace))
                 .collect(Collectors.toList());
         if (!nsMismatch.isEmpty()) {
-            String invalid = String.join(", ", nsMismatch.stream().map(resource -> resource.getKind() + "/" + resource.getMetadata().getName()).distinct().collect(Collectors.toList()));
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Namespace mismatch between kafkactl and yaml document [" + invalid + "]");
+            String invalid = nsMismatch.stream().map(resource -> resource.getKind() + "/" + resource.getMetadata().getName()).distinct().collect(Collectors.joining(", "));
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Namespace mismatch between Kafkactl and YAML document " + invalid + ".");
         }
 
         List<ApiResource> apiResources = apiResourcesService.getListResourceDefinition();
 
         // Load schema content
         resources.stream()
-                .filter(resource -> resource.getKind().equals("Schema") && resource.getSpec().get("schemaFile") != null && StringUtils.isNotEmpty(resource.getSpec().get("schemaFile").toString()))
+                .filter(resource -> resource.getKind().equals("Schema") && StringUtils.isNotEmpty((CharSequence) resource.getSpec().get(SCHEMA_FILE)))
                 .forEach(resource -> {
                     try {
-                        resource.getSpec().put("schema", Files.readString(new File(resource.getSpec().get("schemaFile").toString()).toPath()));
+                        resource.getSpec().put("schema", Files.readString(new File(resource.getSpec().get(SCHEMA_FILE).toString()).toPath()));
                     } catch (Exception e) {
-                        throw new CommandLine.ParameterException(commandSpec.commandLine(), "Cannot open schema file " + resource.getSpec().get("schemaFile") +
-                                ". Schema path must be relative to the CLI. " + e.getClass().getName() + ": " + e.getMessage());
+                        throw new CommandLine.ParameterException(commandSpec.commandLine(), "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE) +
+                                ". Schema path must be relative to the CLI.");
                     }
                 });
 
@@ -127,20 +128,29 @@ public class DiffSubcommand implements Callable<Integer> {
                             .filter(apiRes -> apiRes.getKind().equals(resource.getKind()))
                             .findFirst()
                             .orElseThrow();
+
                     Resource live = resourceService.getSingleResourceWithType(apiResource, namespace, resource.getMetadata().getName(), false);
                     HttpResponse<Resource> merged = resourceService.apply(apiResource, namespace, resource, true);
                     if (merged != null && merged.getBody().isPresent()) {
                         List<String> uDiff = unifiedDiff(live, merged.body());
-                        uDiff.forEach(System.out::println);
+                        uDiff.forEach(diff -> commandSpec.commandLine().getOut().println(diff));
                         return 0;
                     }
+                    commandSpec.commandLine().getErr().println(CommandLine.Help.Ansi.AUTO.string("@|bold,red Failed |@") + resource.getKind() + "/" + resource.getMetadata().getName() + ".");
                     return 1;
                 })
-                .mapToInt(value -> value != null ? 0 : 1)
+                .mapToInt(value -> value)
                 .sum();
+
         return errors > 0 ? 1 : 0;
     }
 
+    /**
+     * Compute the difference between current resource and applied resource
+     * @param live The current resource
+     * @param merged The applied new resource
+     * @return The differences
+     */
     private List<String> unifiedDiff(Resource live, Resource merged) {
         // Ignore status and timestamp for comparison
         if (live != null) {
@@ -153,7 +163,7 @@ public class DiffSubcommand implements Callable<Integer> {
         DumperOptions options = new DumperOptions();
         options.setExplicitStart(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        Representer representer = new Representer();
+        Representer representer = new Representer(new DumperOptions());
         representer.addClassTag(Resource.class, Tag.MAP);
         Yaml yaml = new Yaml(representer, options);
 
