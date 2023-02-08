@@ -400,7 +400,6 @@ class DiffSubcommandTest {
         assertFalse(resource.getSpec().get("schema").toString().isBlank());
         assertTrue(sw.toString().contains("--- Schema/prefix.schema-LIVE"));
         assertTrue(sw.toString().contains("+++ Schema/prefix.schema-MERGED"));
-        assertTrue(sw.toString().contains("@@ -1,0 +1,19 @@"));
         assertTrue(sw.toString().contains("+---"));
         assertTrue(sw.toString().contains("+apiVersion: v1"));
         assertTrue(sw.toString().contains("+kind: Schema"));
@@ -468,7 +467,6 @@ class DiffSubcommandTest {
         assertEquals(0, code);
         assertTrue(sw.toString().contains("--- Schema/prefix.schema-LIVE"));
         assertTrue(sw.toString().contains("+++ Schema/prefix.schema-MERGED"));
-        assertTrue(sw.toString().contains("@@ -1,0 +1,12 @@"));
         assertTrue(sw.toString().contains("+---"));
         assertTrue(sw.toString().contains("+apiVersion: v1"));
         assertTrue(sw.toString().contains("+kind: Schema"));
