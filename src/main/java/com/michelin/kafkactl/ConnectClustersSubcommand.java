@@ -32,7 +32,7 @@ public class ConnectClustersSubcommand implements Callable<Integer> {
     /**
      * Gets or sets the sub command action.
      */
-    @CommandLine.Parameters(index = "0", description = "vaults", arity = "1")
+    @CommandLine.Parameters(index = "0", description = "Action to perform (${COMPLETION-CANDIDATES}).", arity = "1")
     public ConnectClustersAction action;
 
     /**
@@ -100,7 +100,7 @@ public class ConnectClustersSubcommand implements Callable<Integer> {
         // if connect cluster and secrets define.
         List<Resource> results = resourceService.vaultsOnConnectClusters(namespace, connectCluster, secrets);
         formatService.displayList("VaultResponse", results, "table");
-        return 1;
+        return 0;
     }
 }
 
