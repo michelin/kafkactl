@@ -145,7 +145,7 @@ class ConnectClustersSubcommandTest {
         cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("vaults", "connectCluster", "secret1", "secret2");
-        assertEquals(1, code);
+        assertEquals(0, code);
         verify(formatService).displayList("VaultResponse", List.of(resource1, resource2), "table");
     }
 }
