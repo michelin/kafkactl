@@ -50,6 +50,7 @@ public class ConnectorsSubcommand implements Callable<Integer> {
 
     /**
      * Run the "connectors" command
+     *
      * @return The command return code
      * @throws Exception Any exception during the run
      */
