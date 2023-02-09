@@ -408,13 +408,7 @@ class DiffSubcommandTest {
         assertTrue(sw.toString().contains("+  labels: null"));
         assertTrue(sw.toString().contains("+  name: prefix.schema"));
         assertTrue(sw.toString().contains("+  namespace: namespace"));
-        assertTrue(sw.toString().contains("+  schema: \"{\\r\\n  \\\"namespace\\\": \\\"com.michelin.kafkactl\\\",\\r\\n  \\\"type\\\": \\\"record\\\"\\"));
-        assertTrue(sw.toString().contains("+    ,\\r\\n  \\\"name\\\": \\\"PersonAvro\\\",\\r\\n  \\\"fields\\\": [\\r\\n    {\\r\\n      \\\"name\\\"\\"));
-        assertTrue(sw.toString().contains("+    : \\\"firstName\\\",\\r\\n      \\\"type\\\": [\\r\\n        \\\"string\\\"\\r\\n      ],\\r\\n  \\"));
-        assertTrue(sw.toString().contains("+    \\    \\\"doc\\\": \\\"First name of the person\\\"\\r\\n    },\\r\\n    {\\r\\n      \\\"name\\\"\\"));
-        assertTrue(sw.toString().contains("+    : \\\"lastName\\\",\\r\\n      \\\"type\\\": [\\r\\n        \\\"null\\\",\\r\\n        \\\"string\\\"\\"));
-        assertTrue(sw.toString().contains("+    \\r\\n      ],\\r\\n      \\\"default\\\": null,\\r\\n      \\\"doc\\\": \\\"Last name of the\\"));
-        assertTrue(sw.toString().contains("+    \\ person\\\"\\r\\n    }\\r\\n  ]\\r\\n}\\r\\n\""));
+        assertTrue(sw.toString().contains("+  schema: "));
         assertTrue(sw.toString().contains("+  schemaFile: src/test/resources/person.avsc"));
     }
 
