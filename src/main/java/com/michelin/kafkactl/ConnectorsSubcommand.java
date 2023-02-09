@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 
-@CommandLine.Command(name = "connectors", description = "Interact with connectors (Pause/Resume/Restart)")
+@CommandLine.Command(name = "connectors", description = "Interact with connectors.")
 public class ConnectorsSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;

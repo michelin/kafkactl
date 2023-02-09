@@ -15,7 +15,7 @@ import java.util.concurrent.Callable;
 
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 
-@Command(name = "delete-records", description = "Deletes all records within a topic")
+@Command(name = "delete-records", description = "Delete all records within a topic.")
 public class DeleteRecordsSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;

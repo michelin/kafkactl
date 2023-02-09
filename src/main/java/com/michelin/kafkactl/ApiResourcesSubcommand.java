@@ -7,7 +7,7 @@ import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "api-resources", description = "Print the supported API resources on the server")
+@CommandLine.Command(name = "api-resources", description = "Print the supported API resources on the server.")
 public class ApiResourcesSubcommand implements Callable<Integer> {
     @Inject
     public ApiResourcesService apiResourcesService;

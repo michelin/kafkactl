@@ -21,14 +21,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-@Command(name = "get", description = {
-        "Get resources by resource type for the current namespace",
-        "Examples:",
-        "  kafkactl get topic topic1 : Display topic1 configuration",
-        "  kafkactl get topics : Display all topics",
-        "  kafkactl get all : Display all resources",
-        "Parameters: "
-})
+@Command(name = "get", description = "Get resources by resource type for the current namespace.")
 public class GetSubcommand implements Callable<Integer> {
     @Inject
     public NamespacedResourceClient namespacedClient;
@@ -54,10 +47,10 @@ public class GetSubcommand implements Callable<Integer> {
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
-    @Parameters(index = "0", description = "Resource type or 'all' to display resources for all types", arity = "1")
+    @Parameters(index = "0", description = "Resource type or 'all' to display resources of all types.", arity = "1")
     public String resourceType;
 
-    @Parameters(index = "1", description = "Resource name", arity = "0..1")
+    @Parameters(index = "1", description = "Resource name.", arity = "0..1")
     public Optional<String> resourceName;
 
     @Option(names = {"-o", "--output"}, description = "Output format. One of: yaml|table", defaultValue = "table")
@@ -73,9 +66,8 @@ public class GetSubcommand implements Callable<Integer> {
      */
     @Override
     public Integer call() throws Exception {
-        boolean authenticated = loginService.doAuthenticate();
-        if (!authenticated) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed");
+        if (!loginService.doAuthenticate()) {
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
         }
 
         // Validate resourceType + custom type ALL
@@ -92,7 +84,7 @@ public class GetSubcommand implements Callable<Integer> {
                 Map<ApiResource, List<Resource>> resources = resourceService.listAll(apiResources, namespace);
 
                 if (resources.entrySet().size() == 1 && resources.get(resources.keySet().iterator().next()).isEmpty()) {
-                    System.out.println("No resource to display.");
+                    commandSpec.commandLine().getOut().println("No resource to display.");
                 } else {
                     // Display all resources by type
                     resources.entrySet()
@@ -103,7 +95,7 @@ public class GetSubcommand implements Callable<Integer> {
             } catch (HttpClientResponseException e) {
                 formatService.displayError(e, apiResources.get(0).getKind(), null);
             } catch (Exception e) {
-                System.out.println("Error during get for resource type " + resourceType + ": " + e.getMessage());
+                commandSpec.commandLine().getErr().println("Error getting resource type " + resourceType + ": " + e.getMessage());
             }
         } else {
             try {
@@ -113,7 +105,7 @@ public class GetSubcommand implements Callable<Integer> {
             } catch (HttpClientResponseException e) {
                 formatService.displayError(e, apiResources.get(0).getKind(), resourceName.get());
             } catch (Exception e) {
-                System.out.println("Error during get for resource type " + apiResources.get(0).getKind() + "/" + resourceName.get() + ": " + e.getMessage());
+                commandSpec.commandLine().getErr().println("Error getting resource type " + apiResources.get(0).getKind() + "/" + resourceName.get() + ": " + e.getMessage());
             }
 
         }
@@ -126,7 +118,7 @@ public class GetSubcommand implements Callable<Integer> {
      */
     private void validateOutput() {
         if (!List.of("table", "yaml").contains(output)) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Invalid value " + output + " for option -o");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Invalid value " + output + " for option -o.");
         }
     }
 
@@ -149,6 +141,6 @@ public class GetSubcommand implements Callable<Integer> {
             return List.of(optionalApiResource.get());
         }
 
-        throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server doesn't have resource type " + resourceType);
+        throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type " + resourceType + ".");
     }
 }

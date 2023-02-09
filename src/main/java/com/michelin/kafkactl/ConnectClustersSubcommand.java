@@ -11,12 +11,10 @@ import picocli.CommandLine;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import static com.michelin.kafkactl.ConnectClustersAction.VAULTS;
-
 /**
  * Represents the Kafka Connect Cluster sub command class.
  */
-@CommandLine.Command(name = "connect-clusters", description = "Interact with connect clusters (Vaults)")
+@CommandLine.Command(name = "connect-clusters", description = "Interact with connect clusters.")
 public class ConnectClustersSubcommand implements Callable<Integer> {
     /**
      * Gets or sets the kafkactl parent command.

@@ -8,7 +8,6 @@ import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpResponse;
-import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -22,7 +21,7 @@ import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-@Command(name = "apply", description = "Create or update a resource")
+@Command(name = "apply", description = "Create or update a resource.")
 public class ApplySubcommand implements Callable<Integer> {
     public static final String SCHEMA_FILE = "schemaFile";
 

@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-@Command(name = "delete", description = "Delete a resource")
+@Command(name = "delete", description = "Delete a resource.")
 public class DeleteSubcommand implements Callable<Integer> {
     @Inject
     public KafkactlConfig kafkactlConfig;

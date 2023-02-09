@@ -14,7 +14,7 @@ import java.util.concurrent.Callable;
 
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 
-@CommandLine.Command(name = "config", description = "Manage configuration")
+@CommandLine.Command(name = "config", description = "Manage configuration.")
 public class ConfigSubcommand implements Callable<Integer> {
     @Inject
     public KafkactlConfig kafkactlConfig;

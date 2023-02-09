@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 import static com.michelin.kafkactl.ApplySubcommand.SCHEMA_FILE;
 
-@Command(name = "diff", description = "Get differences between a new resource and a old resource")
+@Command(name = "diff", description = "Get differences between a new resource and a old resource.")
 public class DiffSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;

@@ -8,7 +8,6 @@ import com.michelin.kafkactl.services.FileService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import io.micronaut.http.HttpResponse;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,9 +45,6 @@ class DiffSubcommandTest {
 
     @Mock
     private KafkactlCommand kafkactlCommand;
-
-    @Mock
-    private CommandLine.Model.CommandSpec commandSpec;
 
     @InjectMocks
     private DiffSubcommand diffSubcommand;
