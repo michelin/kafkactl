@@ -15,6 +15,7 @@ import picocli.CommandLine;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -176,6 +177,90 @@ class ResetOffsetsSubcommandTest {
         assertEquals(0, code);
         verify(resourceService).resetOffsets(any(), any(), argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("TO_DATETIME") &&
                         resource.getSpec().get(OPTIONS).equals("2000-01-01T12:00:00Z")), anyBoolean(), any());
+        verify(formatService).displayList("ConsumerGroupResetOffsetsResponse", Collections.singletonList(resetOffset),
+                TABLE, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldResetOffsetsShiftBy() {
+        Resource resetOffset = Resource.builder()
+                .metadata(ObjectMeta.builder()
+                        .name("groupID")
+                        .cluster("local")
+                        .build())
+                .spec(Map.of(
+                        "topic", "topic1",
+                        "method", "SHIFT_BY"))
+                .build();
+
+        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+        when(loginService.doAuthenticate(anyBoolean()))
+                .thenReturn(true);
+        when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(Collections.singletonList(resetOffset));
+
+        CommandLine cmd = new CommandLine(resetOffsetsSubcommand);
+
+        int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--shift-by=10");
+        assertEquals(0, code);
+        verify(resourceService).resetOffsets(any(), any(), argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("SHIFT_BY") &&
+                resource.getSpec().get(OPTIONS).equals(10)), anyBoolean(), any());
+        verify(formatService).displayList("ConsumerGroupResetOffsetsResponse", Collections.singletonList(resetOffset),
+                TABLE, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldResetOffsetsByDuration() {
+        Resource resetOffset = Resource.builder()
+                .metadata(ObjectMeta.builder()
+                        .name("groupID")
+                        .cluster("local")
+                        .build())
+                .spec(Map.of(
+                        "topic", "topic1",
+                        "method", "BY_DURATION"))
+                .build();
+
+        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+        when(loginService.doAuthenticate(anyBoolean()))
+                .thenReturn(true);
+        when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(Collections.singletonList(resetOffset));
+
+        CommandLine cmd = new CommandLine(resetOffsetsSubcommand);
+
+        int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--by-duration=PT10M");
+        assertEquals(0, code);
+        verify(resourceService).resetOffsets(any(), any(), argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("BY_DURATION") &&
+                resource.getSpec().get(OPTIONS).equals("PT10M")), anyBoolean(), any());
+        verify(formatService).displayList("ConsumerGroupResetOffsetsResponse", Collections.singletonList(resetOffset),
+                TABLE, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldResetOffsetsToOffset() {
+        Resource resetOffset = Resource.builder()
+                .metadata(ObjectMeta.builder()
+                        .name("groupID")
+                        .cluster("local")
+                        .build())
+                .spec(Map.of(
+                        "topic", "topic1",
+                        "method", "TO_OFFSET"))
+                .build();
+
+        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+        when(loginService.doAuthenticate(anyBoolean()))
+                .thenReturn(true);
+        when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(Collections.singletonList(resetOffset));
+
+        CommandLine cmd = new CommandLine(resetOffsetsSubcommand);
+
+        int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--to-offset=50");
+        assertEquals(0, code);
+        verify(resourceService).resetOffsets(any(), any(), argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("TO_OFFSET") &&
+                resource.getSpec().get(OPTIONS).equals(50)), anyBoolean(), any());
         verify(formatService).displayList("ConsumerGroupResetOffsetsResponse", Collections.singletonList(resetOffset),
                 TABLE, cmd.getCommandSpec());
     }
