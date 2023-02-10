@@ -61,8 +61,7 @@ public class ConfigSubcommand implements Callable<Integer> {
                     .spec(specs)
                     .build();
 
-            formatService.displayList("Context", List.of(currentContextAsResource), TABLE,
-                    commandSpec.commandLine().getOut());
+            formatService.displayList("Context", List.of(currentContextAsResource), TABLE, commandSpec);
             return 0;
         }
 
@@ -89,7 +88,7 @@ public class ConfigSubcommand implements Callable<Integer> {
                 allContextsAsResources.add(currentContextAsResource);
             });
 
-            formatService.displayList("Context", allContextsAsResources, TABLE, commandSpec.commandLine().getOut());
+            formatService.displayList("Context", allContextsAsResources, TABLE, commandSpec);
             return 0;
         }
 

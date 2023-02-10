@@ -3,10 +3,7 @@ package com.michelin.kafkactl;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
-import com.michelin.kafkactl.services.ApiResourcesService;
-import com.michelin.kafkactl.services.FileService;
-import com.michelin.kafkactl.services.LoginService;
-import com.michelin.kafkactl.services.ResourceService;
+import com.michelin.kafkactl.services.*;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,6 +36,9 @@ class DeleteSubcommandTest {
 
     @Mock
     private LoginService loginService;
+
+    @Mock
+    public FormatService formatService;
 
     @Mock
     private ApiResourcesService apiResourcesService;
@@ -53,7 +54,7 @@ class DeleteSubcommandTest {
 
     @Test
     void shouldNotDeleteByNameWhenNotAuthenticated() {
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(false);
 
         CommandLine cmd = new CommandLine(deleteSubcommand);
@@ -61,14 +62,14 @@ class DeleteSubcommandTest {
         cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("topic", "myTopic");
-        assertEquals(2, code);
+        assertEquals(1, code);
         assertTrue(sw.toString().contains("Login failed."));
     }
 
     @Test
     void shouldNotDeleteByFileWhenYmlFileNotFound() {
         kafkactlCommand.optionalNamespace = Optional.empty();
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
@@ -97,7 +98,7 @@ class DeleteSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -118,7 +119,7 @@ class DeleteSubcommandTest {
     @Test
     void shouldNotDeleteByNameWhenInvalidResources() {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionFromCommandName(any()))
                 .thenReturn(Optional.empty());
@@ -145,7 +146,7 @@ class DeleteSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespaceMismatch");
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -184,7 +185,7 @@ class DeleteSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -194,7 +195,7 @@ class DeleteSubcommandTest {
                 .thenReturn(Collections.emptyList());
         when(apiResourcesService.getListResourceDefinition())
                 .thenReturn(Collections.singletonList(apiResource));
-        when(resourceService.delete(any(), any(), any(), anyBoolean()))
+        when(resourceService.delete(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(deleteSubcommand);
@@ -217,7 +218,7 @@ class DeleteSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionFromCommandName(any()))
                 .thenReturn(Optional.of(apiResource));
@@ -225,7 +226,7 @@ class DeleteSubcommandTest {
                 .thenReturn(Collections.emptyList());
         when(apiResourcesService.getListResourceDefinition())
                 .thenReturn(Collections.singletonList(apiResource));
-        when(resourceService.delete(any(), any(), any(), anyBoolean()))
+        when(resourceService.delete(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(deleteSubcommand);
@@ -257,7 +258,7 @@ class DeleteSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -267,7 +268,7 @@ class DeleteSubcommandTest {
                 .thenReturn(Collections.emptyList());
         when(apiResourcesService.getListResourceDefinition())
                 .thenReturn(Collections.singletonList(apiResource));
-        when(resourceService.delete(any(), any(), any(), anyBoolean()))
+        when(resourceService.delete(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(deleteSubcommand);
@@ -301,7 +302,7 @@ class DeleteSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -311,15 +312,13 @@ class DeleteSubcommandTest {
                 .thenReturn(Collections.emptyList());
         when(apiResourcesService.getListResourceDefinition())
                 .thenReturn(Collections.singletonList(apiResource));
-        when(resourceService.delete(any(), any(), any(), anyBoolean()))
+        when(resourceService.delete(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(false);
 
         CommandLine cmd = new CommandLine(deleteSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("-f", "topic");
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("Failed Topic/prefix.topic."));
+        verify(formatService).displayError("Cannot delete resource", "Topic", "prefix.topic", cmd.getCommandSpec());
     }
 }

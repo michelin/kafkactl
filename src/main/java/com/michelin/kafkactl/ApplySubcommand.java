@@ -2,10 +2,7 @@ package com.michelin.kafkactl;
 
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
-import com.michelin.kafkactl.services.ApiResourcesService;
-import com.michelin.kafkactl.services.FileService;
-import com.michelin.kafkactl.services.LoginService;
-import com.michelin.kafkactl.services.ResourceService;
+import com.michelin.kafkactl.services.*;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpResponse;
 import jakarta.inject.Inject;
@@ -32,6 +29,9 @@ public class ApplySubcommand implements Callable<Integer> {
     public ApiResourcesService apiResourcesService;
 
     @Inject
+    public FormatService formatService;
+
+    @Inject
     public FileService fileService;
 
     @Inject
@@ -39,9 +39,6 @@ public class ApplySubcommand implements Callable<Integer> {
 
     @Inject
     public KafkactlConfig kafkactlConfig;
-
-    @CommandLine.ParentCommand
-    public KafkactlCommand kafkactlCommand;
 
     @Option(names = {"-f", "--file"}, description = "YAML file or directory containing resources.")
     public Optional<File> file;
@@ -51,6 +48,9 @@ public class ApplySubcommand implements Callable<Integer> {
 
     @Option(names = {"--dry-run"}, description = "Does not persist resources. Validate only.")
     public boolean dryRun;
+
+    @CommandLine.ParentCommand
+    public KafkactlCommand kafkactlCommand;
 
     @CommandLine.Spec
     public CommandLine.Model.CommandSpec commandSpec;
@@ -66,8 +66,9 @@ public class ApplySubcommand implements Callable<Integer> {
             commandSpec.commandLine().getOut().println("Dry run execution.");
         }
 
-        if (!loginService.doAuthenticate()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
+        if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
+            commandSpec.commandLine().getErr().println("Login failed.");
+            return 1;
         }
 
         // If we have none or both stdin and File set, we stop
@@ -130,9 +131,9 @@ public class ApplySubcommand implements Callable<Integer> {
                             .findFirst()
                             .orElseThrow();
 
-                    HttpResponse<Resource> response = resourceService.apply(apiResource, namespace, resource, dryRun);
+                    HttpResponse<Resource> response = resourceService.apply(apiResource, namespace, resource, dryRun, commandSpec);
                     if (response == null) {
-                        commandSpec.commandLine().getErr().println(CommandLine.Help.Ansi.AUTO.string("@|bold,red Failed |@") + resource.getKind() + "/" + resource.getMetadata().getName() + ".");
+                        formatService.displayError("Cannot deploy resource", resource.getKind(), resource.getMetadata().getName(), commandSpec);
                         return null;
                     }
 
@@ -143,7 +144,6 @@ public class ApplySubcommand implements Callable<Integer> {
                     }
 
                     commandSpec.commandLine().getOut().println(CommandLine.Help.Ansi.AUTO.string("@|bold,green Success |@") + body.getKind() + "/" + body.getMetadata().getName() + resourceState + ".");
-
                     return body;
                 })
                 .mapToInt(value -> value != null ? 0 : 1)

@@ -17,6 +17,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,6 +27,9 @@ class ApiResourcesSubcommandTest {
 
     @Mock
     private LoginService loginService;
+
+    @Mock
+    private KafkactlCommand kafkactlCommand;
 
     @InjectMocks
     private ApiResourcesSubcommand apiResourcesSubcommand;
@@ -40,7 +44,7 @@ class ApiResourcesSubcommandTest {
                 .synchronizable(true)
                 .build();
 
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(apiResourcesService.getListResourceDefinition())
                 .thenReturn(Collections.singletonList(apiResource));
@@ -56,7 +60,7 @@ class ApiResourcesSubcommandTest {
 
     @Test
     void shouldNotDisplayApiResourcesWhenNotAuthenticated() {
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(false);
 
         CommandLine cmd = new CommandLine(apiResourcesSubcommand);
@@ -64,7 +68,7 @@ class ApiResourcesSubcommandTest {
         cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute();
-        assertEquals(2, code);
+        assertEquals(1, code);
         assertTrue(sw.toString().contains("Login failed."));
     }
 }

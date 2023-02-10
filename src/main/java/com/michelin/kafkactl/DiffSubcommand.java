@@ -5,10 +5,7 @@ import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
-import com.michelin.kafkactl.services.ApiResourcesService;
-import com.michelin.kafkactl.services.FileService;
-import com.michelin.kafkactl.services.LoginService;
-import com.michelin.kafkactl.services.ResourceService;
+import com.michelin.kafkactl.services.*;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpResponse;
 import jakarta.inject.Inject;
@@ -47,6 +44,9 @@ public class DiffSubcommand implements Callable<Integer> {
     @Inject
     public KafkactlConfig kafkactlConfig;
 
+    @Inject
+    public FormatService formatService;
+
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
@@ -65,8 +65,9 @@ public class DiffSubcommand implements Callable<Integer> {
      */
     @Override
     public Integer call() throws Exception {
-        if (!loginService.doAuthenticate()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
+        if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
+            commandSpec.commandLine().getErr().println("Login failed.");
+            return 1;
         }
 
         // If we have none or both stdin and File set, we stop
@@ -130,13 +131,13 @@ public class DiffSubcommand implements Callable<Integer> {
                             .orElseThrow();
 
                     Resource live = resourceService.getSingleResourceWithType(apiResource, namespace, resource.getMetadata().getName(), false);
-                    HttpResponse<Resource> merged = resourceService.apply(apiResource, namespace, resource, true);
+                    HttpResponse<Resource> merged = resourceService.apply(apiResource, namespace, resource, true, commandSpec);
                     if (merged != null && merged.getBody().isPresent()) {
                         List<String> uDiff = unifiedDiff(live, merged.body());
                         uDiff.forEach(diff -> commandSpec.commandLine().getOut().println(diff));
                         return 0;
                     }
-                    commandSpec.commandLine().getErr().println(CommandLine.Help.Ansi.AUTO.string("@|bold,red Failed |@") + resource.getKind() + "/" + resource.getMetadata().getName() + ".");
+                    formatService.displayError("Cannot diff resource", resource.getKind(), resource.getMetadata().getName(), commandSpec);
                     return 1;
                 })
                 .mapToInt(value -> value)

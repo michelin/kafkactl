@@ -50,22 +50,22 @@ public class SchemaSubcommand implements Callable<Integer> {
      */
     @Override
     public Integer call() throws Exception {
-        boolean authenticated = loginService.doAuthenticate();
+        boolean authenticated = loginService.doAuthenticate(kafkactlCommand.verbose);
         if (!authenticated) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed");
+            commandSpec.commandLine().getErr().println("Login failed.");
+            return 1;
         }
 
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
 
         List<Resource> updatedSchemas = subjects
                 .stream()
-                .map(subject -> resourceService.changeSchemaCompatibility(namespace, subject,
-                        compatibility))
+                .map(subject -> resourceService.changeSchemaCompatibility(namespace, subject, compatibility, commandSpec))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
         if (!updatedSchemas.isEmpty()) {
-            formatService.displayList("SchemaCompatibilityState", updatedSchemas, TABLE, commandSpec.commandLine().getOut());
+            formatService.displayList("SchemaCompatibilityState", updatedSchemas, TABLE, commandSpec);
             return 0;
         }
 

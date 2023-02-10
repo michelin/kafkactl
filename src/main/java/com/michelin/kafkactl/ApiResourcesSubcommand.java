@@ -15,6 +15,9 @@ public class ApiResourcesSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;
 
+    @CommandLine.ParentCommand
+    public KafkactlCommand kafkactlCommand;
+
     @CommandLine.Spec
     CommandLine.Model.CommandSpec commandSpec;
 
@@ -24,8 +27,9 @@ public class ApiResourcesSubcommand implements Callable<Integer> {
      */
     @Override
     public Integer call() {
-        if (!loginService.doAuthenticate()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
+        if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
+            commandSpec.commandLine().getErr().println("Login failed.");
+            return 1;
         }
 
         CommandLine.Help.TextTable textTable = CommandLine.Help.TextTable.forColumns(

@@ -41,9 +41,10 @@ public class UsersSubcommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        boolean authenticated = loginService.doAuthenticate();
+        boolean authenticated = loginService.doAuthenticate(kafkactlCommand.verbose);
         if (!authenticated) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed");
+            commandSpec.commandLine().getErr().println("Login failed.");
+            return 1;
         }
 
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
@@ -61,9 +62,9 @@ public class UsersSubcommand implements Callable<Integer> {
             );
         }
 
-        Resource res = resourceService.resetPassword(namespace, user);
+        Resource res = resourceService.resetPassword(namespace, user, commandSpec);
         if (res != null) {
-            formatService.displaySingle(res, output, commandSpec.commandLine().getOut());
+            formatService.displaySingle(res, output, commandSpec);
         }
 
         return 0;

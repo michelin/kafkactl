@@ -2,9 +2,6 @@ package com.michelin.kafkactl;
 
 import com.michelin.kafkactl.services.ConfigService;
 import com.michelin.kafkactl.services.FormatService;
-import io.micronaut.test.annotation.MockBean;
-import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,12 +9,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.michelin.kafkactl.services.FormatService.TABLE;
@@ -59,7 +53,7 @@ class ConfigSubcommandTest {
         assertEquals(0, code);
         verify(formatService).displayList(eq("Context"),
                 argThat(currentContext -> currentContext.get(0).getMetadata().getName().equals("current-context")),
-                eq(TABLE), eq(cmd.getOut()));
+                eq(TABLE), eq(cmd.getCommandSpec()));
     }
 
     @Test
@@ -98,7 +92,7 @@ class ConfigSubcommandTest {
         assertEquals(0, code);
         verify(formatService).displayList(eq("Context"),
                 argThat(currentContext -> currentContext.get(0).getMetadata().getName().equals("name")),
-                eq(TABLE), eq(cmd.getOut()));
+                eq(TABLE), eq(cmd.getCommandSpec()));
     }
 
     @Test

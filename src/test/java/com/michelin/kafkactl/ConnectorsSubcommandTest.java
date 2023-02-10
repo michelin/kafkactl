@@ -7,7 +7,6 @@ import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,7 +51,7 @@ class ConnectorsSubcommandTest {
 
     @Test
     void shouldNotChangeStateWhenNotAuthenticated() {
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(false);
 
         CommandLine cmd = new CommandLine(connectorsSubcommand);
@@ -60,15 +59,15 @@ class ConnectorsSubcommandTest {
         cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("pause", "my-connector");
-        assertEquals(2, code);
+        assertEquals(1, code);
         assertTrue(sw.toString().contains("Login failed."));
     }
 
     @Test
     void shouldChangeStateWhenEmptyConnectorsList() {
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(resourceService.changeConnectorState(any(), any(), any()))
+        when(resourceService.changeConnectorState(any(), any(), any(), any()))
                 .thenReturn(null);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
@@ -97,22 +96,20 @@ class ConnectorsSubcommandTest {
                 .spec(Collections.emptyMap())
                 .build();
 
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(resourceService.changeConnectorState(any(), any(), any()))
+        when(resourceService.changeConnectorState(any(), any(), any(), any()))
                 .thenReturn(resource);
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
 
         CommandLine cmd = new CommandLine(connectorsSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setOut(new PrintWriter(sw));
 
         int code = cmd.execute("pause", "my-connector");
         assertEquals(0, code);
         verify(formatService).displayList(eq("ChangeConnectorState"),
                 argThat(connectors -> connectors.get(0).equals(resource)),
-                eq(TABLE), eq(cmd.getOut()));
+                eq(TABLE), eq(cmd.getCommandSpec()));
     }
 
     @Test
@@ -135,31 +132,29 @@ class ConnectorsSubcommandTest {
                 .names(List.of("connects", "connect", "co"))
                 .build();
 
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionFromKind(any()))
                 .thenReturn(Optional.of(apiResource));
-        when(resourceService.listResourcesWithType(any(), any()))
+        when(resourceService.listResourcesWithType(any(), any(), any()))
                 .thenReturn(Collections.singletonList(resource));
-        when(resourceService.changeConnectorState(any(), any(), any()))
+        when(resourceService.changeConnectorState(any(), any(), any(), any()))
                 .thenReturn(resource);
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
 
         CommandLine cmd = new CommandLine(connectorsSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setOut(new PrintWriter(sw));
 
         int code = cmd.execute("pause", "all");
         assertEquals(0, code);
         verify(formatService).displayList(eq("ChangeConnectorState"),
                 argThat(connectors -> connectors.get(0).equals(resource)),
-                eq(TABLE), eq(cmd.getOut()));
+                eq(TABLE), eq(cmd.getCommandSpec()));
     }
 
     @Test
     void shouldThrowExceptionWhenChangeStateOfAll() {
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionFromKind(any()))
                 .thenReturn(Optional.empty());
@@ -172,6 +167,6 @@ class ConnectorsSubcommandTest {
 
         int code = cmd.execute("pause", "all");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains("\"Connector\" kind not found."));
+        assertTrue(sw.toString().contains("The server does not have resource type Connector."));
     }
 }

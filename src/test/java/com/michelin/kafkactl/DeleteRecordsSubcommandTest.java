@@ -48,7 +48,7 @@ class DeleteRecordsSubcommandTest {
 
     @Test
     void shouldNotDeleteWhenNotAuthenticated() {
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(false);
 
         CommandLine cmd = new CommandLine(deleteRecordsSubcommand);
@@ -56,7 +56,7 @@ class DeleteRecordsSubcommandTest {
         cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("topic");
-        assertEquals(2, code);
+        assertEquals(1, code);
         assertTrue(sw.toString().contains("Login failed."));
     }
 
@@ -74,11 +74,11 @@ class DeleteRecordsSubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-        when(resourceService.deleteRecords(any(), any(), anyBoolean()))
+        when(resourceService.deleteRecords(any(), any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
 
         CommandLine cmd = new CommandLine(deleteRecordsSubcommand);
@@ -90,7 +90,7 @@ class DeleteRecordsSubcommandTest {
         assertTrue(sw.toString().contains("Dry run execution."));
         verify(formatService).displayList(eq("DeleteRecordsResponse"),
                 argThat(deleteRecords -> deleteRecords.get(0).equals(resource)),
-                eq(TABLE), eq(cmd.getOut()));
+                eq(TABLE), eq(cmd.getCommandSpec()));
     }
 
     @Test
@@ -107,33 +107,31 @@ class DeleteRecordsSubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-        when(resourceService.deleteRecords(any(), any(), anyBoolean()))
+        when(resourceService.deleteRecords(any(), any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
 
         CommandLine cmd = new CommandLine(deleteRecordsSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setOut(new PrintWriter(sw));
 
         int code = cmd.execute("topic");
         assertEquals(0, code);
         verify(formatService).displayList(eq("DeleteRecordsResponse"),
                 argThat(deleteRecords -> deleteRecords.get(0).equals(resource)),
-                eq(TABLE), eq(cmd.getOut()));
+                eq(TABLE), eq(cmd.getCommandSpec()));
     }
 
     @Test
     void shouldDeleteEmptyResult() {
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate())
+        when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-        when(resourceService.deleteRecords(any(), any(), anyBoolean()))
+        when(resourceService.deleteRecords(any(), any(), anyBoolean(), any()))
                 .thenReturn(Collections.emptyList());
 
         CommandLine cmd = new CommandLine(deleteRecordsSubcommand);

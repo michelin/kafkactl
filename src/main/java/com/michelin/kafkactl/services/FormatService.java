@@ -18,7 +18,6 @@ import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 import picocli.CommandLine;
 
-import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -37,13 +36,12 @@ public class FormatService {
      * @param kind The kind of resource
      * @param resources The list of resources
      * @param output The type of display
-     * @param printWriter The print writer
      */
-    public void displayList(String kind, List<Resource> resources, String output, PrintWriter printWriter) {
+    public void displayList(String kind, List<Resource> resources, String output, CommandLine.Model.CommandSpec commandSpec) {
         if (output.equals(TABLE)) {
-            printTable(kind, resources, printWriter);
+            printTable(kind, resources, commandSpec);
         } else if (output.equals(YAML)) {
-            printYaml(resources, printWriter);
+            printYaml(resources, commandSpec);
         }
     }
 
@@ -51,10 +49,9 @@ public class FormatService {
      * Display a single resource
      * @param resource The resource
      * @param output The type of display
-     * @param printWriter The print writer
      */
-    public void displaySingle(Resource resource, String output, PrintWriter printWriter) {
-        displayList(resource.getKind(), List.of(resource), output, printWriter);
+    public void displaySingle(Resource resource, String output, CommandLine.Model.CommandSpec commandSpec) {
+        displayList(resource.getKind(), List.of(resource), output, commandSpec);
     }
 
     /**
@@ -63,45 +60,53 @@ public class FormatService {
      * @param kind The resource kind
      * @param name The resource name
      */
-    public void displayError(HttpClientResponseException e, String kind, String name) {
+    public void displayError(HttpClientResponseException e, String kind, String name, CommandLine.Model.CommandSpec commandSpec) {
         Optional<Status> statusOptional = e.getResponse().getBody(Status.class);
         if (statusOptional.isPresent() && statusOptional.get().getDetails() != null && !statusOptional.get().getDetails().getCauses().isEmpty()) {
             Status status = statusOptional.get();
             String causes = "\n - " + String.join("\n - ", status.getDetails().getCauses());
 
-            System.out.printf("Failed %s/%s %s for cause(s): %s%n", kind, name, status.getMessage(), causes);
+            commandSpec.commandLine().getErr().printf("Failed %s/%s %s for cause(s): %s%n", kind, name, status.getMessage(), causes);
         } else {
-            System.out.printf("Failed %s/%s %s%n", kind, name, e.getMessage());
+            displayError(e.getMessage(), kind, name, commandSpec);
         }
+    }
+
+    /**
+     * Display an error
+     * @param errorMessage The error message
+     * @param kind The resource kind
+     * @param name The resource name
+     */
+    public void displayError(String errorMessage, String kind, String name, CommandLine.Model.CommandSpec commandSpec) {
+        commandSpec.commandLine().getErr().printf("Failed %s/%s %s.%n", kind, name, errorMessage);
     }
 
     /**
      * Print the list of resources to table format
      * @param kind The kind of resources
      * @param resources The list of resources
-     * @param printWriter The print writer
      */
-    private void printTable(String kind, List<Resource> resources, PrintWriter printWriter) {
+    private void printTable(String kind, List<Resource> resources, CommandLine.Model.CommandSpec commandSpec) {
         String hyphenatedKind = StringConvention.HYPHENATED.format(kind);
         List<String> formats = kafkactlConfig.getTableFormat().getOrDefault(hyphenatedKind, defaults);
 
         PrettyTextTable ptt = new PrettyTextTable(formats, resources);
-        printWriter.println(ptt);
+        commandSpec.commandLine().getOut().println(ptt);
     }
 
     /**
      * Print the list of resources to yaml format
      * @param resources The list of resources
-     * @param printWriter The print writer
      */
-    private void printYaml(List<Resource> resources, PrintWriter printWriter) {
+    private void printYaml(List<Resource> resources, CommandLine.Model.CommandSpec commandSpec) {
         DumperOptions options = new DumperOptions();
         options.setExplicitStart(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         Representer representer = new Representer(new DumperOptions());
         representer.addClassTag(Resource.class, Tag.MAP);
         Yaml yaml = new Yaml(representer, options);
-        printWriter.println(yaml.dumpAll(resources.iterator()));
+        commandSpec.commandLine().getOut().println(yaml.dumpAll(resources.iterator()));
     }
 
     public static class PrettyTextTable {

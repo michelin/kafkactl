@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 
-@Command(name = "import", description = "Import unsynchronized resources")
+@Command(name = "import", description = "Import non-synchronized resources")
 public class ImportSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;
@@ -40,10 +40,10 @@ public class ImportSubcommand implements Callable<Integer> {
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
-    @Parameters(index = "0", description = "Resource type", arity = "1")
+    @Parameters(index = "0", description = "Resource type.", arity = "1")
     public String resourceType;
 
-    @Option(names = {"--dry-run"}, description = "Does not persist resources. Validate only")
+    @Option(names = {"--dry-run"}, description = "Does not persist resources. Validate only.")
     public boolean dryRun;
 
     @CommandLine.Spec
@@ -55,12 +55,12 @@ public class ImportSubcommand implements Callable<Integer> {
      */
     public Integer call() {
         if (dryRun) {
-            System.out.println("Dry run execution");
+            commandSpec.commandLine().getOut().println("Dry run execution.");
         }
 
-        boolean authenticated = loginService.doAuthenticate();
-        if (!authenticated) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed");
+        if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
+            commandSpec.commandLine().getErr().println("Login failed.");
+            return 1;
         }
 
         // Validate resourceType + custom type ALL
@@ -68,10 +68,10 @@ public class ImportSubcommand implements Callable<Integer> {
 
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
 
-        Map<ApiResource, List<Resource>> resources = resourceService.importAll(apiResources, namespace, dryRun);
+        Map<ApiResource, List<Resource>> resources = resourceService.importAll(apiResources, namespace, dryRun, commandSpec);
 
         // Display all resources by type
-        resources.forEach((k, v) -> formatService.displayList(k.getKind(), v, TABLE, commandSpec.commandLine().getOut()));
+        resources.forEach((k, v) -> formatService.displayList(k.getKind(), v, TABLE, commandSpec));
         return 0;
     }
 
@@ -91,11 +91,11 @@ public class ImportSubcommand implements Callable<Integer> {
         // Otherwise, check resource exists
         Optional<ApiResource> optionalApiResource = apiResourcesService.getResourceDefinitionFromCommandName(resourceType);
         if (optionalApiResource.isEmpty()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server doesn't have resource type " + resourceType);
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type " + resourceType + ".");
         }
 
         if (!optionalApiResource.get().isSynchronizable()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Resource Type " + resourceType + " is not synchronizable");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Resource of type " + resourceType + " is not synchronizable.");
         }
 
         return List.of(optionalApiResource.get());

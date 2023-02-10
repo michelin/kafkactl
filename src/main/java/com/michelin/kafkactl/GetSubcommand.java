@@ -24,12 +24,6 @@ import java.util.stream.Collectors;
 @Command(name = "get", description = "Get resources by resource type for the current namespace.")
 public class GetSubcommand implements Callable<Integer> {
     @Inject
-    public NamespacedResourceClient namespacedClient;
-
-    @Inject
-    public ClusterResourceClient nonNamespacedClient;
-
-    @Inject
     public LoginService loginService;
 
     @Inject
@@ -66,8 +60,9 @@ public class GetSubcommand implements Callable<Integer> {
      */
     @Override
     public Integer call() throws Exception {
-        if (!loginService.doAuthenticate()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
+        if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
+            commandSpec.commandLine().getErr().println("Login failed.");
+            return 1;
         }
 
         // Validate resourceType + custom type ALL
@@ -81,7 +76,7 @@ public class GetSubcommand implements Callable<Integer> {
         if (resourceName.isEmpty() || apiResources.size() > 1) {
             try {
                 // List all resources for given types (k get all, k get topics)
-                Map<ApiResource, List<Resource>> resources = resourceService.listAll(apiResources, namespace);
+                Map<ApiResource, List<Resource>> resources = resourceService.listAll(apiResources, namespace, commandSpec);
 
                 if (resources.entrySet().size() == 1 && resources.get(resources.keySet().iterator().next()).isEmpty()) {
                     commandSpec.commandLine().getOut().println("No resource to display.");
@@ -90,24 +85,27 @@ public class GetSubcommand implements Callable<Integer> {
                     resources.entrySet()
                             .stream()
                             .filter(kv -> !kv.getValue().isEmpty())
-                            .forEach(kv -> formatService.displayList(kv.getValue().get(0).getKind(), kv.getValue(), output, commandSpec.commandLine().getOut()));
+                            .forEach(kv -> formatService.displayList(kv.getValue().get(0).getKind(), kv.getValue(), output, commandSpec));
                 }
             } catch (HttpClientResponseException e) {
-                formatService.displayError(e, apiResources.get(0).getKind(), null);
+                formatService.displayError(e, apiResources.get(0).getKind(), null, commandSpec);
+                return 1;
             } catch (Exception e) {
-                commandSpec.commandLine().getErr().println("Error getting resource type " + resourceType + ": " + e.getMessage());
+                formatService.displayError("Error getting resource type", apiResources.get(0).getKind(), null, commandSpec);
+                return 1;
             }
         } else {
             try {
                 // Get individual resources for given types (k get topic topic1)
                 Resource singleResource = resourceService.getSingleResourceWithType(apiResources.get(0), namespace, resourceName.get(), true);
-                formatService.displaySingle(singleResource, output, commandSpec.commandLine().getOut());
+                formatService.displaySingle(singleResource, output, commandSpec);
             } catch (HttpClientResponseException e) {
-                formatService.displayError(e, apiResources.get(0).getKind(), resourceName.get());
+                formatService.displayError(e, apiResources.get(0).getKind(), resourceName.get(), commandSpec);
+                return 1;
             } catch (Exception e) {
-                commandSpec.commandLine().getErr().println("Error getting resource type " + apiResources.get(0).getKind() + "/" + resourceName.get() + ": " + e.getMessage());
+                formatService.displayError("Error getting resource type", apiResources.get(0).getKind(), resourceName.get(), commandSpec);
+                return 1;
             }
-
         }
 
         return 0;

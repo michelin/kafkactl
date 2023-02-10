@@ -45,37 +45,35 @@ class ConnectClustersSubcommandTest {
 
     @Test
     void shouldNotExecuteWhenNotLoggedIn() {
-        when(loginService.doAuthenticate()).thenReturn(false);
+        when(loginService.doAuthenticate(anyBoolean())).thenReturn(false);
         CommandLine cmd = new CommandLine(connectClustersSubcommand);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("vaults");
-        assertEquals(2, code);
+        assertEquals(1, code);
         assertTrue(sw.toString().contains("Login failed."));
     }
 
     @Test
     void shouldDisplayEmptyVaultsListWhenNoConnectClusterAndNoAvailableClusters() {
-        when(loginService.doAuthenticate()).thenReturn(true);
+        when(loginService.doAuthenticate(anyBoolean())).thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
-        when(resourceService.listAvailableVaultsConnectClusters("namespace"))
+        when(resourceService.listAvailableVaultsConnectClusters(any(), any()))
                 .thenReturn(List.of());
 
         CommandLine cmd = new CommandLine(connectClustersSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("vaults");
         assertEquals(0, code);
-        verify(formatService).displayList("ConnectCluster", List.of(), "table", cmd.getOut());
+        verify(formatService).displayList("ConnectCluster", List.of(), "table", cmd.getCommandSpec());
     }
 
     @Test
     void shouldDisplayVaultsListWhenNoConnectCluster() {
-        when(loginService.doAuthenticate()).thenReturn(true);
+        when(loginService.doAuthenticate(anyBoolean())).thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
@@ -87,21 +85,19 @@ class ConnectClustersSubcommandTest {
                 .spec(Collections.emptyMap())
                 .build();
 
-        when(resourceService.listAvailableVaultsConnectClusters("namespace"))
+        when(resourceService.listAvailableVaultsConnectClusters(anyString(), any()))
                 .thenReturn(List.of(resource));
 
         CommandLine cmd = new CommandLine(connectClustersSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("vaults");
         assertEquals(0, code);
-        verify(formatService).displayList("ConnectCluster", List.of(resource), "table", cmd.getOut());
+        verify(formatService).displayList("ConnectCluster", List.of(resource), "table", cmd.getCommandSpec());
     }
 
     @Test
     void shouldLDisplayErrorMessageWhenNoSecretsPassed() {
-        when(loginService.doAuthenticate()).thenReturn(true);
+        when(loginService.doAuthenticate(anyBoolean())).thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
@@ -117,7 +113,7 @@ class ConnectClustersSubcommandTest {
 
     @Test
     void shouldDisplayVaultsResultsWhenConnectClusterAndSecretsDefined() {
-        when(loginService.doAuthenticate()).thenReturn(true);
+        when(loginService.doAuthenticate(anyBoolean())).thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
@@ -135,15 +131,13 @@ class ConnectClustersSubcommandTest {
                 .spec(Map.of("clearText", "secret2", "encrypted", "encrypted2"))
                 .build();
 
-        when(resourceService.vaultsOnConnectClusters("namespace", "connectCluster", List.of("secret1", "secret2")))
+        when(resourceService.vaultsOnConnectClusters(any(), any(), any(), any()))
                 .thenReturn(List.of(resource1, resource2));
 
         CommandLine cmd = new CommandLine(connectClustersSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("vaults", "connectCluster", "secret1", "secret2");
         assertEquals(0, code);
-        verify(formatService).displayList("VaultResponse", List.of(resource1, resource2), "table", cmd.getOut());
+        verify(formatService).displayList("VaultResponse", List.of(resource1, resource2), "table", cmd.getCommandSpec());
     }
 }

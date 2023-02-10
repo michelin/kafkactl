@@ -78,23 +78,24 @@ public class ConnectClustersSubcommand implements Callable<Integer> {
      */
     @Override
     public Integer call() throws Exception {
-        if (!loginService.doAuthenticate()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
+        if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
+            commandSpec.commandLine().getErr().println("Login failed.");
+            return 1;
         }
 
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
 
         // if no parameters, list the available connect cluster to vault secrets
         if (connectCluster.isEmpty()) {
-            List<Resource> availableConnectClusters = resourceService.listAvailableVaultsConnectClusters(namespace);
-            formatService.displayList("ConnectCluster", availableConnectClusters, "table", commandSpec.commandLine().getOut());
+            List<Resource> availableConnectClusters = resourceService.listAvailableVaultsConnectClusters(namespace, commandSpec);
+            formatService.displayList("ConnectCluster", availableConnectClusters, "table", commandSpec);
         } else if (secrets == null) {
             // if connect cluster define but no secrets to encrypt => show error no secrets to encrypt.
             throw new CommandLine.ParameterException(commandSpec.commandLine(), "No secrets to encrypt.");
         } else {
             // if connect cluster and secrets define.
-            List<Resource> results = resourceService.vaultsOnConnectClusters(namespace, connectCluster, secrets);
-            formatService.displayList("VaultResponse", results, "table", commandSpec.commandLine().getOut());
+            List<Resource> results = resourceService.vaultsOnConnectClusters(namespace, connectCluster, secrets, commandSpec);
+            formatService.displayList("VaultResponse", results, "table", commandSpec);
         }
 
         return 0;

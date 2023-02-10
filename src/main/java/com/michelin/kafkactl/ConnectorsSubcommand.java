@@ -56,16 +56,17 @@ public class ConnectorsSubcommand implements Callable<Integer> {
      */
     @Override
     public Integer call() throws Exception {
-        if (!loginService.doAuthenticate()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
+        if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
+            commandSpec.commandLine().getErr().println("Login failed.");
+            return 1;
         }
 
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
 
         if (connectors.stream().anyMatch(s -> s.equalsIgnoreCase("ALL"))) {
             ApiResource connectType = apiResourcesService.getResourceDefinitionFromKind("Connector")
-                    .orElseThrow(() -> new CommandLine.ParameterException(commandSpec.commandLine(), "\"Connector\" kind not found."));
-            connectors = resourceService.listResourcesWithType(connectType, namespace)
+                    .orElseThrow(() -> new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type Connector."));
+            connectors = resourceService.listResourcesWithType(connectType, namespace, commandSpec)
                     .stream()
                     .map(resource -> resource.getMetadata().getName())
                     .collect(Collectors.toList());
@@ -80,12 +81,12 @@ public class ConnectorsSubcommand implements Callable<Integer> {
                                 .build())
                         .spec(Map.of("action", action.toString()))
                         .build())
-                .map(changeConnectorStateRequest -> resourceService.changeConnectorState(namespace, changeConnectorStateRequest.getMetadata().getName(), changeConnectorStateRequest))
+                .map(changeConnectorStateRequest -> resourceService.changeConnectorState(namespace, changeConnectorStateRequest.getMetadata().getName(), changeConnectorStateRequest, commandSpec))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
         if (!changeConnectorResponseList.isEmpty()) {
-            formatService.displayList("ChangeConnectorState", changeConnectorResponseList, TABLE, commandSpec.commandLine().getOut());
+            formatService.displayList("ChangeConnectorState", changeConnectorResponseList, TABLE, commandSpec);
             return 0;
         }
 

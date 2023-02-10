@@ -22,7 +22,7 @@ public class LoginService {
     private final KafkactlConfig kafkactlConfig;
     private final ClusterResourceClient clusterResourceClient;
     private final File jwtFile;
-    private String accessToken = null;
+    private String accessToken;
 
     /**
      * Constructor
@@ -50,17 +50,19 @@ public class LoginService {
 
     /**
      * Check if the user is authenticated, or authenticate him otherwise
+     * @param verbose Is verbose mode activated or not
      * @return true if the user is authenticated, false otherwise
      */
-    public boolean doAuthenticate() {
-        return isAuthenticated() || login("gitlab", kafkactlConfig.getUserToken());
+    public boolean doAuthenticate(boolean verbose) {
+        return isAuthenticated(verbose) || login("gitlab", kafkactlConfig.getUserToken(), verbose);
     }
 
     /**
      * Is the user authenticated already
+     * @param verbose Is verbose mode activated or not
      * @return true if he is, false otherwise
      */
-    public boolean isAuthenticated() {
+    public boolean isAuthenticated(boolean verbose) {
         try {
             if (!jwtFile.exists()) {
                 return false;
@@ -69,7 +71,7 @@ public class LoginService {
             ObjectMapper objectMapper = new ObjectMapper();
             BearerAccessRefreshToken token = objectMapper.readValue(jwtFile, BearerAccessRefreshToken.class);
             UserInfoResponse userInfo = clusterResourceClient.tokenInfo("Bearer " + token.getAccessToken());
-            if (KafkactlCommand.VERBOSE) {
+            if (verbose) {
                 Date expiry = new Date(userInfo.getExp() * 1000);
                 System.out.println("Authentication reused, welcome " + userInfo.getUsername() + "!");
                 System.out.println("Your session is valid until " + expiry + ".");
@@ -91,11 +93,12 @@ public class LoginService {
      * Authenticate the user
      * @param user The user
      * @param password The password
+     * @param verbose Is verbose mode activated or not
      * @return true if he is authenticated, false otherwise
      */
-    public boolean login(String user, String password) {
+    public boolean login(String user, String password, boolean verbose) {
         try {
-            if (KafkactlCommand.VERBOSE) {
+            if (verbose) {
                 System.out.println("Authenticating...");
             }
 
@@ -107,7 +110,7 @@ public class LoginService {
 
             accessToken = tokenResponse.getAccessToken();
 
-            if (KafkactlCommand.VERBOSE) {
+            if (verbose) {
                 Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.SECOND, tokenResponse.getExpiresIn());
                 System.out.println("Authentication successful, welcome " + tokenResponse.getUsername() + "!");

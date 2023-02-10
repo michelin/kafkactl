@@ -3,10 +3,7 @@ package com.michelin.kafkactl;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
-import com.michelin.kafkactl.services.ApiResourcesService;
-import com.michelin.kafkactl.services.FileService;
-import com.michelin.kafkactl.services.LoginService;
-import com.michelin.kafkactl.services.ResourceService;
+import com.michelin.kafkactl.services.*;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
@@ -33,6 +30,9 @@ public class DeleteSubcommand implements Callable<Integer> {
 
     @Inject
     public ApiResourcesService apiResourcesService;
+
+    @Inject
+    public FormatService formatService;
 
     @Inject
     public FileService fileService;
@@ -83,8 +83,9 @@ public class DeleteSubcommand implements Callable<Integer> {
             commandSpec.commandLine().getOut().println("Dry run execution.");
         }
 
-        if (!loginService.doAuthenticate()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed.");
+        if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
+            commandSpec.commandLine().getErr().println("Login failed.");
+            return 1;
         }
 
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
@@ -124,7 +125,7 @@ public class DeleteSubcommand implements Callable<Integer> {
                 .filter(resource -> resource.getMetadata().getNamespace() != null && !resource.getMetadata().getNamespace().equals(namespace))
                 .collect(Collectors.toList());
         if (!nsMismatch.isEmpty()) {
-            String invalid = String.join(", ", nsMismatch.stream().map(resource -> resource.getKind() + "/" + resource.getMetadata().getName()).distinct().collect(Collectors.toList()));
+            String invalid = nsMismatch.stream().map(resource -> resource.getKind() + "/" + resource.getMetadata().getName()).distinct().collect(Collectors.joining(", "));
             throw new CommandLine.ParameterException(commandSpec.commandLine(), "Namespace mismatch between Kafkactl and YAML document " + invalid + ".");
         }
 
@@ -137,11 +138,11 @@ public class DeleteSubcommand implements Callable<Integer> {
                             .filter(apiRes -> apiRes.getKind().equals(resource.getKind()))
                             .findFirst()
                             .orElseThrow();
-                    boolean success = resourceService.delete(apiResource, namespace, resource.getMetadata().getName(), dryRun);
+                    boolean success = resourceService.delete(apiResource, namespace, resource.getMetadata().getName(), dryRun, commandSpec);
                     if (success) {
                         commandSpec.commandLine().getOut().println(CommandLine.Help.Ansi.AUTO.string("@|bold,green Success |@") + apiResource.getKind() + "/" + resource.getMetadata().getName() + " (Deleted).");
                     } else {
-                        commandSpec.commandLine().getErr().println(CommandLine.Help.Ansi.AUTO.string("@|bold,red Failed |@") + apiResource.getKind() + "/" + resource.getMetadata().getName() + ".");
+                        formatService.displayError("Cannot delete resource", resource.getKind(), resource.getMetadata().getName(), commandSpec);
                     }
                     return success;
                 })

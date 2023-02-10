@@ -11,6 +11,7 @@ import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import picocli.CommandLine;
 
 import java.util.List;
 import java.util.Map;
@@ -33,14 +34,14 @@ public class ResourceService {
     @Inject
     FileService fileService;
 
-    public Map<ApiResource, List<Resource>> listAll(List<ApiResource> apiResources, String namespace) {
+    public Map<ApiResource, List<Resource>> listAll(List<ApiResource> apiResources, String namespace, CommandLine.Model.CommandSpec commandSpec) {
         return apiResources
                 .stream()
-                .map(apiResource -> Map.entry(apiResource, listResourcesWithType(apiResource, namespace)))
+                .map(apiResource -> Map.entry(apiResource, listResourcesWithType(apiResource, namespace, commandSpec)))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public List<Resource> listResourcesWithType(ApiResource apiResource, String namespace) {
+    public List<Resource> listResourcesWithType(ApiResource apiResource, String namespace, CommandLine.Model.CommandSpec commandSpec) {
         try {
             if (apiResource.isNamespaced()) {
                 return namespacedClient.list(namespace, apiResource.getPath(), loginService.getAuthorization());
@@ -48,7 +49,7 @@ public class ResourceService {
                 return nonNamespacedClient.list(loginService.getAuthorization(), apiResource.getPath());
             }
         } catch (HttpClientResponseException e) {
-            formatService.displayError(e, apiResource.getKind(), null);
+            formatService.displayError(e, apiResource.getKind(), null, commandSpec);
         }
         return List.of();
     }
@@ -73,7 +74,7 @@ public class ResourceService {
         return resource;
     }
 
-    public HttpResponse<Resource> apply(ApiResource apiResource, String namespace, Resource resource, boolean dryRun) {
+    public HttpResponse<Resource> apply(ApiResource apiResource, String namespace, Resource resource, boolean dryRun, CommandLine.Model.CommandSpec commandSpec) {
         try {
             if (apiResource.isNamespaced()) {
                 return namespacedClient.apply(namespace, apiResource.getPath(), loginService.getAuthorization(), resource, dryRun);
@@ -81,13 +82,13 @@ public class ResourceService {
                 return nonNamespacedClient.apply(loginService.getAuthorization(), apiResource.getPath(), resource, dryRun);
             }
         } catch (HttpClientResponseException e) {
-            formatService.displayError(e, apiResource.getKind(), resource.getMetadata().getName());
+            formatService.displayError(e, apiResource.getKind(), resource.getMetadata().getName(), commandSpec);
         }
 
         return null;
     }
 
-    public boolean delete(ApiResource apiResource, String namespace, String resource, boolean dryRun) {
+    public boolean delete(ApiResource apiResource, String namespace, String resource, boolean dryRun, CommandLine.Model.CommandSpec commandSpec) {
         try {
             if (apiResource.isNamespaced()) {
                 HttpResponse<Void> response = namespacedClient.delete(namespace, apiResource.getPath(), resource, loginService.getAuthorization(), dryRun);
@@ -99,25 +100,25 @@ public class ResourceService {
             }
             return true;
         } catch (HttpClientResponseException e) {
-            formatService.displayError(e, apiResource.getKind(), resource);
+            formatService.displayError(e, apiResource.getKind(), resource, commandSpec);
         }
         return false;
     }
 
-    public Map<ApiResource, List<Resource>> importAll(List<ApiResource> apiResources, String namespace, boolean dryRun) {
+    public Map<ApiResource, List<Resource>> importAll(List<ApiResource> apiResources, String namespace, boolean dryRun, CommandLine.Model.CommandSpec commandSpec) {
         return apiResources
                 .stream()
-                .map(apiResource -> Map.entry(apiResource, importResourcesWithType(apiResource, namespace, dryRun)))
+                .map(apiResource -> Map.entry(apiResource, importResourcesWithType(apiResource, namespace, dryRun, commandSpec)))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private List<Resource> importResourcesWithType(ApiResource apiResource, String namespace, boolean dryRun) {
+    private List<Resource> importResourcesWithType(ApiResource apiResource, String namespace, boolean dryRun, CommandLine.Model.CommandSpec commandSpec) {
         List<Resource> resources;
 
         try {
             resources = namespacedClient.importResources(namespace, apiResource.getPath(), loginService.getAuthorization(), dryRun);
         } catch (HttpClientResponseException e) {
-            formatService.displayError(e, apiResource.getKind(), null);
+            formatService.displayError(e, apiResource.getKind(), null, commandSpec);
             resources = List.of();
         }
 
@@ -129,16 +130,16 @@ public class ResourceService {
      *
      * @param namespace The namespace
      * @param topic     The topic to delete records
-     * @param dryrun    Is dry run mode or not ?
-     * @return The delete records response
+     * @param dryRun    Is dry run mode or not ?
+     * @return The deleted records response
      */
-    public List<Resource> deleteRecords(String namespace, String topic, boolean dryrun) {
+    public List<Resource> deleteRecords(String namespace, String topic, boolean dryRun, CommandLine.Model.CommandSpec commandSpec) {
         List<Resource> resources = List.of();
 
         try {
-            return namespacedClient.deleteRecords(loginService.getAuthorization(), namespace, topic, dryrun);
+            return namespacedClient.deleteRecords(loginService.getAuthorization(), namespace, topic, dryRun);
         } catch (HttpClientResponseException e) {
-            formatService.displayError(e, "Topic", topic);
+            formatService.displayError(e, "Topic", topic, commandSpec);
         }
 
         return resources;
@@ -153,19 +154,19 @@ public class ResourceService {
      * @param dryRun    Is dry run mode or not ?
      * @return The reset offsets response
      */
-    public List<Resource> resetOffsets(String namespace, String group, Resource resource, boolean dryRun) {
+    public List<Resource> resetOffsets(String namespace, String group, Resource resource, boolean dryRun, CommandLine.Model.CommandSpec commandSpec) {
         List<Resource> resources = List.of();
 
         try {
             resources = namespacedClient.resetOffsets(loginService.getAuthorization(), namespace, group, resource, dryRun);
         } catch (HttpClientResponseException e) {
-            formatService.displayError(e, "ConsumerGroup", group);
+            formatService.displayError(e, "ConsumerGroup", group, commandSpec);
         }
 
         return resources;
     }
 
-    public Resource changeConnectorState(String namespace, String connector, Resource changeConnectorState) {
+    public Resource changeConnectorState(String namespace, String connector, Resource changeConnectorState, CommandLine.Model.CommandSpec commandSpec) {
         try {
             Resource resource = namespacedClient.changeConnectorState(namespace, connector, changeConnectorState, loginService.getAuthorization());
             if (resource == null) {
@@ -180,12 +181,12 @@ public class ResourceService {
             }
             return resource;
         } catch (HttpClientResponseException e) {
-            formatService.displayError(e, "ChangeConnectorState", connector);
+            formatService.displayError(e, "ChangeConnectorState", connector, commandSpec);
         }
         return null;
     }
 
-    public Resource changeSchemaCompatibility(String namespace, String subject, SchemaCompatibility compatibility) {
+    public Resource changeSchemaCompatibility(String namespace, String subject, SchemaCompatibility compatibility, CommandLine.Model.CommandSpec commandSpec) {
         try {
             Resource resource = namespacedClient.changeSchemaCompatibility(namespace, subject,
                     Map.of("compatibility", compatibility), loginService.getAuthorization());
@@ -202,12 +203,12 @@ public class ResourceService {
             }
             return resource;
         } catch (HttpClientResponseException e) {
-            formatService.displayError(e, "Schema", subject);
+            formatService.displayError(e, "Schema", subject, commandSpec);
         }
         return null;
     }
 
-    public Resource resetPassword(String namespace, String user) {
+    public Resource resetPassword(String namespace, String user, CommandLine.Model.CommandSpec commandSpec) {
         try {
             Resource resource = namespacedClient.resetPassword(namespace, user, loginService.getAuthorization());
 
@@ -223,7 +224,7 @@ public class ResourceService {
             }
             return resource;
         } catch (HttpClientResponseException e) {
-            formatService.displayError(e, "KafkaUserResetPassword", namespace);
+            formatService.displayError(e, "KafkaUserResetPassword", namespace, commandSpec);
         }
         return null;
     }
@@ -234,13 +235,13 @@ public class ResourceService {
      * @param namespace The namespace
      * @return The list of connect clusters
      */
-    public List<Resource> listAvailableVaultsConnectClusters(String namespace) {
+    public List<Resource> listAvailableVaultsConnectClusters(String namespace, CommandLine.Model.CommandSpec commandSpec) {
         List<Resource> resources = List.of();
 
         try {
             resources = namespacedClient.listAvailableVaultsConnectClusters(namespace, loginService.getAuthorization());
         } catch (HttpClientResponseException e) {
-            formatService.displayError(e, "ConnectCluster", "vaults");
+            formatService.displayError(e, "ConnectCluster", "vaults", commandSpec);
         }
 
         return resources;
@@ -254,7 +255,7 @@ public class ResourceService {
      * @param passwords      The list of passwords to encrypt.
      * @return The encrypted secret.
      */
-    public List<Resource> vaultsOnConnectClusters(final String namespace, final String connectCluster, final List<String> passwords) {
+    public List<Resource> vaultsOnConnectClusters(final String namespace, final String connectCluster, final List<String> passwords, CommandLine.Model.CommandSpec commandSpec) {
         List<Resource> result = List.of();
         try {
             return namespacedClient.vaultsOnConnectClusters(
@@ -263,7 +264,7 @@ public class ResourceService {
                     loginService.getAuthorization()
             );
         } catch (HttpClientResponseException e) {
-            formatService.displayError(e, "ConnectCluster", "vaults");
+            formatService.displayError(e, "ConnectCluster", "vaults", commandSpec);
         }
         return result;
     }
