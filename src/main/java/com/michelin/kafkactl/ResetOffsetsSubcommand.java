@@ -68,7 +68,7 @@ public class ResetOffsetsSubcommand implements Callable<Integer> {
         @Option(names = {"--to-latest"}, description = "Set offset to its latest value (skip all).", required = true)
         public boolean latest;
 
-        @Option(names = {"--to-datetime"}, description = "Set offset to a specific ISO8601 date time with time zone (yyyy-MM-dd'T'HH:mm:ss.SSSXXX).", required = true)
+        @Option(names = {"--to-datetime"}, description = "Set offset to a specific ISO8601 date time with time zone (yyyy-MM-ddTHH:mm:ssZ).", required = true)
         public OffsetDateTime datetime;
 
         @Option(names = {"--shift-by"}, description = "Shift offset by a number. Negative to reprocess or positive to skip.", required = true)
@@ -137,7 +137,7 @@ public class ResetOffsetsSubcommand implements Callable<Integer> {
         if (!resources.isEmpty()) {
             formatService.displayList("ConsumerGroupResetOffsetsResponse", resources, TABLE, commandSpec);
         } else {
-            commandSpec.commandLine().getOut().println("No offsets to reset for the topic " + topic + ".");
+            commandSpec.commandLine().getOut().println("No offsets to reset for " + (topic.allTopics ? "all topics." : "the topic " + topic.topic + "."));
         }
 
         return 0;
