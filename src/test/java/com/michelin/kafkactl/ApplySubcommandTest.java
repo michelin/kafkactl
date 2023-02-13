@@ -164,7 +164,6 @@ class ApplySubcommandTest {
                 .build();
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
-
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(anyBoolean()))

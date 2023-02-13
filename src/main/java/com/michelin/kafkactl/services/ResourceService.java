@@ -131,7 +131,7 @@ public class ResourceService {
                     namespacedClient.apply(namespace, apiResource.getPath(), loginService.getAuthorization(), resource, dryRun)
                     : nonNamespacedClient.apply(loginService.getAuthorization(), apiResource.getPath(), resource, dryRun);
 
-            commandSpec.commandLine().getOut().println(formatService.beautifulKind(response.body().getKind())
+            commandSpec.commandLine().getOut().println(formatService.prettifyKind(response.body().getKind())
                     + " \"" + response.body().getMetadata().getName() + "\" "
                     + (response.header("X-Ns4kafka-Result") != null ? response.header("X-Ns4kafka-Result") : "") + ".");
             return response;

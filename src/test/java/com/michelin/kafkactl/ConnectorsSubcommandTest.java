@@ -7,6 +7,8 @@ import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -149,6 +151,33 @@ class ConnectorsSubcommandTest {
         verify(formatService).displayList(eq(CHANGE_CONNECTOR_STATE),
                 argThat(connectors -> connectors.get(0).equals(resource)),
                 eq(TABLE), eq(cmd.getCommandSpec()));
+    }
+
+    @Test
+    void shouldNotChangeStateWhenHttpClientResponseException() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Connector")
+                .namespaced(true)
+                .synchronizable(true)
+                .path("connectors")
+                .names(List.of("connects", "connect", "co"))
+                .build();
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(loginService.doAuthenticate(anyBoolean()))
+                .thenReturn(true);
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenReturn(Optional.of(apiResource));
+        when(resourceService.listResourcesWithType(any(), any(), any()))
+                .thenThrow(exception);
+
+        CommandLine cmd = new CommandLine(connectorsSubcommand);
+
+        int code = cmd.execute("pause", "all");
+        assertEquals(1, code);
+        verify(formatService).displayError(exception, cmd.getCommandSpec());
     }
 
     @Test
