@@ -49,7 +49,7 @@ class ApiResourcesSubcommandTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(false);
 
         int code = cmd.execute();
@@ -70,7 +70,7 @@ class ApiResourcesSubcommandTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(apiResourcesService.listResourceDefinitions())
                 .thenReturn(Collections.singletonList(apiResource));
@@ -90,7 +90,7 @@ class ApiResourcesSubcommandTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(apiResourcesService.listResourceDefinitions())
                 .thenThrow(exception);

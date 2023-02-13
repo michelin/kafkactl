@@ -38,7 +38,7 @@ class DeleteRecordsSubcommandTest {
 
     @Test
     void shouldNotDeleteWhenNotAuthenticated() {
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(false);
 
         CommandLine cmd = new CommandLine(deleteRecordsSubcommand);
@@ -53,7 +53,7 @@ class DeleteRecordsSubcommandTest {
     void shouldDeleteDryRunSuccess() {
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
@@ -73,7 +73,7 @@ class DeleteRecordsSubcommandTest {
     void shouldDeleteSuccess() {
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
@@ -90,7 +90,7 @@ class DeleteRecordsSubcommandTest {
     void shouldDeleteFail() {
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");

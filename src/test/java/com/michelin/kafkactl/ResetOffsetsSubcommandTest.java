@@ -48,7 +48,7 @@ class ResetOffsetsSubcommandTest {
 
     @Test
     void shouldNotResetWhenNotAuthenticated() {
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(false);
 
         CommandLine cmd = new CommandLine(resetOffsetsSubcommand);
@@ -62,7 +62,7 @@ class ResetOffsetsSubcommandTest {
     @Test
     void shouldResetOffsetsToEarliest() {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(0);
@@ -89,7 +89,7 @@ class ResetOffsetsSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(0);
@@ -119,7 +119,7 @@ class ResetOffsetsSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(0);
@@ -146,7 +146,7 @@ class ResetOffsetsSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(0);
@@ -173,7 +173,7 @@ class ResetOffsetsSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(0);
@@ -200,7 +200,7 @@ class ResetOffsetsSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(0);
@@ -228,7 +228,7 @@ class ResetOffsetsSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.empty();
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");

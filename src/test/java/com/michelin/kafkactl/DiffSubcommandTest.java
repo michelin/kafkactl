@@ -50,7 +50,7 @@ class DiffSubcommandTest {
 
     @Test
     void shouldNotDiffWhenNotAuthenticated() {
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(false);
 
         CommandLine cmd = new CommandLine(diffSubcommand);
@@ -63,7 +63,7 @@ class DiffSubcommandTest {
 
     @Test
     void shouldNotDiffWhenNoFileInStdin() {
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(diffSubcommand);
@@ -81,7 +81,7 @@ class DiffSubcommandTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenThrow(new CommandLine.ParameterException(cmd.getCommandSpec().commandLine(),
@@ -103,7 +103,7 @@ class DiffSubcommandTest {
                 .spec(Collections.emptyMap())
                 .build();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -133,7 +133,7 @@ class DiffSubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.of("namespaceMismatch");
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -164,7 +164,7 @@ class DiffSubcommandTest {
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -217,7 +217,7 @@ class DiffSubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -273,7 +273,7 @@ class DiffSubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -333,7 +333,7 @@ class DiffSubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -394,7 +394,7 @@ class DiffSubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -456,7 +456,7 @@ class DiffSubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -519,7 +519,7 @@ class DiffSubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -569,7 +569,7 @@ class DiffSubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));

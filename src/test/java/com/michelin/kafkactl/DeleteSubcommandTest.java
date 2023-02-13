@@ -55,7 +55,7 @@ class DeleteSubcommandTest {
 
     @Test
     void shouldNotDeleteByNameWhenNotAuthenticated() {
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(false);
 
         CommandLine cmd = new CommandLine(deleteSubcommand);
@@ -69,7 +69,7 @@ class DeleteSubcommandTest {
     @Test
     void shouldNotDeleteByFileWhenYmlFileNotFound() {
         kafkactlCommand.optionalNamespace = Optional.empty();
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
@@ -98,7 +98,7 @@ class DeleteSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -119,7 +119,7 @@ class DeleteSubcommandTest {
     @Test
     void shouldNotDeleteByNameWhenInvalidResources() {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByCommandName(any()))
                 .thenReturn(Optional.empty());
@@ -146,7 +146,7 @@ class DeleteSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespaceMismatch");
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -185,7 +185,7 @@ class DeleteSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -217,7 +217,7 @@ class DeleteSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByCommandName(any()))
                 .thenReturn(Optional.of(apiResource));
@@ -256,7 +256,7 @@ class DeleteSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -299,7 +299,7 @@ class DeleteSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -340,7 +340,7 @@ class DeleteSubcommandTest {
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));

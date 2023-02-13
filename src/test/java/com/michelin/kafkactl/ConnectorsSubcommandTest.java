@@ -54,7 +54,7 @@ class ConnectorsSubcommandTest {
 
     @Test
     void shouldNotChangeStateWhenNotAuthenticated() {
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(false);
 
         CommandLine cmd = new CommandLine(connectorsSubcommand);
@@ -67,7 +67,7 @@ class ConnectorsSubcommandTest {
 
     @Test
     void shouldNotChangeStateWhenEmptyConnectorsList() {
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.changeConnectorState(any(), any(), any(), any()))
                 .thenReturn(Optional.empty());
@@ -97,7 +97,7 @@ class ConnectorsSubcommandTest {
                 .spec(Collections.emptyMap())
                 .build();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.changeConnectorState(any(), any(), any(), any()))
                 .thenReturn(Optional.of(resource));
@@ -133,7 +133,7 @@ class ConnectorsSubcommandTest {
                 .names(List.of("connects", "connect", "co"))
                 .build();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any()))
                 .thenReturn(Optional.of(apiResource));
@@ -166,7 +166,7 @@ class ConnectorsSubcommandTest {
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any()))
                 .thenReturn(Optional.of(apiResource));
@@ -182,7 +182,7 @@ class ConnectorsSubcommandTest {
 
     @Test
     void shouldThrowExceptionWhenChangeStateOfAll() {
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any()))
                 .thenReturn(Optional.empty());

@@ -45,7 +45,7 @@ class UsersSubcommandTest {
 
     @Test
     void shouldNotUpdateUserWhenNotAuthenticated() {
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(false);
 
         CommandLine cmd = new CommandLine(usersSubcommand);
@@ -56,7 +56,7 @@ class UsersSubcommandTest {
 
     @Test
     void shouldNotUpdateUserWhenUnknownOutput() {
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(usersSubcommand);
@@ -72,7 +72,7 @@ class UsersSubcommandTest {
     void shouldNotUpdateUserWhenNotConfirmed() {
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
@@ -92,7 +92,7 @@ class UsersSubcommandTest {
     void shouldUpdateUser() {
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");

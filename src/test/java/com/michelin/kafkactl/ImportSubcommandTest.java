@@ -50,7 +50,7 @@ class ImportSubcommandTest {
 
     @Test
     void shouldNotImportWhenNotAuthenticated() {
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(false);
 
         CommandLine cmd = new CommandLine(importSubcommand);
@@ -63,7 +63,7 @@ class ImportSubcommandTest {
 
     @Test
     void shouldNotImportWhenServerNotHaveResourceType() {
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByCommandName(any()))
                 .thenReturn(Optional.empty());
@@ -87,7 +87,7 @@ class ImportSubcommandTest {
                 .synchronizable(false)
                 .build();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByCommandName(any()))
                 .thenReturn(Optional.of(apiResource));
@@ -121,7 +121,7 @@ class ImportSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByCommandName(any()))
                 .thenReturn(Optional.of(apiResource));
@@ -146,7 +146,7 @@ class ImportSubcommandTest {
                 .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByCommandName(any()))
                 .thenReturn(Optional.of(apiResource));
@@ -189,9 +189,8 @@ class ImportSubcommandTest {
                 .synchronizable(false)
                 .build();
 
-
         kafkactlCommand.optionalNamespace = Optional.empty();
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");

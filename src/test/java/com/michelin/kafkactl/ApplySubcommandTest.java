@@ -56,7 +56,7 @@ class ApplySubcommandTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(false);
 
         int code = cmd.execute();
@@ -69,7 +69,7 @@ class ApplySubcommandTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
 
         int code = cmd.execute();
@@ -83,7 +83,7 @@ class ApplySubcommandTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenThrow(new CommandLine.ParameterException(cmd.getCommandSpec().commandLine(),
@@ -109,7 +109,7 @@ class ApplySubcommandTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -135,7 +135,7 @@ class ApplySubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.of("namespaceMismatch");
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -166,7 +166,7 @@ class ApplySubcommandTest {
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -206,7 +206,7 @@ class ApplySubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -251,7 +251,7 @@ class ApplySubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -301,7 +301,7 @@ class ApplySubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -351,7 +351,7 @@ class ApplySubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -399,7 +399,7 @@ class ApplySubcommandTest {
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));

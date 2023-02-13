@@ -58,7 +58,7 @@ public class ImportSubcommand implements Callable<Integer> {
             commandSpec.commandLine().getOut().println("Dry run execution.");
         }
 
-        if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
+        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
             return 1;
         }
 

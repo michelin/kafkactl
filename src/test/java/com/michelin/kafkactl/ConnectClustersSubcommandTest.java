@@ -46,7 +46,7 @@ class ConnectClustersSubcommandTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(false);
 
         int code = cmd.execute("vaults");
@@ -55,7 +55,7 @@ class ConnectClustersSubcommandTest {
 
     @Test
     void shouldListAvailableVaultsClustersSuccess() {
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
@@ -72,7 +72,7 @@ class ConnectClustersSubcommandTest {
 
     @Test
     void shouldListAvailableVaultsClustersFail() {
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
@@ -89,7 +89,7 @@ class ConnectClustersSubcommandTest {
 
     @Test
     void shouldLDisplayErrorMessageWhenNoSecretsPassed() {
-        when(loginService.doAuthenticate(anyBoolean())).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
@@ -105,7 +105,7 @@ class ConnectClustersSubcommandTest {
 
     @Test
     void shouldVaultSuccess() {
-        when(loginService.doAuthenticate(anyBoolean())).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");

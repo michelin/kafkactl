@@ -66,7 +66,7 @@ public class DiffSubcommand implements Callable<Integer> {
      */
     @Override
     public Integer call() throws Exception {
-        if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
+        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
             return 1;
         }
 

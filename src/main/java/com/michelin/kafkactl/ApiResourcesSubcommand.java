@@ -40,7 +40,7 @@ public class ApiResourcesSubcommand implements Callable<Integer> {
      */
     @Override
     public Integer call() {
-        if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
+        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
             return 1;
         }
 

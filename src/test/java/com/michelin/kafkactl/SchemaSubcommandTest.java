@@ -44,7 +44,7 @@ class SchemaSubcommandTest {
 
     @Test
     void shouldNotUpdateCompatWhenNotAuthenticated() {
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(false);
 
         CommandLine cmd = new CommandLine(schemaSubcommand);
@@ -55,7 +55,7 @@ class SchemaSubcommandTest {
 
     @Test
     void shouldNotUpdateCompatWhenEmptyResponseList() {
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.changeSchemaCompatibility(any(), any(), any(), any()))
                 .thenReturn(Optional.empty());
@@ -83,7 +83,7 @@ class SchemaSubcommandTest {
                 .spec(Collections.emptyMap())
                 .build();
 
-        when(loginService.doAuthenticate(anyBoolean()))
+        when(loginService.doAuthenticate(any(), anyBoolean()))
                 .thenReturn(true);
         when(resourceService.changeSchemaCompatibility(any(), any(), any(), any()))
                 .thenReturn(Optional.of(resource));
