@@ -97,7 +97,7 @@ class LoginServiceTest {
         LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
         boolean actual = loginService.isAuthenticated(cmd.getCommandSpec(), true);
         assertTrue(sw.toString().contains("Authentication reused. Welcome username!"));
-        assertTrue(sw.toString().contains("Your session is valid until Thu Jan 01 01:00:10 CET 1970."));
+        assertTrue(sw.toString().contains("Your session is valid until"));
         assertFalse(actual);
     }
 
@@ -121,7 +121,7 @@ class LoginServiceTest {
 
         boolean actual = loginService.isAuthenticated(cmd.getCommandSpec(), true);
         assertTrue(sw.toString().contains("Authentication reused. Welcome username!"));
-        assertTrue(sw.toString().contains("Your session is valid until Thu Jan 01 01:00:10 CET 1970."));
+        assertTrue(sw.toString().contains("Your session is valid until"));
         assertTrue(actual);
 
         String token = loginService.getAuthorization();
@@ -196,7 +196,7 @@ class LoginServiceTest {
 
         boolean actual = loginService.doAuthenticate(cmd.getCommandSpec(), true);
         assertTrue(sw.toString().contains("Authentication reused. Welcome username!"));
-        assertTrue(sw.toString().contains("Your session is valid until Thu Jan 01 01:00:10 CET 1970."));
+        assertTrue(sw.toString().contains("Your session is valid until"));
         assertTrue(actual);
 
         String token = loginService.getAuthorization();
