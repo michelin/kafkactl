@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 import static com.michelin.kafkactl.services.FormatService.TABLE;
+import static com.michelin.kafkactl.utils.constants.ConstantKind.CONTEXT;
 
 @CommandLine.Command(name = "config", description = "Manage configuration.")
 public class ConfigSubcommand implements Callable<Integer> {
@@ -61,7 +62,7 @@ public class ConfigSubcommand implements Callable<Integer> {
                     .spec(specs)
                     .build();
 
-            formatService.displayList("Context", List.of(currentContextAsResource), TABLE, commandSpec);
+            formatService.displayList(CONTEXT, List.of(currentContextAsResource), TABLE, commandSpec);
             return 0;
         }
 
@@ -88,7 +89,7 @@ public class ConfigSubcommand implements Callable<Integer> {
                 allContextsAsResources.add(currentContextAsResource);
             });
 
-            formatService.displayList("Context", allContextsAsResources, TABLE, commandSpec);
+            formatService.displayList(CONTEXT, allContextsAsResources, TABLE, commandSpec);
             return 0;
         }
 
@@ -115,14 +116,14 @@ enum ConfigAction {
     USE_CONTEXT("use-context");
 
     @Getter
-    private final String realName;
+    private final String name;
 
-    ConfigAction(String realName) {
-        this.realName = realName;
+    ConfigAction(String name) {
+        this.name = name;
     }
 
     @Override
     public String toString() {
-        return realName;
+        return name;
     }
 }

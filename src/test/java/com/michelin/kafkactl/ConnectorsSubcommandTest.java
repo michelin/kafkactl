@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.michelin.kafkactl.services.FormatService.TABLE;
+import static com.michelin.kafkactl.utils.constants.ConstantKind.CHANGE_CONNECTOR_STATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,15 +61,14 @@ class ConnectorsSubcommandTest {
 
         int code = cmd.execute("pause", "my-connector");
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("Login failed."));
     }
 
     @Test
-    void shouldChangeStateWhenEmptyConnectorsList() {
+    void shouldNotChangeStateWhenEmptyConnectorsList() {
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(resourceService.changeConnectorState(any(), any(), any(), any()))
-                .thenReturn(null);
+                .thenReturn(Optional.empty());
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
@@ -81,7 +81,6 @@ class ConnectorsSubcommandTest {
 
         int code = cmd.execute("pause", "my-connector");
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("Cannot change state of given connectors."));
     }
 
     @Test
@@ -99,7 +98,7 @@ class ConnectorsSubcommandTest {
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(resourceService.changeConnectorState(any(), any(), any(), any()))
-                .thenReturn(resource);
+                .thenReturn(Optional.of(resource));
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
 
@@ -107,7 +106,7 @@ class ConnectorsSubcommandTest {
 
         int code = cmd.execute("pause", "my-connector");
         assertEquals(0, code);
-        verify(formatService).displayList(eq("ChangeConnectorState"),
+        verify(formatService).displayList(eq(CHANGE_CONNECTOR_STATE),
                 argThat(connectors -> connectors.get(0).equals(resource)),
                 eq(TABLE), eq(cmd.getCommandSpec()));
     }
@@ -134,12 +133,12 @@ class ConnectorsSubcommandTest {
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionFromKind(any()))
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
                 .thenReturn(Optional.of(apiResource));
         when(resourceService.listResourcesWithType(any(), any(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(resourceService.changeConnectorState(any(), any(), any(), any()))
-                .thenReturn(resource);
+                .thenReturn(Optional.of(resource));
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
 
@@ -147,7 +146,7 @@ class ConnectorsSubcommandTest {
 
         int code = cmd.execute("pause", "all");
         assertEquals(0, code);
-        verify(formatService).displayList(eq("ChangeConnectorState"),
+        verify(formatService).displayList(eq(CHANGE_CONNECTOR_STATE),
                 argThat(connectors -> connectors.get(0).equals(resource)),
                 eq(TABLE), eq(cmd.getCommandSpec()));
     }
@@ -156,7 +155,7 @@ class ConnectorsSubcommandTest {
     void shouldThrowExceptionWhenChangeStateOfAll() {
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionFromKind(any()))
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
                 .thenReturn(Optional.empty());
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");

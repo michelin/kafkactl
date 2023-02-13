@@ -8,6 +8,7 @@ import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.*;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -66,7 +67,6 @@ public class DiffSubcommand implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
-            commandSpec.commandLine().getErr().println("Login failed.");
             return 1;
         }
 
@@ -76,74 +76,69 @@ public class DiffSubcommand implements Callable<Integer> {
             throw new CommandLine.ParameterException(commandSpec.commandLine(), "Required one of -f or stdin.");
         }
 
-        List<Resource> resources;
-        if (file.isPresent()) {
-            // List all files to process
-            List<File> yamlFiles = fileService.computeYamlFileList(file.get(), recursive);
-            if (yamlFiles.isEmpty()) {
-                throw new CommandLine.ParameterException(commandSpec.commandLine(), "Could not find YAML or YML files in " + file.get().getName() + " directory.");
+        List<Resource> resources = resourceService.parseResources(file, recursive, commandSpec);
+
+        try {
+            // Validate resource types from resources
+            List<Resource> invalidResources = apiResourcesService.validateResourceTypes(resources);
+            if (!invalidResources.isEmpty()) {
+                String invalid = invalidResources
+                        .stream()
+                        .map(Resource::getKind)
+                        .distinct()
+                        .collect(Collectors.joining(", "));
+                throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type(s) " + invalid + ".");
             }
-            // Load each files
-            resources = fileService.parseResourceListFromFiles(yamlFiles);
-        } else {
-            Scanner scanner = new Scanner(System.in);
-            scanner.useDelimiter("\\Z");
-            resources = fileService.parseResourceListFromString(scanner.next());
+
+            // Validate namespace mismatch
+            String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
+            List<Resource> namespaceMismatch = resources
+                    .stream()
+                    .filter(resource -> resource.getMetadata().getNamespace() != null && !resource.getMetadata().getNamespace().equals(namespace))
+                    .collect(Collectors.toList());
+
+            if (!namespaceMismatch.isEmpty()) {
+                String invalid = namespaceMismatch
+                        .stream()
+                        .map(resource -> resource.getKind() + "/" + resource.getMetadata().getName())
+                        .distinct()
+                        .collect(Collectors.joining(", "));
+                throw new CommandLine.ParameterException(commandSpec.commandLine(), "Namespace mismatch between Kafkactl and YAML document " + invalid + ".");
+            }
+
+            // Load schema content
+            resources.stream()
+                    .filter(resource -> resource.getKind().equals("Schema") && StringUtils.isNotEmpty((CharSequence) resource.getSpec().get(SCHEMA_FILE)))
+                    .forEach(resource -> {
+                        try {
+                            resource.getSpec().put("schema", Files.readString(new File(resource.getSpec().get(SCHEMA_FILE).toString()).toPath()));
+                        } catch (Exception e) {
+                            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE) +
+                                    ". Schema path must be relative to the CLI.");
+                        }
+                    });
+
+            // Process each document individually, return 0 when all succeed
+            int errors = resources.stream()
+                    .map(resource -> {
+                        ApiResource apiResource = apiResourcesService.getResourceDefinitionByKind(resource.getKind()).orElseThrow();
+                        Resource live = resourceService.getSingleResourceWithType(apiResource, namespace, resource.getMetadata().getName(), false);
+                        HttpResponse<Resource> merged = resourceService.apply(apiResource, namespace, resource, true, commandSpec);
+                        if (merged != null && merged.getBody().isPresent()) {
+                            List<String> uDiff = unifiedDiff(live, merged.body());
+                            uDiff.forEach(diff -> commandSpec.commandLine().getOut().println(diff));
+                            return 0;
+                        }
+                        return 1;
+                    })
+                    .mapToInt(value -> value)
+                    .sum();
+
+            return errors > 0 ? 1 : 0;
+        } catch (HttpClientResponseException e) {
+            formatService.displayError(e, commandSpec);
+            return 1;
         }
-
-        // Validate resource types from resources
-        List<Resource> invalidResources = apiResourcesService.validateResourceTypes(resources);
-        if (!invalidResources.isEmpty()) {
-            String invalid = invalidResources.stream().map(Resource::getKind).distinct().collect(Collectors.joining(", "));
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type(s) " + invalid + ".");
-        }
-
-        // Validate namespace mismatch
-        String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
-        List<Resource> nsMismatch = resources.stream()
-                .filter(resource -> resource.getMetadata().getNamespace() != null && !resource.getMetadata().getNamespace().equals(namespace))
-                .collect(Collectors.toList());
-        if (!nsMismatch.isEmpty()) {
-            String invalid = nsMismatch.stream().map(resource -> resource.getKind() + "/" + resource.getMetadata().getName()).distinct().collect(Collectors.joining(", "));
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Namespace mismatch between Kafkactl and YAML document " + invalid + ".");
-        }
-
-        List<ApiResource> apiResources = apiResourcesService.getListResourceDefinition();
-
-        // Load schema content
-        resources.stream()
-                .filter(resource -> resource.getKind().equals("Schema") && StringUtils.isNotEmpty((CharSequence) resource.getSpec().get(SCHEMA_FILE)))
-                .forEach(resource -> {
-                    try {
-                        resource.getSpec().put("schema", Files.readString(new File(resource.getSpec().get(SCHEMA_FILE).toString()).toPath()));
-                    } catch (Exception e) {
-                        throw new CommandLine.ParameterException(commandSpec.commandLine(), "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE) +
-                                ". Schema path must be relative to the CLI.");
-                    }
-                });
-
-        // Process each document individually, return 0 when all succeed
-        int errors = resources.stream()
-                .map(resource -> {
-                    ApiResource apiResource = apiResources.stream()
-                            .filter(apiRes -> apiRes.getKind().equals(resource.getKind()))
-                            .findFirst()
-                            .orElseThrow();
-
-                    Resource live = resourceService.getSingleResourceWithType(apiResource, namespace, resource.getMetadata().getName(), false);
-                    HttpResponse<Resource> merged = resourceService.apply(apiResource, namespace, resource, true, commandSpec);
-                    if (merged != null && merged.getBody().isPresent()) {
-                        List<String> uDiff = unifiedDiff(live, merged.body());
-                        uDiff.forEach(diff -> commandSpec.commandLine().getOut().println(diff));
-                        return 0;
-                    }
-                    formatService.displayError("Cannot diff resource", resource.getKind(), resource.getMetadata().getName(), commandSpec);
-                    return 1;
-                })
-                .mapToInt(value -> value)
-                .sum();
-
-        return errors > 0 ? 1 : 0;
     }
 
     /**

@@ -3,8 +3,12 @@ package com.michelin.kafkactl;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
-import com.michelin.kafkactl.services.*;
+import com.michelin.kafkactl.services.ApiResourcesService;
+import com.michelin.kafkactl.services.FormatService;
+import com.michelin.kafkactl.services.LoginService;
+import com.michelin.kafkactl.services.ResourceService;
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
@@ -33,9 +36,6 @@ class ApplySubcommandTest {
     private ApiResourcesService apiResourcesService;
 
     @Mock
-    private FileService fileService;
-
-    @Mock
     public FormatService formatService;
 
     @Mock
@@ -52,26 +52,25 @@ class ApplySubcommandTest {
 
     @Test
     void shouldNotApplyWhenNotAuthenticated() {
-        when(loginService.doAuthenticate(anyBoolean()))
-                .thenReturn(false);
-
         CommandLine cmd = new CommandLine(applySubcommand);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
+        when(loginService.doAuthenticate(anyBoolean()))
+                .thenReturn(false);
+
         int code = cmd.execute();
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("Login failed."));
     }
 
     @Test
     void shouldNotApplyWhenNoFileInStdin() {
-        when(loginService.doAuthenticate(anyBoolean()))
-                .thenReturn(true);
-
         CommandLine cmd = new CommandLine(applySubcommand);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
+
+        when(loginService.doAuthenticate(anyBoolean()))
+                .thenReturn(true);
 
         int code = cmd.execute();
         assertEquals(2, code);
@@ -80,14 +79,15 @@ class ApplySubcommandTest {
 
     @Test
     void shouldNotApplyWhenYmlFileNotFound() {
-        when(loginService.doAuthenticate(anyBoolean()))
-                .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.emptyList());
-
         CommandLine cmd = new CommandLine(applySubcommand);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
+
+        when(loginService.doAuthenticate(anyBoolean()))
+                .thenReturn(true);
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
+                .thenThrow(new CommandLine.ParameterException(cmd.getCommandSpec().commandLine(),
+                        "Could not find YAML or YML files in topic directory."));
 
         int code = cmd.execute("-f", "topic");
         assertEquals(2, code);
@@ -105,18 +105,16 @@ class ApplySubcommandTest {
                 .spec(Collections.emptyMap())
                 .build();
 
-        when(loginService.doAuthenticate(anyBoolean()))
-                .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.singletonList(new File("path")));
-        when(fileService.parseResourceListFromFiles(any()))
-                .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
-                .thenReturn(Collections.singletonList(resource));
-
         CommandLine cmd = new CommandLine(applySubcommand);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
+
+        when(loginService.doAuthenticate(anyBoolean()))
+                .thenReturn(true);
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
+                .thenReturn(Collections.singletonList(resource));
+        when(apiResourcesService.validateResourceTypes(any()))
+                .thenReturn(Collections.singletonList(resource));
 
         int code = cmd.execute("-f", "topic.yml");
         assertEquals(2, code);
@@ -139,9 +137,7 @@ class ApplySubcommandTest {
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.singletonList(new File("path")));
-        when(fileService.parseResourceListFromFiles(any()))
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
@@ -156,7 +152,7 @@ class ApplySubcommandTest {
     }
 
     @Test
-    void shouldNotApplyNullResponse() {
+    void shouldNotApplyWhenHttpClientResponseException() {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
@@ -167,36 +163,26 @@ class ApplySubcommandTest {
                 .spec(Collections.emptyMap())
                 .build();
 
-        ApiResource apiResource = ApiResource.builder()
-                .kind("Topic")
-                .path("topics")
-                .names(List.of("topics", "topic", "to"))
-                .namespaced(true)
-                .synchronizable(true)
-                .build();
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.singletonList(new File("path")));
-        when(fileService.parseResourceListFromFiles(any()))
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(Collections.singletonList(apiResource));
-        when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
-                .thenReturn(null);
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenThrow(exception);
 
         CommandLine cmd = new CommandLine(applySubcommand);
 
         int code = cmd.execute("-f", "topic.yml");
         assertEquals(1, code);
-        verify(formatService).displayError("Cannot deploy resource", "Topic", "prefix.topic", cmd.getCommandSpec());
+        verify(formatService).displayError(exception, cmd.getCommandSpec());
     }
 
     @Test
@@ -223,16 +209,14 @@ class ApplySubcommandTest {
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.singletonList(new File("path")));
-        when(fileService.parseResourceListFromFiles(any()))
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(Collections.singletonList(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(HttpResponse
                         .ok(resource)
@@ -244,7 +228,7 @@ class ApplySubcommandTest {
 
         int code = cmd.execute("-f", "topic.yml");
         assertEquals(0, code);
-        assertTrue(sw.toString().contains("Success Topic/prefix.topic (Created)."));
+        verify(resourceService).apply(apiResource, "namespace", resource, false, cmd.getCommandSpec());
     }
 
     @Test
@@ -270,16 +254,14 @@ class ApplySubcommandTest {
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.singletonList(new File("path")));
-        when(fileService.parseResourceListFromFiles(any()))
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(Collections.singletonList(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(HttpResponse
                         .ok(resource)
@@ -292,7 +274,7 @@ class ApplySubcommandTest {
         int code = cmd.execute("-f", "topic.yml", "--dry-run");
         assertEquals(0, code);
         assertTrue(sw.toString().contains("Dry run execution."));
-        assertTrue(sw.toString().contains("Success Topic/prefix.topic (Created)."));
+        verify(resourceService).apply(apiResource, "namespace", resource, true, cmd.getCommandSpec());
     }
 
     @Test
@@ -322,16 +304,14 @@ class ApplySubcommandTest {
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.singletonList(new File("path")));
-        when(fileService.parseResourceListFromFiles(any()))
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(Collections.singletonList(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(HttpResponse
                         .ok(resource)
@@ -344,7 +324,7 @@ class ApplySubcommandTest {
         int code = cmd.execute("-f", "topic.yml");
         assertEquals(0, code);
         assertFalse(resource.getSpec().get("schema").toString().isBlank());
-        assertTrue(sw.toString().contains("Success Schema/prefix.schema (Created)."));
+        verify(resourceService).apply(apiResource, "namespace", resource, false, cmd.getCommandSpec());
     }
 
     @Test
@@ -374,16 +354,14 @@ class ApplySubcommandTest {
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.singletonList(new File("path")));
-        when(fileService.parseResourceListFromFiles(any()))
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(Collections.singletonList(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(HttpResponse
                         .ok(resource));
@@ -394,7 +372,7 @@ class ApplySubcommandTest {
 
         int code = cmd.execute("-f", "topic.yml");
         assertEquals(0, code);
-        assertTrue(sw.toString().contains("Success Schema/prefix.schema."));
+        verify(resourceService).apply(apiResource, "namespace", resource, false, cmd.getCommandSpec());
     }
 
     @Test
@@ -424,16 +402,12 @@ class ApplySubcommandTest {
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.singletonList(new File("path")));
-        when(fileService.parseResourceListFromFiles(any()))
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(Collections.singletonList(apiResource));
 
         CommandLine cmd = new CommandLine(applySubcommand);
         StringWriter sw = new StringWriter();

@@ -4,6 +4,7 @@ import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -14,6 +15,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static com.michelin.kafkactl.services.FormatService.TABLE;
+import static com.michelin.kafkactl.utils.constants.ConstantKind.CHANGE_CONNECTOR_STATE;
+import static com.michelin.kafkactl.utils.constants.ConstantKind.DELETE_RECORDS_RESPONSE;
 
 @Command(name = "delete-records", description = "Delete all records within a topic.")
 public class DeleteRecordsSubcommand implements Callable<Integer> {
@@ -53,19 +56,10 @@ public class DeleteRecordsSubcommand implements Callable<Integer> {
         }
 
         if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
-            commandSpec.commandLine().getErr().println("Login failed.");
             return 1;
         }
 
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
-
-        List<Resource> resources = resourceService.deleteRecords(namespace, topic, dryRun, commandSpec);
-        if (!resources.isEmpty()) {
-            formatService.displayList("DeleteRecordsResponse", resources, TABLE, commandSpec);
-        } else {
-            commandSpec.commandLine().getOut().println("No records to delete for the topic " + topic + ".");
-        }
-
-        return 0;
+        return resourceService.deleteRecords(namespace, topic, dryRun, commandSpec);
     }
 }

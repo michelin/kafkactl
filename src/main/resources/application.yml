@@ -17,6 +17,11 @@ kafkactl:
   version: @version@
   config-path: ${user.home}/.kafkactl
   table-format:
+    ResourceDefinition:
+      - "KIND:/metadata/name"
+      - "NAMES:/spec/names"
+      - "NAMESPACED:/spec/namespaced"
+      - "SYNCHRONIZABLE:/spec/synchronizable"
     Namespace:
       - "NAMESPACE:/metadata/name"
       - "CLUSTER:/metadata/cluster"

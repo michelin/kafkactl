@@ -126,7 +126,7 @@ public class LoginService {
 
             return true;
         } catch (HttpClientResponseException e) {
-            System.out.println("Authentication failed with message: " + e.getMessage());
+            System.err.println("Authentication failed because " + e.getMessage().toLowerCase());
         }
 
         return false;

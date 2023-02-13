@@ -40,9 +40,6 @@ class ImportSubcommandTest {
     public ApiResourcesService apiResourcesService;
 
     @Mock
-    public FormatService formatService;
-
-    @Mock
     public KafkactlConfig kafkactlConfig;
 
     @Mock
@@ -62,14 +59,13 @@ class ImportSubcommandTest {
 
         int code = cmd.execute("topic");
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("Login failed."));
     }
 
     @Test
     void shouldNotImportWhenServerNotHaveResourceType() {
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionFromCommandName(any()))
+        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
                 .thenReturn(Optional.empty());
 
         CommandLine cmd = new CommandLine(importSubcommand);
@@ -93,7 +89,7 @@ class ImportSubcommandTest {
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionFromCommandName(any()))
+        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
                 .thenReturn(Optional.of(apiResource));
 
         CommandLine cmd = new CommandLine(importSubcommand);
@@ -127,16 +123,16 @@ class ImportSubcommandTest {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionFromCommandName(any()))
+        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
                 .thenReturn(Optional.of(apiResource));
         when(resourceService.importAll(any(), any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonMap(apiResource, Collections.singletonList(resource)));
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(importSubcommand);
 
         int code = cmd.execute("topic");
         assertEquals(0, code);
-        verify(formatService).displayList("Topic", Collections.singletonList(resource), TABLE, cmd.getCommandSpec());
+        verify(resourceService).importAll(Collections.singletonList(apiResource), "namespace", false, cmd.getCommandSpec());
     }
 
     @Test
@@ -149,22 +145,13 @@ class ImportSubcommandTest {
                 .synchronizable(true)
                 .build();
 
-        Resource resource = Resource.builder()
-                .kind("Topic")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.topic")
-                        .build())
-                .spec(Collections.emptyMap())
-                .build();
-
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionFromCommandName(any()))
+        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
                 .thenReturn(Optional.of(apiResource));
         when(resourceService.importAll(any(), any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonMap(apiResource, Collections.singletonList(resource)));
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(importSubcommand);
         StringWriter sw = new StringWriter();
@@ -173,7 +160,7 @@ class ImportSubcommandTest {
         int code = cmd.execute("topic", "--dry-run");
         assertEquals(0, code);
         assertTrue(sw.toString().contains("Dry run execution."));
-        verify(formatService).displayList("Topic", Collections.singletonList(resource), TABLE, cmd.getCommandSpec());
+        verify(resourceService).importAll(Collections.singletonList(apiResource), "namespace", true, cmd.getCommandSpec());
     }
 
     @Test
@@ -194,29 +181,29 @@ class ImportSubcommandTest {
                 .synchronizable(true)
                 .build();
 
-        Resource resource = Resource.builder()
+        ApiResource nonSyncApiResource = ApiResource.builder()
                 .kind("Topic")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.topic")
-                        .build())
-                .spec(Collections.emptyMap())
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(false)
+                .synchronizable(false)
                 .build();
+
 
         kafkactlCommand.optionalNamespace = Optional.empty();
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(List.of(apiResource, nonNamespacedApiResource));
+        when(apiResourcesService.listResourceDefinitions())
+                .thenReturn(List.of(apiResource, nonNamespacedApiResource, nonSyncApiResource));
         when(resourceService.importAll(any(), any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonMap(apiResource, Collections.singletonList(resource)));
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(importSubcommand);
 
         int code = cmd.execute("all");
         assertEquals(0, code);
-        verify(formatService).displayList("Topic", Collections.singletonList(resource), TABLE, cmd.getCommandSpec());
+        verify(resourceService).importAll(List.of(apiResource, nonNamespacedApiResource), "namespace", false, cmd.getCommandSpec());
     }
 }

@@ -5,6 +5,7 @@ import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.*;
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,9 +34,6 @@ class DiffSubcommandTest {
     private ApiResourcesService apiResourcesService;
 
     @Mock
-    private FileService fileService;
-
-    @Mock
     public FormatService formatService;
 
     @Mock
@@ -61,7 +59,6 @@ class DiffSubcommandTest {
 
         int code = cmd.execute();
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("Login failed."));
     }
 
     @Test
@@ -80,14 +77,15 @@ class DiffSubcommandTest {
 
     @Test
     void shouldNotDiffWhenYmlFileNotFound() {
-        when(loginService.doAuthenticate(anyBoolean()))
-                .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.emptyList());
-
         CommandLine cmd = new CommandLine(diffSubcommand);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
+
+        when(loginService.doAuthenticate(anyBoolean()))
+                .thenReturn(true);
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
+                .thenThrow(new CommandLine.ParameterException(cmd.getCommandSpec().commandLine(),
+                        "Could not find YAML or YML files in topic directory."));
 
         int code = cmd.execute("-f", "topic");
         assertEquals(2, code);
@@ -107,9 +105,7 @@ class DiffSubcommandTest {
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.singletonList(new File("path")));
-        when(fileService.parseResourceListFromFiles(any()))
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -139,9 +135,7 @@ class DiffSubcommandTest {
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.singletonList(new File("path")));
-        when(fileService.parseResourceListFromFiles(any()))
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
@@ -156,7 +150,53 @@ class DiffSubcommandTest {
     }
 
     @Test
-    void shouldNotDiffWhenNullResponse() {
+    void shouldNotDiffWhenHttpClientResponseException() {
+        Resource resource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Collections.emptyMap())
+                .build();
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(loginService.doAuthenticate(anyBoolean()))
+                .thenReturn(true);
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
+                .thenReturn(Collections.singletonList(resource));
+        when(apiResourcesService.validateResourceTypes(any()))
+                .thenReturn(Collections.emptyList());
+        when(kafkactlConfig.getCurrentNamespace())
+                .thenReturn("namespace");
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenThrow(exception);
+
+        CommandLine cmd = new CommandLine(diffSubcommand);
+
+        int code = cmd.execute("-f", "topic.yml");
+        assertEquals(1, code);
+        verify(formatService).displayError(exception, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldNotDiffWhenHttpClientResponseExceptionDuringApply() {
+        Resource live = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Map.of(
+                        "replicationFactor", 3,
+                        "partitions", 3
+                ))
+                .build();
+
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
@@ -179,18 +219,16 @@ class DiffSubcommandTest {
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.singletonList(new File("path")));
-        when(fileService.parseResourceListFromFiles(any()))
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(Collections.singletonList(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenReturn(Optional.of(apiResource));
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
-                .thenReturn(null);
+                .thenReturn(live);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(null);
 
@@ -198,7 +236,62 @@ class DiffSubcommandTest {
 
         int code = cmd.execute("-f", "topic.yml");
         assertEquals(1, code);
-        verify(formatService).displayError("Cannot diff resource", "Topic", "prefix.topic", cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldNotDiffApplyHasNoBody() {
+        Resource live = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Map.of(
+                        "replicationFactor", 3,
+                        "partitions", 3
+                ))
+                .build();
+
+        Resource resource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Collections.emptyMap())
+                .build();
+
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(loginService.doAuthenticate(anyBoolean()))
+                .thenReturn(true);
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
+                .thenReturn(Collections.singletonList(resource));
+        when(apiResourcesService.validateResourceTypes(any()))
+                .thenReturn(Collections.emptyList());
+        when(kafkactlConfig.getCurrentNamespace())
+                .thenReturn("namespace");
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenReturn(Optional.of(apiResource));
+        when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
+                .thenReturn(live);
+        when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(HttpResponse.ok());
+
+        CommandLine cmd = new CommandLine(diffSubcommand);
+
+        int code = cmd.execute("-f", "topic.yml");
+        assertEquals(1, code);
     }
 
     @Test
@@ -242,16 +335,14 @@ class DiffSubcommandTest {
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.singletonList(new File("path")));
-        when(fileService.parseResourceListFromFiles(any()))
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(Collections.singletonList(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenReturn(Optional.of(apiResource));
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
                 .thenReturn(live);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
@@ -305,16 +396,14 @@ class DiffSubcommandTest {
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.singletonList(new File("path")));
-        when(fileService.parseResourceListFromFiles(any()))
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(Collections.singletonList(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenReturn(Optional.of(apiResource));
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
                 .thenReturn(null);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
@@ -369,16 +458,14 @@ class DiffSubcommandTest {
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.singletonList(new File("path")));
-        when(fileService.parseResourceListFromFiles(any()))
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(Collections.singletonList(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenReturn(Optional.of(apiResource));
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
                 .thenReturn(null);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
@@ -434,16 +521,14 @@ class DiffSubcommandTest {
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.singletonList(new File("path")));
-        when(fileService.parseResourceListFromFiles(any()))
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(Collections.singletonList(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(HttpResponse
                         .ok(resource));
@@ -482,28 +567,16 @@ class DiffSubcommandTest {
                 .spec(specs)
                 .build();
 
-        ApiResource apiResource = ApiResource.builder()
-                .kind("Schema")
-                .namespaced(true)
-                .synchronizable(false)
-                .path("schemas")
-                .names(List.of("schemas", "schema", "sc"))
-                .build();
-
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-                .thenReturn(Collections.singletonList(new File("path")));
-        when(fileService.parseResourceListFromFiles(any()))
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
                 .thenReturn("namespace");
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(Collections.singletonList(apiResource));
 
         CommandLine cmd = new CommandLine(diffSubcommand);
         StringWriter sw = new StringWriter();

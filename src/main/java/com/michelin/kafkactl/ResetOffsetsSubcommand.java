@@ -96,7 +96,6 @@ public class ResetOffsetsSubcommand implements Callable<Integer> {
         }
 
         if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
-            commandSpec.commandLine().getErr().println("Login failed.");
             return 1;
         }
 
@@ -133,13 +132,6 @@ public class ResetOffsetsSubcommand implements Callable<Integer> {
                 .spec(consumerGroupResetOffsetSpec)
                 .build();
 
-        List<Resource> resources = resourceService.resetOffsets(namespace, group, consumerGroupResetOffset, dryRun, commandSpec);
-        if (!resources.isEmpty()) {
-            formatService.displayList("ConsumerGroupResetOffsetsResponse", resources, TABLE, commandSpec);
-        } else {
-            commandSpec.commandLine().getOut().println("No offsets to reset for " + (topic.allTopics ? "all topics." : "the topic " + topic.topic + "."));
-        }
-
-        return 0;
+        return resourceService.resetOffsets(namespace, group, consumerGroupResetOffset, dryRun, commandSpec);
     }
 }

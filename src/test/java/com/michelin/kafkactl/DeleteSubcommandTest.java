@@ -4,7 +4,8 @@ import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.*;
-import jakarta.inject.Inject;
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -63,7 +64,6 @@ class DeleteSubcommandTest {
 
         int code = cmd.execute("topic", "myTopic");
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("Login failed."));
     }
 
     @Test
@@ -121,7 +121,7 @@ class DeleteSubcommandTest {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionFromCommandName(any()))
+        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
                 .thenReturn(Optional.empty());
 
         CommandLine cmd = new CommandLine(deleteSubcommand);
@@ -165,7 +165,7 @@ class DeleteSubcommandTest {
     }
 
     @Test
-    void shouldDeleteByFile() {
+    void shouldDeleteByFileSuccess() {
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
                 .path("topics")
@@ -193,8 +193,8 @@ class DeleteSubcommandTest {
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(Collections.singletonList(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenReturn(Optional.of(apiResource));
         when(resourceService.delete(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(true);
 
@@ -204,11 +204,10 @@ class DeleteSubcommandTest {
 
         int code = cmd.execute("-f", "topic");
         assertEquals(0, code);
-        assertTrue(sw.toString().contains("Success Topic/prefix.topic (Deleted)."));
     }
 
     @Test
-    void shouldDeleteByName() {
+    void shouldDeleteByNameSuccess() {
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
                 .path("topics")
@@ -220,12 +219,12 @@ class DeleteSubcommandTest {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionFromCommandName(any()))
+        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
                 .thenReturn(Optional.of(apiResource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(Collections.singletonList(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenReturn(Optional.of(apiResource));
         when(resourceService.delete(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(true);
 
@@ -235,11 +234,10 @@ class DeleteSubcommandTest {
 
         int code = cmd.execute("topic", "prefix.topic");
         assertEquals(0, code);
-        assertTrue(sw.toString().contains("Success Topic/prefix.topic (Deleted)."));
     }
 
     @Test
-    void shouldDeleteByFileDryRun() {
+    void shouldDeleteByFileDryRunSuccess() {
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
                 .path("topics")
@@ -266,8 +264,8 @@ class DeleteSubcommandTest {
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(Collections.singletonList(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenReturn(Optional.of(apiResource));
         when(resourceService.delete(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(true);
 
@@ -278,7 +276,6 @@ class DeleteSubcommandTest {
         int code = cmd.execute("-f", "topic", "--dry-run");
         assertEquals(0, code);
         assertTrue(sw.toString().contains("Dry run execution."));
-        assertTrue(sw.toString().contains("Success Topic/prefix.topic (Deleted)."));
     }
 
     @Test
@@ -310,8 +307,8 @@ class DeleteSubcommandTest {
                 .thenReturn(Collections.singletonList(resource));
         when(apiResourcesService.validateResourceTypes(any()))
                 .thenReturn(Collections.emptyList());
-        when(apiResourcesService.getListResourceDefinition())
-                .thenReturn(Collections.singletonList(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenReturn(Optional.of(apiResource));
         when(resourceService.delete(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(false);
 
@@ -319,6 +316,45 @@ class DeleteSubcommandTest {
 
         int code = cmd.execute("-f", "topic");
         assertEquals(1, code);
-        verify(formatService).displayError("Cannot delete resource", "Topic", "prefix.topic", cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldNotDeleteByFileWhenHttpClientResponseException() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        Resource resource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Collections.emptyMap())
+                .build();
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+        when(loginService.doAuthenticate(anyBoolean()))
+                .thenReturn(true);
+        when(fileService.computeYamlFileList(any(), anyBoolean()))
+                .thenReturn(Collections.singletonList(new File("path")));
+        when(fileService.parseResourceListFromFiles(any()))
+                .thenReturn(Collections.singletonList(resource));
+        when(apiResourcesService.validateResourceTypes(any()))
+                .thenReturn(Collections.emptyList());
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+                .thenThrow(exception);
+
+        CommandLine cmd = new CommandLine(deleteSubcommand);
+
+        int code = cmd.execute("-f", "topic");
+        assertEquals(1, code);
+        verify(formatService).displayError(exception, cmd.getCommandSpec());
     }
 }

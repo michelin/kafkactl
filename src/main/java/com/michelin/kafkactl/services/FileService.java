@@ -16,11 +16,22 @@ import java.util.stream.StreamSupport;
 
 @Singleton
 public class FileService {
+    /**
+     * Get YAML files from given directory or file
+     * @param fileOrDirectory The file/directory from which to search
+     * @param recursive Search recursively or not
+     * @return A list of files
+     */
     public List<File> computeYamlFileList(File fileOrDirectory, boolean recursive) {
         return listAllFiles(new File[]{fileOrDirectory}, recursive)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Parse resource files to resources list
+     * @param files A list of resource files
+     * @return A list of resources
+     */
     public List<Resource> parseResourceListFromFiles(List<File> files) {
         return files.stream()
                 .map(File::toPath)
@@ -36,17 +47,33 @@ public class FileService {
                 .collect(Collectors.toList());
     }
 
-    public List<Resource> parseResourceListFromString(String content){
+    /**
+     * Parse resources from strings to list
+     * @param content The string to parse
+     * @return A list of resources
+     */
+    public List<Resource> parseResourceListFromString(String content) {
         return parseResourceStreamFromString(content)
                 .collect(Collectors.toList());
     }
 
-    private Stream<Resource> parseResourceStreamFromString(String content){
+    /**
+     * Parse resources from strings to stream
+     * @param content The string to parse
+     * @return A stream of resources
+     */
+    private Stream<Resource> parseResourceStreamFromString(String content) {
         Yaml yaml = new Yaml(new Constructor(Resource.class));
         return StreamSupport.stream(yaml.loadAll(content).spliterator(), false)
                 .map(Resource.class::cast);
     }
 
+    /**
+     * Get YAML files from given directory or file
+     * @param rootDir The file/directory from which to search
+     * @param recursive Search recursively or not
+     * @return A list of files
+     */
     private Stream<File> listAllFiles(File[] rootDir, boolean recursive) {
         return Arrays.stream(rootDir)
                 .flatMap(currentElement -> {

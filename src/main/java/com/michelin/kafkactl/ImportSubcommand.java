@@ -59,7 +59,6 @@ public class ImportSubcommand implements Callable<Integer> {
         }
 
         if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
-            commandSpec.commandLine().getErr().println("Login failed.");
             return 1;
         }
 
@@ -68,11 +67,7 @@ public class ImportSubcommand implements Callable<Integer> {
 
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
 
-        Map<ApiResource, List<Resource>> resources = resourceService.importAll(apiResources, namespace, dryRun, commandSpec);
-
-        // Display all resources by type
-        resources.forEach((k, v) -> formatService.displayList(k.getKind(), v, TABLE, commandSpec));
-        return 0;
+        return resourceService.importAll(apiResources, namespace, dryRun, commandSpec);
     }
 
     /**
@@ -82,14 +77,14 @@ public class ImportSubcommand implements Callable<Integer> {
     private List<ApiResource> validateResourceType() {
         // Specific case ALL
         if (resourceType.equalsIgnoreCase("ALL")) {
-            return apiResourcesService.getListResourceDefinition()
+            return apiResourcesService.listResourceDefinitions()
                     .stream()
                     .filter(ApiResource::isSynchronizable)
                     .collect(Collectors.toList());
         }
 
         // Otherwise, check resource exists
-        Optional<ApiResource> optionalApiResource = apiResourcesService.getResourceDefinitionFromCommandName(resourceType);
+        Optional<ApiResource> optionalApiResource = apiResourcesService.getResourceDefinitionByCommandName(resourceType);
         if (optionalApiResource.isEmpty()) {
             throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type " + resourceType + ".");
         }

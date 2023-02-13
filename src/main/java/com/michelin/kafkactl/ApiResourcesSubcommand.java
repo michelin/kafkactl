@@ -1,11 +1,21 @@
 package com.michelin.kafkactl;
 
+import com.michelin.kafkactl.models.ObjectMeta;
+import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.ApiResourcesService;
+import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
+
+import static com.michelin.kafkactl.services.FormatService.TABLE;
+import static com.michelin.kafkactl.utils.constants.ConstantKind.RESOURCE_DEFINITION;
 
 @CommandLine.Command(name = "api-resources", description = "Print the supported API resources on the server.")
 public class ApiResourcesSubcommand implements Callable<Integer> {
@@ -14,6 +24,9 @@ public class ApiResourcesSubcommand implements Callable<Integer> {
 
     @Inject
     public LoginService loginService;
+
+    @Inject
+    public FormatService formatService;
 
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
@@ -28,22 +41,27 @@ public class ApiResourcesSubcommand implements Callable<Integer> {
     @Override
     public Integer call() {
         if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
-            commandSpec.commandLine().getErr().println("Login failed.");
             return 1;
         }
 
-        CommandLine.Help.TextTable textTable = CommandLine.Help.TextTable.forColumns(
-                CommandLine.Help.defaultColorScheme(CommandLine.Help.Ansi.AUTO),
-                new CommandLine.Help.Column(30, 0, CommandLine.Help.Column.Overflow.SPAN),
-                new CommandLine.Help.Column(30, 2, CommandLine.Help.Column.Overflow.SPAN),
-                new CommandLine.Help.Column(30, 2, CommandLine.Help.Column.Overflow.SPAN));
+        try {
+            List<Resource> resources = apiResourcesService.listResourceDefinitions()
+                    .stream()
+                    .map(apiResource -> Resource.builder()
+                            .metadata(ObjectMeta.builder()
+                                    .name(apiResource.getKind())
+                                    .build())
+                            .spec(Map.of("names", String.join(",", apiResource.getNames()),
+                                    "namespaced", String.valueOf(apiResource.isNamespaced()),
+                                    "synchronizable", String.valueOf(apiResource.isSynchronizable())))
+                            .build())
+                    .collect(Collectors.toList());
 
-        textTable.addRowValues("KIND", "NAMES", "NAMESPACED");
-
-        apiResourcesService.getListResourceDefinition().forEach(rd ->
-                textTable.addRowValues(rd.getKind(), String.join(",", rd.getNames()), String.valueOf(rd.isNamespaced())));
-
-        commandSpec.commandLine().getOut().println(textTable);
-        return 0;
+            formatService.displayList(RESOURCE_DEFINITION, resources, TABLE, commandSpec);
+            return 0;
+        } catch (HttpClientResponseException exception) {
+            formatService.displayError(exception, commandSpec);
+            return 1;
+        }
     }
 }

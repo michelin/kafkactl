@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: Topic
+metadata:
+  name: myPrefix.topic
+spec:
+  replicationFactor: 3
+  partitions: 3
+  configs:
+    min.insync.replicas: '2'
+    cleanup.policy: delete
+    retention.ms: '60000'

@@ -18,31 +18,46 @@ public class ApiResourcesService {
     @Inject
     public LoginService loginService;
 
-    public List<ApiResource> getListResourceDefinition() {
+    /**
+     * List all resource definitions
+     * @return A list of API resources
+     */
+    public List<ApiResource> listResourceDefinitions() {
         return resourceClient.listResourceDefinitions(loginService.getAuthorization());
     }
 
-    public Optional<ApiResource> getResourceDefinitionFromKind(String kind) {
-        List<ApiResource> apiResources = getListResourceDefinition();
-        return apiResources.stream()
+    /**
+     * Get a resource definition by kind
+     * @param kind The kind
+     * @return The resource definition if it exists
+     */
+    public Optional<ApiResource> getResourceDefinitionByKind(String kind) {
+        return listResourceDefinitions()
+                .stream()
                 .filter(resource -> resource.getKind().equals(kind))
                 .findFirst();
     }
 
-    public Optional<ApiResource> getResourceDefinitionFromCommandName(String name) {
-        List<ApiResource> apiResources = getListResourceDefinition();
-        return apiResources.stream()
+    /**
+     * Get a resource definition by command name
+     * @param name The name
+     * @return The resource definition if it exists
+     */
+    public Optional<ApiResource> getResourceDefinitionByCommandName(String name) {
+        return listResourceDefinitions()
+                .stream()
                 .filter(resource -> resource.getNames().contains(name))
                 .findFirst();
     }
 
     public List<Resource> validateResourceTypes(List<Resource> resources) {
-        List<String> allowedKinds = this.getListResourceDefinition()
+        List<String> allowedKinds = listResourceDefinitions()
                 .stream()
                 .map(ApiResource::getKind)
                 .collect(Collectors.toList());
 
-        return resources.stream()
+        return resources
+                .stream()
                 .filter(resource -> !allowedKinds.contains(resource.getKind()))
                 .collect(Collectors.toList());
     }

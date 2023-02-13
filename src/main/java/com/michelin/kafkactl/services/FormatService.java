@@ -22,6 +22,8 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static io.micronaut.core.util.StringUtils.EMPTY_STRING;
+
 @Singleton
 public class FormatService {
     public static final String YAML = "yaml";
@@ -55,31 +57,63 @@ public class FormatService {
     }
 
     /**
-     * Display an error
-     * @param e The HTTP response error
+     * Display an error for a given particular resource kind
+     * E.g., apply, delete, get
+     * @param exception The HTTP response error
      * @param kind The resource kind
      * @param name The resource name
+     * @param commandSpec The command
      */
-    public void displayError(HttpClientResponseException e, String kind, String name, CommandLine.Model.CommandSpec commandSpec) {
-        Optional<Status> statusOptional = e.getResponse().getBody(Status.class);
+    public void displayError(HttpClientResponseException exception, String kind, String name, CommandLine.Model.CommandSpec commandSpec) {
+        Optional<Status> statusOptional = exception.getResponse().getBody(Status.class);
+        String beautifulKind = beautifulKind(kind);
         if (statusOptional.isPresent() && statusOptional.get().getDetails() != null && !statusOptional.get().getDetails().getCauses().isEmpty()) {
             Status status = statusOptional.get();
             String causes = "\n - " + String.join("\n - ", status.getDetails().getCauses());
-
-            commandSpec.commandLine().getErr().printf("Failed %s/%s %s for cause(s): %s%n", kind, name, status.getMessage(), causes);
+            commandSpec.commandLine().getErr().printf("%s \"%s\" failed because %s (%s): %s%n", beautifulKind, name, status.getMessage().toLowerCase(),
+                    exception.getStatus().getCode(), causes);
         } else {
-            displayError(e.getMessage(), kind, name, commandSpec);
+            commandSpec.commandLine().getErr().printf("%s \"%s\" failed because %s (%s).%n", beautifulKind, name, exception.getMessage().toLowerCase(),
+                    exception.getStatus().getCode());
         }
     }
 
     /**
-     * Display an error
-     * @param errorMessage The error message
+     * Display an error for a given kind of resources
+     * @param exception The HTTP response error
      * @param kind The resource kind
      * @param name The resource name
+     * @param commandSpec The command
      */
-    public void displayError(String errorMessage, String kind, String name, CommandLine.Model.CommandSpec commandSpec) {
-        commandSpec.commandLine().getErr().printf("Failed %s/%s %s.%n", kind, name, errorMessage);
+    public void displayError(HttpClientResponseException exception, String kind, CommandLine.Model.CommandSpec commandSpec) {
+        Optional<Status> statusOptional = exception.getResponse().getBody(Status.class);
+        String beautifulKind = beautifulKind(kind);
+        if (statusOptional.isPresent() && statusOptional.get().getDetails() != null && !statusOptional.get().getDetails().getCauses().isEmpty()) {
+            Status status = statusOptional.get();
+            String causes = "\n - " + String.join("\n - ", status.getDetails().getCauses());
+            commandSpec.commandLine().getErr().printf("%s(s) failed because %s (%s): %s%n", beautifulKind,
+                    status.getMessage().toLowerCase(), exception.getStatus().getCode(), causes);
+        } else {
+            commandSpec.commandLine().getErr().printf("%s(s) failed because %s (%s).%n", beautifulKind,
+                    exception.getMessage().toLowerCase(), exception.getStatus().getCode());
+        }
+    }
+
+    /**
+     * Display an generic error
+     * @param exception The HTTP client exception
+     * @param commandSpec The command
+     */
+    public void displayError(HttpClientResponseException exception, CommandLine.Model.CommandSpec commandSpec) {
+        Optional<Status> statusOptional = exception.getResponse().getBody(Status.class);
+        if (statusOptional.isPresent() && statusOptional.get().getDetails() != null && !statusOptional.get().getDetails().getCauses().isEmpty()) {
+            Status status = statusOptional.get();
+            String causes = "\n - " + String.join("\n - ", status.getDetails().getCauses());
+            commandSpec.commandLine().getErr().printf("Failed because %s (%s): %s%n", exception.getMessage().toLowerCase(), exception.getStatus().getCode(),
+                    causes);
+        } else {
+            commandSpec.commandLine().getErr().printf("Failed because %s (%s).%n", exception.getMessage().toLowerCase(), exception.getStatus().getCode());
+        }
     }
 
     /**
@@ -107,6 +141,10 @@ public class FormatService {
         representer.addClassTag(Resource.class, Tag.MAP);
         Yaml yaml = new Yaml(representer, options);
         commandSpec.commandLine().getOut().println(yaml.dumpAll(resources.iterator()));
+    }
+
+    public String beautifulKind(String kind) {
+        return kind.substring(0, 1).toUpperCase() + kind.substring(1).replaceAll("(.)([A-Z])", "$1 $2").toLowerCase();
     }
 
     public static class PrettyTextTable {
@@ -184,8 +222,8 @@ public class FormatService {
                             StdDateFormat sdf = new StdDateFormat();
                             Date d = sdf.parse(cell.asText());
                             output = new PrettyTime().format(d);
-                        } catch ( ParseException e) {
-                            output = cell.asText();
+                        } catch (ParseException e) {
+                            output = EMPTY_STRING;
                         }
                         break;
                     case "PERIOD":
@@ -198,7 +236,7 @@ public class FormatService {
                             output += hours > 0 ? (hours + "h") : "";
                             output += minutes > 0 ? (minutes + "m") : "";
                         } catch (NumberFormatException e) {
-                            output = "err:" + cell;
+                            output = EMPTY_STRING;
                         }
                         break;
                     case "NONE":
@@ -208,7 +246,7 @@ public class FormatService {
                             cell.elements().forEachRemaining(jsonNode -> childs.add(jsonNode.asText()));
                             output = "[" + String.join(",", childs) + "]";
                         } else {
-                            output = cell.asText(StringUtils.EMPTY_STRING);
+                            output = cell.asText(EMPTY_STRING);
                         }
                         break;
                 }

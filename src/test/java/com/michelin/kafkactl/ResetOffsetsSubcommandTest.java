@@ -38,9 +38,6 @@ class ResetOffsetsSubcommandTest {
     public ResourceService resourceService;
 
     @Mock
-    public FormatService formatService;
-
-    @Mock
     public KafkactlConfig kafkactlConfig;
 
     @Mock
@@ -60,45 +57,27 @@ class ResetOffsetsSubcommandTest {
 
         int code = cmd.execute("--group", "myGroup", "--all-topics", "--to-earliest");
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("Login failed."));
-    }
-
-    @Test
-    void shouldHandleEmptyResponseForAllTopics() {
-        kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
-                .thenReturn(true);
-        when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
-                .thenReturn(Collections.emptyList());
-
-        CommandLine cmd = new CommandLine(resetOffsetsSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setOut(new PrintWriter(sw));
-
-        int code = cmd.execute("--group", "myGroup", "--all-topics", "--to-earliest");
-        assertEquals(0, code);
-        assertTrue(sw.toString().contains("No offsets to reset for all topics."));
-    }
-
-    @Test
-    void shouldHandleEmptyResponseForGivenTopic() {
-        kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(anyBoolean()))
-                .thenReturn(true);
-        when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
-                .thenReturn(Collections.emptyList());
-
-        CommandLine cmd = new CommandLine(resetOffsetsSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setOut(new PrintWriter(sw));
-
-        int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--to-earliest");
-        assertEquals(0, code);
-        assertTrue(sw.toString().contains("No offsets to reset for the topic myTopic."));
     }
 
     @Test
     void shouldResetOffsetsToEarliest() {
+        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+        when(loginService.doAuthenticate(anyBoolean()))
+                .thenReturn(true);
+        when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(0);
+
+        CommandLine cmd = new CommandLine(resetOffsetsSubcommand);
+
+        int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--to-earliest");
+        assertEquals(0, code);
+        verify(resourceService).resetOffsets(eq("namespace"), eq("myGroup"),
+                argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("TO_EARLIEST")),
+                eq(false), eq(cmd.getCommandSpec()));
+    }
+
+    @Test
+    void shouldResetOffsetsToEarliestDryRun() {
         Resource resetOffset = Resource.builder()
                 .metadata(ObjectMeta.builder()
                         .name("groupID")
@@ -113,16 +92,18 @@ class ResetOffsetsSubcommandTest {
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonList(resetOffset));
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(resetOffsetsSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--to-earliest");
+        int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--to-earliest", "--dry-run");
         assertEquals(0, code);
-        verify(resourceService).resetOffsets(any(), any(), argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("TO_EARLIEST")),
-                anyBoolean(), any());
-        verify(formatService).displayList("ConsumerGroupResetOffsetsResponse", Collections.singletonList(resetOffset),
-                TABLE, cmd.getCommandSpec());
+        assertTrue(sw.toString().contains("Dry run execution."));
+        verify(resourceService).resetOffsets(eq("namespace"), eq("myGroup"),
+                argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("TO_EARLIEST")),
+                eq(true), eq(cmd.getCommandSpec()));
     }
 
     @Test
@@ -141,16 +122,15 @@ class ResetOffsetsSubcommandTest {
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonList(resetOffset));
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(resetOffsetsSubcommand);
 
         int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--to-latest");
         assertEquals(0, code);
-        verify(resourceService).resetOffsets(any(), any(), argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("TO_LATEST")),
-                anyBoolean(), any());
-        verify(formatService).displayList("ConsumerGroupResetOffsetsResponse", Collections.singletonList(resetOffset),
-                TABLE, cmd.getCommandSpec());
+        verify(resourceService).resetOffsets(eq("namespace"), eq("myGroup"),
+                argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("TO_LATEST")),
+                eq(false), eq(cmd.getCommandSpec()));
     }
 
     @Test
@@ -169,16 +149,15 @@ class ResetOffsetsSubcommandTest {
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonList(resetOffset));
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(resetOffsetsSubcommand);
 
         int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--to-datetime=2000-01-01T12:00:00Z");
         assertEquals(0, code);
-        verify(resourceService).resetOffsets(any(), any(), argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("TO_DATETIME") &&
-                        resource.getSpec().get(OPTIONS).equals("2000-01-01T12:00:00Z")), anyBoolean(), any());
-        verify(formatService).displayList("ConsumerGroupResetOffsetsResponse", Collections.singletonList(resetOffset),
-                TABLE, cmd.getCommandSpec());
+        verify(resourceService).resetOffsets(eq("namespace"), eq("myGroup"),
+                argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("TO_DATETIME")),
+                eq(false), eq(cmd.getCommandSpec()));
     }
 
     @Test
@@ -197,16 +176,15 @@ class ResetOffsetsSubcommandTest {
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonList(resetOffset));
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(resetOffsetsSubcommand);
 
         int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--shift-by=10");
         assertEquals(0, code);
-        verify(resourceService).resetOffsets(any(), any(), argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("SHIFT_BY") &&
-                resource.getSpec().get(OPTIONS).equals(10)), anyBoolean(), any());
-        verify(formatService).displayList("ConsumerGroupResetOffsetsResponse", Collections.singletonList(resetOffset),
-                TABLE, cmd.getCommandSpec());
+        verify(resourceService).resetOffsets(eq("namespace"), eq("myGroup"),
+                argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("SHIFT_BY")),
+                eq(false), eq(cmd.getCommandSpec()));
     }
 
     @Test
@@ -225,16 +203,16 @@ class ResetOffsetsSubcommandTest {
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonList(resetOffset));
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(resetOffsetsSubcommand);
 
         int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--by-duration=PT10M");
         assertEquals(0, code);
-        verify(resourceService).resetOffsets(any(), any(), argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("BY_DURATION") &&
-                resource.getSpec().get(OPTIONS).equals("PT10M")), anyBoolean(), any());
-        verify(formatService).displayList("ConsumerGroupResetOffsetsResponse", Collections.singletonList(resetOffset),
-                TABLE, cmd.getCommandSpec());
+        verify(resourceService).resetOffsets(eq("namespace"), eq("myGroup"),
+                argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("BY_DURATION") &&
+                        resource.getSpec().get(OPTIONS).equals("PT10M")),
+                eq(false), eq(cmd.getCommandSpec()));
     }
 
     @Test
@@ -249,19 +227,21 @@ class ResetOffsetsSubcommandTest {
                         "method", "TO_OFFSET"))
                 .build();
 
-        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+        kafkactlCommand.optionalNamespace = Optional.empty();
         when(loginService.doAuthenticate(anyBoolean()))
                 .thenReturn(true);
+        when(kafkactlConfig.getCurrentNamespace())
+                .thenReturn("namespace");
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonList(resetOffset));
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(resetOffsetsSubcommand);
 
         int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--to-offset=50");
         assertEquals(0, code);
-        verify(resourceService).resetOffsets(any(), any(), argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("TO_OFFSET") &&
-                resource.getSpec().get(OPTIONS).equals(50)), anyBoolean(), any());
-        verify(formatService).displayList("ConsumerGroupResetOffsetsResponse", Collections.singletonList(resetOffset),
-                TABLE, cmd.getCommandSpec());
+        verify(resourceService).resetOffsets(eq("namespace"), eq("myGroup"),
+                argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("TO_OFFSET") &&
+                        resource.getSpec().get(OPTIONS).equals(50)),
+                eq(false), eq(cmd.getCommandSpec()));
     }
 }

@@ -4,6 +4,7 @@ import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.*;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
@@ -84,12 +85,60 @@ public class DeleteSubcommand implements Callable<Integer> {
         }
 
         if (!loginService.doAuthenticate(kafkactlCommand.verbose)) {
-            commandSpec.commandLine().getErr().println("Login failed.");
             return 1;
         }
 
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
-        List<Resource> resources;
+        List<Resource> resources = parseResources(namespace);
+
+        try {
+            // Validate resource types from resources
+            List<Resource> invalidResources = apiResourcesService.validateResourceTypes(resources);
+            if (!invalidResources.isEmpty()) {
+                String invalid = invalidResources
+                        .stream()
+                        .map(Resource::getKind)
+                        .distinct()
+                        .collect(Collectors.joining(", "));
+                throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type(s) " + invalid + ".");
+            }
+
+            // Validate namespace mismatch
+            List<Resource> namespaceMismatch = resources
+                    .stream()
+                    .filter(resource -> resource.getMetadata().getNamespace() != null && !resource.getMetadata().getNamespace().equals(namespace))
+                    .collect(Collectors.toList());
+            if (!namespaceMismatch.isEmpty()) {
+                String invalid = namespaceMismatch
+                        .stream()
+                        .map(resource -> resource.getKind() + "/" + resource.getMetadata().getName())
+                        .distinct()
+                        .collect(Collectors.joining(", "));
+                throw new CommandLine.ParameterException(commandSpec.commandLine(), "Namespace mismatch between Kafkactl and YAML document " + invalid + ".");
+            }
+
+            // Process each document individually, return 0 when all succeed
+            int errors = resources.stream()
+                    .map(resource -> {
+                        ApiResource apiResource = apiResourcesService.getResourceDefinitionByKind(resource.getKind()).orElseThrow();
+                        return resourceService.delete(apiResource, namespace, resource.getMetadata().getName(), dryRun, commandSpec);
+                    })
+                    .mapToInt(value -> Boolean.TRUE.equals(value) ? 0 : 1)
+                    .sum();
+
+            return errors > 0 ? 1 : 0;
+        } catch (HttpClientResponseException e) {
+            formatService.displayError(e, commandSpec);
+            return 1;
+        }
+    }
+
+    /**
+     * Parse given resources
+     * @param namespace The namespace
+     * @return A list of resources
+     */
+    private List<Resource> parseResources(String namespace) {
         if (config.fileConfig != null && config.fileConfig.file.isPresent()) {
             // List all files to process
             List<File> yamlFiles = fileService.computeYamlFileList(config.fileConfig.file.get(), config.fileConfig.recursive);
@@ -97,58 +146,20 @@ public class DeleteSubcommand implements Callable<Integer> {
                 throw new CommandLine.ParameterException(commandSpec.commandLine(), "Could not find YAML or YML files in " + config.fileConfig.file.get().getName() + " directory.");
             }
             // Load each files
-            resources = fileService.parseResourceListFromFiles(yamlFiles);
-        } else {
-            Optional<ApiResource> optionalApiResource = apiResourcesService.getResourceDefinitionFromCommandName(config.nameConfig.resourceType);
-            if (optionalApiResource.isEmpty()) {
-                throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type(s) " + config.nameConfig.resourceType + ".");
-            }
-            // Generate a single resource with minimum details from input
-            resources = List.of(Resource.builder()
-                    .metadata(ObjectMeta.builder()
-                            .name(config.nameConfig.name)
-                            .namespace(namespace)
-                            .build())
-                    .kind(optionalApiResource.get().getKind())
-                    .build());
+            return fileService.parseResourceListFromFiles(yamlFiles);
         }
 
-        // Validate resource types from resources
-        List<Resource> invalidResources = apiResourcesService.validateResourceTypes(resources);
-        if (!invalidResources.isEmpty()) {
-            String invalid = invalidResources.stream().map(Resource::getKind).distinct().collect(Collectors.joining(", "));
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type(s) " + invalid + ".");
+        Optional<ApiResource> optionalApiResource = apiResourcesService.getResourceDefinitionByCommandName(config.nameConfig.resourceType);
+        if (optionalApiResource.isEmpty()) {
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type(s) " + config.nameConfig.resourceType + ".");
         }
-
-        // Validate namespace mismatch
-        List<Resource> nsMismatch = resources.stream()
-                .filter(resource -> resource.getMetadata().getNamespace() != null && !resource.getMetadata().getNamespace().equals(namespace))
-                .collect(Collectors.toList());
-        if (!nsMismatch.isEmpty()) {
-            String invalid = nsMismatch.stream().map(resource -> resource.getKind() + "/" + resource.getMetadata().getName()).distinct().collect(Collectors.joining(", "));
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Namespace mismatch between Kafkactl and YAML document " + invalid + ".");
-        }
-
-        List<ApiResource> apiResources = apiResourcesService.getListResourceDefinition();
-
-        // Process each document individually, return 0 when all succeed
-        int errors = resources.stream()
-                .map(resource -> {
-                    ApiResource apiResource = apiResources.stream()
-                            .filter(apiRes -> apiRes.getKind().equals(resource.getKind()))
-                            .findFirst()
-                            .orElseThrow();
-                    boolean success = resourceService.delete(apiResource, namespace, resource.getMetadata().getName(), dryRun, commandSpec);
-                    if (success) {
-                        commandSpec.commandLine().getOut().println(CommandLine.Help.Ansi.AUTO.string("@|bold,green Success |@") + apiResource.getKind() + "/" + resource.getMetadata().getName() + " (Deleted).");
-                    } else {
-                        formatService.displayError("Cannot delete resource", resource.getKind(), resource.getMetadata().getName(), commandSpec);
-                    }
-                    return success;
-                })
-                .mapToInt(value -> Boolean.TRUE.equals(value) ? 0 : 1)
-                .sum();
-
-        return errors > 0 ? 1 : 0;
+        // Generate a single resource with minimum details from input
+        return List.of(Resource.builder()
+                .metadata(ObjectMeta.builder()
+                        .name(config.nameConfig.name)
+                        .namespace(namespace)
+                        .build())
+                .kind(optionalApiResource.get().getKind())
+                .build());
     }
 }

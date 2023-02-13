@@ -29,9 +29,6 @@ class ConnectClustersSubcommandTest {
     private KafkactlConfig kafkactlConfig;
 
     @Mock
-    private FormatService formatService;
-
-    @Mock
     private ResourceService resourceService;
 
     @Mock
@@ -45,54 +42,49 @@ class ConnectClustersSubcommandTest {
 
     @Test
     void shouldNotExecuteWhenNotLoggedIn() {
-        when(loginService.doAuthenticate(anyBoolean())).thenReturn(false);
         CommandLine cmd = new CommandLine(connectClustersSubcommand);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
+        when(loginService.doAuthenticate(anyBoolean()))
+                .thenReturn(false);
+
         int code = cmd.execute("vaults");
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("Login failed."));
     }
 
     @Test
-    void shouldDisplayEmptyVaultsListWhenNoConnectClusterAndNoAvailableClusters() {
-        when(loginService.doAuthenticate(anyBoolean())).thenReturn(true);
+    void shouldListAvailableVaultsClustersSuccess() {
+        when(loginService.doAuthenticate(anyBoolean()))
+                .thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
         when(resourceService.listAvailableVaultsConnectClusters(any(), any()))
-                .thenReturn(List.of());
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(connectClustersSubcommand);
 
         int code = cmd.execute("vaults");
         assertEquals(0, code);
-        verify(formatService).displayList("ConnectCluster", List.of(), "table", cmd.getCommandSpec());
+        verify(resourceService).listAvailableVaultsConnectClusters("namespace", cmd.getCommandSpec());
     }
 
     @Test
-    void shouldDisplayVaultsListWhenNoConnectCluster() {
-        when(loginService.doAuthenticate(anyBoolean())).thenReturn(true);
+    void shouldListAvailableVaultsClustersFail() {
+        when(loginService.doAuthenticate(anyBoolean()))
+                .thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
-
-        Resource resource = Resource.builder()
-                .kind("ConnectCluster")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder().build())
-                .spec(Collections.emptyMap())
-                .build();
-
-        when(resourceService.listAvailableVaultsConnectClusters(anyString(), any()))
-                .thenReturn(List.of(resource));
+        when(resourceService.listAvailableVaultsConnectClusters(any(), any()))
+                .thenReturn(1);
 
         CommandLine cmd = new CommandLine(connectClustersSubcommand);
 
         int code = cmd.execute("vaults");
-        assertEquals(0, code);
-        verify(formatService).displayList("ConnectCluster", List.of(resource), "table", cmd.getCommandSpec());
+        assertEquals(1, code);
+        verify(resourceService).listAvailableVaultsConnectClusters("namespace", cmd.getCommandSpec());
     }
 
     @Test
@@ -112,7 +104,7 @@ class ConnectClustersSubcommandTest {
     }
 
     @Test
-    void shouldDisplayVaultsResultsWhenConnectClusterAndSecretsDefined() {
+    void shouldVaultSuccess() {
         when(loginService.doAuthenticate(anyBoolean())).thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
@@ -132,12 +124,12 @@ class ConnectClustersSubcommandTest {
                 .build();
 
         when(resourceService.vaultsOnConnectClusters(any(), any(), any(), any()))
-                .thenReturn(List.of(resource1, resource2));
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(connectClustersSubcommand);
 
         int code = cmd.execute("vaults", "connectCluster", "secret1", "secret2");
         assertEquals(0, code);
-        verify(formatService).displayList("VaultResponse", List.of(resource1, resource2), "table", cmd.getCommandSpec());
+        verify(resourceService).vaultsOnConnectClusters("namespace", "connectCluster", List.of("secret1", "secret2"), cmd.getCommandSpec());
     }
 }
