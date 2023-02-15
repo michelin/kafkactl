@@ -389,14 +389,6 @@ class ApplySubcommandTest {
                 .spec(specs)
                 .build();
 
-        ApiResource apiResource = ApiResource.builder()
-                .kind("Schema")
-                .namespaced(true)
-                .synchronizable(false)
-                .path("schemas")
-                .names(List.of("schemas", "schema", "sc"))
-                .build();
-
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))

@@ -1,22 +1,15 @@
 package com.michelin.kafkactl;
 
-import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
-import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-import java.util.List;
 import java.util.concurrent.Callable;
-
-import static com.michelin.kafkactl.services.FormatService.TABLE;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.CHANGE_CONNECTOR_STATE;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.DELETE_RECORDS_RESPONSE;
 
 @Command(name = "delete-records", description = "Delete all records within a topic.")
 public class DeleteRecordsSubcommand implements Callable<Integer> {

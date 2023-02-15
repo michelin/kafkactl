@@ -1,7 +1,6 @@
 package com.michelin.kafkactl;
 
 import com.michelin.kafkactl.models.ApiResource;
-import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
@@ -13,12 +12,9 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
-
-import static com.michelin.kafkactl.services.FormatService.TABLE;
 
 @Command(name = "import", description = "Import non-synchronized resources")
 public class ImportSubcommand implements Callable<Integer> {

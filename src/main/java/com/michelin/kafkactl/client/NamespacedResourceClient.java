@@ -2,7 +2,6 @@ package com.michelin.kafkactl.client;
 
 import com.michelin.kafkactl.client.predicates.RetryTimeoutPredicate;
 import com.michelin.kafkactl.models.Resource;
-import com.michelin.kafkactl.models.SchemaCompatibility;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.*;
 import io.micronaut.http.client.annotation.Client;
@@ -10,7 +9,6 @@ import io.micronaut.retry.annotation.Retryable;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Client("${kafkactl.api}/api/namespaces/")
 public interface NamespacedResourceClient {

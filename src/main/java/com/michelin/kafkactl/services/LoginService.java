@@ -1,7 +1,6 @@
 package com.michelin.kafkactl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.michelin.kafkactl.KafkactlCommand;
 import com.michelin.kafkactl.KafkactlConfig;
 import com.michelin.kafkactl.client.BearerAccessRefreshToken;
 import com.michelin.kafkactl.client.ClusterResourceClient;

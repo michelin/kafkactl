@@ -2,8 +2,6 @@ package com.michelin.kafkactl;
 
 import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.configuration.picocli.PicocliRunner;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;

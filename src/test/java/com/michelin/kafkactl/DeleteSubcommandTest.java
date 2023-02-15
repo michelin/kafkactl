@@ -320,14 +320,6 @@ class DeleteSubcommandTest {
 
     @Test
     void shouldNotDeleteByFileWhenHttpClientResponseException() {
-        ApiResource apiResource = ApiResource.builder()
-                .kind("Topic")
-                .path("topics")
-                .names(List.of("topics", "topic", "to"))
-                .namespaced(true)
-                .synchronizable(true)
-                .build();
-
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")

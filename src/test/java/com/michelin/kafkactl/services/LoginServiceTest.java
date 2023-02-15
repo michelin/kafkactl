@@ -61,7 +61,25 @@ class LoginServiceTest {
     }
 
     @Test
-    void shouldNotBeAuthenticatedWhenHttpClientResponseException() {
+    void shouldNotBeAuthenticatedWhenThrowUnauthorized() {
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.unauthorized());
+        when(kafkactlConfig.getConfigPath())
+                .thenReturn("src/test/resources/login");
+        when(clusterResourceClient.tokenInfo(any()))
+                .thenThrow(exception);
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
+        boolean actual = loginService.isAuthenticated(cmd.getCommandSpec(), true);
+        assertTrue(sw.toString().isBlank());
+        assertFalse(actual);
+    }
+
+    @Test
+    void shouldNotBeAuthenticatedWhenThrowException() {
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         when(kafkactlConfig.getConfigPath())
                 .thenReturn("src/test/resources/login");
@@ -79,7 +97,7 @@ class LoginServiceTest {
     }
 
     @Test
-    void shouldBeAuthenticatedWhenInactive() {
+    void shouldNotBeAuthenticatedWhenInactive() {
         UserInfoResponse userInfoResponse = new UserInfoResponse();
         userInfoResponse.setUsername("username");
         userInfoResponse.setExp(10);
@@ -235,5 +253,37 @@ class LoginServiceTest {
 
         String token = loginService.getAuthorization();
         assertEquals("Bearer accessToken", token);
+    }
+
+    @Test
+    void shouldDoAuthenticateAndCannotAuthenticate() {
+        UserInfoResponse userInfoResponse = new UserInfoResponse();
+        userInfoResponse.setUsername("username");
+        userInfoResponse.setExp(10);
+        userInfoResponse.setActive(false);
+
+        BearerAccessRefreshToken bearerAccessRefreshToken = new BearerAccessRefreshToken();
+        bearerAccessRefreshToken.setUsername("username");
+        bearerAccessRefreshToken.setAccessToken("accessToken");
+        bearerAccessRefreshToken.setTokenType("tokenType");
+        bearerAccessRefreshToken.setExpiresIn(1);
+        bearerAccessRefreshToken.setRoles(Collections.singletonList("user"));
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        when(kafkactlConfig.getConfigPath())
+                .thenReturn("src/test/resources/login");
+        when(clusterResourceClient.tokenInfo(any()))
+                .thenReturn(userInfoResponse);
+        when(clusterResourceClient.login(any()))
+                .thenThrow(exception);
+
+        LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
+
+        boolean actual = loginService.doAuthenticate(cmd.getCommandSpec(), false);
+        assertFalse(actual);
     }
 }

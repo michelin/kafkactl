@@ -5,7 +5,6 @@ import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.models.SchemaCompatibility;
-import com.michelin.kafkactl.models.Status;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
@@ -18,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.*;
@@ -55,7 +53,7 @@ public class ResourceService {
                 if (!resources.isEmpty()) {
                     formatService.displayList(resources.get(0).getKind(), resources, TABLE, commandSpec);
                 } else {
-                    commandSpec.commandLine().getOut().println("No " + resources.get(0).getKind().toLowerCase() + " to display.");
+                    commandSpec.commandLine().getOut().println("No " + apiResources.get(0).getKind().toLowerCase() + " to display.");
                 }
                 return 0;
             } catch (HttpClientResponseException exception) {
