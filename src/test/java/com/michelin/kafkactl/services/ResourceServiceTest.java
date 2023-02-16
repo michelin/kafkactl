@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.michelin.kafkactl.services.FormatService.TABLE;
+import static com.michelin.kafkactl.utils.constants.ConstantKind.CONSUMER_GROUP_RESET_OFFSET_RESPONSE;
+import static com.michelin.kafkactl.utils.constants.ConstantKind.DELETE_RECORDS_RESPONSE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -631,5 +633,212 @@ class ResourceServiceTest {
         verify(formatService).displayError(argThat(exception -> exception.getStatus().equals(HttpStatus.NOT_FOUND)
                 && exception.getMessage().equals("Not Found")), eq("Topic"), eq("prefix.topic"),
                 eq(cmd.getCommandSpec()));
+    }
+
+    @Test
+    void shouldImportAllSuccess() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        Resource topicResource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        when(namespacedClient.importResources(any(), any(), any(), anyBoolean()))
+                .thenReturn(Collections.singletonList(topicResource));
+
+        int actual = resourceService.importAll(Collections.singletonList(apiResource), "namespace", false,
+                cmd.getCommandSpec());
+
+        assertEquals(0, actual);
+        verify(formatService).displayList("Topic", Collections.singletonList(topicResource), TABLE, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldImportAllEmpty() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        when(namespacedClient.importResources(any(), any(), any(), anyBoolean()))
+                .thenReturn(Collections.emptyList());
+
+        int actual = resourceService.importAll(Collections.singletonList(apiResource), "namespace", false,
+                cmd.getCommandSpec());
+
+        assertEquals(0, actual);
+        assertTrue(sw.toString().contains("No topic to import."));
+    }
+
+    @Test
+    void shouldImportAllFail() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        when(namespacedClient.importResources(any(), any(), any(), anyBoolean()))
+                .thenThrow(exception);
+
+        int actual = resourceService.importAll(Collections.singletonList(apiResource), "namespace", false,
+                cmd.getCommandSpec());
+
+        assertEquals(1, actual);
+        verify(formatService).displayError(exception, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldDeleteRecordsSuccess() {
+        Resource topicResource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        when(namespacedClient.deleteRecords(any(), any(), any(), anyBoolean()))
+                .thenReturn(Collections.singletonList(topicResource));
+
+        int actual = resourceService.deleteRecords("namespace", "topic", false, cmd.getCommandSpec());
+
+        assertEquals(0, actual);
+        verify(formatService).displayList(DELETE_RECORDS_RESPONSE, Collections.singletonList(topicResource), TABLE, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldDeleteRecordsEmpty() {
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        when(namespacedClient.deleteRecords(any(), any(), any(), anyBoolean()))
+                .thenReturn(Collections.emptyList());
+
+        int actual = resourceService.deleteRecords("namespace", "topic", false, cmd.getCommandSpec());
+
+        assertEquals(0, actual);
+        assertTrue(sw.toString().contains("No record to delete."));
+    }
+
+    @Test
+    void shouldDeleteRecordsFail() {
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        when(namespacedClient.deleteRecords(any(), any(), any(), anyBoolean()))
+                .thenThrow(exception);
+
+        int actual = resourceService.deleteRecords("namespace", "topic", false, cmd.getCommandSpec());
+
+        assertEquals(1, actual);
+        verify(formatService).displayError(exception, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldResetOffsetsSuccess() {
+        Resource topicResource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        when(namespacedClient.resetOffsets(any(), any(), any(), any(), anyBoolean()))
+                .thenReturn(Collections.singletonList(topicResource));
+
+        int actual = resourceService.resetOffsets("namespace", "topic", topicResource, false, cmd.getCommandSpec());
+
+        assertEquals(0, actual);
+        verify(formatService).displayList(CONSUMER_GROUP_RESET_OFFSET_RESPONSE, Collections.singletonList(topicResource), TABLE, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldResetOffsetsEmpty() {
+        Resource topicResource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        when(namespacedClient.resetOffsets(any(), any(), any(), any(), anyBoolean()))
+                .thenReturn(Collections.emptyList());
+
+        int actual = resourceService.resetOffsets("namespace", "topic", topicResource, false, cmd.getCommandSpec());
+
+        assertEquals(0, actual);
+        assertTrue(sw.toString().contains("No offset to reset."));
+    }
+
+    @Test
+    void shouldResetOffsetsFail() {
+        Resource topicResource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        when(namespacedClient.resetOffsets(any(), any(), any(), any(), anyBoolean()))
+                .thenThrow(exception);
+
+        int actual = resourceService.resetOffsets("namespace", "topic", topicResource, false, cmd.getCommandSpec());
+
+        assertEquals(1, actual);
+        verify(formatService).displayError(exception, cmd.getCommandSpec());
     }
 }

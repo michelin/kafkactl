@@ -167,6 +167,14 @@ public class ResourceService {
         }
     }
 
+    /**
+     * Import all resources of given types
+     * @param apiResources The resource types
+     * @param namespace The namespace
+     * @param dryRun Is dry run mode ?
+     * @param commandSpec The command that triggered the action
+     * @return 0 if the command succeed, 1 otherwise
+     */
     public int importAll(List<ApiResource> apiResources, String namespace, boolean dryRun, CommandLine.Model.CommandSpec commandSpec) {
         int errors = apiResources
                 .stream()
@@ -192,10 +200,10 @@ public class ResourceService {
 
     /**
      * Delete records for a given topic
-     *
      * @param namespace The namespace
      * @param topic     The topic to delete records
      * @param dryRun    Is dry run mode or not ?
+     * @param commandSpec The command that triggered the action
      * @return The deleted records response
      */
     public int deleteRecords(String namespace, String topic, boolean dryRun, CommandLine.Model.CommandSpec commandSpec) {
@@ -204,7 +212,7 @@ public class ResourceService {
             if (!resources.isEmpty()) {
                 formatService.displayList(DELETE_RECORDS_RESPONSE, resources, TABLE, commandSpec);
             } else {
-                commandSpec.commandLine().getOut().println("No records to delete.");
+                commandSpec.commandLine().getOut().println("No record to delete.");
             }
             return 0;
         } catch (HttpClientResponseException exception) {
@@ -215,11 +223,11 @@ public class ResourceService {
 
     /**
      * Reset offsets for a given topic and consumer group
-     *
      * @param namespace The namespace
      * @param group     The consumer group
      * @param resource  The information about how to reset
      * @param dryRun    Is dry run mode or not ?
+     * @param commandSpec The command that triggered the action
      * @return The reset offsets response
      */
     public int resetOffsets(String namespace, String group, Resource resource, boolean dryRun, CommandLine.Model.CommandSpec commandSpec) {
@@ -228,7 +236,7 @@ public class ResourceService {
             if (!resources.isEmpty()) {
                 formatService.displayList(CONSUMER_GROUP_RESET_OFFSET_RESPONSE, resources, TABLE, commandSpec);
             } else {
-                commandSpec.commandLine().getOut().println("No offsets to reset.");
+                commandSpec.commandLine().getOut().println("No offset to reset.");
             }
             return 0;
         } catch (HttpClientResponseException e) {
