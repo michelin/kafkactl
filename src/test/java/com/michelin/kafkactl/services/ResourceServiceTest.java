@@ -543,4 +543,93 @@ class ResourceServiceTest {
         assertEquals(topicResource, actual.body());
         assertTrue(sw.toString().contains("Topic \"prefix.topic\" created."));
     }
+
+    @Test
+    void shouldDeleteNamespacedResource() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        when(namespacedClient.delete(any(), any(), any(), any(), anyBoolean()))
+                .thenReturn(HttpResponse
+                        .<Void>ok()
+                        .header("X-Ns4kafka-Result", "created"));
+
+        boolean actual = resourceService.delete(apiResource, "namespace", "name", false, cmd.getCommandSpec());
+
+        assertTrue(actual);
+    }
+
+    @Test
+    void shouldDeleteNonNamespacedResource() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(false)
+                .synchronizable(true)
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        when(nonNamespacedClient.delete(any(), any(), any(), anyBoolean()))
+                .thenReturn(HttpResponse
+                        .<Void>ok()
+                        .header("X-Ns4kafka-Result", "created"));
+
+        boolean actual = resourceService.delete(apiResource, "namespace", "name", false, cmd.getCommandSpec());
+
+        assertTrue(actual);
+    }
+
+    @Test
+    void shouldDeleteNamespacedResourceAndHandleHttpResponseException() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        when(namespacedClient.delete(any(), any(), any(), any(), anyBoolean()))
+                .thenThrow(exception);
+
+        boolean actual = resourceService.delete(apiResource, "namespace", "prefix.topic", false, cmd.getCommandSpec());
+
+        assertFalse(actual);
+        verify(formatService).displayError(exception, "Topic", "prefix.topic", cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDeleteNotFoundResource() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        when(namespacedClient.delete(any(), any(), any(), any(), anyBoolean()))
+                .thenReturn(HttpResponse.notFound());
+
+        boolean actual = resourceService.delete(apiResource, "namespace", "prefix.topic", false, cmd.getCommandSpec());
+
+        assertFalse(actual);
+        verify(formatService).displayError(argThat(exception -> exception.getStatus().equals(HttpStatus.NOT_FOUND)
+                && exception.getMessage().equals("Not Found")), eq("Topic"), eq("prefix.topic"),
+                eq(cmd.getCommandSpec()));
+    }
 }

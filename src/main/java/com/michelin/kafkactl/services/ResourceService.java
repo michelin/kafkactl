@@ -131,8 +131,8 @@ public class ResourceService {
                     : nonNamespacedClient.apply(loginService.getAuthorization(), apiResource.getPath(), resource, dryRun);
 
             commandSpec.commandLine().getOut().println(formatService.prettifyKind(response.body().getKind())
-                    + " \"" + response.body().getMetadata().getName() + "\" "
-                    + (response.header("X-Ns4kafka-Result") != null ? response.header("X-Ns4kafka-Result") : "") + ".");
+                    + " \"" + response.body().getMetadata().getName() + "\""
+                    + (response.header("X-Ns4kafka-Result") != null ? " " + response.header("X-Ns4kafka-Result") : "") + ".");
             return response;
         } catch (HttpClientResponseException e) {
             formatService.displayError(e, resource.getKind(), resource.getMetadata().getName(), commandSpec);
@@ -140,6 +140,15 @@ public class ResourceService {
         }
     }
 
+    /**
+     * Delete a given resource
+     * @param apiResource The resource type
+     * @param namespace The namespace
+     * @param resource The resource
+     * @param dryRun Is dry run mode ?
+     * @param commandSpec The command that triggered the action
+     * @return true if deletion succeeded, false otherwise
+     */
     public boolean delete(ApiResource apiResource, String namespace, String resource, boolean dryRun, CommandLine.Model.CommandSpec commandSpec) {
         try {
             HttpResponse<Void> response = apiResource.isNamespaced() ?
