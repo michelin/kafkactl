@@ -28,8 +28,7 @@ import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceServiceTest {
@@ -323,15 +322,225 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.notFound());
+        Resource topicResource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                        .build())
+                .spec(Map.of())
+                .build();
+
         when(namespacedClient.get(any(), any(), any(), any()))
-                .thenThrow(exception);
+                .thenReturn(HttpResponse.notFound(topicResource));
 
         HttpClientResponseException actual = assertThrows(HttpClientResponseException.class,
                 () -> resourceService.getSingleResourceWithType(apiResource, "namespace",
                         "resourceName", true));
 
-        assertEquals("error", actual.getMessage());
+        assertEquals("Not Found", actual.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, actual.getStatus());
+    }
+
+    @Test
+    void shouldNotThrowExceptionWhenGetSingleResourceWithTypeNotFound() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        Resource topicResource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        when(namespacedClient.get(any(), any(), any(), any()))
+                .thenReturn(HttpResponse.notFound(topicResource));
+
+        Resource actual = resourceService.getSingleResourceWithType(apiResource, "namespace",
+                "resourceName", false);
+
+        assertEquals(topicResource, actual);
+    }
+
+    @Test
+    void shouldThrowServerExceptionWhenGetSingleResourceWithType() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        Resource topicResource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        when(namespacedClient.get(any(), any(), any(), any()))
+                .thenReturn(HttpResponse.serverError(topicResource));
+
+        Resource actual = resourceService.getSingleResourceWithType(apiResource, "namespace",
+                "resourceName", false);
+
+        assertEquals(topicResource, actual);
+    }
+
+    @Test
+    void shouldApplyNamespacedResourceAndHandleHttpResponseException() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        Resource topicResource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.notFound());
+
+        when(namespacedClient.apply(any(), any(), any(), any(), anyBoolean()))
+                .thenThrow(exception);
+
+        HttpResponse<Resource> actual = resourceService.apply(apiResource, "namespace", topicResource, false, cmd.getCommandSpec());
+
+        assertNull(actual);
+        verify(formatService).displayError(exception, "Topic", "prefix.topic", cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldApplyNamespacedResource() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        Resource topicResource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        doCallRealMethod().when(formatService).prettifyKind(any());
+        when(namespacedClient.apply(any(), any(), any(), any(), anyBoolean()))
+                .thenReturn(HttpResponse
+                        .ok(topicResource)
+                        .header("X-Ns4kafka-Result", "created"));
+
+        HttpResponse<Resource> actual = resourceService.apply(apiResource, "namespace", topicResource, false, cmd.getCommandSpec());
+
+        assertEquals(HttpStatus.OK, actual.getStatus());
+        assertEquals(topicResource, actual.body());
+        assertTrue(sw.toString().contains("Topic \"prefix.topic\" created."));
+    }
+
+    @Test
+    void shouldApplyNamespacedResourceNullHeaderInResponse() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        Resource topicResource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        doCallRealMethod().when(formatService).prettifyKind(any());
+        when(namespacedClient.apply(any(), any(), any(), any(), anyBoolean()))
+                .thenReturn(HttpResponse
+                        .ok(topicResource));
+
+        HttpResponse<Resource> actual = resourceService.apply(apiResource, "namespace", topicResource, false, cmd.getCommandSpec());
+
+        assertEquals(HttpStatus.OK, actual.getStatus());
+        assertEquals(topicResource, actual.body());
+        assertTrue(sw.toString().contains("Topic \"prefix.topic\"."));
+    }
+
+    @Test
+    void shouldApplyNonNamespacedResource() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(false)
+                .synchronizable(true)
+                .build();
+
+        Resource topicResource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        doCallRealMethod().when(formatService).prettifyKind(any());
+        when(nonNamespacedClient.apply(any(), any(), any(), anyBoolean()))
+                .thenReturn(HttpResponse
+                        .ok(topicResource)
+                        .header("X-Ns4kafka-Result", "created"));
+
+        HttpResponse<Resource> actual = resourceService.apply(apiResource, "namespace", topicResource, false, cmd.getCommandSpec());
+
+        assertEquals(HttpStatus.OK, actual.getStatus());
+        assertEquals(topicResource, actual.body());
+        assertTrue(sw.toString().contains("Topic \"prefix.topic\" created."));
     }
 }

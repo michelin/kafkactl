@@ -121,6 +121,7 @@ public class ResourceService {
      * @param namespace The namespace
      * @param resource The resource
      * @param dryRun Is dry run mode ?
+     * @param commandSpec The command that triggered the action
      * @return An HTTP response
      */
     public HttpResponse<Resource> apply(ApiResource apiResource, String namespace, Resource resource, boolean dryRun, CommandLine.Model.CommandSpec commandSpec) {
