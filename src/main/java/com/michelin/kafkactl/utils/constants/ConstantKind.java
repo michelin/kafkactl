@@ -8,6 +8,7 @@ public class ConstantKind {
     public static final String CONNECTOR = "Connector";
     public static final String CONNECT_CLUSTER = "ConnectCluster";
     public static final String DELETE_RECORDS_RESPONSE = "DeleteRecordsResponse";
+    public static final String KAFKA_USER_RESET_PASSWORD = "KafkaUserResetPassword";
     public static final String SUBJECT = "Subject";
     public static final String SCHEMA_COMPATIBILITY_STATE = "SchemaCompatibilityState";
     public static final String VAULT_RESPONSE = "VaultResponse";

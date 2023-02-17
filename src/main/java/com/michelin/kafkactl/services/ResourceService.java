@@ -228,7 +228,7 @@ public class ResourceService {
      * @param resource  The information about how to reset
      * @param dryRun    Is dry run mode or not ?
      * @param commandSpec The command that triggered the action
-     * @return The reset offsets response
+     * @return 0 if the command succeeded, 1 otherwise
      */
     public int resetOffsets(String namespace, String group, Resource resource, boolean dryRun, CommandLine.Model.CommandSpec commandSpec) {
         try {
@@ -245,6 +245,14 @@ public class ResourceService {
         }
     }
 
+    /**
+     * Change the state of a given connector
+     * @param namespace The namespace
+     * @param connector The connector name
+     * @param changeConnectorState The state
+     * @param commandSpec The command that triggered the action
+     * @return The resource
+     */
     public Optional<Resource> changeConnectorState(String namespace, String connector, Resource changeConnectorState, CommandLine.Model.CommandSpec commandSpec) {
         try {
             HttpResponse<Resource> response = namespacedClient.changeConnectorState(namespace, connector, changeConnectorState, loginService.getAuthorization());
@@ -260,6 +268,14 @@ public class ResourceService {
         }
     }
 
+    /**
+     * Change the compatibility of a given schema
+     * @param namespace The namespace
+     * @param subject The schema subject
+     * @param compatibility The compatibility to apply
+     * @param commandSpec The command that triggered the action
+     * @return The resource
+     */
     public Optional<Resource> changeSchemaCompatibility(String namespace, String subject, SchemaCompatibility compatibility, CommandLine.Model.CommandSpec commandSpec) {
         try {
             HttpResponse<Resource> response = namespacedClient.changeSchemaCompatibility(namespace, subject,
@@ -277,6 +293,14 @@ public class ResourceService {
         }
     }
 
+    /**
+     * Reset user password
+     * @param namespace The namespace
+     * @param user The user
+     * @param output The output format
+     * @param commandSpec The command that triggered the action
+     * @return 0 if the command succeeded, 1 otherwise
+     */
     public int resetPassword(String namespace, String user, String output, CommandLine.Model.CommandSpec commandSpec) {
         try {
             HttpResponse<Resource> response = namespacedClient.resetPassword(namespace, user, loginService.getAuthorization());
@@ -296,9 +320,9 @@ public class ResourceService {
 
     /**
      * List all available connect clusters for vaulting
-     *
      * @param namespace The namespace
-     * @return The list of connect clusters
+     * @param commandSpec The command that triggered the action
+     * @return 0 if the command succeeded, 1 otherwise
      */
     public int listAvailableVaultsConnectClusters(String namespace, CommandLine.Model.CommandSpec commandSpec) {
         try {
@@ -313,11 +337,11 @@ public class ResourceService {
 
     /**
      * Vault a list of passwords for a specific Kafka Connect Cluster.
-     *
      * @param namespace      The namespace
      * @param connectCluster The Kafka connect cluster to use for vaulting secret.
      * @param passwords      The list of passwords to encrypt.
-     * @return The encrypted secret.
+     * @param commandSpec The command that triggered the action
+     * @return 0 if the command succeeded, 1 otherwise
      */
     public int vaultsOnConnectClusters(final String namespace, final String connectCluster, final List<String> passwords, CommandLine.Model.CommandSpec commandSpec) {
         try {
@@ -330,6 +354,13 @@ public class ResourceService {
         }
     }
 
+    /**
+     * Parse resources in given directory/file
+     * @param file The directory/file to parse
+     * @param recursive Explore given directory recursively or not ?
+     * @param commandSpec The command that triggered the action
+     * @return The list of resources
+     */
     public List<Resource> parseResources(Optional<File> file, boolean recursive, CommandLine.Model.CommandSpec commandSpec) {
         if (file.isPresent()) {
             // List all files to process
