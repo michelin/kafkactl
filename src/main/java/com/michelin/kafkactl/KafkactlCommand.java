@@ -12,19 +12,19 @@ import java.util.concurrent.Callable;
 @Command(name = "kafkactl",
         subcommands =
                 {
-                        ApplySubcommand.class,
-                        GetSubcommand.class,
-                        DeleteSubcommand.class,
                         ApiResourcesSubcommand.class,
-                        DiffSubcommand.class,
-                        ResetOffsetsSubcommand.class,
-                        DeleteRecordsSubcommand.class,
-                        ImportSubcommand.class,
-                        ConnectorsSubcommand.class,
-                        SchemaSubcommand.class,
-                        UsersSubcommand.class,
+                        ApplySubcommand.class,
                         ConfigSubcommand.class,
-                        ConnectClustersSubcommand.class
+                        ConnectClustersSubcommand.class,
+                        ConnectorsSubcommand.class,
+                        DeleteRecordsSubcommand.class,
+                        DeleteSubcommand.class,
+                        DiffSubcommand.class,
+                        GetSubcommand.class,
+                        ImportSubcommand.class,
+                        ResetOffsetsSubcommand.class,
+                        SchemaSubcommand.class,
+                        UsersSubcommand.class
                 },
         versionProvider = VersionProvider.class,
         mixinStandardHelpOptions = true)
