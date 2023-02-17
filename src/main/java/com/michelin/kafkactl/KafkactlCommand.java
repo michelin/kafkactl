@@ -10,22 +10,29 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 @Command(name = "kafkactl",
-        subcommands =
-                {
-                        ApiResourcesSubcommand.class,
-                        ApplySubcommand.class,
-                        ConfigSubcommand.class,
-                        ConnectClustersSubcommand.class,
-                        ConnectorsSubcommand.class,
-                        DeleteRecordsSubcommand.class,
-                        DeleteSubcommand.class,
-                        DiffSubcommand.class,
-                        GetSubcommand.class,
-                        ImportSubcommand.class,
-                        ResetOffsetsSubcommand.class,
-                        SchemaSubcommand.class,
-                        UsersSubcommand.class
-                },
+        subcommands = {
+                ApiResourcesSubcommand.class,
+                ApplySubcommand.class,
+                ConfigSubcommand.class,
+                ConnectClustersSubcommand.class,
+                ConnectorsSubcommand.class,
+                DeleteRecordsSubcommand.class,
+                DeleteSubcommand.class,
+                DiffSubcommand.class,
+                GetSubcommand.class,
+                ImportSubcommand.class,
+                ResetOffsetsSubcommand.class,
+                SchemaSubcommand.class,
+                UsersSubcommand.class
+        },
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "These are common Kafkactl commands.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
         versionProvider = VersionProvider.class,
         mixinStandardHelpOptions = true)
 public class KafkactlCommand implements Callable<Integer> {

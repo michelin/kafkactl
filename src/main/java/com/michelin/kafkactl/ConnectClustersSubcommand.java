@@ -1,10 +1,9 @@
 package com.michelin.kafkactl;
 
-import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
-import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
 import lombok.Getter;
 import picocli.CommandLine;
@@ -12,14 +11,20 @@ import picocli.CommandLine;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import static com.michelin.kafkactl.services.FormatService.TABLE;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.CONNECT_CLUSTER;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.VAULT_RESPONSE;
-
 /**
  * Represents the Kafka Connect Cluster sub command class.
  */
-@CommandLine.Command(name = "connect-clusters", description = "Interact with connect clusters.")
+@CommandLine.Command(name = "connect-clusters",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "Interact with connect clusters.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
+        versionProvider = VersionProvider.class,
+        mixinStandardHelpOptions = true)
 public class ConnectClustersSubcommand implements Callable<Integer> {
     /**
      * Gets or sets the kafkactl parent command.

@@ -1,13 +1,12 @@
 package com.michelin.kafkactl;
 
-import com.michelin.kafkactl.client.ClusterResourceClient;
-import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
@@ -16,7 +15,6 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -24,7 +22,17 @@ import java.util.stream.Collectors;
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.services.FormatService.YAML;
 
-@Command(name = "get", description = "Get resources by resource type for the current namespace.")
+@Command(name = "get",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "Get resources by resource type for the current namespace.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
+        versionProvider = VersionProvider.class,
+        mixinStandardHelpOptions = true)
 public class GetSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;

@@ -3,6 +3,7 @@ package com.michelin.kafkactl;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
 
@@ -12,7 +13,17 @@ import java.util.concurrent.Callable;
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.services.FormatService.YAML;
 
-@CommandLine.Command(name = "reset-password", description = "Reset a Kafka password.")
+@CommandLine.Command(name = "reset-password",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "Reset a Kafka password.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
+        versionProvider = VersionProvider.class,
+        mixinStandardHelpOptions = true)
 public class UsersSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;

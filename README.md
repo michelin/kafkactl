@@ -99,23 +99,23 @@ kafkactl config current-context
 Usage: kafkactl [-hvV] [-n=<optionalNamespace>] [COMMAND]
   -h, --help      Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or yaml resource
-  -v, --verbose   ...
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
   -V, --version   Print version information and exit.
 Commands:
-  apply           Create or update a resource
-  get             Get resources by resource type for the current namespace
-  delete          Delete a resource
-  api-resources   Print the supported API resources on the server
-  diff            Get differences between the new resources and the old resource
-  reset-offsets   Reset Consumer Group offsets
-  delete-records  Deletes all records within a topic
-  import          Import resources already present on the Kafka Cluster in
-                    ns4kafka
-  connectors      Interact with connectors (Pause/Resume/Restart)
-  schemas         Update schema compatibility mode
-  reset-password  Reset your Kafka password
-  config          Manage configuration
+  api-resources     Print the supported API resources on the server.
+  apply             Create or update a resource.
+  config            Manage configuration.
+  connect-clusters  Interact with connect clusters.
+  connectors        Interact with connectors.
+  delete-records    Delete all records within a topic.
+  delete            Delete a resource.
+  diff              Get differences between a new resource and a old resource.
+  get               Get resources by resource type for the current namespace.
+  import            Import non-synchronized resources.
+  reset-offsets     Reset consumer group offsets.
+  schemas           Interact with schemas.
+  reset-password    Reset a Kafka password.
 ```
 
 ## Config
@@ -124,12 +124,13 @@ This command allows you to manage your Kafka contexts.
 
 ```console
 Usage: kafkactl config [-v] [-n=<optionalNamespace>] <action> <context>
-Manage configuration
-      <action>    (get-contexts | current-context | use-context)
-      <context>   Context
+Manage configuration.
+      <action>    Action to perform (get-contexts, current-context,
+                    use-context).
+      <context>   Context to use.
   -n, --namespace=<optionalNamespace>
-                           Override namespace defined in config or yaml resource
-  -v, --verbose            ...
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
 ```
 
 ## Apply
@@ -138,13 +139,13 @@ This command allows you to deploy a resource.
 
 ```console
 Usage: kafkactl apply [-Rv] [--dry-run] [-f=<file>] [-n=<optionalNamespace>]
-Create or update a resource
-      --dry-run       Does not persist resources. Validate only
-  -f, --file=<file>   YAML File or Directory containing YAML resources
+Create or update a resource.
+      --dry-run       Does not persist resources. Validate only.
+  -f, --file=<file>   YAML file or directory containing resources.
   -n, --namespace=<optionalNamespace>
-                      Override namespace defined in config or yaml resource
-  -R, --recursive     Enable recursive search of file
-  -v, --verbose       ...
+                      Override namespace defined in config or YAML resources.
+  -R, --recursive     Search file recursively.
+  -v, --verbose       Enable the verbose mode.
 ```
 
 Resources have to be described in yaml manifests.

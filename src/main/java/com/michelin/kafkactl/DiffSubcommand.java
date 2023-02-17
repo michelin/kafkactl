@@ -6,6 +6,7 @@ import com.github.difflib.patch.Patch;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.*;
+import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
@@ -27,7 +28,17 @@ import java.util.stream.Collectors;
 
 import static com.michelin.kafkactl.ApplySubcommand.SCHEMA_FILE;
 
-@Command(name = "diff", description = "Get differences between a new resource and a old resource.")
+@Command(name = "diff",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "Get differences between a new resource and a old resource.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
+        versionProvider = VersionProvider.class,
+        mixinStandardHelpOptions = true)
 public class DiffSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;

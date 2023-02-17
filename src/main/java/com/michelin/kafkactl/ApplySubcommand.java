@@ -3,11 +3,11 @@ package com.michelin.kafkactl;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.*;
+import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
-import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import java.io.File;
@@ -17,7 +17,17 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-@Command(name = "apply", description = "Create or update a resource.")
+@CommandLine.Command(name = "apply",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "Create or update a resource.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
+        versionProvider = VersionProvider.class,
+        mixinStandardHelpOptions = true)
 public class ApplySubcommand implements Callable<Integer> {
     public static final String SCHEMA_FILE = "schemaFile";
 

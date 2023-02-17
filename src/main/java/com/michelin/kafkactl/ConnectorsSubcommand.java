@@ -7,6 +7,7 @@ import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import lombok.Getter;
@@ -23,7 +24,17 @@ import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.CHANGE_CONNECTOR_STATE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.CONNECTOR;
 
-@CommandLine.Command(name = "connectors", description = "Interact with connectors.")
+@CommandLine.Command(name = "connectors",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "Interact with connectors.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
+        versionProvider = VersionProvider.class,
+        mixinStandardHelpOptions = true)
 public class ConnectorsSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;

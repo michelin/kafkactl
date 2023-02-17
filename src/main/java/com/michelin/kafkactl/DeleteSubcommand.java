@@ -4,6 +4,7 @@ import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.*;
+import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
@@ -18,7 +19,17 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-@Command(name = "delete", description = "Delete a resource.")
+@Command(name = "delete",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "Delete a resource.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
+        versionProvider = VersionProvider.class,
+        mixinStandardHelpOptions = true)
 public class DeleteSubcommand implements Callable<Integer> {
     @Inject
     public KafkactlConfig kafkactlConfig;

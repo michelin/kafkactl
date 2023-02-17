@@ -4,6 +4,7 @@ import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.ConfigService;
 import com.michelin.kafkactl.services.FormatService;
+import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.core.util.StringUtils;
 import jakarta.inject.Inject;
 import lombok.Getter;
@@ -15,7 +16,17 @@ import java.util.concurrent.Callable;
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.CONTEXT;
 
-@CommandLine.Command(name = "config", description = "Manage configuration.")
+@CommandLine.Command(name = "config",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "Manage configuration.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
+        versionProvider = VersionProvider.class,
+        mixinStandardHelpOptions = true)
 public class ConfigSubcommand implements Callable<Integer> {
     @Inject
     public KafkactlConfig kafkactlConfig;

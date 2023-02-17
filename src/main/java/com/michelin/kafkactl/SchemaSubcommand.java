@@ -5,6 +5,7 @@ import com.michelin.kafkactl.models.SchemaCompatibility;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
 
@@ -16,7 +17,17 @@ import java.util.stream.Collectors;
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.SCHEMA_COMPATIBILITY_STATE;
 
-@CommandLine.Command(name = "schemas", description = "Interact with schemas.")
+@CommandLine.Command(name = "schemas",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "Interact with schemas.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
+        versionProvider = VersionProvider.class,
+        mixinStandardHelpOptions = true)
 public class SchemaSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;

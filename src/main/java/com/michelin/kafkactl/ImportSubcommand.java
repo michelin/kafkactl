@@ -5,6 +5,7 @@ import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -16,7 +17,17 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-@Command(name = "import", description = "Import non-synchronized resources")
+@Command(name = "import",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "Import non-synchronized resources.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
+        versionProvider = VersionProvider.class,
+        mixinStandardHelpOptions = true)
 public class ImportSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;

@@ -5,6 +5,7 @@ import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
@@ -15,13 +16,20 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static com.michelin.kafkactl.services.FormatService.TABLE;
-
-@Command(name = "reset-offsets", description = "Reset consumer group offsets.")
+@Command(name = "reset-offsets",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "Reset consumer group offsets.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
+        versionProvider = VersionProvider.class,
+        mixinStandardHelpOptions = true)
 public class ResetOffsetsSubcommand implements Callable<Integer> {
     public static final String RESET_METHOD = "method";
     public static final String OPTIONS = "options";

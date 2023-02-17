@@ -5,6 +5,7 @@ import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
+import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
@@ -17,7 +18,17 @@ import java.util.stream.Collectors;
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.RESOURCE_DEFINITION;
 
-@CommandLine.Command(name = "api-resources", description = "Print the supported API resources on the server.")
+@CommandLine.Command(name = "api-resources",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "Print the supported API resources on the server.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
+        versionProvider = VersionProvider.class,
+        mixinStandardHelpOptions = true)
 public class ApiResourcesSubcommand implements Callable<Integer> {
     @Inject
     public ApiResourcesService apiResourcesService;
