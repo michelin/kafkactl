@@ -1,11 +1,11 @@
 package com.michelin.kafkactl;
 
 import com.michelin.kafkactl.models.ApiResource;
-import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -13,12 +13,21 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-@Command(name = "import", description = "Import unsynchronized resources")
+@Command(name = "import",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "Import non-synchronized resources.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
+        versionProvider = VersionProvider.class,
+        mixinStandardHelpOptions = true)
 public class ImportSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;
@@ -38,10 +47,10 @@ public class ImportSubcommand implements Callable<Integer> {
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
-    @Parameters(index = "0", description = "Resource type", arity = "1")
+    @Parameters(index = "0", description = "Resource type.", arity = "1")
     public String resourceType;
 
-    @Option(names = {"--dry-run"}, description = "Does not persist resources. Validate only")
+    @Option(names = {"--dry-run"}, description = "Does not persist resources. Validate only.")
     public boolean dryRun;
 
     @CommandLine.Spec
@@ -53,12 +62,11 @@ public class ImportSubcommand implements Callable<Integer> {
      */
     public Integer call() {
         if (dryRun) {
-            System.out.println("Dry run execution");
+            commandSpec.commandLine().getOut().println("Dry run execution.");
         }
 
-        boolean authenticated = loginService.doAuthenticate();
-        if (!authenticated) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed");
+        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
+            return 1;
         }
 
         // Validate resourceType + custom type ALL
@@ -66,11 +74,7 @@ public class ImportSubcommand implements Callable<Integer> {
 
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
 
-        Map<ApiResource, List<Resource>> resources = resourceService.importAll(apiResources, namespace, dryRun);
-
-        // Display all resources by type
-        resources.forEach((k, v) -> formatService.displayList(k.getKind(), v, "table"));
-        return 0;
+        return resourceService.importAll(apiResources, namespace, dryRun, commandSpec);
     }
 
     /**
@@ -80,20 +84,20 @@ public class ImportSubcommand implements Callable<Integer> {
     private List<ApiResource> validateResourceType() {
         // Specific case ALL
         if (resourceType.equalsIgnoreCase("ALL")) {
-            return apiResourcesService.getListResourceDefinition()
+            return apiResourcesService.listResourceDefinitions()
                     .stream()
                     .filter(ApiResource::isSynchronizable)
                     .collect(Collectors.toList());
         }
 
         // Otherwise, check resource exists
-        Optional<ApiResource> optionalApiResource = apiResourcesService.getResourceDefinitionFromCommandName(resourceType);
+        Optional<ApiResource> optionalApiResource = apiResourcesService.getResourceDefinitionByCommandName(resourceType);
         if (optionalApiResource.isEmpty()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server doesn't have resource type " + resourceType);
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type " + resourceType + ".");
         }
 
         if (!optionalApiResource.get().isSynchronizable()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Resource Type " + resourceType + " is not synchronizable");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Resource of type " + resourceType + " is not synchronizable.");
         }
 
         return List.of(optionalApiResource.get());

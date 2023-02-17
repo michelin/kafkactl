@@ -6,6 +6,7 @@ import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.convert.format.MapFormat;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,6 +30,7 @@ public class KafkactlConfig {
 
     @Getter
     @Setter
+    @Builder
     @Introspected
     public static class Context {
         private String name;
@@ -38,6 +40,7 @@ public class KafkactlConfig {
 
         @Getter
         @Setter
+        @Builder
         @Introspected
         public static class ApiContext {
             private String api;

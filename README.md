@@ -1,13 +1,13 @@
 # Kafkactl 
 
-<!-- [![GitHub release](https://img.shields.io/github/v/release/michelin/kafkactl?logo=github&style=for-the-badge)](https://github.com/michelin/kafkactl/releases)
-[![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/michelin/kafkactl/latest?logo=github&style=for-the-badge)](https://github.com/michelin/kafkactl/commits/main)-->
-
 [![GitHub Build](https://img.shields.io/github/actions/workflow/status/michelin/kafkactl/on_push_main.yml?branch=main&logo=github&style=for-the-badge)](https://img.shields.io/github/actions/workflow/status/michelin/kafkactl/on_push_main.yml)
+[![GitHub release](https://img.shields.io/github/v/release/michelin/kafkactl?logo=github&style=for-the-badge)](https://github.com/michelin/kafkactl/releases)
+[![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/michelin/kafkactl/latest?logo=github&style=for-the-badge)](https://github.com/michelin/kafkactl/commits/main)
 [![GitHub Stars](https://img.shields.io/github/stars/michelin/kafkactl?logo=github&style=for-the-badge)](https://github.com/michelin/kafkactl)
 [![GitHub Watch](https://img.shields.io/github/watchers/michelin/kafkactl?logo=github&style=for-the-badge)](https://github.com/michelin/kafkactl)
 [![Docker Pulls](https://img.shields.io/docker/pulls/michelin/kafkactl?label=Pulls&logo=docker&style=for-the-badge)](https://hub.docker.com/r/michelin/kafkactl/tags)
 [![Docker Stars](https://img.shields.io/docker/stars/michelin/kafkactl?label=Stars&logo=docker&style=for-the-badge)](https://hub.docker.com/r/michelin/kafkactl)
+[![SonarCloud Coverage](https://img.shields.io/sonar/coverage/michelin_kafkactl?logo=sonarcloud&server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge)](https://sonarcloud.io/component_measures/metric/coverage/list?id=michelin_kafkactl)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?logo=apache&style=for-the-badge)](https://opensource.org/licenses/Apache-2.0)
 
 **Kafkactl** is the CLI linked with [Ns4Kafka](https://github.com/michelin/ns4kafka). It lets you deploy your Kafka resources using YAML descriptors.
@@ -97,25 +97,32 @@ kafkactl config current-context
 
 ```console
 Usage: kafkactl [-hvV] [-n=<optionalNamespace>] [COMMAND]
+
+Description:
+
+These are common Kafkactl commands.
+
+Options:
   -h, --help      Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or yaml resource
-  -v, --verbose   ...
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
   -V, --version   Print version information and exit.
+
 Commands:
-  apply           Create or update a resource
-  get             Get resources by resource type for the current namespace
-  delete          Delete a resource
-  api-resources   Print the supported API resources on the server
-  diff            Get differences between the new resources and the old resource
-  reset-offsets   Reset Consumer Group offsets
-  delete-records  Deletes all records within a topic
-  import          Import resources already present on the Kafka Cluster in
-                    ns4kafka
-  connectors      Interact with connectors (Pause/Resume/Restart)
-  schemas         Update schema compatibility mode
-  reset-password  Reset your Kafka password
-  config          Manage configuration
+  api-resources     Print the supported API resources on the server.
+  apply             Create or update a resource.
+  config            Manage configuration.
+  connect-clusters  Interact with connect clusters.
+  connectors        Interact with connectors.
+  delete-records    Delete all records within a topic.
+  delete            Delete a resource.
+  diff              Get differences between a new resource and a old resource.
+  get               Get resources by resource type for the current namespace.
+  import            Import non-synchronized resources.
+  reset-offsets     Reset consumer group offsets.
+  schemas           Interact with schemas.
+  reset-password    Reset a Kafka password.
 ```
 
 ## Config
@@ -123,13 +130,22 @@ Commands:
 This command allows you to manage your Kafka contexts.
 
 ```console
-Usage: kafkactl config [-v] [-n=<optionalNamespace>] <action> <context>
-Manage configuration
-      <action>    (get-contexts | current-context | use-context)
-      <context>   Context
+Usage: kafkactl config [-hvV] [-n=<optionalNamespace>] <action> <context>
+
+Description:
+
+Manage configuration.
+
+Parameters:
+      <action>    Action to perform (get-contexts, current-context, use-context).
+      <context>   Context to use.
+
+Options:
+  -h, --help      Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                           Override namespace defined in config or yaml resource
-  -v, --verbose            ...
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
+  -V, --version   Print version information and exit.
 ```
 
 ## Apply
@@ -137,14 +153,21 @@ Manage configuration
 This command allows you to deploy a resource.
 
 ```console
-Usage: kafkactl apply [-Rv] [--dry-run] [-f=<file>] [-n=<optionalNamespace>]
-Create or update a resource
-      --dry-run       Does not persist resources. Validate only
-  -f, --file=<file>   YAML File or Directory containing YAML resources
+Usage: kafkactl apply [-hRvV] [--dry-run] [-f=<file>] [-n=<optionalNamespace>]
+
+Description:
+
+Create or update a resource.
+
+Options:
+      --dry-run       Does not persist resources. Validate only.
+  -f, --file=<file>   YAML file or directory containing resources.
+  -h, --help          Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                      Override namespace defined in config or yaml resource
-  -R, --recursive     Enable recursive search of file
-  -v, --verbose       ...
+                      Override namespace defined in config or YAML resources.
+  -R, --recursive     Search file recursively.
+  -v, --verbose       Enable the verbose mode.
+  -V, --version       Print version information and exit.
 ```
 
 Resources have to be described in yaml manifests.
@@ -157,40 +180,50 @@ Deleting a resource is permanent and instantaneous. There is no coming back afte
 - if the topic contained data, this data is lost.
 - if the ACL was associated to live/running user, the user will instantly lose access to the resource.
 
-```yml
-Usage: kafkactl delete [-v] [--dry-run] [-n=<optionalNamespace>]
-                       ([<resourceType> <name>] | [[-f=<file>] [-R]])
-Delete a resource
-      <resourceType>   Resource type
-      <name>           Resource name
-      --dry-run        Does not persist operation. Validate only
-  -f, --file=<file>    YAML File or Directory containing YAML resources
+```console
+Usage: kafkactl delete [-hvV] [--dry-run] [-n=<optionalNamespace>] ([<resourceType> <name>] | [[-f=<file>] [-R]])
+
+Description:
+
+Delete a resource.
+
+Parameters:
+      <resourceType>   Resource type.
+      <name>           Resource name.
+
+Options:
+      --dry-run        Does not persist operation. Validate only.
+  -f, --file=<file>    YAML file or directory containing resources.
+  -h, --help           Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                       Override namespace defined in config or yaml resource
-  -R, --recursive      Enable recursive search in Directory
-  -v, --verbose        ...
+                       Override namespace defined in config or YAML resources.
+  -R, --recursive      Search file recursively.
+  -v, --verbose        Enable the verbose mode.
+  -V, --version        Print version information and exit.
 ```
 
 ## Get
 
 This command allows you to consult one or multiple resources.
 
-```yml
-Usage: kafkactl get [-v] [-n=<optionalNamespace>] [-o=<output>] <resourceType>
-                    [<resourceName>]
-Get resources by resource type for the current namespace
-Examples:
-  kafkactl get topic topic1 : Display topic1 configuration
-  kafkactl get topics : Display all topics
-  kafkactl get all : Display all resources
+```console
+Usage: kafkactl get [-hvV] [-n=<optionalNamespace>] [-o=<output>] <resourceType> [<resourceName>]
+
+Description:
+
+Get resources by resource type for the current namespace.
+
 Parameters:
-      <resourceType>      Resource type or 'all' to display resources for all
-                            types
-      [<resourceName>]    Resource name
+      <resourceType>      Resource type or 'all' to display resources of all types.
+      [<resourceName>]    Resource name.
+
+Options:
+  -h, --help              Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                          Override namespace defined in config or yaml resource
+                          Override namespace defined in config or YAML resources.
   -o, --output=<output>   Output format. One of: yaml|table
-  -v, --verbose           ...
+  -v, --verbose           Enable the verbose mode.
+  -V, --version           Print version information and exit.
 ```
 
 - **resourceType** is one of the managed resources: topic, connector, acl, schema, stream or **all** to fetch all the resources.
@@ -200,40 +233,63 @@ Parameters:
 
 This command allows you to consult which resources can be access.
 
-```yml
-Usage: kafkactl api-resources [-v] [-n=<optionalNamespace>]
-Print the supported API resources on the server
+```console
+Usage: kafkactl api-resources [-hvV] [-n=<optionalNamespace>]
+
+Description:
+
+Print the supported API resources on the server.
+
+Options:
+  -h, --help      Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or yaml resource
-  -v, --verbose   ...
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
+  -V, --version   Print version information and exit.
 ```
 
 ## Diff
 
 This command allows you to check differences between a new yaml descriptor and the current one deployed in Ns4Kafka.
 
-```yml
-Usage: kafkactl diff [-Rv] [-f=<file>] [-n=<optionalNamespace>]
-Get differences between the new resources and the old resource
-  -f, --file=<file>   YAML File or Directory containing YAML resources
+```console
+Usage: kafkactl diff [-hRvV] [-f=<file>] [-n=<optionalNamespace>]
+
+Description:
+
+Get differences between a new resource and a old resource.
+
+Options:
+  -f, --file=<file>   YAML file or directory containing resources.
+  -h, --help          Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                      Override namespace defined in config or yaml resource
-  -R, --recursive     Enable recursive search of file
-  -v, --verbose       ...
+                      Override namespace defined in config or YAML resources.
+  -R, --recursive     Search file recursively.
+  -v, --verbose       Enable the verbose mode.
+  -V, --version       Print version information and exit.
 ```
 
 ## Import
 
 This command allows you to import unsynchronized resources between Ns4Kafka, and the Kafka broker/Kafka Connect cluster.
 
-```yml
-Usage: kafkactl import [-v] [--dry-run] [-n=<optionalNamespace>] <resourceType>
-Import unsynchronized resources
-      <resourceType>   Resource type
-      --dry-run        Does not persist resources. Validate only
+```console
+Usage: kafkactl import [-hvV] [--dry-run] [-n=<optionalNamespace>] <resourceType>
+
+Description:
+
+Import non-synchronized resources.
+
+Parameters:
+      <resourceType>   Resource type.
+
+Options:
+      --dry-run        Does not persist resources. Validate only.
+  -h, --help           Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                       Override namespace defined in config or yaml resource
-  -v, --verbose        ...
+                       Override namespace defined in config or YAML resources.
+  -v, --verbose        Enable the verbose mode.
+  -V, --version        Print version information and exit.
 ```
 
 - **resourceType** can be topic or connector
@@ -242,31 +298,32 @@ Import unsynchronized resources
 
 This command allows you to reset the offsets of consumer groups and topics.
 
-```yml
-Usage: kafkactl reset-offsets [-v] [--dry-run] --group=<group>
-                              [-n=<optionalNamespace>] (--topic=<topic> |
-                              --all-topics) (--to-earliest | --to-latest |
-                              --to-datetime=<datetime> | --shift-by=<shiftBy> |
-                              --by-duration=<duration> | --to-offset=<offset>)
-Reset Consumer Group offsets
-      --all-topics           All topics
+```console
+Usage: kafkactl reset-offsets [-hvV] [--dry-run] --group=<group> [-n=<optionalNamespace>] (--topic=<topic> | --all-topics) (--to-earliest | --to-latest |
+                        --to-datetime=<datetime> | --shift-by=<shiftBy> | --by-duration=<duration> | --to-offset=<offset>)
+
+Description:
+
+Reset consumer group offsets.
+
+Options:
+      --all-topics           All topics.
       --by-duration=<duration>
-                             Shift offset by a duration format [ PnDTnHnMnS ]
-      --dry-run              Does not persist resources. Validate only
-      --group=<group>        Consumer group name
+                             Shift offset by a duration format (PnDTnHnMnS).
+      --dry-run              Does not persist resources. Validate only.
+      --group=<group>        Consumer group name.
+  -h, --help                 Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                             Override namespace defined in config or yaml
-                               resource
-      --shift-by=<shiftBy>   Shift offset by a number [ negative to reprocess,
-                               positive to skip ]
+                             Override namespace defined in config or YAML resources.
+      --shift-by=<shiftBy>   Shift offset by a number. Negative to reprocess or positive to skip.
       --to-datetime=<datetime>
-                             Set offset to a specific ISO 8601 DateTime with
-                               Time zone [ yyyy-MM-dd'T'HH:mm:ss.SSSXXX ]
-      --to-earliest          Set offset to its earliest value [ reprocess all ]
-      --to-latest            Set offset to its latest value [ skip all ]
-      --to-offset=<offset>   Set offset to a specific index
-      --topic=<topic>        Topic or Topic:Partition [ topic[:partition] ]
-  -v, --verbose              ...
+                             Set offset to a specific ISO8601 date time with time zone (yyyy-MM-ddTHH:mm:ssZ).
+      --to-earliest          Set offset to its earliest value (reprocess all).
+      --to-latest            Set offset to its latest value (skip all).
+      --to-offset=<offset>   Set offset to a specific index.
+      --topic=<topic>        Topic name or topic:partition.
+  -v, --verbose              Enable the verbose mode.
+  -V, --version              Print version information and exit.
 ```
 
 - **--group** is one of your consumer group to reset.
@@ -277,30 +334,46 @@ Reset Consumer Group offsets
 
 This command allows you to delete all records within "delete" typed topics.
 
-```yml
-Usage: kafkactl delete-records [-v] [--dry-run] [-n=<optionalNamespace>] <topic>
-Deletes all records within a topic
-      <topic>     Name of the topic
-      --dry-run   Does not persist resources. Validate only
+```console
+Usage: kafkactl delete-records [-hvV] [--dry-run] [-n=<optionalNamespace>] <topic>
+
+Description:
+
+Delete all records within a topic.
+
+Parameters:
+      <topic>     Name of the topic.
+
+Options:
+      --dry-run   Does not persist resources. Validate only.
+  -h, --help      Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or yaml resource
-  -v, --verbose   ...
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
+  -V, --version   Print version information and exit.
 ```
 
 ## Connectors
 
 This command allows you to interact with connectors.
 
-```yml
-Usage: kafkactl connectors [-v] [-n=<optionalNamespace>] <action>
-                           <connectors>...
-Interact with connectors (Pause/Resume/Restart)
-      <action>          (pause | resume | restart)
-      <connectors>...   Connector names separated by space (use `ALL` for all
-                          connectors)
+```console
+Usage: kafkactl connectors [-hvV] [-n=<optionalNamespace>] <action> <connectors>...
+
+Description:
+
+Interact with connectors.
+
+Parameters:
+      <action>          Action to perform (pause, resume, restart).
+      <connectors>...   Connector names separated by space or "all" for all connectors.
+
+Options:
+  -h, --help            Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                        Override namespace defined in config or yaml resource
-  -v, --verbose         ...
+                        Override namespace defined in config or YAML resources.
+  -v, --verbose         Enable the verbose mode.
+  -V, --version         Print version information and exit.
 ```
 
 - **action** can be pause, resume, restart
@@ -310,18 +383,23 @@ Interact with connectors (Pause/Resume/Restart)
 
 This command allows you to modify schema compatibility.
 
-```yml
-Usage: kafkactl schemas [-v] [-n=<optionalNamespace>] <compatibility>
-                        <subjects>...
-Update schema compatibility mode
-      <compatibility>   Compatibility mode to set [GLOBAL, BACKWARD,
-                          BACKWARD_TRANSITIVE, FORWARD, FORWARD_TRANSITIVE,
-                          FULL, FULL_TRANSITIVE, NONE]. GLOBAL will revert to
-                          Schema Registry's compatibility level
-      <subjects>...     Subject names separated by space
+```console
+Usage: kafkactl schemas [-hvV] [-n=<optionalNamespace>] <compatibility> <subjects>...
+
+Description:
+
+Interact with schemas.
+
+Parameters:
+      <compatibility>   Compatibility to set (global, backward, backward-transitive, forward, forward-transitive, full, full-transitive, none).
+      <subjects>...     Subject names separated by space.
+
+Options:
+  -h, --help            Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                        Override namespace defined in config or yaml resource
-  -v, --verbose         ...
+                        Override namespace defined in config or YAML resources.
+  -v, --verbose         Enable the verbose mode.
+  -V, --version         Print version information and exit.
 ```
 
 - **compatibility** is the compatibility mode to apply.
@@ -331,16 +409,24 @@ Update schema compatibility mode
 
 This command allows you to reset the password of a user.
 
-```yml
-Usage: kafkactl reset-password [-v] [--execute] [-n=<optionalNamespace>]
-                               [-o=<output>] <user>
-Reset your Kafka password
-      <user>              The user to reset password
+```console
+Usage: kafkactl reset-password [-hvV] [--execute] [-n=<optionalNamespace>] [-o=<output>] <user>
+
+Description:
+
+Reset a Kafka password.
+
+Parameters:
+      <user>              The user to reset password.
+
+Options:
       --execute           This option is mandatory to change the password
+  -h, --help              Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                          Override namespace defined in config or yaml resource
+                          Override namespace defined in config or YAML resources.
   -o, --output=<output>   Output format. One of: yaml|table
-  -v, --verbose           ...
+  -v, --verbose           Enable the verbose mode.
+  -V, --version           Print version information and exit.
 ```
 
 # Resources

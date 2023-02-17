@@ -1,13 +1,12 @@
 package com.michelin.kafkactl;
 
-import com.michelin.kafkactl.client.ClusterResourceClient;
-import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
@@ -16,26 +15,25 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-@Command(name = "get", description = {
-        "Get resources by resource type for the current namespace",
-        "Examples:",
-        "  kafkactl get topic topic1 : Display topic1 configuration",
-        "  kafkactl get topics : Display all topics",
-        "  kafkactl get all : Display all resources",
-        "Parameters: "
-})
+import static com.michelin.kafkactl.services.FormatService.TABLE;
+import static com.michelin.kafkactl.services.FormatService.YAML;
+
+@Command(name = "get",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "Get resources by resource type for the current namespace.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
+        versionProvider = VersionProvider.class,
+        mixinStandardHelpOptions = true)
 public class GetSubcommand implements Callable<Integer> {
-    @Inject
-    public NamespacedResourceClient namespacedClient;
-
-    @Inject
-    public ClusterResourceClient nonNamespacedClient;
-
     @Inject
     public LoginService loginService;
 
@@ -54,10 +52,10 @@ public class GetSubcommand implements Callable<Integer> {
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
-    @Parameters(index = "0", description = "Resource type or 'all' to display resources for all types", arity = "1")
+    @Parameters(index = "0", description = "Resource type or 'all' to display resources of all types.", arity = "1")
     public String resourceType;
 
-    @Parameters(index = "1", description = "Resource name", arity = "0..1")
+    @Parameters(index = "1", description = "Resource name.", arity = "0..1")
     public Optional<String> resourceName;
 
     @Option(names = {"-o", "--output"}, description = "Output format. One of: yaml|table", defaultValue = "table")
@@ -73,9 +71,8 @@ public class GetSubcommand implements Callable<Integer> {
      */
     @Override
     public Integer call() throws Exception {
-        boolean authenticated = loginService.doAuthenticate();
-        if (!authenticated) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed");
+        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
+            return 1;
         }
 
         // Validate resourceType + custom type ALL
@@ -87,46 +84,26 @@ public class GetSubcommand implements Callable<Integer> {
 
         // List resources based on parameters
         if (resourceName.isEmpty() || apiResources.size() > 1) {
-            try {
-                // List all resources for given types (k get all, k get topics)
-                Map<ApiResource, List<Resource>> resources = resourceService.listAll(apiResources, namespace);
-
-                if (resources.entrySet().size() == 1 && resources.get(resources.keySet().iterator().next()).isEmpty()) {
-                    System.out.println("No resource to display.");
-                } else {
-                    // Display all resources by type
-                    resources.entrySet()
-                            .stream()
-                            .filter(kv -> !kv.getValue().isEmpty())
-                            .forEach(kv -> formatService.displayList(kv.getValue().get(0).getKind(), kv.getValue(), output));
-                }
-            } catch (HttpClientResponseException e) {
-                formatService.displayError(e, apiResources.get(0).getKind(), null);
-            } catch (Exception e) {
-                System.out.println("Error during get for resource type " + resourceType + ": " + e.getMessage());
-            }
-        } else {
-            try {
-                // Get individual resources for given types (k get topic topic1)
-                Resource singleResource = resourceService.getSingleResourceWithType(apiResources.get(0), namespace, resourceName.get(), true);
-                formatService.displaySingle(singleResource, output);
-            } catch (HttpClientResponseException e) {
-                formatService.displayError(e, apiResources.get(0).getKind(), resourceName.get());
-            } catch (Exception e) {
-                System.out.println("Error during get for resource type " + apiResources.get(0).getKind() + "/" + resourceName.get() + ": " + e.getMessage());
-            }
-
+            return resourceService.listAll(apiResources, namespace, commandSpec);
         }
 
-        return 0;
+        try {
+            // Get individual resources for given types (k get topic topic1)
+            Resource singleResource = resourceService.getSingleResourceWithType(apiResources.get(0), namespace, resourceName.get(), true);
+            formatService.displaySingle(singleResource, output, commandSpec);
+            return 0;
+        } catch (HttpClientResponseException e) {
+            formatService.displayError(e, apiResources.get(0).getKind(), resourceName.get(), commandSpec);
+            return 1;
+        }
     }
 
     /**
      * Validate required output format
      */
     private void validateOutput() {
-        if (!List.of("table", "yaml").contains(output)) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Invalid value " + output + " for option -o");
+        if (!List.of(TABLE, YAML).contains(output)) {
+            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Invalid value " + output + " for option -o.");
         }
     }
 
@@ -137,18 +114,18 @@ public class GetSubcommand implements Callable<Integer> {
     private List<ApiResource> validateResourceType() {
         // Specific case ALL
         if (resourceType.equalsIgnoreCase("ALL")) {
-            return apiResourcesService.getListResourceDefinition()
+            return apiResourcesService.listResourceDefinitions()
                     .stream()
                     .filter(ApiResource::isNamespaced)
                     .collect(Collectors.toList());
         }
 
         // Otherwise, check resource exists
-        Optional<ApiResource> optionalApiResource = apiResourcesService.getResourceDefinitionFromCommandName(resourceType);
+        Optional<ApiResource> optionalApiResource = apiResourcesService.getResourceDefinitionByCommandName(resourceType);
         if (optionalApiResource.isPresent()) {
             return List.of(optionalApiResource.get());
         }
 
-        throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server doesn't have resource type " + resourceType);
+        throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type " + resourceType + ".");
     }
 }

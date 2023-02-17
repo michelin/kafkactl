@@ -5,15 +5,29 @@ import com.michelin.kafkactl.models.SchemaCompatibility;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
 import picocli.CommandLine;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-@CommandLine.Command(name = "schemas", description = "Update schema compatibility mode")
+import static com.michelin.kafkactl.services.FormatService.TABLE;
+import static com.michelin.kafkactl.utils.constants.ConstantKind.SCHEMA_COMPATIBILITY_STATE;
+
+@CommandLine.Command(name = "schemas",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "Interact with schemas.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
+        versionProvider = VersionProvider.class,
+        mixinStandardHelpOptions = true)
 public class SchemaSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;
@@ -33,12 +47,10 @@ public class SchemaSubcommand implements Callable<Integer> {
     @CommandLine.ParentCommand
     public KafkactlCommand kafkactlCommand;
 
-    @CommandLine.Parameters(index="0",  description = "Compatibility mode to set [GLOBAL, BACKWARD, " +
-            "BACKWARD_TRANSITIVE, FORWARD, FORWARD_TRANSITIVE, FULL, FULL_TRANSITIVE, NONE]. " +
-            "GLOBAL will revert to Schema Registry's compatibility level", arity = "1")
+    @CommandLine.Parameters(index = "0",  description = "Compatibility to set (${COMPLETION-CANDIDATES}).", arity = "1")
     public SchemaCompatibility compatibility;
 
-    @CommandLine.Parameters(index="1..*", description = "Subject names separated by space", arity = "1..*")
+    @CommandLine.Parameters(index = "1..*", description = "Subject names separated by space.", arity = "1..*")
     public List<String> subjects;
 
     /**
@@ -48,22 +60,21 @@ public class SchemaSubcommand implements Callable<Integer> {
      */
     @Override
     public Integer call() throws Exception {
-        boolean authenticated = loginService.doAuthenticate();
-        if (!authenticated) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Login failed");
+        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
+            return 1;
         }
 
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
 
         List<Resource> updatedSchemas = subjects
                 .stream()
-                .map(subject -> resourceService.changeSchemaCompatibility(namespace, subject,
-                        compatibility))
-                .filter(Objects::nonNull)
+                .map(subject -> resourceService.changeSchemaCompatibility(namespace, subject, compatibility, commandSpec))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
 
         if (!updatedSchemas.isEmpty()) {
-            formatService.displayList("SchemaCompatibilityState", updatedSchemas, "table");
+            formatService.displayList(SCHEMA_COMPATIBILITY_STATE, updatedSchemas, TABLE, commandSpec);
             return 0;
         }
 

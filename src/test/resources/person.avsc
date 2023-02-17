@@ -1,0 +1,23 @@
+{
+  "namespace": "com.michelin.kafkactl",
+  "type": "record",
+  "name": "PersonAvro",
+  "fields": [
+    {
+      "name": "firstName",
+      "type": [
+        "string"
+      ],
+      "doc": "First name of the person"
+    },
+    {
+      "name": "lastName",
+      "type": [
+        "null",
+        "string"
+      ],
+      "default": null,
+      "doc": "Last name of the person"
+    }
+  ]
+}

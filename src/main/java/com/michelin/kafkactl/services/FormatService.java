@@ -7,7 +7,6 @@ import com.michelin.kafkactl.KafkactlConfig;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.models.Status;
 import io.micronaut.core.naming.conventions.StringConvention;
-import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -22,10 +21,12 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static io.micronaut.core.util.StringUtils.EMPTY_STRING;
+
 @Singleton
 public class FormatService {
-    private static final String YAML = "yaml";
-    private static final String TABLE = "table";
+    public static final String YAML = "yaml";
+    public static final String TABLE = "table";
     private final List<String> defaults = List.of("KIND:/kind", "NAME:/metadata/name", "AGE:/metadata/creationTimestamp%AGO");
 
     @Inject
@@ -36,12 +37,13 @@ public class FormatService {
      * @param kind The kind of resource
      * @param resources The list of resources
      * @param output The type of display
+     * @param commandSpec The command spec used to print the output
      */
-    public void displayList(String kind, List<Resource> resources, String output) {
+    public void displayList(String kind, List<Resource> resources, String output, CommandLine.Model.CommandSpec commandSpec) {
         if (output.equals(TABLE)) {
-            printTable(kind, resources);
+            printTable(kind, resources, commandSpec);
         } else if (output.equals(YAML)) {
-            printYaml(resources);
+            printYaml(resources, commandSpec);
         }
     }
 
@@ -49,26 +51,68 @@ public class FormatService {
      * Display a single resource
      * @param resource The resource
      * @param output The type of display
+     * @param commandSpec The command spec used to print the output
      */
-    public void displaySingle(Resource resource, String output) {
-        displayList(resource.getKind(), List.of(resource), output);
+    public void displaySingle(Resource resource, String output, CommandLine.Model.CommandSpec commandSpec) {
+        displayList(resource.getKind(), List.of(resource), output, commandSpec);
     }
 
     /**
-     * Display an error
-     * @param e The HTTP response error
+     * Display an error for a given particular resource kind
+     * E.g., apply, delete, get
+     * @param exception The HTTP response error
      * @param kind The resource kind
      * @param name The resource name
+     * @param commandSpec The command spec used to print the output
      */
-    public void displayError(HttpClientResponseException e, String kind, String name) {
-        Optional<Status> statusOptional = e.getResponse().getBody(Status.class);
+    public void displayError(HttpClientResponseException exception, String kind, String name, CommandLine.Model.CommandSpec commandSpec) {
+        Optional<Status> statusOptional = exception.getResponse().getBody(Status.class);
+        String prettyKind = prettifyKind(kind);
         if (statusOptional.isPresent() && statusOptional.get().getDetails() != null && !statusOptional.get().getDetails().getCauses().isEmpty()) {
             Status status = statusOptional.get();
             String causes = "\n - " + String.join("\n - ", status.getDetails().getCauses());
-
-            System.out.printf("Failed %s/%s %s for cause(s): %s%n", kind, name, status.getMessage(), causes);
+            commandSpec.commandLine().getErr().printf("%s \"%s\" failed because %s (%s):%s%n", prettyKind, name, status.getMessage().toLowerCase(),
+                    exception.getStatus().getCode(), causes);
         } else {
-            System.out.printf("Failed %s/%s %s%n", kind, name, e.getMessage());
+            commandSpec.commandLine().getErr().printf("%s \"%s\" failed because %s (%s).%n", prettyKind, name, exception.getMessage().toLowerCase(),
+                    exception.getStatus().getCode());
+        }
+    }
+
+    /**
+     * Display an error for a given kind of resources
+     * @param exception The HTTP response error
+     * @param kind The resource kind
+     * @param commandSpec The command spec used to print the output
+     */
+    public void displayError(HttpClientResponseException exception, String kind, CommandLine.Model.CommandSpec commandSpec) {
+        Optional<Status> statusOptional = exception.getResponse().getBody(Status.class);
+        String prettyKind = prettifyKind(kind);
+        if (statusOptional.isPresent() && statusOptional.get().getDetails() != null && !statusOptional.get().getDetails().getCauses().isEmpty()) {
+            Status status = statusOptional.get();
+            String causes = "\n - " + String.join("\n - ", status.getDetails().getCauses());
+            commandSpec.commandLine().getErr().printf("%s(s) failed because %s (%s):%s%n", prettyKind,
+                    status.getMessage().toLowerCase(), exception.getStatus().getCode(), causes);
+        } else {
+            commandSpec.commandLine().getErr().printf("%s(s) failed because %s (%s).%n", prettyKind,
+                    exception.getMessage().toLowerCase(), exception.getStatus().getCode());
+        }
+    }
+
+    /**
+     * Display a generic error
+     * @param exception The HTTP client exception
+     * @param commandSpec The command spec used to print the output
+     */
+    public void displayError(HttpClientResponseException exception, CommandLine.Model.CommandSpec commandSpec) {
+        Optional<Status> statusOptional = exception.getResponse().getBody(Status.class);
+        if (statusOptional.isPresent() && statusOptional.get().getDetails() != null && !statusOptional.get().getDetails().getCauses().isEmpty()) {
+            Status status = statusOptional.get();
+            String causes = "\n - " + String.join("\n - ", status.getDetails().getCauses());
+            commandSpec.commandLine().getErr().printf("Failed because %s (%s):%s%n", status.getMessage().toLowerCase(), exception.getStatus().getCode(),
+                    causes);
+        } else {
+            commandSpec.commandLine().getErr().printf("Failed because %s (%s).%n", exception.getMessage().toLowerCase(), exception.getStatus().getCode());
         }
     }
 
@@ -76,27 +120,38 @@ public class FormatService {
      * Print the list of resources to table format
      * @param kind The kind of resources
      * @param resources The list of resources
+     * @param commandSpec The command spec used to print the output
      */
-    private void printTable(String kind, List<Resource> resources) {
+    private void printTable(String kind, List<Resource> resources, CommandLine.Model.CommandSpec commandSpec) {
         String hyphenatedKind = StringConvention.HYPHENATED.format(kind);
         List<String> formats = kafkactlConfig.getTableFormat().getOrDefault(hyphenatedKind, defaults);
 
         PrettyTextTable ptt = new PrettyTextTable(formats, resources);
-        System.out.println(ptt);
+        commandSpec.commandLine().getOut().println(ptt);
     }
 
     /**
      * Print the list of resources to yaml format
      * @param resources The list of resources
+     * @param commandSpec The command spec used to print the output
      */
-    private void printYaml(List<Resource> resources) {
+    private void printYaml(List<Resource> resources, CommandLine.Model.CommandSpec commandSpec) {
         DumperOptions options = new DumperOptions();
         options.setExplicitStart(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        Representer representer = new Representer();
+        Representer representer = new Representer(new DumperOptions());
         representer.addClassTag(Resource.class, Tag.MAP);
         Yaml yaml = new Yaml(representer, options);
-        System.out.println(yaml.dumpAll(resources.iterator()));
+        commandSpec.commandLine().getOut().println(yaml.dumpAll(resources.iterator()));
+    }
+
+    /**
+     * Prettify kind
+     * @param kind The kind
+     * @return The prettified kind
+     */
+    public String prettifyKind(String kind) {
+        return kind.substring(0, 1).toUpperCase() + kind.substring(1).replaceAll("(.)([A-Z])", "$1 $2").toLowerCase();
     }
 
     public static class PrettyTextTable {
@@ -174,8 +229,8 @@ public class FormatService {
                             StdDateFormat sdf = new StdDateFormat();
                             Date d = sdf.parse(cell.asText());
                             output = new PrettyTime().format(d);
-                        } catch ( ParseException e) {
-                            output = cell.asText();
+                        } catch (ParseException e) {
+                            output = EMPTY_STRING;
                         }
                         break;
                     case "PERIOD":
@@ -188,17 +243,17 @@ public class FormatService {
                             output += hours > 0 ? (hours + "h") : "";
                             output += minutes > 0 ? (minutes + "m") : "";
                         } catch (NumberFormatException e) {
-                            output = "err:" + cell;
+                            output = EMPTY_STRING;
                         }
                         break;
                     case "NONE":
                     default:
                         if (cell.isArray()) {
-                            List<String> childs = new ArrayList<>();
-                            cell.elements().forEachRemaining(jsonNode -> childs.add(jsonNode.asText()));
-                            output = "[" + String.join(",", childs) + "]";
+                            List<String> children = new ArrayList<>();
+                            cell.elements().forEachRemaining(jsonNode -> children.add(jsonNode.asText()));
+                            output = String.join(",", children);
                         } else {
-                            output = cell.asText(StringUtils.EMPTY_STRING);
+                            output = cell.asText(EMPTY_STRING);
                         }
                         break;
                 }

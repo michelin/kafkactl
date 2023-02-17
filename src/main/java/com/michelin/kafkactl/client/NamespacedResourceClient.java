@@ -2,7 +2,6 @@ package com.michelin.kafkactl.client;
 
 import com.michelin.kafkactl.client.predicates.RetryTimeoutPredicate;
 import com.michelin.kafkactl.models.Resource;
-import com.michelin.kafkactl.models.SchemaCompatibility;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.*;
 import io.micronaut.http.client.annotation.Client;
@@ -81,7 +80,7 @@ public interface NamespacedResourceClient {
      * @return The resource
      */
     @Get("{namespace}/{kind}/{resourceName}")
-    Resource get(
+    HttpResponse<Resource> get(
             String namespace,
             String kind,
             String resourceName,
@@ -147,7 +146,7 @@ public interface NamespacedResourceClient {
      * @return The change state response
      */
     @Post("{namespace}/connectors/{connector}/change-state")
-    Resource changeConnectorState(
+    HttpResponse<Resource> changeConnectorState(
             String namespace,
             String connector,
             @Body Resource changeConnectorState,
@@ -163,10 +162,10 @@ public interface NamespacedResourceClient {
      * @return The change compatibility response
      */
     @Post("{namespace}/schemas/{subject}/config")
-    Resource changeSchemaCompatibility(
+    HttpResponse<Resource> changeSchemaCompatibility(
             String namespace,
             String subject,
-            @Body Map<String, SchemaCompatibility> compatibility,
+            @Body Map<String, String> compatibility,
             @Header("Authorization") String token);
 
     /**
@@ -178,7 +177,7 @@ public interface NamespacedResourceClient {
      * @return The reset password response
      */
     @Post("{namespace}/users/{user}/reset-password")
-    Resource resetPassword(String namespace, String user, @Header("Authorization") String token);
+    HttpResponse<Resource> resetPassword(String namespace, String user, @Header("Authorization") String token);
 
     /**
      * List all available connect clusters for vaulting

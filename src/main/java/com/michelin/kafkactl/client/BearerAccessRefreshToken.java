@@ -1,7 +1,6 @@
 package com.michelin.kafkactl.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import lombok.Getter;
 import lombok.Setter;

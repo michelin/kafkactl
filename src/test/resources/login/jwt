@@ -1,0 +1,9 @@
+{
+  "username": "test@test",
+  "roles": [
+    "isAdmin()"
+  ],
+  "access_token": "a-fake-access-token",
+  "token_type": "Bearer",
+  "expires_in": 60
+}

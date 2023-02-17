@@ -21,89 +21,75 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ConnectClustersSubcommandTest {
     @Mock
-    public KafkactlConfig kafkactlConfig;
+    private KafkactlConfig kafkactlConfig;
 
     @Mock
-    public FormatService formatService;
+    private ResourceService resourceService;
 
     @Mock
-    public ResourceService resourceService;
+    private LoginService loginService;
 
     @Mock
-    public LoginService loginService;
-
-    @Mock
-    public KafkactlCommand kafkactlCommand;
+    private KafkactlCommand kafkactlCommand;
 
     @InjectMocks
     private ConnectClustersSubcommand connectClustersSubcommand;
 
     @Test
     void shouldNotExecuteWhenNotLoggedIn() {
-        when(loginService.doAuthenticate()).thenReturn(false);
         CommandLine cmd = new CommandLine(connectClustersSubcommand);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+                .thenReturn(false);
+
         int code = cmd.execute("vaults");
-        assertEquals(2, code);
-        assertTrue(sw.toString().contains("Login failed."));
+        assertEquals(1, code);
     }
 
     @Test
-    void shouldDisplayEmptyVaultsListWhenNoConnectClusterAndNoAvailableClusters() {
-        when(loginService.doAuthenticate()).thenReturn(true);
+    void shouldListAvailableVaultsClustersSuccess() {
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+                .thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
-
-        when(resourceService.listAvailableVaultsConnectClusters("namespace"))
-                .thenReturn(List.of());
+        when(resourceService.listAvailableVaultsConnectClusters(any(), any()))
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(connectClustersSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("vaults");
         assertEquals(0, code);
-        verify(formatService).displayList("ConnectCluster", List.of(), "table");
+        verify(resourceService).listAvailableVaultsConnectClusters("namespace", cmd.getCommandSpec());
     }
 
     @Test
-    void shouldDisplayVaultsListWhenNoConnectCluster() {
-        when(loginService.doAuthenticate()).thenReturn(true);
+    void shouldListAvailableVaultsClustersFail() {
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+                .thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
-
-        Resource resource = Resource.builder()
-                .kind("ConnectCluster")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder().build())
-                .spec(Collections.emptyMap())
-                .build();
-
-        when(resourceService.listAvailableVaultsConnectClusters("namespace"))
-                .thenReturn(List.of(resource));
+        when(resourceService.listAvailableVaultsConnectClusters(any(), any()))
+                .thenReturn(1);
 
         CommandLine cmd = new CommandLine(connectClustersSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("vaults");
-        assertEquals(0, code);
-        verify(formatService).displayList("ConnectCluster", List.of(resource), "table");
+        assertEquals(1, code);
+        verify(resourceService).listAvailableVaultsConnectClusters("namespace", cmd.getCommandSpec());
     }
 
     @Test
     void shouldLDisplayErrorMessageWhenNoSecretsPassed() {
-        when(loginService.doAuthenticate()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
@@ -118,8 +104,8 @@ class ConnectClustersSubcommandTest {
     }
 
     @Test
-    void shouldDisplayVaultsResultsWhenConnectClusterAndSecretsDefined() {
-        when(loginService.doAuthenticate()).thenReturn(true);
+    void shouldVaultSuccess() {
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
@@ -137,15 +123,13 @@ class ConnectClustersSubcommandTest {
                 .spec(Map.of("clearText", "secret2", "encrypted", "encrypted2"))
                 .build();
 
-        when(resourceService.vaultsOnConnectClusters("namespace", "connectCluster", List.of("secret1", "secret2")))
-                .thenReturn(List.of(resource1, resource2));
+        when(resourceService.vaultsOnConnectClusters(any(), any(), any(), any()))
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(connectClustersSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("vaults", "connectCluster", "secret1", "secret2");
         assertEquals(0, code);
-        verify(formatService).displayList("VaultResponse", List.of(resource1, resource2), "table");
+        verify(resourceService).vaultsOnConnectClusters("namespace", "connectCluster", List.of("secret1", "secret2"), cmd.getCommandSpec());
     }
 }

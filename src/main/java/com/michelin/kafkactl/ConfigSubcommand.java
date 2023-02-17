@@ -4,6 +4,7 @@ import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.ConfigService;
 import com.michelin.kafkactl.services.FormatService;
+import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.core.util.StringUtils;
 import jakarta.inject.Inject;
 import lombok.Getter;
@@ -12,7 +13,20 @@ import picocli.CommandLine;
 import java.util.*;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "config", description = "Manage configuration")
+import static com.michelin.kafkactl.services.FormatService.TABLE;
+import static com.michelin.kafkactl.utils.constants.ConstantKind.CONTEXT;
+
+@CommandLine.Command(name = "config",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@:%n%n",
+        description = "Manage configuration.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true,
+        versionProvider = VersionProvider.class,
+        mixinStandardHelpOptions = true)
 public class ConfigSubcommand implements Callable<Integer> {
     @Inject
     public KafkactlConfig kafkactlConfig;
@@ -23,14 +37,14 @@ public class ConfigSubcommand implements Callable<Integer> {
     @Inject
     public FormatService formatService;
 
-    @CommandLine.ParentCommand
-    public KafkactlCommand kafkactlCommand;
-
-    @CommandLine.Parameters(index = "0", description = "(get-contexts | current-context | use-context)", arity = "1")
+    @CommandLine.Parameters(index = "0", description = "Action to perform (${COMPLETION-CANDIDATES}).", arity = "1")
     public ConfigAction action;
 
-    @CommandLine.Parameters(index="1", defaultValue = "", description = "Context", arity = "1")
+    @CommandLine.Parameters(index="1", defaultValue = "", description = "Context to use.", arity = "1")
     public String context;
+
+    @CommandLine.Spec
+    public CommandLine.Model.CommandSpec commandSpec;
 
     /**
      * Run the "config" command
@@ -59,12 +73,12 @@ public class ConfigSubcommand implements Callable<Integer> {
                     .spec(specs)
                     .build();
 
-            formatService.displayList("Context", List.of(currentContextAsResource), "table");
+            formatService.displayList(CONTEXT, List.of(currentContextAsResource), TABLE, commandSpec);
             return 0;
         }
 
         if (kafkactlConfig.getContexts().isEmpty()) {
-            System.out.println("No context pre-defined.");
+            commandSpec.commandLine().getOut().println("No context pre-defined.");
             return 0;
         }
 
@@ -86,20 +100,20 @@ public class ConfigSubcommand implements Callable<Integer> {
                 allContextsAsResources.add(currentContextAsResource);
             });
 
-            formatService.displayList("Context", allContextsAsResources, "table");
+            formatService.displayList(CONTEXT, allContextsAsResources, TABLE, commandSpec);
             return 0;
         }
 
         Optional<KafkactlConfig.Context> optionalContextToSet = configService.getContextByName(context);
         if (optionalContextToSet.isEmpty()) {
-            System.out.println("error: no context exists with the name: " + context);
+            commandSpec.commandLine().getErr().println("No context exists with the name: " + context);
             return 1;
         }
 
         KafkactlConfig.Context contextToSet = optionalContextToSet.get();
         if (action.equals(ConfigAction.USE_CONTEXT)) {
             configService.updateConfigurationContext(contextToSet);
-            System.out.println("Switched to context \"" + context + "\".");
+            commandSpec.commandLine().getOut().println("Switched to context \"" + context + "\".");
             return 0;
         }
 
@@ -113,14 +127,14 @@ enum ConfigAction {
     USE_CONTEXT("use-context");
 
     @Getter
-    private final String realName;
+    private final String name;
 
-    ConfigAction(String realName) {
-        this.realName = realName;
+    ConfigAction(String name) {
+        this.name = name;
     }
 
     @Override
     public String toString() {
-        return realName;
+        return name;
     }
 }
