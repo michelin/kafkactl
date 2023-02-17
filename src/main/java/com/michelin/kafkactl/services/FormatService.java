@@ -195,7 +195,7 @@ public class FormatService {
             // Create Data Rows
             this.rows.forEach(tt::addRowValues);
 
-            return tt.toString().substring(0, tt.toString().lastIndexOf(System.getProperty("line.separator")));
+            return tt.toString();
         }
 
         static class PrettyTextTableColumn {
