@@ -6,6 +6,7 @@ import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
+import com.michelin.kafkactl.models.SchemaCompatibility;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
@@ -16,17 +17,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.michelin.kafkactl.services.FormatService.TABLE;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.CONSUMER_GROUP_RESET_OFFSET_RESPONSE;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.DELETE_RECORDS_RESPONSE;
+import static com.michelin.kafkactl.utils.constants.ConstantKind.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -840,5 +838,302 @@ class ResourceServiceTest {
 
         assertEquals(1, actual);
         verify(formatService).displayError(exception, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldChangeConnectorState() {
+        Resource changeConnectorStateResource = Resource.builder()
+                .kind(CHANGE_CONNECTOR_STATE)
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("connector")
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        when(namespacedClient.changeConnectorState(any(), any(), any(), any()))
+                .thenReturn(HttpResponse.ok(changeConnectorStateResource));
+
+        Optional<Resource> actual = resourceService.changeConnectorState("namespace", "connector", changeConnectorStateResource, cmd.getCommandSpec());
+
+        assertTrue(actual.isPresent());
+        assertEquals(changeConnectorStateResource, actual.get());
+    }
+
+    @Test
+    void shouldChangeConnectorStateNotFound() {
+        Resource changeConnectorStateResource = Resource.builder()
+                .kind(CHANGE_CONNECTOR_STATE)
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("connector")
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        when(namespacedClient.changeConnectorState(any(), any(), any(), any()))
+                .thenReturn(HttpResponse.notFound(changeConnectorStateResource));
+
+        Optional<Resource> actual = resourceService.changeConnectorState("namespace", "connector", changeConnectorStateResource,
+                cmd.getCommandSpec());
+
+        assertTrue(actual.isEmpty());
+        verify(formatService).displayError(argThat(exception -> exception.getStatus().equals(HttpStatus.NOT_FOUND)
+                        && exception.getMessage().equals("Not Found")), eq(CONNECTOR), eq("connector"),
+                eq(cmd.getCommandSpec()));
+    }
+
+    @Test
+    void shouldChangeConnectorStateFail() {
+        Resource changeConnectorStateResource = Resource.builder()
+                .kind(CHANGE_CONNECTOR_STATE)
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("connector")
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        when(namespacedClient.changeConnectorState(any(), any(), any(), any()))
+                .thenThrow(exception);
+
+        Optional<Resource> actual = resourceService.changeConnectorState("namespace", "connector", changeConnectorStateResource,
+                cmd.getCommandSpec());
+
+        assertTrue(actual.isEmpty());
+        verify(formatService).displayError(exception, CONNECTOR, "connector", cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldChangeSchemaCompatibility() {
+        Resource changeSchemaCompatResource = Resource.builder()
+                .kind(SCHEMA_COMPATIBILITY_STATE)
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("subject")
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        when(namespacedClient.changeSchemaCompatibility(any(), any(), any(), any()))
+                .thenReturn(HttpResponse.ok(changeSchemaCompatResource));
+
+        Optional<Resource> actual = resourceService.changeSchemaCompatibility("namespace", "subject", SchemaCompatibility.FORWARD_TRANSITIVE,
+                cmd.getCommandSpec());
+
+        assertTrue(actual.isPresent());
+        assertEquals(changeSchemaCompatResource, actual.get());
+    }
+
+    @Test
+    void shouldChangeSchemaCompatibilityNotFound() {
+        Resource changeConnectorStateResource = Resource.builder()
+                .kind(CHANGE_CONNECTOR_STATE)
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("subject")
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        when(namespacedClient.changeSchemaCompatibility(any(), any(), any(), any()))
+                .thenReturn(HttpResponse.notFound(changeConnectorStateResource));
+
+        Optional<Resource> actual = resourceService.changeSchemaCompatibility("namespace", "subject", SchemaCompatibility.FORWARD_TRANSITIVE,
+                cmd.getCommandSpec());
+
+        assertTrue(actual.isEmpty());
+        verify(formatService).displayError(argThat(exception -> exception.getStatus().equals(HttpStatus.NOT_FOUND)
+                        && exception.getMessage().equals("Not Found")), eq(SUBJECT), eq("subject"),
+                eq(cmd.getCommandSpec()));
+    }
+
+    @Test
+    void shouldChangeSchemaCompatFail() {
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        when(namespacedClient.changeSchemaCompatibility(any(), any(), any(), any()))
+                .thenThrow(exception);
+
+        Optional<Resource> actual = resourceService.changeSchemaCompatibility("namespace", "subject", SchemaCompatibility.FORWARD_TRANSITIVE,
+                cmd.getCommandSpec());
+
+        assertTrue(actual.isEmpty());
+        verify(formatService).displayError(exception, SUBJECT, "subject", cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldResetPassword() {
+        Resource changeSchemaCompatResource = Resource.builder()
+                .kind(KAFKA_USER_RESET_PASSWORD)
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("user")
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        when(namespacedClient.resetPassword(any(), any(), any()))
+                .thenReturn(HttpResponse.ok(changeSchemaCompatResource));
+
+        int actual = resourceService.resetPassword("namespace", "username", TABLE, cmd.getCommandSpec());
+
+        assertEquals(0, actual);
+        verify(formatService).displaySingle(changeSchemaCompatResource, TABLE, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldResetPasswordNotFound() {
+        Resource changeConnectorStateResource = Resource.builder()
+                .kind(KAFKA_USER_RESET_PASSWORD)
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("prefix.topic")
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        when(namespacedClient.resetPassword(any(), any(), any()))
+                .thenReturn(HttpResponse.notFound(changeConnectorStateResource));
+
+        int actual = resourceService.resetPassword("namespace", "username", TABLE, cmd.getCommandSpec());
+
+        assertEquals(1, actual);
+        verify(formatService).displayError(argThat(exception -> exception.getStatus().equals(HttpStatus.NOT_FOUND)
+                        && exception.getMessage().equals("Not Found")), eq(cmd.getCommandSpec()));
+    }
+
+    @Test
+    void shouldResetPasswordFail() {
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        when(namespacedClient.resetPassword(any(), any(), any()))
+                .thenThrow(exception);
+
+        int actual = resourceService.resetPassword("namespace", "username", TABLE, cmd.getCommandSpec());
+
+        assertEquals(1, actual);
+        verify(formatService).displayError(exception, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldListAvailableVaultsConnectClusters() {
+        Resource availableVaults = Resource.builder()
+                .kind(CONNECT_CLUSTER)
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("connectCluster")
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        when(namespacedClient.listAvailableVaultsConnectClusters(any(), any()))
+                .thenReturn(Collections.singletonList(availableVaults));
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        int actual = resourceService.listAvailableVaultsConnectClusters("namespace", cmd.getCommandSpec());
+
+        assertEquals(0, actual);
+        verify(formatService).displayList(CONNECT_CLUSTER, Collections.singletonList(availableVaults), TABLE, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldListAvailableVaultsConnectClustersAndThrowException() {
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        when(namespacedClient.listAvailableVaultsConnectClusters(any(), any()))
+                .thenThrow(exception);
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        int actual = resourceService.listAvailableVaultsConnectClusters("namespace", cmd.getCommandSpec());
+
+        assertEquals(1, actual);
+        verify(formatService).displayError(exception, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldVaultsOnConnectClusters() {
+        Resource availableVaults = Resource.builder()
+                .kind(CONNECT_CLUSTER)
+                .apiVersion("v1")
+                .metadata(ObjectMeta.builder()
+                        .name("connectCluster")
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        when(namespacedClient.vaultsOnConnectClusters(any(), any(), any(), any()))
+                .thenReturn(Collections.singletonList(availableVaults));
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        int actual = resourceService.vaultsOnConnectClusters("namespace", "connectCluster", Collections.singletonList("passwd"),
+                cmd.getCommandSpec());
+
+        assertEquals(0, actual);
+        verify(formatService).displayList(VAULT_RESPONSE, Collections.singletonList(availableVaults), TABLE, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldVaultsOnConnectClustersAndThrowException() {
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        when(namespacedClient.listAvailableVaultsConnectClusters(any(), any()))
+                .thenThrow(exception);
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        int actual = resourceService.listAvailableVaultsConnectClusters("namespace", cmd.getCommandSpec());
+
+        assertEquals(1, actual);
+        verify(formatService).displayError(exception, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldParse() {
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        doCallRealMethod()
+                .when(fileService).computeYamlFileList(any(), anyBoolean());
+        doCallRealMethod()
+                .when(fileService).parseResourceListFromFiles(any());
+
+        List<Resource> actual = resourceService.parseResources(Optional.of(new File("src/test/resources/topics/topic.yml")), false, cmd.getCommandSpec());
+
+        assertEquals(1, actual.size());
+        assertEquals("Topic", actual.get(0).getKind());
+        assertEquals("myPrefix.topic", actual.get(0).getMetadata().getName());
+        assertEquals(3, actual.get(0).getSpec().get("replicationFactor"));
+        assertEquals(3, actual.get(0).getSpec().get("partitions"));
+    }
+
+    @Test
+    void shouldNotParseNotFound() {
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+
+        when(fileService.computeYamlFileList(any(), anyBoolean()))
+                .thenReturn(Collections.emptyList());
+
+        CommandLine.ParameterException actual = assertThrows(CommandLine.ParameterException.class,
+                () -> resourceService.parseResources(Optional.of(new File("src/test/resources/topics/topic.yml")), false, cmd.getCommandSpec()));
+
+        assertEquals("Could not find YAML or YML files in topic.yml directory.", actual.getMessage());
     }
 }
