@@ -555,7 +555,10 @@ class ResourceServiceTest {
                 .build();
 
         CommandLine cmd = new CommandLine(new KafkactlCommand());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
 
+        doCallRealMethod().when(formatService).prettifyKind(any());
         when(namespacedClient.delete(any(), any(), any(), any(), anyBoolean()))
                 .thenReturn(HttpResponse
                         .<Void>ok()
@@ -564,6 +567,7 @@ class ResourceServiceTest {
         boolean actual = resourceService.delete(apiResource, "namespace", "name", false, cmd.getCommandSpec());
 
         assertTrue(actual);
+        assertTrue(sw.toString().contains("Topic \"name\" deleted."));
     }
 
     @Test
@@ -577,7 +581,10 @@ class ResourceServiceTest {
                 .build();
 
         CommandLine cmd = new CommandLine(new KafkactlCommand());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
 
+        doCallRealMethod().when(formatService).prettifyKind(any());
         when(nonNamespacedClient.delete(any(), any(), any(), anyBoolean()))
                 .thenReturn(HttpResponse
                         .<Void>ok()
@@ -586,6 +593,7 @@ class ResourceServiceTest {
         boolean actual = resourceService.delete(apiResource, "namespace", "name", false, cmd.getCommandSpec());
 
         assertTrue(actual);
+        assertTrue(sw.toString().contains("Topic \"name\" deleted."));
     }
 
     @Test

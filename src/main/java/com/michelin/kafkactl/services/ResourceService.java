@@ -160,6 +160,9 @@ public class ResourceService {
                 throw new HttpClientResponseException(response.reason(), response);
             }
 
+            commandSpec.commandLine().getOut().println(formatService.prettifyKind(apiResource.getKind())
+                    + " \"" + resource + "\" deleted.");
+
             return true;
         } catch (HttpClientResponseException exception) {
             formatService.displayError(exception, apiResource.getKind(), resource, commandSpec);
