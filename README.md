@@ -20,7 +20,7 @@
   * [Api Resources](#api-resources)
   * [Apply](#apply)
   * [Config](#config)
-  * [Connectors](#connectors)
+  * [Connect Clusters](#connect-clusters)
   * [Connectors](#connectors)
   * [Delete Records](#delete-records)
   * [Delete](#delete)
@@ -146,6 +146,12 @@ Options:
   -V, --version   Print version information and exit.
 ```
 
+Example(s):
+
+```console
+kafkactl api-resources
+```
+
 ## Apply
 
 This command allows you to deploy a resource.
@@ -166,6 +172,13 @@ Options:
   -R, --recursive     Search file recursively.
   -v, --verbose       Enable the verbose mode.
   -V, --version       Print version information and exit.
+```
+
+Example(s):
+
+```console
+kafkactl apply -f directoryOfResources
+kafkactl apply -f resource.yml
 ```
 
 Resources have to be described in yaml manifests.
@@ -191,6 +204,14 @@ Options:
                   Override namespace defined in config or YAML resources.
   -v, --verbose   Enable the verbose mode.
   -V, --version   Print version information and exit.
+```
+
+Example(s):
+
+```console
+kafkactl config get-contexts
+kafkactl config use-context local
+kafkactl config current-context
 ```
 
 ## Connect Clusters
@@ -221,6 +242,13 @@ Options:
 - **connectCluster**, if defined, is the name of a Connect clusters to use to vault sensitive connector configuration
 - **secrets** are the clear text to encrypt.
 
+Example(s):
+
+```console
+kafkactl connect-clusters vaults
+kafkactl connect-clusters vaults myConnectCluster someClearText
+```
+
 ## Connectors
 
 This command allows you to interact with connectors.
@@ -247,6 +275,14 @@ Options:
 - **action** can be pause, resume, restart
 - **connectors** is a list of connector names separated by space.
 
+Example(s):
+
+```console
+kafkactl connectors pause myConnector
+kafkactl connectors resume myConnector
+kafkactl connectors restart myConnector
+```
+
 ## Delete Records
 
 This command allows you to delete all records within "delete" typed topics.
@@ -268,6 +304,12 @@ Options:
                   Override namespace defined in config or YAML resources.
   -v, --verbose   Enable the verbose mode.
   -V, --version   Print version information and exit.
+```
+
+Example(s):
+
+```console
+kafkactl delete-records myTopic
 ```
 
 ## Delete
@@ -300,6 +342,13 @@ Options:
   -V, --version        Print version information and exit.
 ```
 
+Example(s):
+
+```console
+kafkactl delete -f directoryOfResources
+kafkactl delete -f resource.yml
+```
+
 ## Diff
 
 This command allows you to check differences between a new yaml descriptor and the current one deployed in Ns4Kafka.
@@ -319,6 +368,12 @@ Options:
   -R, --recursive     Search file recursively.
   -v, --verbose       Enable the verbose mode.
   -V, --version       Print version information and exit.
+```
+
+Example(s):
+
+```console
+kafkactl diff -f resource.yml
 ```
 
 ## Get
@@ -348,6 +403,14 @@ Options:
 - **resourceType** is one of the managed resources: topic, connector, acl, schema, stream or **all** to fetch all the resources.
 - **resourceName** is the name of the resource to consult.
 
+Example(s):
+
+```console
+kafkactl get all
+kafkactl get topics
+kafkactl get topic myTopic
+```
+
 ## Import
 
 This command allows you to import unsynchronized resources between Ns4Kafka, and the Kafka broker/Kafka Connect cluster.
@@ -372,6 +435,13 @@ Options:
 ```
 
 - **resourceType** can be topic or connector
+
+Example(s):
+
+```console
+kafkactl import topics
+kafkactl import connectors
+```
 
 ## Reset Offsets
 
@@ -409,6 +479,12 @@ Options:
 - **--topic/--all-topics** is a given topic or all the topics to reset.
 - **method** can be: --to-earliest, --to-latest, --to-offset, --to-datetime, --shift-by
 
+Example(s):
+
+```console
+kafkactl reset-offsets --group myConsumerGroup --topic myTopic --to-earliest
+```
+
 ## Schemas
 
 This command allows you to modify the schema compatibility.
@@ -435,6 +511,12 @@ Options:
 - **compatibility** is the compatibility mode to apply.
 - **subject** is the subject to update the compatibility.
 
+Example(s):
+
+```console
+kafkactl schemas forward-transitive mySubject-value
+```
+
 ## Reset Password
 
 This command allows you to reset the password of a user.
@@ -457,6 +539,12 @@ Options:
   -o, --output=<output>   Output format. One of: yaml|table
   -v, --verbose           Enable the verbose mode.
   -V, --version           Print version information and exit.
+```
+
+Example(s):
+
+```console
+kafkactl reset-password myUser
 ```
 
 # Resources
