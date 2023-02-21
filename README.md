@@ -17,16 +17,17 @@
 * [Download](#download)
 * [Install](#install)
 * [Usage](#usage)
-  * [Config](#config)
-  * [Apply](#apply)
-  * [Delete](#delete)
-  * [Get](#get)
   * [Api Resources](#api-resources)
+  * [Apply](#apply)
+  * [Config](#config)
+  * [Connectors](#connectors)
+  * [Delete Records](#delete-records)
+  * [Delete](#delete)
   * [Diff](#diff)
+  * [Get](#get)
   * [Import](#import)
   * [Reset Offsets](#reset-offsets)
-  * [Delete Records](#delete-records)
-  * [Connectors](#connectors)
+  * [Schemas](#schemas)
   * [Reset Password](#reset-password)
 * [Resources](#resources)
   * [User](#user)
@@ -125,20 +126,16 @@ Commands:
   reset-password    Reset a Kafka password.
 ```
 
-## Config
+## Api Resources 
 
-This command allows you to manage your Kafka contexts.
+This command allows you to consult which resources can be access.
 
 ```console
-Usage: kafkactl config [-hvV] [-n=<optionalNamespace>] <action> <context>
+Usage: kafkactl api-resources [-hvV] [-n=<optionalNamespace>]
 
 Description:
 
-Manage configuration.
-
-Parameters:
-      <action>    Action to perform (get-contexts, current-context, use-context).
-      <context>   Context to use.
+Print the supported API resources on the server.
 
 Options:
   -h, --help      Show this help message and exit.
@@ -172,6 +169,78 @@ Options:
 
 Resources have to be described in yaml manifests.
 
+## Config
+
+This command allows you to manage your Kafka contexts.
+
+```console
+Usage: kafkactl config [-hvV] [-n=<optionalNamespace>] <action> <context>
+
+Description:
+
+Manage configuration.
+
+Parameters:
+      <action>    Action to perform (get-contexts, current-context, use-context).
+      <context>   Context to use.
+
+Options:
+  -h, --help      Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
+  -V, --version   Print version information and exit.
+```
+
+## Connectors
+
+This command allows you to interact with connectors.
+
+```console
+Usage: kafkactl connectors [-hvV] [-n=<optionalNamespace>] <action> <connectors>...
+
+Description:
+
+Interact with connectors.
+
+Parameters:
+      <action>          Action to perform (pause, resume, restart).
+      <connectors>...   Connector names separated by space or "all" for all connectors.
+
+Options:
+  -h, --help            Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                        Override namespace defined in config or YAML resources.
+  -v, --verbose         Enable the verbose mode.
+  -V, --version         Print version information and exit.
+```
+
+- **action** can be pause, resume, restart
+- **connectors** is a list of connector names separated by space.
+
+## Delete Records
+
+This command allows you to delete all records within "delete" typed topics.
+
+```console
+Usage: kafkactl delete-records [-hvV] [--dry-run] [-n=<optionalNamespace>] <topic>
+
+Description:
+
+Delete all records within a topic.
+
+Parameters:
+      <topic>     Name of the topic.
+
+Options:
+      --dry-run   Does not persist resources. Validate only.
+  -h, --help      Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
+  -V, --version   Print version information and exit.
+```
+
 ## Delete
 
 This command allows you to delete a resource.
@@ -202,6 +271,27 @@ Options:
   -V, --version        Print version information and exit.
 ```
 
+## Diff
+
+This command allows you to check differences between a new yaml descriptor and the current one deployed in Ns4Kafka.
+
+```console
+Usage: kafkactl diff [-hRvV] [-f=<file>] [-n=<optionalNamespace>]
+
+Description:
+
+Get differences between a new resource and a old resource.
+
+Options:
+  -f, --file=<file>   YAML file or directory containing resources.
+  -h, --help          Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                      Override namespace defined in config or YAML resources.
+  -R, --recursive     Search file recursively.
+  -v, --verbose       Enable the verbose mode.
+  -V, --version       Print version information and exit.
+```
+
 ## Get
 
 This command allows you to consult one or multiple resources.
@@ -228,46 +318,6 @@ Options:
 
 - **resourceType** is one of the managed resources: topic, connector, acl, schema, stream or **all** to fetch all the resources.
 - **resourceName** is the name of the resource to consult.
-
-## Api Resources 
-
-This command allows you to consult which resources can be access.
-
-```console
-Usage: kafkactl api-resources [-hvV] [-n=<optionalNamespace>]
-
-Description:
-
-Print the supported API resources on the server.
-
-Options:
-  -h, --help      Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or YAML resources.
-  -v, --verbose   Enable the verbose mode.
-  -V, --version   Print version information and exit.
-```
-
-## Diff
-
-This command allows you to check differences between a new yaml descriptor and the current one deployed in Ns4Kafka.
-
-```console
-Usage: kafkactl diff [-hRvV] [-f=<file>] [-n=<optionalNamespace>]
-
-Description:
-
-Get differences between a new resource and a old resource.
-
-Options:
-  -f, --file=<file>   YAML file or directory containing resources.
-  -h, --help          Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                      Override namespace defined in config or YAML resources.
-  -R, --recursive     Search file recursively.
-  -v, --verbose       Enable the verbose mode.
-  -V, --version       Print version information and exit.
-```
 
 ## Import
 
@@ -329,55 +379,6 @@ Options:
 - **--group** is one of your consumer group to reset.
 - **--topic/--all-topics** is a given topic or all the topics to reset.
 - **method** can be: --to-earliest, --to-latest, --to-offset, --to-datetime, --shift-by
-
-## Delete Records
-
-This command allows you to delete all records within "delete" typed topics.
-
-```console
-Usage: kafkactl delete-records [-hvV] [--dry-run] [-n=<optionalNamespace>] <topic>
-
-Description:
-
-Delete all records within a topic.
-
-Parameters:
-      <topic>     Name of the topic.
-
-Options:
-      --dry-run   Does not persist resources. Validate only.
-  -h, --help      Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or YAML resources.
-  -v, --verbose   Enable the verbose mode.
-  -V, --version   Print version information and exit.
-```
-
-## Connectors
-
-This command allows you to interact with connectors.
-
-```console
-Usage: kafkactl connectors [-hvV] [-n=<optionalNamespace>] <action> <connectors>...
-
-Description:
-
-Interact with connectors.
-
-Parameters:
-      <action>          Action to perform (pause, resume, restart).
-      <connectors>...   Connector names separated by space or "all" for all connectors.
-
-Options:
-  -h, --help            Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                        Override namespace defined in config or YAML resources.
-  -v, --verbose         Enable the verbose mode.
-  -V, --version         Print version information and exit.
-```
-
-- **action** can be pause, resume, restart
-- **connectors** is a list of connector names separated by space.
 
 ## Schemas
 
@@ -520,9 +521,14 @@ spec:
   url: http://localhost:8083
   username: myUsername
   password: myPassword
+  aes256Key: myKey
+  aes256Salt: mySalt
+  aes256Format: "%s"
 ```
 
 - **metadata.name** should not collide with the name of a Connect cluster declared in the Ns4Kafka configuration. An error message will be thrown otherwise.
+- **metadata.aes256Key** and **metadata.aes256Salt** are the AES256 key and salt used to encrypt connector sensitive configuration, if needed. It can be used with the [AES256 Config Provider](https://github.com/michelin/michelin-connect-plugins/blob/main/doc/config-providers/aes256-config-provider.md) to encrypt connector sensitive configuration (such as username, password, etc...) at rest, and provides the ability to your Connect cluster to decrypt it by itself.
+- **metadata.aes256Format** is the AES256 format used to display encrypted connector sensitive configuration, if needed. Default is "${aes256:%s}".
 - Owners of Connect clusters can authorize other namespaces to deploy connectors on their own Connect clusters by giving an ACL with the WRITE permission to the grantees.
 
 ### Kafka Streams
