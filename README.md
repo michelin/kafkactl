@@ -21,6 +21,7 @@
   * [Apply](#apply)
   * [Config](#config)
   * [Connectors](#connectors)
+  * [Connectors](#connectors)
   * [Delete Records](#delete-records)
   * [Delete](#delete)
   * [Diff](#diff)
@@ -191,6 +192,34 @@ Options:
   -v, --verbose   Enable the verbose mode.
   -V, --version   Print version information and exit.
 ```
+
+## Connect Clusters
+
+This command allows you to interact with Connect clusters.
+
+```console
+Usage: kafkactl connect-clusters [-hvV] [-n=<optionalNamespace>] <action> <connectCluster> [<secrets>...]
+
+Description:
+
+Interact with connect clusters.
+
+Parameters:
+      <action>           Action to perform (vaults).
+      <connectCluster>   Connect Cluster name that will vault the secrets.
+      [<secrets>...]     Secrets to vaults separated by space.
+
+Options:
+  -h, --help             Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                         Override namespace defined in config or YAML resources.
+  -v, --verbose          Enable the verbose mode.
+  -V, --version          Print version information and exit.
+```
+
+- **action** can only be vaults (for now)
+- **connectCluster**, if defined, is the name of a Connect clusters to use to vault sensitive connector configuration
+- **secrets** are the clear text to encrypt.
 
 ## Connectors
 
@@ -382,7 +411,7 @@ Options:
 
 ## Schemas
 
-This command allows you to modify schema compatibility.
+This command allows you to modify the schema compatibility.
 
 ```console
 Usage: kafkactl schemas [-hvV] [-n=<optionalNamespace>] <compatibility> <subjects>...
