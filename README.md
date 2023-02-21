@@ -227,7 +227,7 @@ Interact with connect clusters.
 
 Parameters:
       <action>           Action to perform (vaults).
-      <connectCluster>   Connect Cluster name that will vault the secrets.
+      <connectCluster>   Connect cluster name that will vault the secrets.
       [<secrets>...]     Secrets to vaults separated by space.
 
 Options:

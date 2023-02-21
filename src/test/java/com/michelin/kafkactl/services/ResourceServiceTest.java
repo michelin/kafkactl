@@ -126,6 +126,8 @@ class ResourceServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
+        doCallRealMethod()
+                .when(formatService).prettifyKind(any());
         when(namespacedClient.list(any(), any(), any()))
                 .thenReturn(Collections.emptyList());
 
@@ -1061,6 +1063,21 @@ class ResourceServiceTest {
 
         assertEquals(0, actual);
         verify(formatService).displayList(CONNECT_CLUSTER, Collections.singletonList(availableVaults), TABLE, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldListAvailableVaultsConnectClustersWhenEmpty() {
+        when(namespacedClient.listAvailableVaultsConnectClusters(any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int actual = resourceService.listAvailableVaultsConnectClusters("namespace", cmd.getCommandSpec());
+
+        assertEquals(0, actual);
+        assertTrue(sw.toString().contains("No connect cluster configured as vault."));
     }
 
     @Test
