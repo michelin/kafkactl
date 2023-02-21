@@ -53,7 +53,8 @@ public class ResourceService {
                 if (!resources.isEmpty()) {
                     formatService.displayList(resources.get(0).getKind(), resources, TABLE, commandSpec);
                 } else {
-                    commandSpec.commandLine().getOut().println("No " + apiResources.get(0).getKind().toLowerCase() + " to display.");
+                    commandSpec.commandLine().getOut().println("No " + formatService.prettifyKind(apiResources.get(0).getKind()).toLowerCase()
+                            + " to display.");
                 }
                 return 0;
             } catch (HttpClientResponseException exception) {
@@ -330,7 +331,12 @@ public class ResourceService {
     public int listAvailableVaultsConnectClusters(String namespace, CommandLine.Model.CommandSpec commandSpec) {
         try {
             List<Resource> availableConnectClusters = namespacedClient.listAvailableVaultsConnectClusters(namespace, loginService.getAuthorization());
-            formatService.displayList(CONNECT_CLUSTER, availableConnectClusters, TABLE, commandSpec);
+            if (!availableConnectClusters.isEmpty()) {
+                formatService.displayList(CONNECT_CLUSTER, availableConnectClusters, TABLE, commandSpec);
+            } else {
+                commandSpec.commandLine().getOut().println("No connect cluster configured as vault.");
+            }
+
             return 0;
         } catch (HttpClientResponseException exception) {
             formatService.displayError(exception, commandSpec);
