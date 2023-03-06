@@ -243,7 +243,7 @@ class FormatServiceTest {
 
         formatService.displayError(exception, "Topic", cmd.getCommandSpec());
 
-        assertTrue(sw.toString().contains("Topic(s) failed because an error occurred (500):"));
+        assertTrue(sw.toString().contains("Topic failed because an error occurred (500):"));
         assertTrue(sw.toString().contains(" - Error 1"));
         assertTrue(sw.toString().contains(" - Error 2"));
         assertTrue(sw.toString().contains(" - Error 3"));
@@ -264,7 +264,7 @@ class FormatServiceTest {
 
         formatService.displayError(exception, "Topic", cmd.getCommandSpec());
 
-        assertTrue(sw.toString().contains("Topic(s) failed because error (500)."));
+        assertTrue(sw.toString().contains("Topic failed because error (500)."));
     }
 
     @Test
@@ -278,7 +278,7 @@ class FormatServiceTest {
 
         formatService.displayError(exception, "Topic", cmd.getCommandSpec());
 
-        assertTrue(sw.toString().contains("Topic(s) failed because error (500)."));
+        assertTrue(sw.toString().contains("Topic failed because error (500)."));
     }
 
     @Test

@@ -91,10 +91,10 @@ public class FormatService {
         if (statusOptional.isPresent() && statusOptional.get().getDetails() != null && !statusOptional.get().getDetails().getCauses().isEmpty()) {
             Status status = statusOptional.get();
             String causes = "\n - " + String.join("\n - ", status.getDetails().getCauses());
-            commandSpec.commandLine().getErr().printf("%s(s) failed because %s (%s):%s%n", prettyKind,
+            commandSpec.commandLine().getErr().printf("%s failed because %s (%s):%s%n", prettyKind,
                     status.getMessage().toLowerCase(), exception.getStatus().getCode(), causes);
         } else {
-            commandSpec.commandLine().getErr().printf("%s(s) failed because %s (%s).%n", prettyKind,
+            commandSpec.commandLine().getErr().printf("%s failed because %s (%s).%n", prettyKind,
                     exception.getMessage().toLowerCase(), exception.getStatus().getCode());
         }
     }
