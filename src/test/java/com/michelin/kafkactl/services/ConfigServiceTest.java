@@ -172,7 +172,7 @@ class ConfigServiceTest {
 
         String backUp = Files.readString(Paths.get(kafkactlConfig.getConfigPath() + "/config.yml"));
 
-        configService.updateConfigurationContext(contextToSet, cmd.getCommandSpec());
+        configService.updateConfigurationContext(contextToSet);
 
         String actual = Files.readString(Paths.get(kafkactlConfig.getConfigPath() + "/config.yml"));
 
