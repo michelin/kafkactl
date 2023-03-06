@@ -145,8 +145,7 @@ public class LoginService {
      * @param commandSpec The command spec used to print the output
      */
     public void deleteJWTFile(CommandLine.Model.CommandSpec commandSpec) throws IOException {
-        if (!Files.deleteIfExists(jwtFile.toPath())) {
-            commandSpec.commandLine().getErr().println("Failed to delete JWT file.");
-        }
+        if (jwtFile.exists())
+            Files.delete(jwtFile.toPath());
     }
 }
