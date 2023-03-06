@@ -68,6 +68,8 @@ kafkactl:
       - "COUNT/PARTITIONS:/spec/countPartition"
       - "DISK/TOPICS:/spec/diskTopic"
       - "COUNT/CONNECTORS:/spec/countConnector"
+      - "USER/CONSUMER_BYTE_RATE:/spec/consumerByteRate"
+      - "USER/PRODUCER_BYTE_RATE:/spec/producerByteRate"
     ChangeConnectorState:
       - "CONNECTOR:/metadata/name"
       - "STATUS:/status/code"

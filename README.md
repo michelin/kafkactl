@@ -881,6 +881,8 @@ spec:
   count/partitions: 60
   count/connectors: 5
   disk/topics: 500MiB
+  user/consumer_byte_rate: 204800
+  user/producer_byte_rate: 204800
 ```
 
 - **count/topics** is the maximum number of deployable topics
@@ -888,6 +890,8 @@ spec:
 - **count/connectors** is the maximum number of deployable connectors
 - **disk/topics** is the maximum size of all topics. It is computed from the sum of _retention.bytes_ * _number of partitions_ of all topics. 
 Unit of measure accepted is byte (B), kibibyte (KiB), mebibyte (MiB), gibibyte (GiB)
+- **user/consumer_byte_rate** is the consumer network bandwith quota before throttling. Expressed in bytes/sec
+- **user/producer_byte_rate** is the producer network bandwith quota before throttling. Expressed in bytes/sec
 
 # CI/CD
 
