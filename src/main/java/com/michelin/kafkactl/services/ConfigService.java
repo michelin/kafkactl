@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import picocli.CommandLine;
 
 import java.io.*;
 import java.util.LinkedHashMap;
@@ -49,9 +50,10 @@ public class ConfigService {
     /**
      * Update the current configuration context with the given new context
      * @param contextToSet The context to set
+     * @param commandSpec The command spec used to print the output
      * @throws IOException Any exception during file writing
      */
-    public void updateConfigurationContext(KafkactlConfig.Context contextToSet) throws IOException {
+    public void updateConfigurationContext(KafkactlConfig.Context contextToSet, CommandLine.Model.CommandSpec commandSpec) throws IOException {
         Yaml yaml = new Yaml();
         File initialFile = new File(kafkactlConfig.getConfigPath() + "/config.yml");
         InputStream targetStream = new FileInputStream(initialFile);
@@ -71,6 +73,6 @@ public class ConfigService {
         FileWriter writer = new FileWriter(kafkactlConfig.getConfigPath() + "/config.yml");
         yamlMapper.dump(rootNodeConfig, writer);
 
-        loginService.deleteJWTFile();
+        loginService.deleteJWTFile(commandSpec);
     }
 }

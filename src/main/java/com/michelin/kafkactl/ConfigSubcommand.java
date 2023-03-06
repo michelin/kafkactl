@@ -112,7 +112,7 @@ public class ConfigSubcommand implements Callable<Integer> {
 
         KafkactlConfig.Context contextToSet = optionalContextToSet.get();
         if (action.equals(ConfigAction.USE_CONTEXT)) {
-            configService.updateConfigurationContext(contextToSet);
+            configService.updateConfigurationContext(contextToSet, commandSpec);
             commandSpec.commandLine().getOut().println("Switched to context \"" + context + "\".");
             return 0;
         }

@@ -13,6 +13,7 @@ import picocli.CommandLine;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -141,10 +142,11 @@ public class LoginService {
 
     /**
      * If exists, delete JWT file
+     * @param commandSpec The command spec used to print the output
      */
-    public void deleteJWTFile() {
-        if (jwtFile.exists()) {
-            jwtFile.delete();
+    public void deleteJWTFile(CommandLine.Model.CommandSpec commandSpec) throws IOException {
+        if (!Files.deleteIfExists(jwtFile.toPath())) {
+            commandSpec.commandLine().getErr().println("Failed to delete JWT file.");
         }
     }
 }

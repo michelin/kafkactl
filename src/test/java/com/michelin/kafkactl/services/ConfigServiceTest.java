@@ -1,15 +1,15 @@
 package com.michelin.kafkactl.services;
 
+import com.michelin.kafkactl.KafkactlCommand;
 import com.michelin.kafkactl.KafkactlConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import picocli.CommandLine;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -163,12 +163,16 @@ class ConfigServiceTest {
                         .build())
                 .build();
 
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
         when(kafkactlConfig.getConfigPath())
                 .thenReturn("src/test/resources");
 
         String backUp = Files.readString(Paths.get(kafkactlConfig.getConfigPath() + "/config.yml"));
 
-        configService.updateConfigurationContext(contextToSet);
+        configService.updateConfigurationContext(contextToSet, cmd.getCommandSpec());
 
         String actual = Files.readString(Paths.get(kafkactlConfig.getConfigPath() + "/config.yml"));
 
