@@ -13,6 +13,7 @@ import picocli.CommandLine;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -142,9 +143,8 @@ public class LoginService {
     /**
      * If exists, delete JWT file
      */
-    public void deleteJWTFile() {
-        if (jwtFile.exists()) {
-            jwtFile.delete();
-        }
+    public void deleteJWTFile() throws IOException {
+        if (jwtFile.exists())
+            Files.delete(jwtFile.toPath());
     }
 }
