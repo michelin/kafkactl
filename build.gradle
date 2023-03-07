@@ -80,8 +80,14 @@ dockerfile {
     baseImage = "eclipse-temurin:11-jre-alpine"
 }
 
-dockerBuild {
-    images = ["michelin/kafkactl:" + version]
+if (project.hasProperty("release")) {
+    dockerBuild {
+        images = ["michelin/kafkactl:" + version, "michelin/kafkactl:latest"]
+    }
+} else {
+    dockerBuild {
+        images = ["michelin/kafkactl:" + version]
+    }
 }
 
 sonarqube {
