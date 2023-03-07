@@ -434,13 +434,13 @@ Options:
   -V, --version        Print version information and exit.
 ```
 
-- **resourceType** can be topic or connector
+- **resourceType** can be topics or connects.
 
 Example(s):
 
 ```console
 kafkactl import topics
-kafkactl import connectors
+kafkactl import connects
 ```
 
 ## Reset Offsets
