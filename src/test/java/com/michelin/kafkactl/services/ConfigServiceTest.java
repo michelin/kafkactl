@@ -168,19 +168,19 @@ class ConfigServiceTest {
         cmd.setOut(new PrintWriter(sw));
 
         when(kafkactlConfig.getConfigPath())
-                .thenReturn("src/test/resources");
+                .thenReturn("src/test/resources/config.yml");
 
-        String backUp = Files.readString(Paths.get(kafkactlConfig.getConfigPath() + "/config.yml"));
+        String backUp = Files.readString(Paths.get(kafkactlConfig.getConfigPath()));
 
         configService.updateConfigurationContext(contextToSet);
 
-        String actual = Files.readString(Paths.get(kafkactlConfig.getConfigPath() + "/config.yml"));
+        String actual = Files.readString(Paths.get(kafkactlConfig.getConfigPath()));
 
         assertTrue(actual.contains("  current-namespace: namespace"));
         assertTrue(actual.contains("  api: https://ns4kafka.com"));
         assertTrue(actual.contains("  user-token: userToken"));
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter(kafkactlConfig.getConfigPath() + "/config.yml", false));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(kafkactlConfig.getConfigPath(), false));
         writer.append(backUp);
         writer.close();
     }

@@ -9,6 +9,8 @@ import picocli.CommandLine.Option;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
+import static com.michelin.kafkactl.KafkactlConfig.KAFKACTL_CONFIG;
+
 @Command(name = "kafkactl",
         subcommands = {
                 ApiResourcesSubcommand.class,
@@ -58,8 +60,8 @@ public class KafkactlCommand implements Callable<Integer> {
             System.setProperty("micronaut.config.files", System.getProperty("user.home") + "/.kafkactl/config.yml");
         }
 
-        if (System.getenv("KAFKACTL_CONFIG") != null) {
-            System.setProperty("micronaut.config.files", System.getenv("KAFKACTL_CONFIG"));
+        if (System.getenv(KAFKACTL_CONFIG) != null) {
+            System.setProperty("micronaut.config.files", System.getenv(KAFKACTL_CONFIG));
         }
 
         int exitCode = PicocliRunner.execute(KafkactlCommand.class, args);

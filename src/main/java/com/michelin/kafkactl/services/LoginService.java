@@ -33,9 +33,9 @@ public class LoginService {
     public LoginService(KafkactlConfig kafkactlConfig, ClusterResourceClient clusterResourceClient) {
         this.kafkactlConfig = kafkactlConfig;
         this.clusterResourceClient = clusterResourceClient;
-        this.jwtFile = new File(kafkactlConfig.getConfigPath() + "/jwt");
+        this.jwtFile = new File(kafkactlConfig.getConfigDirectory() + "/jwt");
         // Create base kafkactl dir if not exists
-        File kafkactlDir = new File(kafkactlConfig.getConfigPath());
+        File kafkactlDir = new File(kafkactlConfig.getConfigDirectory());
         if (!kafkactlDir.exists()) {
             kafkactlDir.mkdir();
         }
