@@ -59,7 +59,7 @@ public class KafkactlConfig {
             return parent != null ? parent : ".";
         }
 
-        return System.getenv("user.home") + "/.kafkactl";
+        return System.getProperty("user.home") + "/.kafkactl";
     }
 
     /**
@@ -68,6 +68,6 @@ public class KafkactlConfig {
      */
     public String getConfigPath() {
         return StringUtils.isNotEmpty(System.getenv(KAFKACTL_CONFIG)) ?
-                System.getenv(KAFKACTL_CONFIG) : System.getenv("user.home") + "/.kafkactl/config.yml";
+                System.getenv(KAFKACTL_CONFIG) : System.getProperty("user.home") + "/.kafkactl/config.yml";
     }
 }
