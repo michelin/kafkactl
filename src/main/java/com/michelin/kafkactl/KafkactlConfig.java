@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -52,9 +53,8 @@ public class KafkactlConfig {
      * @return The config directory
      */
     public String getConfigDirectory() {
-        return System.getenv(KAFKACTL_CONFIG) != null ? System.getenv(KAFKACTL_CONFIG)
-                .substring(0, System.getenv(KAFKACTL_CONFIG).lastIndexOf(System.getProperty("file.separator")))
-                : System.getProperty("user.home") + "/.kafkactl";
+        return System.getenv(KAFKACTL_CONFIG) != null ?
+                new File(System.getenv(KAFKACTL_CONFIG)).getParent() : System.getProperty("user.home") + "/.kafkactl";
     }
 
     /**
