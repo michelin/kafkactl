@@ -3,6 +3,7 @@ package com.michelin.kafkactl.services;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SystemServiceTest {
 
@@ -18,6 +19,6 @@ class SystemServiceTest {
 
     @Test
     void shouldGetAllEnv() {
-        assertEquals(System.getenv(), SystemService.getEnv());
+        assertTrue(SystemService.getEnv().equals(System.getenv()));
     }
 }
