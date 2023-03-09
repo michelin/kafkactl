@@ -2,6 +2,7 @@ package com.michelin.kafkactl;
 
 import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.configuration.picocli.PicocliRunner;
+import io.micronaut.core.util.StringUtils;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -60,7 +61,7 @@ public class KafkactlCommand implements Callable<Integer> {
             System.setProperty("micronaut.config.files", System.getProperty("user.home") + "/.kafkactl/config.yml");
         }
 
-        if (System.getenv(KAFKACTL_CONFIG) != null) {
+        if (StringUtils.isNotEmpty(System.getenv(KAFKACTL_CONFIG))) {
             System.setProperty("micronaut.config.files", System.getenv(KAFKACTL_CONFIG));
         }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.convert.format.MapFormat;
+import io.micronaut.core.util.StringUtils;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -53,8 +54,12 @@ public class KafkactlConfig {
      * @return The config directory
      */
     public String getConfigDirectory() {
-        return System.getenv(KAFKACTL_CONFIG) != null ?
-                new File(System.getenv(KAFKACTL_CONFIG)).getParent() : System.getProperty("user.home") + "/.kafkactl";
+        if (StringUtils.isNotEmpty(System.getProperty(KAFKACTL_CONFIG))) {
+            String parent = new File(System.getProperty(KAFKACTL_CONFIG)).getParent();
+            return parent != null ? parent : ".";
+        }
+
+        return System.getProperty("user.home") + "/.kafkactl";
     }
 
     /**
@@ -62,7 +67,7 @@ public class KafkactlConfig {
      * @return The config path
      */
     public String getConfigPath() {
-        return System.getenv(KAFKACTL_CONFIG) != null ? System.getenv(KAFKACTL_CONFIG) :
-                System.getProperty("user.home") + "/.kafkactl/config.yml";
+        return StringUtils.isNotEmpty(System.getProperty(KAFKACTL_CONFIG)) ?
+                System.getProperty(KAFKACTL_CONFIG) : System.getProperty("user.home") + "/.kafkactl/config.yml";
     }
 }
