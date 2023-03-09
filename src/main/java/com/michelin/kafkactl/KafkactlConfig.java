@@ -54,8 +54,8 @@ public class KafkactlConfig {
      * @return The config directory
      */
     public String getConfigDirectory() {
-        if (StringUtils.isNotEmpty(System.getProperty(KAFKACTL_CONFIG))) {
-            String parent = new File(System.getProperty(KAFKACTL_CONFIG)).getParent();
+        if (StringUtils.isNotEmpty(System.getenv(KAFKACTL_CONFIG))) {
+            String parent = new File(System.getenv(KAFKACTL_CONFIG)).getParent();
             return parent != null ? parent : ".";
         }
 
@@ -67,7 +67,7 @@ public class KafkactlConfig {
      * @return The config path
      */
     public String getConfigPath() {
-        return StringUtils.isNotEmpty(System.getProperty(KAFKACTL_CONFIG)) ?
-                System.getProperty(KAFKACTL_CONFIG) : System.getProperty("user.home") + "/.kafkactl/config.yml";
+        return StringUtils.isNotEmpty(System.getenv(KAFKACTL_CONFIG)) ?
+                System.getenv(KAFKACTL_CONFIG) : System.getenv("user.home") + "/.kafkactl/config.yml";
     }
 }
