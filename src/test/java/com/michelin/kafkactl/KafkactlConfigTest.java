@@ -17,7 +17,7 @@ class KafkactlConfigTest {
         try (MockedStatic<SystemService> mocked = mockStatic(SystemService.class)) {
             mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG))
                     .thenReturn("");
-            when(SystemService.getProperty(any()))
+            mocked.when(() -> SystemService.getProperty(any()))
                     .thenAnswer(answer -> System.getProperty(answer.getArgument(0)));
 
             String actual = kafkactlConfig.getConfigDirectory();
@@ -64,7 +64,7 @@ class KafkactlConfigTest {
         try (MockedStatic<SystemService> mocked = mockStatic(SystemService.class)) {
             mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG))
                     .thenReturn("");
-            when(SystemService.getProperty(any()))
+            mocked.when(() -> SystemService.getProperty(any()))
                     .thenAnswer(answer -> System.getProperty(answer.getArgument(0)));
 
             String actual = kafkactlConfig.getConfigPath();
