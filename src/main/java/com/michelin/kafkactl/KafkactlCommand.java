@@ -1,13 +1,17 @@
 package com.michelin.kafkactl;
 
+import com.michelin.kafkactl.services.SystemService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.configuration.picocli.PicocliRunner;
+import io.micronaut.core.util.StringUtils;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import java.util.Optional;
 import java.util.concurrent.Callable;
+
+import static com.michelin.kafkactl.KafkactlConfig.KAFKACTL_CONFIG;
 
 @Command(name = "kafkactl",
         subcommands = {
@@ -55,11 +59,11 @@ public class KafkactlCommand implements Callable<Integer> {
      */
     public static void main(String[] args) {
         if (System.getenv().keySet().stream().noneMatch(s -> s.startsWith("KAFKACTL_"))) {
-            System.setProperty("micronaut.config.files", System.getProperty("user.home") + "/.kafkactl/config.yml");
+            SystemService.setProperty("micronaut.config.files", SystemService.getProperty("user.home") + "/.kafkactl/config.yml");
         }
 
-        if (System.getenv("KAFKACTL_CONFIG") != null) {
-            System.setProperty("micronaut.config.files", System.getenv("KAFKACTL_CONFIG"));
+        if (StringUtils.isNotEmpty(SystemService.getEnv(KAFKACTL_CONFIG))) {
+            SystemService.setProperty("micronaut.config.files", SystemService.getEnv(KAFKACTL_CONFIG));
         }
 
         int exitCode = PicocliRunner.execute(KafkactlCommand.class, args);

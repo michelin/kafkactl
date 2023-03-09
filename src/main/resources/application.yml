@@ -15,7 +15,6 @@ logger:
 
 kafkactl:
   version: @version@
-  config-path: ${user.home}/.kafkactl
   table-format:
     ResourceDefinition:
       - "KIND:/metadata/name"

@@ -1,15 +1,16 @@
 package com.michelin.kafkactl;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.michelin.kafkactl.services.SystemService;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.core.annotation.Introspected;
-import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.convert.format.MapFormat;
+import io.micronaut.core.util.StringUtils;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -18,8 +19,8 @@ import java.util.Map;
 @Introspected
 @ConfigurationProperties("kafkactl")
 public class KafkactlConfig {
+    public static final String KAFKACTL_CONFIG = "KAFKACTL_CONFIG";
     private String version;
-    private String configPath;
     private String api;
     private String userToken;
     private String currentNamespace;
@@ -47,5 +48,27 @@ public class KafkactlConfig {
             private String userToken;
             private String namespace;
         }
+    }
+
+    /**
+     * Get the current user config directory
+     * @return The config directory
+     */
+    public String getConfigDirectory() {
+        if (StringUtils.isNotEmpty(SystemService.getEnv(KAFKACTL_CONFIG))) {
+            String parent = new File(SystemService.getEnv(KAFKACTL_CONFIG)).getParent();
+            return parent != null ? parent : ".";
+        }
+
+        return SystemService.getProperty("user.home") + "/.kafkactl";
+    }
+
+    /**
+     * Get the current user config full path
+     * @return The config path
+     */
+    public String getConfigPath() {
+        return StringUtils.isNotEmpty(SystemService.getEnv(KAFKACTL_CONFIG)) ?
+                SystemService.getEnv(KAFKACTL_CONFIG) : SystemService.getProperty("user.home") + "/.kafkactl/config.yml";
     }
 }

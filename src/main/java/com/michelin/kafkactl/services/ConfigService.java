@@ -54,7 +54,7 @@ public class ConfigService {
      */
     public void updateConfigurationContext(KafkactlConfig.Context contextToSet) throws IOException {
         Yaml yaml = new Yaml();
-        File initialFile = new File(kafkactlConfig.getConfigPath() + "/config.yml");
+        File initialFile = new File(kafkactlConfig.getConfigPath());
         InputStream targetStream = new FileInputStream(initialFile);
         Map<String, LinkedHashMap<String, Object>> rootNodeConfig = yaml.load(targetStream);
 
@@ -69,7 +69,7 @@ public class ConfigService {
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 
         Yaml yamlMapper = new Yaml(options);
-        FileWriter writer = new FileWriter(kafkactlConfig.getConfigPath() + "/config.yml");
+        FileWriter writer = new FileWriter(kafkactlConfig.getConfigPath());
         yamlMapper.dump(rootNodeConfig, writer);
 
         loginService.deleteJWTFile();

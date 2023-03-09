@@ -48,7 +48,7 @@ class LoginServiceTest {
 
     @Test
     void shouldNotBeAuthenticatedWhenJwtNotExist() {
-        when(kafkactlConfig.getConfigPath())
+        when(kafkactlConfig.getConfigDirectory())
                 .thenReturn("src/test/resources");
 
         CommandLine cmd = new CommandLine(new KafkactlCommand());
@@ -63,7 +63,7 @@ class LoginServiceTest {
     @Test
     void shouldNotBeAuthenticatedWhenThrowUnauthorized() {
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.unauthorized());
-        when(kafkactlConfig.getConfigPath())
+        when(kafkactlConfig.getConfigDirectory())
                 .thenReturn("src/test/resources/login");
         when(clusterResourceClient.tokenInfo(any()))
                 .thenThrow(exception);
@@ -81,7 +81,7 @@ class LoginServiceTest {
     @Test
     void shouldNotBeAuthenticatedWhenThrowException() {
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
-        when(kafkactlConfig.getConfigPath())
+        when(kafkactlConfig.getConfigDirectory())
                 .thenReturn("src/test/resources/login");
         when(clusterResourceClient.tokenInfo(any()))
                 .thenThrow(exception);
@@ -107,7 +107,7 @@ class LoginServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        when(kafkactlConfig.getConfigPath())
+        when(kafkactlConfig.getConfigDirectory())
                 .thenReturn("src/test/resources/login");
         when(clusterResourceClient.tokenInfo(any()))
                 .thenReturn(userInfoResponse);
@@ -130,7 +130,7 @@ class LoginServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        when(kafkactlConfig.getConfigPath())
+        when(kafkactlConfig.getConfigDirectory())
                 .thenReturn("src/test/resources/login");
         when(clusterResourceClient.tokenInfo(any()))
                 .thenReturn(userInfoResponse);
@@ -148,7 +148,7 @@ class LoginServiceTest {
 
     @Test
     void shouldNotLoginWhenHttpClientResponseException() {
-        when(kafkactlConfig.getConfigPath())
+        when(kafkactlConfig.getConfigDirectory())
                 .thenReturn("src/test/resources/login");
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         when(clusterResourceClient.login(any()))
@@ -173,7 +173,7 @@ class LoginServiceTest {
         bearerAccessRefreshToken.setExpiresIn(1);
         bearerAccessRefreshToken.setRoles(Collections.singletonList("user"));
 
-        when(kafkactlConfig.getConfigPath())
+        when(kafkactlConfig.getConfigDirectory())
                 .thenReturn("src/test/resources/login");
         when(clusterResourceClient.login(any()))
                 .thenReturn(bearerAccessRefreshToken);
@@ -205,7 +205,7 @@ class LoginServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        when(kafkactlConfig.getConfigPath())
+        when(kafkactlConfig.getConfigDirectory())
                 .thenReturn("src/test/resources/login");
         when(clusterResourceClient.tokenInfo(any()))
                 .thenReturn(userInfoResponse);
@@ -239,7 +239,7 @@ class LoginServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        when(kafkactlConfig.getConfigPath())
+        when(kafkactlConfig.getConfigDirectory())
                 .thenReturn("src/test/resources/login");
         when(clusterResourceClient.tokenInfo(any()))
                 .thenReturn(userInfoResponse);
@@ -274,7 +274,7 @@ class LoginServiceTest {
         cmd.setOut(new PrintWriter(sw));
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
-        when(kafkactlConfig.getConfigPath())
+        when(kafkactlConfig.getConfigDirectory())
                 .thenReturn("src/test/resources/login");
         when(clusterResourceClient.tokenInfo(any()))
                 .thenReturn(userInfoResponse);

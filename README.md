@@ -53,12 +53,19 @@ Kafkactl requires 3 variables to work:
   
 These variable can be defined in the dedicated configuration file.
 
-Create a folder .kafkactl in your home directory:
+Create a `.kafkactl/config.yml` file in your home directory:
 
-- Windows: C:\Users\Name\\.kafkactl
-- Linux: ~/.kafkactl
+- Windows: C:\Users\Name\\.kafkactl\config.yml
+- Linux: ~/.kafkactl/config.yml
 
-Create .kafkactl/config.yml with the following content:
+It is possible to override this default location by setting the **KAFKACTL_CONFIG** environment variable:
+
+```console
+KAFKACTL_CONFIG=C:\AnotherDirectory\config.yml
+KAFKACTL_CONFIG=/anotherDirectory/config.yml
+```
+
+Fill the config.yml file with the following content:
 
 ```yaml
 kafkactl:
