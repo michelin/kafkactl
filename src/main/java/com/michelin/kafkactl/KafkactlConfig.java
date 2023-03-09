@@ -1,6 +1,7 @@
 package com.michelin.kafkactl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.michelin.kafkactl.services.SystemService;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.convert.format.MapFormat;
@@ -54,12 +55,12 @@ public class KafkactlConfig {
      * @return The config directory
      */
     public String getConfigDirectory() {
-        if (StringUtils.isNotEmpty(System.getenv(KAFKACTL_CONFIG))) {
-            String parent = new File(System.getenv(KAFKACTL_CONFIG)).getParent();
+        if (StringUtils.isNotEmpty(SystemService.getEnv(KAFKACTL_CONFIG))) {
+            String parent = new File(SystemService.getEnv(KAFKACTL_CONFIG)).getParent();
             return parent != null ? parent : ".";
         }
 
-        return System.getProperty("user.home") + "/.kafkactl";
+        return SystemService.getProperty("user.home") + "/.kafkactl";
     }
 
     /**
@@ -67,7 +68,7 @@ public class KafkactlConfig {
      * @return The config path
      */
     public String getConfigPath() {
-        return StringUtils.isNotEmpty(System.getenv(KAFKACTL_CONFIG)) ?
-                System.getenv(KAFKACTL_CONFIG) : System.getProperty("user.home") + "/.kafkactl/config.yml";
+        return StringUtils.isNotEmpty(SystemService.getEnv(KAFKACTL_CONFIG)) ?
+                SystemService.getEnv(KAFKACTL_CONFIG) : SystemService.getProperty("user.home") + "/.kafkactl/config.yml";
     }
 }
