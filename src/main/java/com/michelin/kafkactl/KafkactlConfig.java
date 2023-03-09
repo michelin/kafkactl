@@ -59,7 +59,7 @@ public class KafkactlConfig {
             return parent != null ? parent : ".";
         }
 
-        return System.getProperty("user.home") + "/.kafkactl";
+        return System.getenv("user.home") + "/.kafkactl";
     }
 
     /**
