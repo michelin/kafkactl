@@ -575,14 +575,13 @@ spec:
     retention.ms: '60000'
 ```
 
-- `metadata.name` must be part of your allowed ACLs. Visit your namespace ACLs to understand which topics you are allowed to manage.
-- `spec` properties and more importantly **spec.config** properties validation dependend on the topic validation rules associated to your namespace.
-- `spec.replicationFactor` and `spec.partitions` are immutable. They cannot be modified once the topic is created.
+- The `metadata.name` field must be part of your allowed ACLs. Visit your namespace's ACLs to understand which topics you are allowed to manage.
+- The validation of `spec` properties, and especially `spec.config` properties, depends on the topic validation rules associated with your namespace.
+- `spec.replicationFactor` and `spec.partitions` are immutable and cannot be modified once the topic is created.
 
 ### ACL
 
-In order to provide access to your topics to another namespace, you can add an ACL using the following example, where "daaagbl0" is your namespace and "dbbbgbl0" the namespace that needs access your topics.
-
+To provide access to your topics to another namespace, you can add an Access Control List (ACL) using the following example, where "daaagbl0" is your namespace and "dbbbgbl0" is the namespace that needs access to your topics:
 
 ```yaml
 ---
@@ -599,11 +598,12 @@ spec:
   grantedTo: dbbbgbl0
 ```
 
-- `spec.resourceType` can be `TOPIC`, `GROUP`, `CONNECT`, `CONNECT_CLUSTER`.
-- `spec.resourcePatternType` can be `PREFIXED`, `LITERAL`.
-- `spec.permission` can be `READ`, `WRITE`.
+Here are some points to keep in mind:
+- `spec.resourceType` can be `TOPIC`, `GROUP`, `CONNECT`, or `CONNECT_CLUSTER`.
+- `spec.resourcePatternType` can be `PREFIXED` or `LITERAL`.
+- `spec.permission` can be `READ` or `WRITE`.
 - `spec.grantedTo` must reference a namespace on the same Kafka cluster as yours.
-- `spec.resource` must reference any “sub-resource” that you are owner of. For example, if you are owner of the prefix “aaa”, you can grant READ or WRITE access such as:
+- `spec.resource` must reference any “sub-resource” that you own. For example, if you are owner of the prefix “aaa”, you can grant READ or WRITE access to:
   - the whole prefix: “aaa” 
   - a sub prefix: “aaa_subprefix”
   - a literal topic name: “aaa_myTopic”
@@ -626,12 +626,12 @@ spec:
     consumer.override.sasl.jaas.config: o.a.k.s.s.ScramLoginModule required username="<user>" password="<password>";
 ```
 
-- `spec.connectCluster` must refer to one of the Kafka Connect clusters authorized to your namespace. It can also refer to a Kafka Connect cluster that you self deployed or you have been granted access.
+- `spec.connectCluster` must refer to one of the Kafka Connect clusters authorized in your namespace. It can also refer to a Kafka Connect cluster that you have self-deployed or have been granted access to.
 - Everything else depend on the connect validation rules associated to your namespace.
 
 ### Connect Cluster
 
-This resource declares a Connect cluster that has been self-deployed, so namespaces are autonomous to deploy connectors on it without any Ns4Kafka outage.
+The `Connect Cluster` resource declares a Connect cluster that has been self-deployed, so namespaces are autonomous to deploy connectors on it without any Ns4Kafka outage.
 
 ```yaml
 ---
@@ -648,14 +648,14 @@ spec:
   aes256Format: "%s"
 ```
 
-- `metadata.name` should not collide with the name of a Connect cluster declared in the Ns4Kafka configuration. An error message will be thrown otherwise.
-- `metadata.aes256Key` and `metadata.aes256Salt` are the AES256 key and salt used to encrypt connector sensitive configuration, if needed. It can be used with the [AES256 Config Provider](https://github.com/michelin/michelin-connect-plugins/blob/main/doc/config-providers/aes256-config-provider.md) to encrypt connector sensitive configuration (such as username, password, etc...) at rest, and provides the ability to your Connect cluster to decrypt it by itself.
-- `metadata.aes256Format` is the AES256 format used to display encrypted connector sensitive configuration, if needed. Default is "${aes256:%s}".
-- Owners of Connect clusters can authorize other namespaces to deploy connectors on their own Connect clusters by giving an ACL with the WRITE permission to the grantees.
+- `metadata.name` should not collide with the name of a Connect cluster declared in the Ns4Kafka configuration. Otherwise, an error message will be thrown.
+- `metadata.aes256Key` and `metadata.aes256Salt` are the AES256 key and salt used to encrypt connector-sensitive configuration, if needed. You can use the [AES256 Config Provider](https://github.com/michelin/michelin-connect-plugins/blob/main/doc/config-providers/aes256-config-provider.md) to encrypt connector-sensitive configuration (such as username, password, etc.) at rest. This provides the ability for your Connect cluster to decrypt it by itself.
+- `metadata.aes256Format` is the AES256 format used to display encrypted connector-sensitive configuration, if needed. The default format is "${aes256:%s}".
+- Owners of Connect clusters can authorize other namespaces to deploy connectors on their Connect clusters by giving an ACL with the WRITE permission to the grantees.
 
 ### Kafka Streams
 
-Th `Kafka Streams` resource grants the necessary ACLs for your Kafka Streams to work properly if you have internal topics.
+The `Kafka Streams` resource grants the necessary ACLs for your Kafka Streams to work properly if you have internal topics.
 
 ```yaml
 ---
@@ -669,7 +669,7 @@ metadata:
 
 ### Schema
 
-Subjects can be declared by referencing a local _avsc_ file with `spec.schemaFile` or directly inline with `spec.schema`.
+The `Schema` resource allows you to declare subjects for your schemas. You can either reference a local `avsc` file with `spec.schemaFile`, or define your schema directly inline with `spec.schema`.
 
 #### Local file
 
@@ -700,7 +700,7 @@ spec:
 
 #### Reference
 
-If your schema references a type which is already stored in the Schema Registry, you can do this:
+If your schema references a type that is already stored in the Schema Registry, you can do the following:
 
 ```yml
 ---
@@ -731,10 +731,9 @@ spec:
       version: 1
 ```
 
-This example assumes there is a subject named "commons.address-value" with a version 1 already available in the Schema Registry.
+This example assumes that a subject named `commons.address-value` with version 1 is already available in the Schema Registry.
 
-Your schemas ACLs are the same as your topics ACLs.
-If you are allowed to create a topic "myPrefix.topic", then you are automatically allowed to create subject myPrefix.topic-key and myPrefix.topic-value.
+Your schema's ACLs are the same as your topic's ACLs. If you are allowed to create a topic `myPrefix.topic`, then you are automatically allowed to create the subjects `myPrefix.topic-key` and `myPrefix.topic-value`.
 
 ## Administrator
 
@@ -742,7 +741,7 @@ Here is the list of resources a Ns4Kafka administrator can manage.
 
 ### Namespace
 
-The `Namespace` resources are the core of Ns4Kafka.
+The `Namespace` resource is the core of Ns4Kafka.
 
 ```yml
 ---
@@ -807,11 +806,11 @@ spec:
           validation-type: NonEmptyString
 ```
 
-- `metadata.cluster` is the name of the Kakfa cluster. It should refer a cluster defined in the Ns4Kafka configuration.
+- `metadata.cluster` is the name of the Kafka cluster. It should refer to a cluster defined in the Ns4Kafka configuration.
 - `spec.kafkaUser` is the Kafka principal. It should refer to an Account ID. It will be used to create ACLs on this service account.
-- `spec.connectClusters` is the list of Kafka Connect clusters. It should refer to a Kafka Connect cluster declared in the Ns4Kafka configuration
-- `spec.topicValidator` is the list of constraints for topics.
-- `spec.connectValidator` is the list of constraints for connectors.
+- `spec.connectClusters` is a list of Kafka Connect clusters. It should refer to a Kafka Connect cluster declared in the Ns4Kafka configuration.
+- `spec.topicValidator` is a list of constraints for topics.
+- `spec.connectValidator` is a list of constraints for connectors.
 
 ### ACL Owner
 
@@ -832,8 +831,8 @@ spec:
   grantedTo: myNamespace
 ```
 
-- With this ACL, the namespace "myNamespace" will be owner of topics prefixed by "myPrefix.". No one else is able to modify these resources.
-- `resourceType` can be `topic`, `connect` or `group`.
+- With this ACL, the namespace "myNamespace" will be the owner of topics prefixed by "myPrefix.". No one else is able to modify these resources.
+- `resourceType` can be `topic`, `connect`, or `group`.
 
 ### Role Binding
 
@@ -868,7 +867,7 @@ spec:
     subjectName: myGitLabGroup
 ```
 
-- With this role binding, members of the group "myGitLabGroup" can use Ns4Kafka to manage topics starting with "myPrefix." on the "myCluster" Kafka cluster.  
+- With this role binding, members of the group "myGitLabGroup" can use Ns4Kafka to manage topics starting with "myPrefix." on the "myCluster" Kafka cluster.
 
 ### Quota
 
@@ -889,13 +888,13 @@ spec:
   user/producer_byte_rate: 204800
 ```
 
-- `count/topics` is the maximum number of deployable topics
-- `count/partitions` is the maximum number of deployable partitions
-- `count/connectors` is the maximum number of deployable connectors
+- `count/topics` is the maximum number of deployable topics.
+- `count/partitions` is the maximum number of deployable partitions.
+- `count/connectors` is the maximum number of deployable connectors.
 - `disk/topics** is the maximum size of all topics. It is computed from the sum of _retention.bytes_ * _number of partitions_ of all topics. 
-Unit of measure accepted is byte (B), kibibyte (KiB), mebibyte (MiB), gibibyte (GiB)
-- `user/consumer_byte_rate` is the consumer network bandwith quota before throttling. Expressed in bytes/sec
-- `user/producer_byte_rate` is the producer network bandwith quota before throttling. Expressed in bytes/sec
+Unit of measure accepted is byte (B), kibibyte (KiB), mebibyte (MiB), gibibyte (GiB).
+- `user/consumer_byte_rate` is the consumer network bandwith quota before throttling. Expressed in bytes/sec.
+- `user/producer_byte_rate` is the producer network bandwith quota before throttling. Expressed in bytes/sec.
 
 # CI/CD
 
