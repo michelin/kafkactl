@@ -12,7 +12,7 @@
 
 Kafkactl is the CLI tool that comes with [Ns4Kafka](https://github.com/michelin/ns4kafka). It allows you to deploy your Kafka resources using YAML descriptors.
 
-# Table of Contents
+## Table of Contents
 
 * [Download](#download)
 * [Install](#install)
@@ -34,8 +34,9 @@ Kafkactl is the CLI tool that comes with [Ns4Kafka](https://github.com/michelin/
   * [User](#user)
   * [Administrator](#administrator)
 * [CI/CD](#cicd)
-  
-# Download
+* [Contribution](#contribution)
+
+## Download
 
 You can download Kafkactl from the project's releases page on GitHub at https://github.com/michelin/kafkactl/releases, which offers three different formats:
 - JAR (requires Java 11)
@@ -44,7 +45,7 @@ You can download Kafkactl from the project's releases page on GitHub at https://
 
 Alternatively, you can use the Docker image available at https://hub.docker.com/repository/docker/michelin/kafkactl.
 
-# Install
+## Install
 
 To use Kafkactl, you need to define three variables:
 - The URL of Ns4Kafka
@@ -102,7 +103,7 @@ To check your current context, use the following command:
 kafkactl config current-context
 ```
 
-# Usage
+## Usage
 
 ```console
 Usage: kafkactl [-hvV] [-n=<optionalNamespace>] [COMMAND]
@@ -134,7 +135,7 @@ Commands:
   reset-password    Reset a Kafka password.
 ```
 
-## Api Resources 
+### Api Resources 
 
 The `api-resources` command allows you to check which resources can be accessed through the API.
 
@@ -159,7 +160,7 @@ Example(s):
 kafkactl api-resources
 ```
 
-## Apply
+### Apply
 
 The `apply` command allows you to deploy a resource.
 
@@ -190,7 +191,7 @@ kafkactl apply -f resource.yml
 
 The resources have to be described in YAML manifests.
 
-## Config
+### Config
 
 The `config` command allows you to manage your Kafka contexts.
 
@@ -221,7 +222,7 @@ kafkactl config use-context local
 kafkactl config current-context
 ```
 
-## Connect Clusters
+### Connect Clusters
 
 The `connect-clusters` command allows you to interact with Kafka Connect clusters.
 
@@ -256,7 +257,7 @@ kafkactl connect-clusters vaults
 kafkactl connect-clusters vaults myConnectCluster someClearText
 ```
 
-## Connectors
+### Connectors
 
 The `connectors` command allows you to interact with Kafka Connect connectors.
 
@@ -290,7 +291,7 @@ kafkactl connectors resume myConnector
 kafkactl connectors restart myConnector
 ```
 
-## Delete Records
+### Delete Records
 
 The `delete-records` command allows you to delete all records within "delete" typed topics.
 
@@ -319,7 +320,7 @@ Example(s):
 kafkactl delete-records myTopic
 ```
 
-## Delete
+### Delete
 
 The `delete` command allows you to delete a resource.
 
@@ -354,7 +355,7 @@ kafkactl delete -f directoryOfResources
 kafkactl delete -f resource.yml
 ```
 
-## Diff
+### Diff
 
 The `diff` command allows you to compare a new YAML descriptor with the current one deployed in Ns4Kafka, allowing you to easily identify any differences.
 
@@ -381,7 +382,7 @@ Example(s):
 kafkactl diff -f resource.yml
 ```
 
-## Get
+### Get
 
 The `get` command allows you to retrieve information about one or multiple resources.
 
@@ -416,7 +417,7 @@ kafkactl get topics
 kafkactl get topic myTopic
 ```
 
-## Import
+### Import
 
 The `import` command allows you to import unsynchronized resources between Ns4Kafka and the Kafka broker/Kafka Connect cluster.
 
@@ -448,7 +449,7 @@ kafkactl import topics
 kafkactl import connects
 ```
 
-## Reset Offsets
+### Reset Offsets
 
 The `reset-offsets` command allows you to reset the offsets of consumer groups and topics.
 
@@ -490,7 +491,7 @@ Example(s):
 kafkactl reset-offsets --group myConsumerGroup --topic myTopic --to-earliest
 ```
 
-## Schemas
+### Schemas
 
 The `schemas` command allows you to modify the schema compatibility.
 
@@ -522,7 +523,7 @@ Example(s):
 kafkactl schemas forward-transitive mySubject-value
 ```
 
-## Reset Password
+### Reset Password
 
 The `reset-password` command allows you to reset the password of a user.
 
@@ -552,13 +553,13 @@ Example(s):
 kafkactl reset-password myUser
 ```
 
-# Resources
+## Resources
 
-## User
+### User
 
 This is the list of resources a simple Ns4Kafka user can manage.
 
-### Topic
+#### Topic
 
 ```yaml
 ---
@@ -579,7 +580,7 @@ spec:
 - The validation of `spec` properties, and especially `spec.config` properties, depends on the topic validation rules associated with your namespace.
 - `spec.replicationFactor` and `spec.partitions` are immutable and cannot be modified once the topic is created.
 
-### ACL
+#### ACL
 
 To provide access to your topics to another namespace, you can add an Access Control List (ACL) using the following example, where "daaagbl0" is your namespace and "dbbbgbl0" is the namespace that needs access to your topics:
 
@@ -608,7 +609,7 @@ Here are some points to keep in mind:
   - a sub prefix: “aaa_subprefix”
   - a literal topic name: “aaa_myTopic”
 
-### Connector
+#### Connector
 
 ```yaml
 ---
@@ -629,7 +630,7 @@ spec:
 - `spec.connectCluster` must refer to one of the Kafka Connect clusters authorized in your namespace. It can also refer to a Kafka Connect cluster that you have self-deployed or have been granted access to.
 - Everything else depend on the connect validation rules associated to your namespace.
 
-### Connect Cluster
+#### Connect Cluster
 
 The `Connect Cluster` resource declares a Connect cluster that has been self-deployed, so namespaces are autonomous to deploy connectors on it without any Ns4Kafka outage.
 
@@ -653,7 +654,7 @@ spec:
 - `metadata.aes256Format` is the AES256 format used to display encrypted connector-sensitive configuration, if needed. The default format is "${aes256:%s}".
 - Owners of Connect clusters can authorize other namespaces to deploy connectors on their Connect clusters by giving an ACL with the WRITE permission to the grantees.
 
-### Kafka Streams
+#### Kafka Streams
 
 The `Kafka Streams` resource grants the necessary ACLs for your Kafka Streams to work properly if you have internal topics.
 
@@ -667,11 +668,11 @@ metadata:
 
 - `metadata.name` must correspond to your Kafka Streams `application.id`.
 
-### Schema
+#### Schema
 
 The `Schema` resource allows you to declare subjects for your schemas. You can either reference a local `avsc` file with `spec.schemaFile`, or define your schema directly inline with `spec.schema`.
 
-#### Local file
+##### Local file
 
 ```yml
 ---
@@ -683,7 +684,7 @@ spec:
   schemaFile: schemas/topic.avsc # relative to kafkactl binary
 ```
 
-#### Inline
+##### Inline
 
 ```yml
 ---
@@ -698,7 +699,7 @@ spec:
     }
 ```
 
-#### Reference
+##### Reference
 
 If your schema references a type that is already stored in the Schema Registry, you can do the following:
 
@@ -735,11 +736,11 @@ This example assumes that a subject named `commons.address-value` with version 1
 
 Your schema's ACLs are the same as your topic's ACLs. If you are allowed to create a topic `myPrefix.topic`, then you are automatically allowed to create the subjects `myPrefix.topic-key` and `myPrefix.topic-value`.
 
-## Administrator
+### Administrator
 
 Here is the list of resources a Ns4Kafka administrator can manage.
 
-### Namespace
+#### Namespace
 
 The `Namespace` resource is the core of Ns4Kafka.
 
@@ -812,7 +813,7 @@ spec:
 - `spec.topicValidator` is a list of constraints for topics.
 - `spec.connectValidator` is a list of constraints for connectors.
 
-### ACL Owner
+#### ACL Owner
 
 ACLs with owner permission can only be deployed by administrators.
   
@@ -834,7 +835,7 @@ spec:
 - With this ACL, the namespace "myNamespace" will be the owner of topics prefixed by "myPrefix.". No one else is able to modify these resources.
 - `resourceType` can be `topic`, `connect`, or `group`.
 
-### Role Binding
+#### Role Binding
 
 The `Role Binding` resource links a namespace to a project team.
 
@@ -869,7 +870,7 @@ spec:
 
 - With this role binding, members of the group "myGitLabGroup" can use Ns4Kafka to manage topics starting with "myPrefix." on the "myCluster" Kafka cluster.
 
-### Quota
+#### Quota
 
 It is possible to define quotas on a namespace. 
 
@@ -896,7 +897,7 @@ Unit of measure accepted is byte (B), kibibyte (KiB), mebibyte (MiB), gibibyte (
 - `user/consumer_byte_rate` is the consumer network bandwith quota before throttling. Expressed in bytes/sec.
 - `user/producer_byte_rate` is the producer network bandwith quota before throttling. Expressed in bytes/sec.
 
-# CI/CD
+## CI/CD
 
 Kafkactl can be easily integrated into a CI/CD pipeline using the [Docker image](https://hub.docker.com/repository/docker/michelin/kafkactl) available on Docker Hub.
 
@@ -917,3 +918,7 @@ kafkactl:
 - `KAFKACTL_CURRENT_NAMESPACE` specifies the namespace to use.
 - `KAFKACTL_API` is the URL of Ns4Kafka in which to deploy.
 - `KAFKACTL_USER_TOKEN` contains the GitLab token.
+
+## Contribution
+ 
+We welcome contributions from the community! Before you get started, please take a look at our [contribution guide](https://github.com/michelin/kafkactl/blob/main/CONTRIBUTING.md) to learn about our guidelines and best practices. We appreciate your help in making Kafkactl a better tool for everyone.
