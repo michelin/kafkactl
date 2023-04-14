@@ -752,7 +752,7 @@ metadata:
   name: myNamespace
   cluster: myCluster
   labels:
-    contacts: namespace.owner@mail.com
+    contacts: namespace.owner@example.com
 spec:
   kafkaUser: kafkaServiceAccount
   connectClusters: 
@@ -833,7 +833,7 @@ spec:
 ```
 
 - With this ACL, the namespace "myNamespace" will be the owner of topics prefixed by "myPrefix.". No one else is able to modify these resources.
-- `resourceType` can be `topic`, `connect`, or `group`.
+- `resourceType` can be `topic`, `connect`, `connect_cluster` or `group`.
 
 #### Role Binding
 
@@ -855,6 +855,8 @@ spec:
     - topics/delete-records
     - connectors
     - connectors/change-state
+    - connect-clusters
+    - connect-clusters/vaults
     - acls
     - consumer-groups/reset
     - streams
@@ -863,6 +865,21 @@ spec:
     - POST
     - PUT
     - DELETE
+  subject:
+    subjectType: GROUP
+    subjectName: myGitLabGroup
+---
+apiVersion: v1
+kind: RoleBinding
+metadata:
+  name: rb2-myNamespace
+  namespace: myNamespace
+spec:
+  role:
+    resourceTypes:
+    - quota
+    verbs:
+    - GET
   subject:
     subjectType: GROUP
     subjectName: myGitLabGroup
