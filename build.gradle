@@ -77,11 +77,22 @@ graalvmNative {
 }
 
 dockerfile {
-    baseImage = "eclipse-temurin:11-jre-alpine"
+    baseImage("eclipse-temurin:11-jre-alpine")
+    editDockerfile {
+        after('COPY layers/application.jar /home/app/application.jar') {
+            insert('RUN echo "#!/bin/sh\\n\\njava -jar /home/app/application.jar \\"\\$@\\"" > /usr/bin/kafkactl && chmod +x /usr/bin/kafkactl')
+        }
+    }
 }
 
 dockerfileNative {
-    baseImage = "ubuntu:22.04"
+    baseImage("alpine:3.17.3")
+    args('-H:+StaticExecutableWithDynamicLibC')
+    editDockerfile {
+        after('COPY layers/application /app/application') {
+            insert('RUN echo "#!/bin/sh\\n\\n /app/application \\"\\$@\\"" > /usr/bin/kafkactl && chmod +x /usr/bin/kafkactl')
+        }
+    }
 }
 
 if (project.hasProperty("release")) {
