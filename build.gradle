@@ -89,7 +89,7 @@ dockerfileNative {
     baseImage("alpine:3.17.3")
     args('-H:+StaticExecutableWithDynamicLibC')
     editDockerfile {
-        after('COPY layers/application /app/application') {
+        after('COPY --from=graalvm /home/app/application /app/application') {
             insert('RUN echo "#!/bin/sh\\n\\n /app/application \\"\\$@\\"" > /usr/bin/kafkactl && chmod +x /usr/bin/kafkactl')
         }
     }

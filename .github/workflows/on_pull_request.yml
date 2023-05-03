@@ -56,7 +56,7 @@ jobs:
 
       - name: Docker
         run: ./gradlew dockerBuild dockerPush
-        
+
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
