@@ -95,7 +95,7 @@ dockerfileNative {
     }
 }
 
-if (project.hasProperty("release")) {
+if (project.hasProperty("releaseLatest")) {
     dockerBuild {
         images = ["michelin/kafkactl:" + version, "michelin/kafkactl:latest"]
     }
