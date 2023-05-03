@@ -62,7 +62,7 @@ jobs:
         with:
           username: ${{ secrets.MICHELIN_DOCKER_HUB_USERNAME }}
           password: ${{ secrets.MICHELIN_DOCKER_HUB_PASSWD }}
-          
+
       - name: Checkout project
         uses: actions/checkout@v3
         with:

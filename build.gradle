@@ -81,7 +81,7 @@ dockerfile {
 }
 
 dockerfileNative {
-    baseImage = "alpine:3.17.3"
+    baseImage = "ubuntu:22.04"
 }
 
 if (project.hasProperty("release")) {
