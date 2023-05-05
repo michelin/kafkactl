@@ -43,7 +43,10 @@ You can download Kafkactl from the project's releases page on GitHub at https://
 - Windows
 - Linux
 
-Alternatively, you can use the Docker image available at https://hub.docker.com/repository/docker/michelin/kafkactl.
+Alternatively, you can use the Docker images available at https://hub.docker.com/repository/docker/michelin/kafkactl. 
+Two kind of images are released:
+- The `kafkactl:<version>` images contains Kafkactl as a JAR application.
+- The `kafkactl:<version>-native` images contains Kafkactl as a native binary.
 
 ## Install
 
@@ -916,7 +919,23 @@ Unit of measure accepted is byte (B), kibibyte (KiB), mebibyte (MiB), gibibyte (
 
 ## CI/CD
 
-Kafkactl can be easily integrated into a CI/CD pipeline using the [Docker image](https://hub.docker.com/repository/docker/michelin/kafkactl) available on Docker Hub.
+Kafkactl can be easily integrated into a CI/CD pipeline using the [Docker images](https://hub.docker.com/repository/docker/michelin/kafkactl) available on Docker Hub.
+
+Here are two examples of how you can use the Kafkactl Docker images in your pipeline, one for the `kafkactl:<version>-native` image and one for the kafkactl:<version> image:
+
+```yaml
+kafkactl:
+  stage: kafkactl
+  image:
+    name: michelin/kafkactl:<version>-native
+    entrypoint: ['/bin/sh', '-c']
+  before_script:
+    - export KAFKACTL_CURRENT_NAMESPACE=test
+    - export KAFKACTL_API=http://ns4kafka-dev-api.domain.com
+    - export KAFKACTL_USER_TOKEN=${GITLAB_TOKEN}
+  script:
+    - kafkactl get all
+```
 
 ```yaml
 kafkactl:
