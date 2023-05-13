@@ -855,8 +855,10 @@ spec:
     - schemas
     - schemas/config
     - topics
+    - topics/import
     - topics/delete-records
     - connectors
+    - connectors/import
     - connectors/change-state
     - connect-clusters
     - connect-clusters/vaults
