@@ -2,6 +2,7 @@ package com.michelin.kafkactl.services;
 
 import com.michelin.kafkactl.models.Resource;
 import jakarta.inject.Singleton;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
@@ -63,7 +64,7 @@ public class FileService {
      * @return A stream of resources
      */
     private Stream<Resource> parseResourceStreamFromString(String content) {
-        Yaml yaml = new Yaml(new Constructor(Resource.class));
+        Yaml yaml = new Yaml(new Constructor(Resource.class, new LoaderOptions()));
         return StreamSupport.stream(yaml.loadAll(content).spliterator(), false)
                 .map(Resource.class::cast);
     }
