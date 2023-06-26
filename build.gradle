@@ -23,7 +23,7 @@ dependencies {
     implementation("io.micronaut:micronaut-validation")
     implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("io.micronaut:micronaut-http-client")
-    implementation("org.ocpsoft.prettytime:prettytime:5.0.6.Final")
+    implementation("org.ocpsoft.prettytime:prettytime:5.0.7.Final")
     implementation("io.github.java-diff-utils:java-diff-utils:4.12")
 
     runtimeOnly("ch.qos.logback:logback-classic")
