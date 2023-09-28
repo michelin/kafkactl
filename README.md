@@ -14,27 +14,42 @@ Kafkactl is the CLI tool that comes with [Ns4Kafka](https://github.com/michelin/
 
 ## Table of Contents
 
-* [Download](#download)
-* [Install](#install)
-* [Usage](#usage)
-  * [Api Resources](#api-resources)
-  * [Apply](#apply)
-  * [Config](#config)
-  * [Connect Clusters](#connect-clusters)
-  * [Connectors](#connectors)
-  * [Delete Records](#delete-records)
-  * [Delete](#delete)
-  * [Diff](#diff)
-  * [Get](#get)
-  * [Import](#import)
-  * [Reset Offsets](#reset-offsets)
-  * [Schemas](#schemas)
-  * [Reset Password](#reset-password)
-* [Resources](#resources)
-  * [User](#user)
-  * [Administrator](#administrator)
-* [CI/CD](#cicd)
-* [Contribution](#contribution)
+- [Kafkactl](#kafkactl)
+  - [Table of Contents](#table-of-contents)
+  - [Download](#download)
+  - [Install](#install)
+  - [Usage](#usage)
+    - [Api Resources](#api-resources)
+    - [Apply](#apply)
+    - [Config](#config)
+    - [Connect Clusters](#connect-clusters)
+    - [Connectors](#connectors)
+    - [Delete Records](#delete-records)
+    - [Delete](#delete)
+    - [Diff](#diff)
+    - [Get](#get)
+    - [Import](#import)
+    - [Reset Offsets](#reset-offsets)
+    - [Schemas](#schemas)
+    - [Reset Password](#reset-password)
+  - [Resources](#resources)
+    - [User](#user)
+      - [Topic](#topic)
+      - [ACL](#acl)
+      - [Connector](#connector)
+      - [Connect Cluster](#connect-cluster)
+      - [Kafka Streams](#kafka-streams)
+      - [Schema](#schema)
+        - [Local file](#local-file)
+        - [Inline](#inline)
+        - [Reference](#reference)
+    - [Administrator](#administrator)
+      - [Namespace](#namespace)
+      - [ACL Owner](#acl-owner)
+      - [Role Binding](#role-binding)
+      - [Quota](#quota)
+  - [CI/CD](#cicd)
+  - [Contribution](#contribution)
 
 ## Download
 
@@ -570,6 +585,9 @@ apiVersion: v1
 kind: Topic
 metadata:
   name: myPrefix.topic
+  tags:
+    - tag1
+    - tag2
 spec:
   replicationFactor: 3
   partitions: 3
@@ -582,6 +600,7 @@ spec:
 - The `metadata.name` field must be part of your allowed ACLs. Visit your namespace's ACLs to understand which topics you are allowed to manage.
 - The validation of `spec` properties, and especially `spec.config` properties, depends on the topic validation rules associated with your namespace.
 - `spec.replicationFactor` and `spec.partitions` are immutable and cannot be modified once the topic is created.
+- `metadata.tags` represents the list of tag on the topic inside a confluent cloud cluster.
 
 #### ACL
 
