@@ -1,6 +1,6 @@
 plugins {
-    id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("io.micronaut.application") version "3.7.10"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("io.micronaut.application") version "4.0.3"
     id("jacoco")
     id("org.sonarqube") version "4.4.0.3356"
     id("pl.allegro.tech.build.axion-release") version "1.15.4"
@@ -14,22 +14,26 @@ repositories {
 }
 
 dependencies {
-    annotationProcessor("info.picocli:picocli-codegen")
     annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("info.picocli:picocli-codegen")
+    annotationProcessor("io.micronaut.validation:micronaut-validation-processor")
 
     implementation("info.picocli:picocli")
-    implementation("io.micronaut.picocli:micronaut-picocli")
-    implementation("io.micronaut:micronaut-jackson-databind")
-    implementation("io.micronaut:micronaut-validation")
-    implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("io.micronaut:micronaut-http-client")
+    implementation("io.micronaut:micronaut-jackson-databind")
+    implementation("io.micronaut.picocli:micronaut-picocli")
+    implementation("io.micronaut.validation:micronaut-validation")
+    implementation("jakarta.annotation:jakarta.annotation-api")
+    implementation("jakarta.validation:jakarta.validation-api")
     implementation("org.ocpsoft.prettytime:prettytime:5.0.7.Final")
     implementation("io.github.java-diff-utils:java-diff-utils:4.12")
+    implementation("io.micronaut:micronaut-retry")
+    implementation("org.yaml:snakeyaml")
+
+    compileOnly("org.graalvm.nativeimage:svm")
+    compileOnly("org.projectlombok:lombok")
 
     runtimeOnly("ch.qos.logback:logback-classic")
-
-    compileOnly("org.projectlombok:lombok")
-    compileOnly("org.graalvm.nativeimage:svm")
 
     testImplementation("io.micronaut:micronaut-http-client")
     testImplementation("org.mockito:mockito-junit-jupiter:5.5.0")
@@ -45,8 +49,8 @@ application {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion("11")
-    targetCompatibility = JavaVersion.toVersion("11")
+    sourceCompatibility = JavaVersion.toVersion('17')
+    targetCompatibility = JavaVersion.toVersion('17')
 }
 
 micronaut {
@@ -65,7 +69,7 @@ shadowJar {
 graalvmNative {
     binaries {
         main {
-            imageName.set("kafkactl-" + project.version)
+            imageName.set("kafkactl-" + version)
             buildArgs.add("-H:Class=com.michelin.kafkactl.KafkactlCommand")
             buildArgs.add("-H:IncludeResourceBundles=org.ocpsoft.prettytime.i18n.Resources")
             buildArgs.add("-H:+ReportUnsupportedElementsAtRuntime")
@@ -77,7 +81,7 @@ graalvmNative {
 }
 
 dockerfile {
-    baseImage("eclipse-temurin:11-jre-alpine")
+    baseImage = "eclipse-temurin:17-jre-alpine"
 }
 
 dockerfileNative {
@@ -91,19 +95,19 @@ dockerfileNative {
 
 if (project.hasProperty("releaseLatest")) {
     dockerBuild {
-        images = ["michelin/kafkactl:" + version, "michelin/kafkactl:latest"]
+        images.set(["michelin/kafkactl:" + version, "michelin/kafkactl:latest"])
     }
 
     dockerBuildNative {
-        images = ["michelin/kafkactl:" + version + "-native", "michelin/kafkactl:latest-native"]
+        images.set(["michelin/kafkactl:" + version + "-native", "michelin/kafkactl:latest-native"])
     }
 } else {
     dockerBuild {
-        images = ["michelin/kafkactl:" + version]
+        images.set(["michelin/kafkactl:" + version])
     }
 
     dockerBuildNative {
-        images = ["michelin/kafkactl:" + version + "-native"]
+        images.set(["michelin/kafkactl:" + version + "-native"])
     }
 }
 
@@ -118,8 +122,14 @@ sonarqube {
 jacocoTestReport {
     dependsOn test
     reports {
-        html.enabled true
-        xml.enabled true
+        html.required = true
+        xml.required = true
+    }
+}
+
+test {
+    reports {
+        html.required = false
     }
 }
 

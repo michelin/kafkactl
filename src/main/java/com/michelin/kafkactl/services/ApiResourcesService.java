@@ -5,11 +5,13 @@ import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Api resources service.
+ */
 @Singleton
 public class ApiResourcesService {
     @Inject
@@ -19,7 +21,8 @@ public class ApiResourcesService {
     public LoginService loginService;
 
     /**
-     * List all resource definitions
+     * List all resource definitions.
+     *
      * @return A list of API resources
      */
     public List<ApiResource> listResourceDefinitions() {
@@ -27,38 +30,46 @@ public class ApiResourcesService {
     }
 
     /**
-     * Get a resource definition by kind
+     * Get a resource definition by kind.
+     *
      * @param kind The kind
      * @return The resource definition if it exists
      */
     public Optional<ApiResource> getResourceDefinitionByKind(String kind) {
         return listResourceDefinitions()
-                .stream()
-                .filter(resource -> resource.getKind().equals(kind))
-                .findFirst();
+            .stream()
+            .filter(resource -> resource.getKind().equals(kind))
+            .findFirst();
     }
 
     /**
-     * Get a resource definition by command name
+     * Get a resource definition by command name.
+     *
      * @param name The name
      * @return The resource definition if it exists
      */
     public Optional<ApiResource> getResourceDefinitionByCommandName(String name) {
         return listResourceDefinitions()
-                .stream()
-                .filter(resource -> resource.getNames().contains(name))
-                .findFirst();
+            .stream()
+            .filter(resource -> resource.getNames().contains(name))
+            .findFirst();
     }
 
+    /**
+     * Validate resource types to get only allowed resource types.
+     *
+     * @param resources The resources
+     * @return The allowed resources
+     */
     public List<Resource> validateResourceTypes(List<Resource> resources) {
         List<String> allowedKinds = listResourceDefinitions()
-                .stream()
-                .map(ApiResource::getKind)
-                .collect(Collectors.toList());
+            .stream()
+            .map(ApiResource::getKind)
+            .toList();
 
         return resources
-                .stream()
-                .filter(resource -> !allowedKinds.contains(resource.getKind()))
-                .collect(Collectors.toList());
+            .stream()
+            .filter(resource -> !allowedKinds.contains(resource.getKind()))
+            .collect(Collectors.toList());
     }
 }

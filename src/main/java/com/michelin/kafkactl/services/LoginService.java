@@ -9,14 +9,16 @@ import com.michelin.kafkactl.client.UsernameAndPasswordRequest;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Singleton;
-import picocli.CommandLine;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Calendar;
 import java.util.Date;
+import picocli.CommandLine;
 
+/**
+ * Login service.
+ */
 @Singleton
 public class LoginService {
     private static final String UNEXPECTED_ERROR = "Unexpected error occurred:";
@@ -26,8 +28,9 @@ public class LoginService {
     private String accessToken;
 
     /**
-     * Constructor
-     * @param kafkactlConfig The Kafkactl config
+     * Constructor.
+     *
+     * @param kafkactlConfig        The Kafkactl config
      * @param clusterResourceClient The client for resources
      */
     public LoginService(KafkactlConfig kafkactlConfig, ClusterResourceClient clusterResourceClient) {
@@ -42,7 +45,8 @@ public class LoginService {
     }
 
     /**
-     * Get the authorization header
+     * Get the authorization header.
+     *
      * @return The authorization header
      */
     public String getAuthorization() {
@@ -50,19 +54,21 @@ public class LoginService {
     }
 
     /**
-     * Check if the user is authenticated, or authenticate him otherwise
-     * @param verbose Is verbose mode activated or not
+     * Check if the user is authenticated, or authenticate him otherwise.
+     *
+     * @param verbose     Is verbose mode activated or not
      * @param commandSpec The command spec used to print the output
      * @return true if the user is authenticated, false otherwise
      */
     public boolean doAuthenticate(CommandLine.Model.CommandSpec commandSpec, boolean verbose) {
         return isAuthenticated(commandSpec, verbose)
-                || login(commandSpec, "gitlab", kafkactlConfig.getUserToken(), verbose);
+            || login(commandSpec, "gitlab", kafkactlConfig.getUserToken(), verbose);
     }
 
     /**
-     * Is the user authenticated already
-     * @param verbose Is verbose mode activated or not
+     * Is the user authenticated already.
+     *
+     * @param verbose     Is verbose mode activated or not
      * @param commandSpec The command spec used to print the output
      * @return true if he is, false otherwise
      */
@@ -77,7 +83,8 @@ public class LoginService {
             UserInfoResponse userInfo = clusterResourceClient.tokenInfo("Bearer " + token.getAccessToken());
             if (verbose) {
                 Date expiry = new Date(userInfo.getExp() * 1000);
-                commandSpec.commandLine().getOut().println("Authentication reused. Welcome " + userInfo.getUsername() + "!");
+                commandSpec.commandLine().getOut()
+                    .println("Authentication reused. Welcome " + userInfo.getUsername() + "!");
                 commandSpec.commandLine().getOut().println("Your session is valid until " + expiry + ".");
             }
 
@@ -85,21 +92,22 @@ public class LoginService {
             return userInfo.isActive();
         } catch (IOException e) {
             commandSpec.commandLine().getErr().println(String.format("%s %s.",
-                    UNEXPECTED_ERROR, e.getMessage()));
+                UNEXPECTED_ERROR, e.getMessage()));
         } catch (HttpClientResponseException e) {
             if (e.getStatus() != HttpStatus.UNAUTHORIZED) {
                 commandSpec.commandLine().getErr().println(String.format("%s %s (%s).",
-                        UNEXPECTED_ERROR, e.getMessage(), e.getStatus().getCode()));
+                    UNEXPECTED_ERROR, e.getMessage(), e.getStatus().getCode()));
             }
         }
         return false;
     }
 
     /**
-     * Authenticate the user
-     * @param user The user
-     * @param password The password
-     * @param verbose Is verbose mode activated or not
+     * Authenticate the user.
+     *
+     * @param user        The user
+     * @param password    The password
+     * @param verbose     Is verbose mode activated or not
      * @param commandSpec The command spec used to print the output
      * @return true if he is authenticated, false otherwise
      */
@@ -110,17 +118,18 @@ public class LoginService {
             }
 
             BearerAccessRefreshToken tokenResponse = clusterResourceClient.login(UsernameAndPasswordRequest
-                    .builder()
-                    .username(user)
-                    .password(password)
-                    .build());
+                .builder()
+                .username(user)
+                .password(password)
+                .build());
 
             accessToken = tokenResponse.getAccessToken();
 
             if (verbose) {
                 Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.SECOND, tokenResponse.getExpiresIn());
-                commandSpec.commandLine().getOut().println("Authentication successful. Welcome " + tokenResponse.getUsername() + "!");
+                commandSpec.commandLine().getOut()
+                    .println("Authentication successful. Welcome " + tokenResponse.getUsername() + "!");
                 commandSpec.commandLine().getOut().println("Your session is valid until " + calendar.getTime() + ".");
             }
 
@@ -129,22 +138,24 @@ public class LoginService {
                 objectMapper.writeValue(jwtFile, tokenResponse);
             } catch (IOException e) {
                 commandSpec.commandLine().getErr().println(String.format("%s %s.",
-                        UNEXPECTED_ERROR, e.getMessage()));
+                    UNEXPECTED_ERROR, e.getMessage()));
             }
 
             return true;
         } catch (HttpClientResponseException e) {
-            commandSpec.commandLine().getErr().println("Authentication failed because " + e.getMessage().toLowerCase() + ".");
+            commandSpec.commandLine().getErr()
+                .println("Authentication failed because " + e.getMessage().toLowerCase() + ".");
         }
 
         return false;
     }
 
     /**
-     * If exists, delete JWT file
+     * If exists, delete JWT file.
      */
-    public void deleteJWTFile() throws IOException {
-        if (jwtFile.exists())
+    public void deleteJwtFile() throws IOException {
+        if (jwtFile.exists()) {
             Files.delete(jwtFile.toPath());
+        }
     }
 }

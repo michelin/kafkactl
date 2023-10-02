@@ -3,17 +3,24 @@ package com.michelin.kafkactl.client;
 import com.michelin.kafkactl.client.predicates.RetryTimeoutPredicate;
 import com.michelin.kafkactl.models.Resource;
 import io.micronaut.http.HttpResponse;
-import io.micronaut.http.annotation.*;
+import io.micronaut.http.annotation.Body;
+import io.micronaut.http.annotation.Delete;
+import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.Header;
+import io.micronaut.http.annotation.Post;
+import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.http.client.annotation.Client;
 import io.micronaut.retry.annotation.Retryable;
-
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Namespaced resource client.
+ */
 @Client("${kafkactl.api}/api/namespaces/")
 public interface NamespacedResourceClient {
     /**
-     * Delete a given resource
+     * Delete a given resource.
      *
      * @param namespace    The namespace
      * @param kind         The kind of resource
@@ -24,18 +31,18 @@ public interface NamespacedResourceClient {
      */
     @Delete("{namespace}/{kind}/{resourceName}{?dryrun}")
     @Retryable(delay = "${kafkactl.retry.delete.delay}",
-            attempts = "${kafkactl.retry.delete.attempt}",
-            multiplier = "${kafkactl.retry.delete.multiplier}",
-            predicate = RetryTimeoutPredicate.class)
+        attempts = "${kafkactl.retry.delete.attempt}",
+        multiplier = "${kafkactl.retry.delete.multiplier}",
+        predicate = RetryTimeoutPredicate.class)
     HttpResponse<Void> delete(
-            String namespace,
-            String kind,
-            String resourceName,
-            @Header("Authorization") String token,
-            @QueryValue boolean dryrun);
+        String namespace,
+        String kind,
+        String resourceName,
+        @Header("Authorization") String token,
+        @QueryValue boolean dryrun);
 
     /**
-     * Apply a given resource
+     * Apply a given resource.
      *
      * @param namespace The namespace
      * @param kind      The kind of resource
@@ -46,18 +53,18 @@ public interface NamespacedResourceClient {
      */
     @Post("{namespace}/{kind}{?dryrun}")
     @Retryable(delay = "${kafkactl.retry.apply.delay}",
-            attempts = "${kafkactl.retry.apply.attempt}",
-            multiplier = "${kafkactl.retry.apply.multiplier}",
-            predicate = RetryTimeoutPredicate.class)
+        attempts = "${kafkactl.retry.apply.attempt}",
+        multiplier = "${kafkactl.retry.apply.multiplier}",
+        predicate = RetryTimeoutPredicate.class)
     HttpResponse<Resource> apply(
-            String namespace,
-            String kind,
-            @Header("Authorization") String token,
-            @Body Resource resource,
-            @QueryValue boolean dryrun);
+        String namespace,
+        String kind,
+        @Header("Authorization") String token,
+        @Body Resource resource,
+        @QueryValue boolean dryrun);
 
     /**
-     * List all resources
+     * List all resources.
      *
      * @param namespace The namespace
      * @param kind      The kind of resource
@@ -66,12 +73,12 @@ public interface NamespacedResourceClient {
      */
     @Get("{namespace}/{kind}")
     List<Resource> list(
-            String namespace,
-            String kind,
-            @Header("Authorization") String token);
+        String namespace,
+        String kind,
+        @Header("Authorization") String token);
 
     /**
-     * Get a resource
+     * Get a resource.
      *
      * @param namespace    The namespace
      * @param kind         The kind of resource
@@ -81,13 +88,13 @@ public interface NamespacedResourceClient {
      */
     @Get("{namespace}/{kind}/{resourceName}")
     HttpResponse<Resource> get(
-            String namespace,
-            String kind,
-            String resourceName,
-            @Header("Authorization") String token);
+        String namespace,
+        String kind,
+        String resourceName,
+        @Header("Authorization") String token);
 
     /**
-     * Imports the unsynchronized given type of resource
+     * Imports the unsynchronized given type of resource.
      *
      * @param namespace The namespace
      * @param kind      The kind of resource
@@ -97,13 +104,13 @@ public interface NamespacedResourceClient {
      */
     @Post("{namespace}/{kind}/_/import{?dryrun}")
     List<Resource> importResources(
-            String namespace,
-            String kind,
-            @Header("Authorization") String token,
-            @QueryValue boolean dryrun);
+        String namespace,
+        String kind,
+        @Header("Authorization") String token,
+        @QueryValue boolean dryrun);
 
     /**
-     * Delete records for a given topic
+     * Delete records for a given topic.
      *
      * @param token     The authentication token
      * @param namespace The namespace
@@ -113,13 +120,13 @@ public interface NamespacedResourceClient {
      */
     @Post("{namespace}/topics/{topic}/delete-records{?dryrun}")
     List<Resource> deleteRecords(
-            @Header("Authorization") String token,
-            String namespace,
-            String topic,
-            @QueryValue boolean dryrun);
+        @Header("Authorization") String token,
+        String namespace,
+        String topic,
+        @QueryValue boolean dryrun);
 
     /**
-     * Reset offsets for a given topic and consumer group
+     * Reset offsets for a given topic and consumer group.
      *
      * @param token             The authentication token
      * @param namespace         The namespace
@@ -130,14 +137,14 @@ public interface NamespacedResourceClient {
      */
     @Post("{namespace}/consumer-groups/{consumerGroupName}/reset{?dryrun}")
     List<Resource> resetOffsets(
-            @Header("Authorization") String token,
-            String namespace,
-            String consumerGroupName,
-            @Body Resource json,
-            @QueryValue boolean dryrun);
+        @Header("Authorization") String token,
+        String namespace,
+        String consumerGroupName,
+        @Body Resource json,
+        @QueryValue boolean dryrun);
 
     /**
-     * Change the state of a given connector
+     * Change the state of a given connector.
      *
      * @param namespace            The namespace
      * @param connector            The connector to change
@@ -147,13 +154,13 @@ public interface NamespacedResourceClient {
      */
     @Post("{namespace}/connectors/{connector}/change-state")
     HttpResponse<Resource> changeConnectorState(
-            String namespace,
-            String connector,
-            @Body Resource changeConnectorState,
-            @Header("Authorization") String token);
+        String namespace,
+        String connector,
+        @Body Resource changeConnectorState,
+        @Header("Authorization") String token);
 
     /**
-     * Change the schema compatibility mode
+     * Change the schema compatibility mode.
      *
      * @param namespace     The namespace
      * @param subject       The subject
@@ -163,13 +170,13 @@ public interface NamespacedResourceClient {
      */
     @Post("{namespace}/schemas/{subject}/config")
     HttpResponse<Resource> changeSchemaCompatibility(
-            String namespace,
-            String subject,
-            @Body Map<String, String> compatibility,
-            @Header("Authorization") String token);
+        String namespace,
+        String subject,
+        @Body Map<String, String> compatibility,
+        @Header("Authorization") String token);
 
     /**
-     * Reset password of a given user
+     * Reset password of a given user.
      *
      * @param namespace The namespace
      * @param user      The user
@@ -180,15 +187,15 @@ public interface NamespacedResourceClient {
     HttpResponse<Resource> resetPassword(String namespace, String user, @Header("Authorization") String token);
 
     /**
-     * List all available connect clusters for vaulting
+     * List all available connect clusters for vaulting.
      *
      * @param namespace The namespace
      * @return The list of connect clusters
      */
     @Get("{namespace}/connect-clusters/_/vaults")
     List<Resource> listAvailableVaultsConnectClusters(
-            String namespace,
-            @Header("Authorization") String token);
+        String namespace,
+        @Header("Authorization") String token);
 
     /**
      * Vault a secret for a specific Kafka Connect Cluster.
@@ -200,8 +207,8 @@ public interface NamespacedResourceClient {
      */
     @Post("{namespace}/connect-clusters/{connectCluster}/vaults")
     List<Resource> vaultsOnConnectClusters(
-            final String namespace,
-            final String connectCluster,
-            @Body List<String> passwords,
-            @Header("Authorization") String token);
+        final String namespace,
+        final String connectCluster,
+        @Body List<String> passwords,
+        @Header("Authorization") String token);
 }

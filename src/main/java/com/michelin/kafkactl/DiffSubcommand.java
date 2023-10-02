@@ -1,16 +1,28 @@
 package com.michelin.kafkactl;
 
+import static com.michelin.kafkactl.ApplySubcommand.SCHEMA_FILE;
+
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
-import com.michelin.kafkactl.services.*;
+import com.michelin.kafkactl.services.ApiResourcesService;
+import com.michelin.kafkactl.services.FileService;
+import com.michelin.kafkactl.services.FormatService;
+import com.michelin.kafkactl.services.LoginService;
+import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
+import java.io.File;
+import java.nio.file.Files;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
@@ -19,26 +31,20 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
-
-import static com.michelin.kafkactl.ApplySubcommand.SCHEMA_FILE;
-
+/**
+ * Diff subcommand.
+ */
 @Command(name = "diff",
-        headerHeading = "@|bold Usage|@:",
-        synopsisHeading = " ",
-        descriptionHeading = "%n@|bold Description|@:%n%n",
-        description = "Get differences between a new resource and a old resource.",
-        parameterListHeading = "%n@|bold Parameters|@:%n",
-        optionListHeading = "%n@|bold Options|@:%n",
-        commandListHeading = "%n@|bold Commands|@:%n",
-        usageHelpAutoWidth = true,
-        versionProvider = VersionProvider.class,
-        mixinStandardHelpOptions = true)
+    headerHeading = "@|bold Usage|@:",
+    synopsisHeading = " ",
+    descriptionHeading = "%n@|bold Description|@:%n%n",
+    description = "Get differences between a new resource and a old resource.",
+    parameterListHeading = "%n@|bold Parameters|@:%n",
+    optionListHeading = "%n@|bold Options|@:%n",
+    commandListHeading = "%n@|bold Commands|@:%n",
+    usageHelpAutoWidth = true,
+    versionProvider = VersionProvider.class,
+    mixinStandardHelpOptions = true)
 public class DiffSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;
@@ -71,7 +77,8 @@ public class DiffSubcommand implements Callable<Integer> {
     public CommandLine.Model.CommandSpec commandSpec;
 
     /**
-     * Run the "diff" command
+     * Run the "diff" command.
+     *
      * @return The command return code
      */
     @Override
@@ -93,56 +100,65 @@ public class DiffSubcommand implements Callable<Integer> {
             List<Resource> invalidResources = apiResourcesService.validateResourceTypes(resources);
             if (!invalidResources.isEmpty()) {
                 String invalid = invalidResources
-                        .stream()
-                        .map(Resource::getKind)
-                        .distinct()
-                        .collect(Collectors.joining(", "));
-                throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type(s) " + invalid + ".");
+                    .stream()
+                    .map(Resource::getKind)
+                    .distinct()
+                    .collect(Collectors.joining(", "));
+                throw new CommandLine.ParameterException(commandSpec.commandLine(),
+                    "The server does not have resource type(s) " + invalid + ".");
             }
 
             // Validate namespace mismatch
             String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
             List<Resource> namespaceMismatch = resources
-                    .stream()
-                    .filter(resource -> resource.getMetadata().getNamespace() != null && !resource.getMetadata().getNamespace().equals(namespace))
-                    .collect(Collectors.toList());
+                .stream()
+                .filter(resource -> resource.getMetadata().getNamespace() != null
+                    && !resource.getMetadata().getNamespace().equals(namespace))
+                .toList();
 
             if (!namespaceMismatch.isEmpty()) {
                 String invalid = namespaceMismatch
-                        .stream()
-                        .map(resource -> resource.getKind() + "/" + resource.getMetadata().getName())
-                        .distinct()
-                        .collect(Collectors.joining(", "));
-                throw new CommandLine.ParameterException(commandSpec.commandLine(), "Namespace mismatch between Kafkactl and YAML document " + invalid + ".");
+                    .stream()
+                    .map(resource -> resource.getKind() + "/" + resource.getMetadata().getName())
+                    .distinct()
+                    .collect(Collectors.joining(", "));
+                throw new CommandLine.ParameterException(commandSpec.commandLine(),
+                    "Namespace mismatch between Kafkactl and YAML document " + invalid + ".");
             }
 
             // Load schema content
             resources.stream()
-                    .filter(resource -> resource.getKind().equals("Schema") && StringUtils.isNotEmpty((CharSequence) resource.getSpec().get(SCHEMA_FILE)))
-                    .forEach(resource -> {
-                        try {
-                            resource.getSpec().put("schema", Files.readString(new File(resource.getSpec().get(SCHEMA_FILE).toString()).toPath()));
-                        } catch (Exception e) {
-                            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE) +
-                                    ". Schema path must be relative to the CLI.");
-                        }
-                    });
+                .filter(resource -> resource.getKind().equals("Schema")
+                    && StringUtils.isNotEmpty((CharSequence) resource.getSpec().get(SCHEMA_FILE)))
+                .forEach(resource -> {
+                    try {
+                        resource.getSpec().put("schema",
+                            Files.readString(new File(resource.getSpec().get(SCHEMA_FILE).toString()).toPath()));
+                    } catch (Exception e) {
+                        throw new CommandLine.ParameterException(commandSpec.commandLine(),
+                            "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE)
+                                + ". Schema path must be relative to the CLI.");
+                    }
+                });
 
             // Process each document individually, return 0 when all succeed
             int errors = resources.stream()
-                    .map(resource -> {
-                        ApiResource apiResource = apiResourcesService.getResourceDefinitionByKind(resource.getKind()).orElseThrow();
-                        Resource live = resourceService.getSingleResourceWithType(apiResource, namespace, resource.getMetadata().getName(), false);
-                        HttpResponse<Resource> merged = resourceService.apply(apiResource, namespace, resource, true, commandSpec);
-                        if (merged != null && merged.getBody().isPresent()) {
-                            List<String> uDiff = unifiedDiff(live, merged.body());
-                            uDiff.forEach(diff -> commandSpec.commandLine().getOut().println(diff));
-                            return 0;
-                        }
-                        return 1;
-                    })
-                    .mapToInt(value -> value)
-                    .sum();
+                .map(resource -> {
+                    ApiResource apiResource =
+                        apiResourcesService.getResourceDefinitionByKind(resource.getKind()).orElseThrow();
+                    Resource live = resourceService.getSingleResourceWithType(apiResource, namespace,
+                        resource.getMetadata().getName(), false);
+                    HttpResponse<Resource> merged =
+                        resourceService.apply(apiResource, namespace, resource, true, commandSpec);
+                    if (merged != null && merged.getBody().isPresent()) {
+                        List<String> unifiedDiff = unifiedDiff(live, merged.body());
+                        unifiedDiff.forEach(diff -> commandSpec.commandLine().getOut().println(diff));
+                        return 0;
+                    }
+                    return 1;
+                })
+                .mapToInt(value -> value)
+                .sum();
 
             return errors > 0 ? 1 : 0;
         } catch (HttpClientResponseException e) {
@@ -152,8 +168,9 @@ public class DiffSubcommand implements Callable<Integer> {
     }
 
     /**
-     * Compute the difference between current resource and applied resource
-     * @param live The current resource
+     * Compute the difference between current resource and applied resource.
+     *
+     * @param live   The current resource
      * @param merged The applied new resource
      * @return The differences
      */
@@ -177,8 +194,8 @@ public class DiffSubcommand implements Callable<Integer> {
         List<String> newResourceStr = yaml.dump(merged).lines().collect(Collectors.toList());
         Patch<String> diff = DiffUtils.diff(oldResourceStr, newResourceStr);
         return UnifiedDiffUtils.generateUnifiedDiff(
-                String.format("%s/%s-LIVE", merged.getKind(), merged.getMetadata().getName()),
-                String.format("%s/%s-MERGED", merged.getKind(), merged.getMetadata().getName()),
-                oldResourceStr, diff, 3);
+            String.format("%s/%s-LIVE", merged.getKind(), merged.getMetadata().getName()),
+            String.format("%s/%s-MERGED", merged.getKind(), merged.getMetadata().getName()),
+            oldResourceStr, diff, 3);
     }
 }

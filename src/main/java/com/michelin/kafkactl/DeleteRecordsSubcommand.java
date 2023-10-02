@@ -5,24 +5,26 @@ import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
+import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-import java.util.concurrent.Callable;
-
+/**
+ * Delete records subcommand.
+ */
 @Command(name = "delete-records",
-        headerHeading = "@|bold Usage|@:",
-        synopsisHeading = " ",
-        descriptionHeading = "%n@|bold Description|@:%n%n",
-        description = "Delete all records within a topic.",
-        parameterListHeading = "%n@|bold Parameters|@:%n",
-        optionListHeading = "%n@|bold Options|@:%n",
-        commandListHeading = "%n@|bold Commands|@:%n",
-        usageHelpAutoWidth = true,
-        versionProvider = VersionProvider.class,
-        mixinStandardHelpOptions = true)
+    headerHeading = "@|bold Usage|@:",
+    synopsisHeading = " ",
+    descriptionHeading = "%n@|bold Description|@:%n%n",
+    description = "Delete all records within a topic.",
+    parameterListHeading = "%n@|bold Parameters|@:%n",
+    optionListHeading = "%n@|bold Options|@:%n",
+    commandListHeading = "%n@|bold Commands|@:%n",
+    usageHelpAutoWidth = true,
+    versionProvider = VersionProvider.class,
+    mixinStandardHelpOptions = true)
 public class DeleteRecordsSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;
@@ -49,7 +51,8 @@ public class DeleteRecordsSubcommand implements Callable<Integer> {
     public CommandLine.Model.CommandSpec commandSpec;
 
     /**
-     * Run the "delete-records" command
+     * Run the "delete-records" command.
+     *
      * @return The command return code
      * @throws Exception Any exception during the run
      */

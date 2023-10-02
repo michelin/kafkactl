@@ -2,32 +2,38 @@ package com.michelin.kafkactl;
 
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
-import com.michelin.kafkactl.services.*;
+import com.michelin.kafkactl.services.ApiResourcesService;
+import com.michelin.kafkactl.services.FileService;
+import com.michelin.kafkactl.services.FormatService;
+import com.michelin.kafkactl.services.LoginService;
+import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
-import picocli.CommandLine;
-import picocli.CommandLine.Option;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
+import picocli.CommandLine;
+import picocli.CommandLine.Option;
 
+/**
+ * Apply subcommand.
+ */
 @CommandLine.Command(name = "apply",
-        headerHeading = "@|bold Usage|@:",
-        synopsisHeading = " ",
-        descriptionHeading = "%n@|bold Description|@:%n%n",
-        description = "Create or update a resource.",
-        parameterListHeading = "%n@|bold Parameters|@:%n",
-        optionListHeading = "%n@|bold Options|@:%n",
-        commandListHeading = "%n@|bold Commands|@:%n",
-        usageHelpAutoWidth = true,
-        versionProvider = VersionProvider.class,
-        mixinStandardHelpOptions = true)
+    headerHeading = "@|bold Usage|@:",
+    synopsisHeading = " ",
+    descriptionHeading = "%n@|bold Description|@:%n%n",
+    description = "Create or update a resource.",
+    parameterListHeading = "%n@|bold Parameters|@:%n",
+    optionListHeading = "%n@|bold Options|@:%n",
+    commandListHeading = "%n@|bold Commands|@:%n",
+    usageHelpAutoWidth = true,
+    versionProvider = VersionProvider.class,
+    mixinStandardHelpOptions = true)
 public class ApplySubcommand implements Callable<Integer> {
     public static final String SCHEMA_FILE = "schemaFile";
 
@@ -65,7 +71,8 @@ public class ApplySubcommand implements Callable<Integer> {
     public CommandLine.Model.CommandSpec commandSpec;
 
     /**
-     * Run the "apply" command
+     * Run the "apply" command.
+     *
      * @return The command return code
      * @throws Exception Any exception during the run
      */
@@ -92,49 +99,56 @@ public class ApplySubcommand implements Callable<Integer> {
             List<Resource> invalidResources = apiResourcesService.validateResourceTypes(resources);
             if (!invalidResources.isEmpty()) {
                 String invalid = invalidResources
-                        .stream()
-                        .map(Resource::getKind)
-                        .distinct()
-                        .collect(Collectors.joining(", "));
-                throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type(s) " + invalid + ".");
+                    .stream()
+                    .map(Resource::getKind)
+                    .distinct()
+                    .collect(Collectors.joining(", "));
+                throw new CommandLine.ParameterException(commandSpec.commandLine(),
+                    "The server does not have resource type(s) " + invalid + ".");
             }
 
             // Validate namespace mismatch
             String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
             List<Resource> namespaceMismatch = resources
-                    .stream()
-                    .filter(resource -> resource.getMetadata().getNamespace() != null && !resource.getMetadata().getNamespace().equals(namespace))
-                    .collect(Collectors.toList());
+                .stream()
+                .filter(resource -> resource.getMetadata().getNamespace() != null
+                    && !resource.getMetadata().getNamespace().equals(namespace))
+                .toList();
 
             if (!namespaceMismatch.isEmpty()) {
                 String invalid = namespaceMismatch
-                        .stream()
-                        .map(resource -> resource.getKind() + "/" + resource.getMetadata().getName())
-                        .distinct()
-                        .collect(Collectors.joining(", "));
-                throw new CommandLine.ParameterException(commandSpec.commandLine(), "Namespace mismatch between Kafkactl and YAML document " + invalid + ".");
+                    .stream()
+                    .map(resource -> resource.getKind() + "/" + resource.getMetadata().getName())
+                    .distinct()
+                    .collect(Collectors.joining(", "));
+                throw new CommandLine.ParameterException(commandSpec.commandLine(),
+                    "Namespace mismatch between Kafkactl and YAML document " + invalid + ".");
             }
 
             // Load schema content
             resources
-                    .stream()
-                    .filter(resource -> resource.getKind().equals("Schema") && StringUtils.isNotEmpty((CharSequence) resource.getSpec().get(SCHEMA_FILE)))
-                    .forEach(resource -> {
-                        try {
-                            resource.getSpec().put("schema", Files.readString(new File(resource.getSpec().get(SCHEMA_FILE).toString()).toPath()));
-                        } catch (Exception e) {
-                            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE) +
-                                    ". Schema path must be relative to the CLI.");
-                        }
-                    });
+                .stream()
+                .filter(resource -> resource.getKind().equals("Schema")
+                    && StringUtils.isNotEmpty((CharSequence) resource.getSpec().get(SCHEMA_FILE)))
+                .forEach(resource -> {
+                    try {
+                        resource.getSpec().put("schema",
+                            Files.readString(new File(resource.getSpec().get(SCHEMA_FILE).toString()).toPath()));
+                    } catch (Exception e) {
+                        throw new CommandLine.ParameterException(commandSpec.commandLine(),
+                            "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE)
+                                + ". Schema path must be relative to the CLI.");
+                    }
+                });
 
             int errors = resources.stream()
-                    .map(resource -> {
-                        ApiResource apiResource = apiResourcesService.getResourceDefinitionByKind(resource.getKind()).orElseThrow();
-                        return resourceService.apply(apiResource, namespace, resource, dryRun, commandSpec);
-                    })
-                    .mapToInt(value -> value != null ? 0 : 1)
-                    .sum();
+                .map(resource -> {
+                    ApiResource apiResource =
+                        apiResourcesService.getResourceDefinitionByKind(resource.getKind()).orElseThrow();
+                    return resourceService.apply(apiResource, namespace, resource, dryRun, commandSpec);
+                })
+                .mapToInt(value -> value != null ? 0 : 1)
+                .sum();
 
             return errors > 0 ? 1 : 0;
         } catch (HttpClientResponseException e) {

@@ -6,14 +6,16 @@ import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.convert.format.MapFormat;
 import io.micronaut.core.util.StringUtils;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-
+/**
+ * Kafkactl config class.
+ */
 @Getter
 @Setter
 @Introspected
@@ -29,29 +31,9 @@ public class KafkactlConfig {
     @MapFormat(transformation = MapFormat.MapTransformation.FLAT)
     private Map<String, List<String>> tableFormat;
 
-    @Getter
-    @Setter
-    @Builder
-    @Introspected
-    public static class Context {
-        private String name;
-
-        @JsonProperty("context")
-        private ApiContext definition;
-
-        @Getter
-        @Setter
-        @Builder
-        @Introspected
-        public static class ApiContext {
-            private String api;
-            private String userToken;
-            private String namespace;
-        }
-    }
-
     /**
-     * Get the current user config directory
+     * Get the current user config directory.
+     *
      * @return The config directory
      */
     public String getConfigDirectory() {
@@ -64,11 +46,40 @@ public class KafkactlConfig {
     }
 
     /**
-     * Get the current user config full path
+     * Get the current user config full path.
+     *
      * @return The config path
      */
     public String getConfigPath() {
-        return StringUtils.isNotEmpty(SystemService.getEnv(KAFKACTL_CONFIG)) ?
-                SystemService.getEnv(KAFKACTL_CONFIG) : SystemService.getProperty("user.home") + "/.kafkactl/config.yml";
+        return StringUtils.isNotEmpty(SystemService.getEnv(KAFKACTL_CONFIG))
+            ? SystemService.getEnv(KAFKACTL_CONFIG) : SystemService.getProperty("user.home")
+            + "/.kafkactl/config.yml";
+    }
+
+    /**
+     * Context class.
+     */
+    @Getter
+    @Setter
+    @Builder
+    @Introspected
+    public static class Context {
+        private String name;
+
+        @JsonProperty("context")
+        private ApiContext definition;
+
+        /**
+         * ApiContext class.
+         */
+        @Getter
+        @Setter
+        @Builder
+        @Introspected
+        public static class ApiContext {
+            private String api;
+            private String userToken;
+            private String namespace;
+        }
     }
 }

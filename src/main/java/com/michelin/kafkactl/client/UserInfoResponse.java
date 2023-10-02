@@ -4,6 +4,9 @@ import io.micronaut.core.annotation.ReflectiveAccess;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * User info response.
+ */
 @Getter
 @Setter
 @ReflectiveAccess

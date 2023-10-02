@@ -7,27 +7,29 @@ import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
-
+/**
+ * Import subcommand.
+ */
 @Command(name = "import",
-        headerHeading = "@|bold Usage|@:",
-        synopsisHeading = " ",
-        descriptionHeading = "%n@|bold Description|@:%n%n",
-        description = "Import non-synchronized resources.",
-        parameterListHeading = "%n@|bold Parameters|@:%n",
-        optionListHeading = "%n@|bold Options|@:%n",
-        commandListHeading = "%n@|bold Commands|@:%n",
-        usageHelpAutoWidth = true,
-        versionProvider = VersionProvider.class,
-        mixinStandardHelpOptions = true)
+    headerHeading = "@|bold Usage|@:",
+    synopsisHeading = " ",
+    descriptionHeading = "%n@|bold Description|@:%n%n",
+    description = "Import non-synchronized resources.",
+    parameterListHeading = "%n@|bold Parameters|@:%n",
+    optionListHeading = "%n@|bold Options|@:%n",
+    commandListHeading = "%n@|bold Commands|@:%n",
+    usageHelpAutoWidth = true,
+    versionProvider = VersionProvider.class,
+    mixinStandardHelpOptions = true)
 public class ImportSubcommand implements Callable<Integer> {
     @Inject
     public LoginService loginService;
@@ -57,7 +59,8 @@ public class ImportSubcommand implements Callable<Integer> {
     CommandLine.Model.CommandSpec commandSpec;
 
     /**
-     * Run the "get" command
+     * Run the "get" command.
+     *
      * @return The command return code
      */
     public Integer call() {
@@ -78,26 +81,30 @@ public class ImportSubcommand implements Callable<Integer> {
     }
 
     /**
-     * Validate required resource type
+     * Validate required resource type.
+     *
      * @return The list of resource type
      */
     private List<ApiResource> validateResourceType() {
         // Specific case ALL
         if (resourceType.equalsIgnoreCase("ALL")) {
             return apiResourcesService.listResourceDefinitions()
-                    .stream()
-                    .filter(ApiResource::isSynchronizable)
-                    .collect(Collectors.toList());
+                .stream()
+                .filter(ApiResource::isSynchronizable)
+                .collect(Collectors.toList());
         }
 
         // Otherwise, check resource exists
-        Optional<ApiResource> optionalApiResource = apiResourcesService.getResourceDefinitionByCommandName(resourceType);
+        Optional<ApiResource> optionalApiResource =
+            apiResourcesService.getResourceDefinitionByCommandName(resourceType);
         if (optionalApiResource.isEmpty()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "The server does not have resource type " + resourceType + ".");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(),
+                "The server does not have resource type " + resourceType + ".");
         }
 
         if (!optionalApiResource.get().isSynchronizable()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Resource of type " + resourceType + " is not synchronizable.");
+            throw new CommandLine.ParameterException(commandSpec.commandLine(),
+                "Resource of type " + resourceType + " is not synchronizable.");
         }
 
         return List.of(optionalApiResource.get());
