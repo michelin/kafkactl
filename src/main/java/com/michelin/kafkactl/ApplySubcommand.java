@@ -1,11 +1,12 @@
 package com.michelin.kafkactl;
 
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
+import com.michelin.kafkactl.parents.DryRunCommand;
 import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FileService;
 import com.michelin.kafkactl.services.FormatService;
-import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.core.util.StringUtils;
@@ -15,7 +16,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
@@ -34,11 +34,8 @@ import picocli.CommandLine.Option;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class ApplySubcommand implements Callable<Integer> {
+public class ApplySubcommand extends DryRunCommand {
     public static final String SCHEMA_FILE = "schemaFile";
-
-    @Inject
-    public LoginService loginService;
 
     @Inject
     public ApiResourcesService apiResourcesService;
@@ -61,15 +58,6 @@ public class ApplySubcommand implements Callable<Integer> {
     @Option(names = {"-R", "--recursive"}, description = "Search file recursively.")
     public boolean recursive;
 
-    @Option(names = {"--dry-run"}, description = "Does not persist resources. Validate only.")
-    public boolean dryRun;
-
-    @CommandLine.ParentCommand
-    public KafkactlCommand kafkactlCommand;
-
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
-
     /**
      * Run the "apply" command.
      *
@@ -77,15 +65,7 @@ public class ApplySubcommand implements Callable<Integer> {
      * @throws Exception Any exception during the run
      */
     @Override
-    public Integer call() throws Exception {
-        if (dryRun) {
-            commandSpec.commandLine().getOut().println("Dry run execution.");
-        }
-
-        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
-            return 1;
-        }
-
+    public Integer onAuthSuccess() throws Exception {
         // If we have none or both stdin and File set, we stop
         boolean hasStdin = System.in.available() > 0;
         if (hasStdin == file.isPresent()) {

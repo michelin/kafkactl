@@ -5,12 +5,13 @@ import static com.michelin.kafkactl.ApplySubcommand.SCHEMA_FILE;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
+import com.michelin.kafkactl.parents.AuthenticatedCommand;
 import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FileService;
 import com.michelin.kafkactl.services.FormatService;
-import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.core.util.StringUtils;
@@ -21,7 +22,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -45,10 +45,7 @@ import picocli.CommandLine.Option;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class DiffSubcommand implements Callable<Integer> {
-    @Inject
-    public LoginService loginService;
-
+public class DiffSubcommand extends AuthenticatedCommand {
     @Inject
     public ApiResourcesService apiResourcesService;
 
@@ -82,11 +79,7 @@ public class DiffSubcommand implements Callable<Integer> {
      * @return The command return code
      */
     @Override
-    public Integer call() throws Exception {
-        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
-            return 1;
-        }
-
+    public Integer onAuthSuccess() throws Exception {
         // If we have none or both stdin and File set, we stop
         boolean hasStdin = System.in.available() > 0;
         if (hasStdin == file.isPresent()) {

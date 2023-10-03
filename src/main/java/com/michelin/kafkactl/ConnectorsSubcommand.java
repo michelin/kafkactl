@@ -4,12 +4,13 @@ import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.CHANGE_CONNECTOR_STATE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.CONNECTOR;
 
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
+import com.michelin.kafkactl.parents.AuthenticatedCommand;
 import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
-import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
@@ -17,8 +18,8 @@ import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import picocli.CommandLine;
 
@@ -36,10 +37,7 @@ import picocli.CommandLine;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class ConnectorsSubcommand implements Callable<Integer> {
-    @Inject
-    public LoginService loginService;
-
+public class ConnectorsSubcommand extends AuthenticatedCommand {
     @Inject
     public KafkactlConfig kafkactlConfig;
 
@@ -69,14 +67,9 @@ public class ConnectorsSubcommand implements Callable<Integer> {
      * Run the "connectors" command.
      *
      * @return The command return code
-     * @throws Exception Any exception during the run
      */
     @Override
-    public Integer call() throws Exception {
-        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
-            return 1;
-        }
-
+    public Integer onAuthSuccess() {
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
 
         try {
@@ -120,17 +113,14 @@ public class ConnectorsSubcommand implements Callable<Integer> {
     /**
      * Connector actions.
      */
+    @Getter
+    @AllArgsConstructor
     public enum ConnectorAction {
         PAUSE("pause"),
         RESUME("resume"),
         RESTART("restart");
 
-        @Getter
         private final String name;
-
-        ConnectorAction(String name) {
-            this.name = name;
-        }
 
         @Override
         public String toString() {

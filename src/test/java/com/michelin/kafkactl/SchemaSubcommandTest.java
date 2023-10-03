@@ -1,5 +1,6 @@
 package com.michelin.kafkactl;
 
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.FormatService;
@@ -45,7 +46,7 @@ class SchemaSubcommandTest {
     @Test
     void shouldNotUpdateCompatWhenNotAuthenticated() {
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(false);
+            .thenReturn(false);
 
         CommandLine cmd = new CommandLine(schemaSubcommand);
 
@@ -56,14 +57,14 @@ class SchemaSubcommandTest {
     @Test
     void shouldNotUpdateCompatWhenEmptyResponseList() {
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(resourceService.changeSchemaCompatibility(any(), any(), any(), any()))
-                .thenReturn(Optional.empty());
+            .thenReturn(Optional.empty());
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("namespace");
+            .thenReturn("namespace");
 
         CommandLine cmd = new CommandLine(schemaSubcommand);
 
@@ -74,31 +75,31 @@ class SchemaSubcommandTest {
     @Test
     void shouldUpdateCompat() {
         Resource resource = Resource.builder()
-                .kind("SchemaCompatibilityState")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.schema-value")
-                        .namespace("namespace")
-                        .build())
-                .spec(Collections.emptyMap())
-                .build();
+            .kind("SchemaCompatibilityState")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.schema-value")
+                .namespace("namespace")
+                .build())
+            .spec(Collections.emptyMap())
+            .build();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(resourceService.changeSchemaCompatibility(any(), any(), any(), any()))
-                .thenReturn(Optional.of(resource));
+            .thenReturn(Optional.of(resource));
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
 
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("namespace");
+            .thenReturn("namespace");
 
         CommandLine cmd = new CommandLine(schemaSubcommand);
 
         int code = cmd.execute("backward", "mySubject");
         assertEquals(0, code);
         verify(formatService).displayList(eq(SCHEMA_COMPATIBILITY_STATE),
-                argThat(schemas -> schemas.get(0).equals(resource)),
-                eq(TABLE), eq(cmd.getCommandSpec()));
+            argThat(schemas -> schemas.get(0).equals(resource)),
+            eq(TABLE), eq(cmd.getCommandSpec()));
     }
 }

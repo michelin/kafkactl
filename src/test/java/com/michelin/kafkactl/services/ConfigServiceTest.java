@@ -1,7 +1,7 @@
 package com.michelin.kafkactl.services;
 
 import com.michelin.kafkactl.KafkactlCommand;
-import com.michelin.kafkactl.KafkactlConfig;
+import com.michelin.kafkactl.config.KafkactlConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,31 +32,31 @@ class ConfigServiceTest {
     @Test
     void shouldGetCurrentContextName() {
         KafkactlConfig.Context contextOne = KafkactlConfig.Context.builder()
-                .name("name")
-                .definition(KafkactlConfig.Context.ApiContext.builder()
-                        .userToken("userToken")
-                        .api("https://ns4kafka.com")
-                        .namespace("namespace")
-                        .build())
-                .build();
+            .name("name")
+            .definition(KafkactlConfig.Context.ApiContext.builder()
+                .userToken("userToken")
+                .api("https://ns4kafka.com")
+                .namespace("namespace")
+                .build())
+            .build();
 
         KafkactlConfig.Context contextTwo = KafkactlConfig.Context.builder()
-                .name("name2")
-                .definition(KafkactlConfig.Context.ApiContext.builder()
-                        .userToken("userToken2")
-                        .api("https://ns4kafka.com")
-                        .namespace("namespace2")
-                        .build())
-                .build();
+            .name("name2")
+            .definition(KafkactlConfig.Context.ApiContext.builder()
+                .userToken("userToken2")
+                .api("https://ns4kafka.com")
+                .namespace("namespace2")
+                .build())
+            .build();
 
         when(kafkactlConfig.getContexts())
-                .thenReturn(List.of(contextOne, contextTwo));
+            .thenReturn(List.of(contextOne, contextTwo));
         when(kafkactlConfig.getApi())
-                .thenReturn("https://ns4kafka.com");
+            .thenReturn("https://ns4kafka.com");
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("namespace");
+            .thenReturn("namespace");
         when(kafkactlConfig.getUserToken())
-                .thenReturn("userToken");
+            .thenReturn("userToken");
 
         String actual = configService.getCurrentContextName();
 
@@ -66,29 +66,29 @@ class ConfigServiceTest {
     @Test
     void shouldNotGetCurrentContextName() {
         KafkactlConfig.Context contextOne = KafkactlConfig.Context.builder()
-                .name("name")
-                .definition(KafkactlConfig.Context.ApiContext.builder()
-                        .userToken("userToken")
-                        .api("https://ns4kafka.com")
-                        .namespace("namespace")
-                        .build())
-                .build();
+            .name("name")
+            .definition(KafkactlConfig.Context.ApiContext.builder()
+                .userToken("userToken")
+                .api("https://ns4kafka.com")
+                .namespace("namespace")
+                .build())
+            .build();
 
         KafkactlConfig.Context contextTwo = KafkactlConfig.Context.builder()
-                .name("name2")
-                .definition(KafkactlConfig.Context.ApiContext.builder()
-                        .userToken("userToken2")
-                        .api("https://ns4kafka.com")
-                        .namespace("namespace2")
-                        .build())
-                .build();
+            .name("name2")
+            .definition(KafkactlConfig.Context.ApiContext.builder()
+                .userToken("userToken2")
+                .api("https://ns4kafka.com")
+                .namespace("namespace2")
+                .build())
+            .build();
 
         when(kafkactlConfig.getContexts())
-                .thenReturn(List.of(contextOne, contextTwo));
+            .thenReturn(List.of(contextOne, contextTwo));
         when(kafkactlConfig.getApi())
-                .thenReturn("https://ns4kafka.com");
+            .thenReturn("https://ns4kafka.com");
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("badNamespace");
+            .thenReturn("badNamespace");
 
         String actual = configService.getCurrentContextName();
 
@@ -98,25 +98,25 @@ class ConfigServiceTest {
     @Test
     void shouldGetContextByName() {
         KafkactlConfig.Context contextOne = KafkactlConfig.Context.builder()
-                .name("name")
-                .definition(KafkactlConfig.Context.ApiContext.builder()
-                        .userToken("userToken")
-                        .api("https://ns4kafka.com")
-                        .namespace("namespace")
-                        .build())
-                .build();
+            .name("name")
+            .definition(KafkactlConfig.Context.ApiContext.builder()
+                .userToken("userToken")
+                .api("https://ns4kafka.com")
+                .namespace("namespace")
+                .build())
+            .build();
 
         KafkactlConfig.Context contextTwo = KafkactlConfig.Context.builder()
-                .name("name2")
-                .definition(KafkactlConfig.Context.ApiContext.builder()
-                        .userToken("userToken2")
-                        .api("https://ns4kafka.com")
-                        .namespace("namespace2")
-                        .build())
-                .build();
+            .name("name2")
+            .definition(KafkactlConfig.Context.ApiContext.builder()
+                .userToken("userToken2")
+                .api("https://ns4kafka.com")
+                .namespace("namespace2")
+                .build())
+            .build();
 
         when(kafkactlConfig.getContexts())
-                .thenReturn(List.of(contextOne, contextTwo));
+            .thenReturn(List.of(contextOne, contextTwo));
 
         Optional<KafkactlConfig.Context> actual = configService.getContextByName("name");
 
@@ -127,25 +127,25 @@ class ConfigServiceTest {
     @Test
     void shouldNotGetContextByName() {
         KafkactlConfig.Context contextOne = KafkactlConfig.Context.builder()
-                .name("name")
-                .definition(KafkactlConfig.Context.ApiContext.builder()
-                        .userToken("userToken")
-                        .api("https://ns4kafka.com")
-                        .namespace("namespace")
-                        .build())
-                .build();
+            .name("name")
+            .definition(KafkactlConfig.Context.ApiContext.builder()
+                .userToken("userToken")
+                .api("https://ns4kafka.com")
+                .namespace("namespace")
+                .build())
+            .build();
 
         KafkactlConfig.Context contextTwo = KafkactlConfig.Context.builder()
-                .name("name2")
-                .definition(KafkactlConfig.Context.ApiContext.builder()
-                        .userToken("userToken2")
-                        .api("https://ns4kafka.com")
-                        .namespace("namespace2")
-                        .build())
-                .build();
+            .name("name2")
+            .definition(KafkactlConfig.Context.ApiContext.builder()
+                .userToken("userToken2")
+                .api("https://ns4kafka.com")
+                .namespace("namespace2")
+                .build())
+            .build();
 
         when(kafkactlConfig.getContexts())
-                .thenReturn(List.of(contextOne, contextTwo));
+            .thenReturn(List.of(contextOne, contextTwo));
 
         Optional<KafkactlConfig.Context> actual = configService.getContextByName("notFound");
 
@@ -155,20 +155,20 @@ class ConfigServiceTest {
     @Test
     void shouldUpdateConfigurationContext() throws IOException {
         KafkactlConfig.Context contextToSet = KafkactlConfig.Context.builder()
-                .name("name")
-                .definition(KafkactlConfig.Context.ApiContext.builder()
-                        .userToken("userToken")
-                        .api("https://ns4kafka.com")
-                        .namespace("namespace")
-                        .build())
-                .build();
+            .name("name")
+            .definition(KafkactlConfig.Context.ApiContext.builder()
+                .userToken("userToken")
+                .api("https://ns4kafka.com")
+                .namespace("namespace")
+                .build())
+            .build();
 
         CommandLine cmd = new CommandLine(new KafkactlCommand());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
         when(kafkactlConfig.getConfigPath())
-                .thenReturn("src/test/resources/config.yml");
+            .thenReturn("src/test/resources/config.yml");
 
         String backUp = Files.readString(Paths.get(kafkactlConfig.getConfigPath()));
 

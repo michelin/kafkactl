@@ -3,6 +3,8 @@ package com.michelin.kafkactl;
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.services.FormatService.YAML;
 
+import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.parents.AuthenticatedCommand;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
@@ -26,10 +28,7 @@ import picocli.CommandLine;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class UsersSubcommand implements Callable<Integer> {
-    @Inject
-    public LoginService loginService;
-
+public class UsersSubcommand extends AuthenticatedCommand {
     @Inject
     public ResourceService resourceService;
 
@@ -49,18 +48,8 @@ public class UsersSubcommand implements Callable<Integer> {
         "--output"}, description = "Output format. One of: yaml|table", defaultValue = "table")
     public String output;
 
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
-
-    @CommandLine.ParentCommand
-    public KafkactlCommand kafkactlCommand;
-
     @Override
-    public Integer call() throws Exception {
-        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
-            return 1;
-        }
-
+    public Integer onAuthSuccess() throws Exception {
         if (!List.of(TABLE, YAML).contains(output)) {
             throw new CommandLine.ParameterException(commandSpec.commandLine(),
                 "Invalid value " + output + " for option -o.");

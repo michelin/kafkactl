@@ -5,7 +5,7 @@ import static io.micronaut.core.util.StringUtils.EMPTY_STRING;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
-import com.michelin.kafkactl.KafkactlConfig;
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.models.Status;
 import io.micronaut.core.naming.conventions.StringConvention;

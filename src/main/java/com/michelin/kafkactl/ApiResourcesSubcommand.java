@@ -5,15 +5,14 @@ import static com.michelin.kafkactl.utils.constants.ConstantKind.RESOURCE_DEFINI
 
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
+import com.michelin.kafkactl.parents.AuthenticatedCommand;
 import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
-import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import picocli.CommandLine;
 
@@ -31,21 +30,12 @@ import picocli.CommandLine;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class ApiResourcesSubcommand implements Callable<Integer> {
+public class ApiResourcesSubcommand extends AuthenticatedCommand {
     @Inject
     public ApiResourcesService apiResourcesService;
 
     @Inject
-    public LoginService loginService;
-
-    @Inject
     public FormatService formatService;
-
-    @CommandLine.ParentCommand
-    public KafkactlCommand kafkactlCommand;
-
-    @CommandLine.Spec
-    CommandLine.Model.CommandSpec commandSpec;
 
     /**
      * Run the "api-resources" command.
@@ -53,11 +43,7 @@ public class ApiResourcesSubcommand implements Callable<Integer> {
      * @return The command return code
      */
     @Override
-    public Integer call() {
-        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
-            return 1;
-        }
-
+    public Integer onAuthSuccess() {
         try {
             List<Resource> resources = apiResourcesService.listResourceDefinitions()
                 .stream()

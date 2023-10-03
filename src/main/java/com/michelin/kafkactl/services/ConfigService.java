@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.services;
 
-import com.michelin.kafkactl.KafkactlConfig;
+import com.michelin.kafkactl.config.KafkactlConfig;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.io.File;

@@ -1,12 +1,13 @@
 package com.michelin.kafkactl;
 
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
+import com.michelin.kafkactl.parents.DryRunCommand;
 import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FileService;
 import com.michelin.kafkactl.services.FormatService;
-import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
@@ -14,7 +15,6 @@ import jakarta.inject.Inject;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
@@ -36,15 +36,12 @@ import picocli.CommandLine.Parameters;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class DeleteSubcommand implements Callable<Integer> {
+public class DeleteSubcommand extends DryRunCommand {
     @Inject
     public KafkactlConfig kafkactlConfig;
 
     @Inject
     public ResourceService resourceService;
-
-    @Inject
-    public LoginService loginService;
 
     @Inject
     public ApiResourcesService apiResourcesService;
@@ -55,17 +52,8 @@ public class DeleteSubcommand implements Callable<Integer> {
     @Inject
     public FileService fileService;
 
-    @CommandLine.ParentCommand
-    public KafkactlCommand kafkactlCommand;
-
     @ArgGroup(multiplicity = "1")
     public EitherOf config;
-
-    @Option(names = {"--dry-run"}, description = "Does not persist operation. Validate only.")
-    public boolean dryRun;
-
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
 
     /**
      * Run the "delete" command.
@@ -73,15 +61,7 @@ public class DeleteSubcommand implements Callable<Integer> {
      * @return The command return code
      */
     @Override
-    public Integer call() {
-        if (dryRun) {
-            commandSpec.commandLine().getOut().println("Dry run execution.");
-        }
-
-        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
-            return 1;
-        }
-
+    public Integer onAuthSuccess() {
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
         List<Resource> resources = parseResources(namespace);
 

@@ -1,10 +1,8 @@
 package com.michelin.kafkactl;
 
-import com.michelin.kafkactl.models.ApiResource;
-import com.michelin.kafkactl.services.FormatService;
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,10 +12,8 @@ import picocli.CommandLine;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.List;
 import java.util.Optional;
 
-import static com.michelin.kafkactl.ResetOffsetsSubcommand.RESET_METHOD;
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,7 +32,7 @@ class UsersSubcommandTest {
 
     @Mock
     public KafkactlConfig kafkactlConfig;
-    
+
     @Mock
     public KafkactlCommand kafkactlCommand;
 
@@ -46,7 +42,7 @@ class UsersSubcommandTest {
     @Test
     void shouldNotUpdateUserWhenNotAuthenticated() {
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(false);
+            .thenReturn(false);
 
         CommandLine cmd = new CommandLine(usersSubcommand);
 
@@ -57,7 +53,7 @@ class UsersSubcommandTest {
     @Test
     void shouldNotUpdateUserWhenUnknownOutput() {
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
 
         CommandLine cmd = new CommandLine(usersSubcommand);
         StringWriter sw = new StringWriter();
@@ -73,9 +69,9 @@ class UsersSubcommandTest {
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("namespace");
+            .thenReturn("namespace");
 
         CommandLine cmd = new CommandLine(usersSubcommand);
         StringWriter sw = new StringWriter();
@@ -93,11 +89,11 @@ class UsersSubcommandTest {
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("namespace");
+            .thenReturn("namespace");
         when(resourceService.resetPassword(any(), any(), any(), any()))
-                .thenReturn(0);
+            .thenReturn(0);
 
         CommandLine cmd = new CommandLine(usersSubcommand);
 

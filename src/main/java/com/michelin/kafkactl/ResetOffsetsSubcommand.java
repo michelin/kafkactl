@@ -1,7 +1,9 @@
 package com.michelin.kafkactl;
 
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
+import com.michelin.kafkactl.parents.DryRunCommand;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
@@ -32,12 +34,9 @@ import picocli.CommandLine.Option;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class ResetOffsetsSubcommand implements Callable<Integer> {
+public class ResetOffsetsSubcommand extends DryRunCommand {
     public static final String RESET_METHOD = "method";
     public static final String OPTIONS = "options";
-
-    @Inject
-    public LoginService loginService;
 
     @Inject
     public ResourceService resourceService;
@@ -48,22 +47,14 @@ public class ResetOffsetsSubcommand implements Callable<Integer> {
     @Inject
     public KafkactlConfig kafkactlConfig;
 
-    @CommandLine.ParentCommand
-    public KafkactlCommand kafkactlCommand;
-
     @Option(names = {"--group"}, required = true, description = "Consumer group name.")
     public String group;
-
-    @Option(names = {"--dry-run"}, description = "Does not persist resources. Validate only.")
-    public boolean dryRun;
 
     @ArgGroup(multiplicity = "1")
     public TopicArgs topic;
 
     @ArgGroup(multiplicity = "1")
     public ResetMethod method;
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
 
     /**
      * Run the "reset-offsets" command.
@@ -72,15 +63,7 @@ public class ResetOffsetsSubcommand implements Callable<Integer> {
      * @throws Exception Any exception during the run
      */
     @Override
-    public Integer call() throws Exception {
-        if (dryRun) {
-            commandSpec.commandLine().getOut().println("Dry run execution.");
-        }
-
-        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
-            return 1;
-        }
-
+    public Integer onAuthSuccess() throws Exception {
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
 
         Map<String, Object> consumerGroupResetOffsetSpec = new HashMap<>();

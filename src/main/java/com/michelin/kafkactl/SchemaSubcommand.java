@@ -3,8 +3,10 @@ package com.michelin.kafkactl;
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.SCHEMA_COMPATIBILITY_STATE;
 
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.models.SchemaCompatibility;
+import com.michelin.kafkactl.parents.AuthenticatedCommand;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
@@ -30,24 +32,15 @@ import picocli.CommandLine;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class SchemaSubcommand implements Callable<Integer> {
-    @Inject
-    public LoginService loginService;
-
+public class SchemaSubcommand extends AuthenticatedCommand {
     @Inject
     public ResourceService resourceService;
-
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
 
     @Inject
     public KafkactlConfig kafkactlConfig;
 
     @Inject
     public FormatService formatService;
-
-    @CommandLine.ParentCommand
-    public KafkactlCommand kafkactlCommand;
 
     @CommandLine.Parameters(index = "0", description = "Compatibility to set (${COMPLETION-CANDIDATES}).", arity = "1")
     public SchemaCompatibility compatibility;
@@ -62,11 +55,7 @@ public class SchemaSubcommand implements Callable<Integer> {
      * @throws Exception Any exception during the run
      */
     @Override
-    public Integer call() throws Exception {
-        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
-            return 1;
-        }
-
+    public Integer onAuthSuccess() throws Exception {
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
 
         List<Resource> updatedSchemas = subjects

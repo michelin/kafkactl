@@ -3,18 +3,18 @@ package com.michelin.kafkactl;
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.services.FormatService.YAML;
 
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
+import com.michelin.kafkactl.parents.AuthenticatedCommand;
 import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
-import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -35,10 +35,7 @@ import picocli.CommandLine.Parameters;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class GetSubcommand implements Callable<Integer> {
-    @Inject
-    public LoginService loginService;
-
+public class GetSubcommand extends AuthenticatedCommand {
     @Inject
     public ApiResourcesService apiResourcesService;
 
@@ -51,9 +48,6 @@ public class GetSubcommand implements Callable<Integer> {
     @Inject
     public KafkactlConfig kafkactlConfig;
 
-    @CommandLine.ParentCommand
-    public KafkactlCommand kafkactlCommand;
-
     @Parameters(index = "0", description = "Resource type or 'all' to display resources of all types.", arity = "1")
     public String resourceType;
 
@@ -63,9 +57,6 @@ public class GetSubcommand implements Callable<Integer> {
     @Option(names = {"-o", "--output"}, description = "Output format. One of: yaml|table", defaultValue = "table")
     public String output;
 
-    @CommandLine.Spec
-    CommandLine.Model.CommandSpec commandSpec;
-
     /**
      * Run the "get" command.
      *
@@ -73,11 +64,7 @@ public class GetSubcommand implements Callable<Integer> {
      * @throws Exception Any exception during the run
      */
     @Override
-    public Integer call() throws Exception {
-        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
-            return 1;
-        }
-
+    public Integer onAuthSuccess() throws Exception {
         // Validate resourceType + custom type ALL
         List<ApiResource> apiResources = validateResourceType();
 

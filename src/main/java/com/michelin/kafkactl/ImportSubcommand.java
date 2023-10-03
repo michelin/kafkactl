@@ -1,19 +1,18 @@
 package com.michelin.kafkactl;
 
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
+import com.michelin.kafkactl.parents.DryRunCommand;
 import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
-import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /**
@@ -30,10 +29,7 @@ import picocli.CommandLine.Parameters;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class ImportSubcommand implements Callable<Integer> {
-    @Inject
-    public LoginService loginService;
-
+public class ImportSubcommand extends DryRunCommand {
     @Inject
     public ResourceService resourceService;
 
@@ -46,32 +42,15 @@ public class ImportSubcommand implements Callable<Integer> {
     @Inject
     public KafkactlConfig kafkactlConfig;
 
-    @CommandLine.ParentCommand
-    public KafkactlCommand kafkactlCommand;
-
     @Parameters(index = "0", description = "Resource type.", arity = "1")
     public String resourceType;
-
-    @Option(names = {"--dry-run"}, description = "Does not persist resources. Validate only.")
-    public boolean dryRun;
-
-    @CommandLine.Spec
-    CommandLine.Model.CommandSpec commandSpec;
 
     /**
      * Run the "get" command.
      *
      * @return The command return code
      */
-    public Integer call() {
-        if (dryRun) {
-            commandSpec.commandLine().getOut().println("Dry run execution.");
-        }
-
-        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
-            return 1;
-        }
-
+    public Integer onAuthSuccess() {
         // Validate resourceType + custom type ALL
         List<ApiResource> apiResources = validateResourceType();
 

@@ -1,6 +1,6 @@
 package com.michelin.kafkactl;
 
-import static com.michelin.kafkactl.KafkactlConfig.KAFKACTL_CONFIG;
+import static com.michelin.kafkactl.config.KafkactlConfig.KAFKACTL_CONFIG;
 
 import com.michelin.kafkactl.services.SystemService;
 import com.michelin.kafkactl.utils.VersionProvider;
@@ -80,9 +80,8 @@ public class KafkactlCommand implements Callable<Integer> {
      * Run the "kafkactl" command.
      *
      * @return The command return code
-     * @throws Exception Any exception during the run
      */
-    public Integer call() throws Exception {
+    public Integer call() {
         commandSpec.commandLine().getOut().println(new CommandLine(this).getUsageMessage());
         return 0;
     }

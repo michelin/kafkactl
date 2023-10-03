@@ -1,4 +1,4 @@
-package com.michelin.kafkactl;
+package com.michelin.kafkactl.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.michelin.kafkactl.services.SystemService;
