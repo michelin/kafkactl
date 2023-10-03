@@ -1,11 +1,9 @@
 package com.michelin.kafkactl;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.parents.DryRunCommand;
 import com.michelin.kafkactl.services.FormatService;
-import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
@@ -14,8 +12,6 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -43,9 +39,6 @@ public class ResetOffsetsSubcommand extends DryRunCommand {
 
     @Inject
     public FormatService formatService;
-
-    @Inject
-    public KafkactlConfig kafkactlConfig;
 
     @Option(names = {"--group"}, required = true, description = "Consumer group name.")
     public String group;

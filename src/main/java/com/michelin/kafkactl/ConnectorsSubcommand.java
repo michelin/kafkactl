@@ -4,12 +4,10 @@ import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.CHANGE_CONNECTOR_STATE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.CONNECTOR;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.parents.AuthenticatedCommand;
-import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
@@ -39,13 +37,7 @@ import picocli.CommandLine;
     mixinStandardHelpOptions = true)
 public class ConnectorsSubcommand extends AuthenticatedCommand {
     @Inject
-    public KafkactlConfig kafkactlConfig;
-
-    @Inject
     public ResourceService resourceService;
-
-    @Inject
-    public ApiResourcesService apiResourcesService;
 
     @Inject
     public FormatService formatService;
@@ -56,12 +48,6 @@ public class ConnectorsSubcommand extends AuthenticatedCommand {
     @CommandLine.Parameters(index = "1..*",
         description = "Connector names separated by space or \"all\" for all connectors.", arity = "1..*")
     public List<String> connectors;
-
-    @CommandLine.ParentCommand
-    public KafkactlCommand kafkactlCommand;
-
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
 
     /**
      * Run the "connectors" command.

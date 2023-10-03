@@ -3,15 +3,12 @@ package com.michelin.kafkactl;
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.services.FormatService.YAML;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.parents.AuthenticatedCommand;
 import com.michelin.kafkactl.services.FormatService;
-import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
 import java.util.List;
-import java.util.concurrent.Callable;
 import picocli.CommandLine;
 
 /**
@@ -31,9 +28,6 @@ import picocli.CommandLine;
 public class UsersSubcommand extends AuthenticatedCommand {
     @Inject
     public ResourceService resourceService;
-
-    @Inject
-    public KafkactlConfig kafkactlConfig;
 
     @Inject
     public FormatService formatService;

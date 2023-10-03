@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -27,8 +26,7 @@ public class FileService {
      * @return A list of files
      */
     public List<File> computeYamlFileList(File fileOrDirectory, boolean recursive) {
-        return listAllFiles(new File[] {fileOrDirectory}, recursive)
-            .collect(Collectors.toList());
+        return listAllFiles(new File[] {fileOrDirectory}, recursive).toList();
     }
 
     /**
@@ -49,7 +47,7 @@ public class FileService {
                 }
             })
             .flatMap(this::parseResourceStreamFromString)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     /**
@@ -60,7 +58,7 @@ public class FileService {
      */
     public List<Resource> parseResourceListFromString(String content) {
         return parseResourceStreamFromString(content)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     /**

@@ -1,11 +1,9 @@
 package com.michelin.kafkactl;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.parents.DryRunCommand;
-import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FileService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.ResourceService;
@@ -38,13 +36,7 @@ import picocli.CommandLine.Parameters;
     mixinStandardHelpOptions = true)
 public class DeleteSubcommand extends DryRunCommand {
     @Inject
-    public KafkactlConfig kafkactlConfig;
-
-    @Inject
     public ResourceService resourceService;
-
-    @Inject
-    public ApiResourcesService apiResourcesService;
 
     @Inject
     public FormatService formatService;

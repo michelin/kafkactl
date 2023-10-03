@@ -3,21 +3,17 @@ package com.michelin.kafkactl;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.parents.AuthenticatedCommand;
-import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FileService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
-import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.io.File;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -45,16 +41,10 @@ import picocli.CommandLine.Option;
     mixinStandardHelpOptions = true)
 public class DiffSubcommand extends AuthenticatedCommand {
     @Inject
-    public ApiResourcesService apiResourcesService;
-
-    @Inject
     public FileService fileService;
 
     @Inject
     public ResourceService resourceService;
-
-    @Inject
-    public KafkactlConfig kafkactlConfig;
 
     @Inject
     public FormatService formatService;

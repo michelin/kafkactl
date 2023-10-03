@@ -20,10 +20,10 @@ public abstract class AuthenticatedCommand implements Callable<Integer> {
     protected LoginService loginService;
 
     @Inject
-    public ApiResourcesService apiResourcesService;
+    protected ApiResourcesService apiResourcesService;
 
     @Inject
-    public KafkactlConfig kafkactlConfig;
+    protected KafkactlConfig kafkactlConfig;
 
     @CommandLine.ParentCommand
     protected KafkactlCommand kafkactlCommand;
@@ -31,6 +31,12 @@ public abstract class AuthenticatedCommand implements Callable<Integer> {
     @CommandLine.Spec
     protected CommandLine.Model.CommandSpec commandSpec;
 
+    /**
+     * Run the command.
+     *
+     * @return The command return code
+     * @throws Exception Any exception during the run
+     */
     @Override
     public Integer call() throws Exception {
         if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
@@ -40,10 +46,20 @@ public abstract class AuthenticatedCommand implements Callable<Integer> {
         return onAuthSuccess();
     }
 
+    /**
+     * Gets the current namespace.
+     *
+     * @return The current namespace
+     */
     protected String getNamespace() {
         return kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
     }
 
+    /**
+     * Validate the namespace does not mismatch between Kafkactl and YAML document.
+     *
+     * @param resources The resources
+     */
     protected void validateNamespace(List<Resource> resources) {
         List<Resource> namespaceMismatch = resources
             .stream()
@@ -62,5 +78,11 @@ public abstract class AuthenticatedCommand implements Callable<Integer> {
         }
     }
 
+    /**
+     * Run after authentication success.
+     *
+     * @return The command return code
+     * @throws Exception Any exception during the run
+     */
     public abstract Integer onAuthSuccess() throws Exception;
 }

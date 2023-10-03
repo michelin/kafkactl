@@ -3,11 +3,9 @@ package com.michelin.kafkactl;
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.services.FormatService.YAML;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.parents.AuthenticatedCommand;
-import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
@@ -37,16 +35,10 @@ import picocli.CommandLine.Parameters;
     mixinStandardHelpOptions = true)
 public class GetSubcommand extends AuthenticatedCommand {
     @Inject
-    public ApiResourcesService apiResourcesService;
-
-    @Inject
     public ResourceService resourceService;
 
     @Inject
     public FormatService formatService;
-
-    @Inject
-    public KafkactlConfig kafkactlConfig;
 
     @Parameters(index = "0", description = "Resource type or 'all' to display resources of all types.", arity = "1")
     public String resourceType;

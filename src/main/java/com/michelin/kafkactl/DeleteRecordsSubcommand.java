@@ -1,6 +1,5 @@
 package com.michelin.kafkactl;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.parents.DryRunCommand;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.ResourceService;
@@ -29,9 +28,6 @@ public class DeleteRecordsSubcommand extends DryRunCommand {
 
     @Inject
     public FormatService formatService;
-
-    @Inject
-    public KafkactlConfig kafkactlConfig;
 
     @Parameters(description = "Name of the topic.", arity = "1")
     public String topic;

@@ -18,9 +18,8 @@ public class RetryTimeoutPredicate implements RetryPredicate {
      */
     @Override
     public boolean test(Throwable throwable) {
-        if (throwable instanceof HttpClientResponseException) {
-            Optional<Status> statusOptional =
-                ((HttpClientResponseException) throwable).getResponse().getBody(Status.class);
+        if (throwable instanceof HttpClientResponseException response) {
+            Optional<Status> statusOptional = response.getResponse().getBody(Status.class);
             if (statusOptional.isPresent() && statusOptional.get().getDetails() != null
                 && !statusOptional.get().getDetails().getCauses().isEmpty()
                 && HttpResponseStatus.INTERNAL_SERVER_ERROR.code() == statusOptional.get().getCode()

@@ -6,7 +6,6 @@ import static com.michelin.kafkactl.utils.constants.ConstantKind.RESOURCE_DEFINI
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.parents.AuthenticatedCommand;
-import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
@@ -31,9 +30,6 @@ import picocli.CommandLine;
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
 public class ApiResourcesSubcommand extends AuthenticatedCommand {
-    @Inject
-    public ApiResourcesService apiResourcesService;
-
     @Inject
     public FormatService formatService;
 

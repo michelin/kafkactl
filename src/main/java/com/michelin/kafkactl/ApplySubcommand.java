@@ -1,6 +1,5 @@
 package com.michelin.kafkactl;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.parents.DryRunCommand;
@@ -8,14 +7,11 @@ import com.michelin.kafkactl.services.FileService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
-import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.io.File;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 

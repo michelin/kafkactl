@@ -1,6 +1,5 @@
 package com.michelin.kafkactl;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.parents.AuthenticatedCommand;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.ResourceService;
@@ -43,12 +42,6 @@ public class ConnectClustersSubcommand extends AuthenticatedCommand {
      */
     @CommandLine.Parameters(index = "2..*", description = "Secrets to vaults separated by space.", arity = "0..*")
     public List<String> secrets;
-
-    /**
-     * Gets or sets the kafkactl configuration.
-     */
-    @Inject
-    public KafkactlConfig kafkactlConfig;
 
     /**
      * Gets or sets the resource service.
