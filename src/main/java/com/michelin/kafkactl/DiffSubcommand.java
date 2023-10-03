@@ -14,9 +14,9 @@ import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
@@ -61,7 +61,7 @@ public class DiffSubcommand extends AuthenticatedCommand {
      * @return The command return code
      */
     @Override
-    public Integer onAuthSuccess() throws Exception {
+    public Integer onAuthSuccess() throws IOException {
         // If we have none or both stdin and File set, we stop
         boolean hasStdin = System.in.available() > 0;
         if (hasStdin == file.isPresent()) {
@@ -125,8 +125,8 @@ public class DiffSubcommand extends AuthenticatedCommand {
         representer.addClassTag(Resource.class, Tag.MAP);
         Yaml yaml = new Yaml(representer, options);
 
-        List<String> oldResourceStr = live != null ? yaml.dump(live).lines().collect(Collectors.toList()) : List.of();
-        List<String> newResourceStr = yaml.dump(merged).lines().collect(Collectors.toList());
+        List<String> oldResourceStr = live != null ? yaml.dump(live).lines().toList() : List.of();
+        List<String> newResourceStr = yaml.dump(merged).lines().toList();
         Patch<String> diff = DiffUtils.diff(oldResourceStr, newResourceStr);
         return UnifiedDiffUtils.generateUnifiedDiff(
             String.format("%s/%s-LIVE", merged.getKind(), merged.getMetadata().getName()),

@@ -8,6 +8,7 @@ import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
+import java.io.IOException;
 import java.util.List;
 import picocli.CommandLine;
 
@@ -42,8 +43,14 @@ public class UsersSubcommand extends AuthenticatedCommand {
         "--output"}, description = "Output format. One of: yaml|table", defaultValue = "table")
     public String output;
 
+    /**
+     * Run the "users" command.
+     *
+     * @return The command return code
+     * @throws IOException Any exception during the run
+     */
     @Override
-    public Integer onAuthSuccess() throws Exception {
+    public Integer onAuthSuccess() throws IOException {
         if (!List.of(TABLE, YAML).contains(output)) {
             throw new CommandLine.ParameterException(commandSpec.commandLine(),
                 "Invalid value " + output + " for option -o.");

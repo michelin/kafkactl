@@ -1,29 +1,28 @@
 package com.michelin.kafkactl;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
-import com.michelin.kafkactl.models.ApiResource;
-import com.michelin.kafkactl.services.ApiResourcesService;
-import com.michelin.kafkactl.services.LoginService;
-import com.michelin.kafkactl.services.ResourceService;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import picocli.CommandLine;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.models.ApiResource;
+import com.michelin.kafkactl.services.ApiResourcesService;
+import com.michelin.kafkactl.services.LoginService;
+import com.michelin.kafkactl.services.ResourceService;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import picocli.CommandLine;
 
 @ExtendWith(MockitoExtension.class)
 class ImportSubcommandTest {
@@ -62,7 +61,7 @@ class ImportSubcommandTest {
     void shouldNotImportWhenServerNotHaveResourceType() {
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
+        when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.empty());
 
         CommandLine cmd = new CommandLine(importSubcommand);
@@ -86,7 +85,7 @@ class ImportSubcommandTest {
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
+        when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
 
         CommandLine cmd = new CommandLine(importSubcommand);
@@ -111,7 +110,7 @@ class ImportSubcommandTest {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
+        when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
         when(resourceService.importAll(any(), any(), anyBoolean(), any()))
             .thenReturn(0);
@@ -137,7 +136,7 @@ class ImportSubcommandTest {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
+        when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
         when(resourceService.importAll(any(), any(), anyBoolean(), any()))
             .thenReturn(0);

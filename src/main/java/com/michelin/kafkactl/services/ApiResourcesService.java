@@ -42,12 +42,12 @@ public class ApiResourcesService {
     }
 
     /**
-     * Get a resource definition by command name.
+     * Get a resource definition by name.
      *
      * @param name The name
      * @return The resource definition if it exists
      */
-    public Optional<ApiResource> getResourceDefinitionByCommandName(String name) {
+    public Optional<ApiResource> getResourceDefinitionByName(String name) {
         return listResourceDefinitions()
             .stream()
             .filter(resource -> resource.getNames().contains(name))

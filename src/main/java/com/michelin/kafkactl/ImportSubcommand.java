@@ -8,7 +8,6 @@ import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
@@ -62,12 +61,12 @@ public class ImportSubcommand extends DryRunCommand {
             return apiResourcesService.listResourceDefinitions()
                 .stream()
                 .filter(ApiResource::isSynchronizable)
-                .collect(Collectors.toList());
+                .toList();
         }
 
         // Otherwise, check resource exists
         Optional<ApiResource> optionalApiResource =
-            apiResourcesService.getResourceDefinitionByCommandName(resourceType);
+            apiResourcesService.getResourceDefinitionByName(resourceType);
         if (optionalApiResource.isEmpty()) {
             throw new CommandLine.ParameterException(commandSpec.commandLine(),
                 "The server does not have resource type " + resourceType + ".");

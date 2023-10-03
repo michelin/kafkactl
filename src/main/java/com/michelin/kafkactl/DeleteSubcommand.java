@@ -13,7 +13,6 @@ import jakarta.inject.Inject;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
@@ -58,34 +57,8 @@ public class DeleteSubcommand extends DryRunCommand {
         List<Resource> resources = parseResources(namespace);
 
         try {
-            // Validate resource types from resources
-            List<Resource> invalidResources = apiResourcesService.filterNotAllowedResourceTypes(resources);
-            if (!invalidResources.isEmpty()) {
-                String invalid = invalidResources
-                    .stream()
-                    .map(Resource::getKind)
-                    .distinct()
-                    .collect(Collectors.joining(", "));
-                throw new CommandLine.ParameterException(commandSpec.commandLine(),
-                    "The server does not have resource type(s) " + invalid + ".");
-            }
-
-            // Validate namespace mismatch
-            List<Resource> namespaceMismatch = resources
-                .stream()
-                .filter(resource -> resource.getMetadata().getNamespace() != null
-                    && !resource.getMetadata().getNamespace().equals(namespace))
-                .toList();
-
-            if (!namespaceMismatch.isEmpty()) {
-                String invalid = namespaceMismatch
-                    .stream()
-                    .map(resource -> resource.getKind() + "/" + resource.getMetadata().getName())
-                    .distinct()
-                    .collect(Collectors.joining(", "));
-                throw new CommandLine.ParameterException(commandSpec.commandLine(),
-                    "Namespace mismatch between Kafkactl and YAML document " + invalid + ".");
-            }
+            resourceService.validateAllowedResources(resources, commandSpec);
+            validateNamespace(resources);
 
             // Process each document individually, return 0 when all succeed
             int errors = resources.stream()
@@ -125,7 +98,7 @@ public class DeleteSubcommand extends DryRunCommand {
         }
 
         Optional<ApiResource> optionalApiResource =
-            apiResourcesService.getResourceDefinitionByCommandName(config.nameConfig.resourceType);
+            apiResourcesService.getResourceDefinitionByName(config.nameConfig.resourceType);
         if (optionalApiResource.isEmpty()) {
             throw new CommandLine.ParameterException(commandSpec.commandLine(),
                 "The server does not have resource type(s) " + config.nameConfig.resourceType + ".");

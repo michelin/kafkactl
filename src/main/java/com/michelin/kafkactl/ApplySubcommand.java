@@ -10,6 +10,7 @@ import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import picocli.CommandLine;
@@ -49,10 +50,10 @@ public class ApplySubcommand extends DryRunCommand {
      * Run the "apply" command.
      *
      * @return The command return code
-     * @throws Exception Any exception during the run
+     * @throws IOException Any exception during the run
      */
     @Override
-    public Integer onAuthSuccess() throws Exception {
+    public Integer onAuthSuccess() throws IOException {
         // If we have none or both stdin and File set, we stop
         boolean hasStdin = System.in.available() > 0;
         if (hasStdin == file.isPresent()) {

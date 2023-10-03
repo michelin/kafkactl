@@ -1,5 +1,13 @@
 package com.michelin.kafkactl;
 
+import static com.michelin.kafkactl.services.FormatService.TABLE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.ObjectMeta;
@@ -10,26 +18,17 @@ import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static com.michelin.kafkactl.services.FormatService.TABLE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GetSubcommandTest {
@@ -79,7 +78,7 @@ class GetSubcommandTest {
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
+        when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
 
         CommandLine cmd = new CommandLine(getSubcommand);
@@ -95,7 +94,7 @@ class GetSubcommandTest {
     void shouldNotGetWhenServerNotHaveResourceType() {
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
+        when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.empty());
 
         CommandLine cmd = new CommandLine(getSubcommand);
@@ -120,7 +119,7 @@ class GetSubcommandTest {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
+        when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
         HttpClientResponseException e = new HttpClientResponseException("error", HttpResponse.serverError());
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
@@ -155,7 +154,7 @@ class GetSubcommandTest {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
+        when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
             .thenReturn(resource);
@@ -180,7 +179,7 @@ class GetSubcommandTest {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
+        when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
         when(resourceService.listAll(any(), any(), any()))
             .thenReturn(0);

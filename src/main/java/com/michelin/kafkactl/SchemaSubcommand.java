@@ -10,9 +10,9 @@ import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import picocli.CommandLine;
 
 /**
@@ -46,10 +46,10 @@ public class SchemaSubcommand extends AuthenticatedCommand {
      * Run the "reset-offsets" command.
      *
      * @return The command return code
-     * @throws Exception Any exception during the run
+     * @throws IOException Any exception during the run
      */
     @Override
-    public Integer onAuthSuccess() throws Exception {
+    public Integer onAuthSuccess() throws IOException {
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
 
         List<Resource> updatedSchemas = subjects
@@ -57,7 +57,7 @@ public class SchemaSubcommand extends AuthenticatedCommand {
             .map(subject -> resourceService.changeSchemaCompatibility(namespace, subject, compatibility, commandSpec))
             .filter(Optional::isPresent)
             .map(Optional::get)
-            .collect(Collectors.toList());
+            .toList();
 
         if (!updatedSchemas.isEmpty()) {
             formatService.displayList(SCHEMA_COMPATIBILITY_STATE, updatedSchemas, TABLE, commandSpec);

@@ -11,9 +11,9 @@ import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -53,10 +53,10 @@ public class GetSubcommand extends AuthenticatedCommand {
      * Run the "get" command.
      *
      * @return The command return code
-     * @throws Exception Any exception during the run
+     * @throws IOException Any exception during the run
      */
     @Override
-    public Integer onAuthSuccess() throws Exception {
+    public Integer onAuthSuccess() throws IOException {
         // Validate resourceType + custom type ALL
         List<ApiResource> apiResources = validateResourceType();
 
@@ -102,12 +102,12 @@ public class GetSubcommand extends AuthenticatedCommand {
             return apiResourcesService.listResourceDefinitions()
                 .stream()
                 .filter(ApiResource::isNamespaced)
-                .collect(Collectors.toList());
+                .toList();
         }
 
         // Otherwise, check resource exists
         Optional<ApiResource> optionalApiResource =
-            apiResourcesService.getResourceDefinitionByCommandName(resourceType);
+            apiResourcesService.getResourceDefinitionByName(resourceType);
         if (optionalApiResource.isPresent()) {
             return List.of(optionalApiResource.get());
         }

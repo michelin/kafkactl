@@ -7,6 +7,7 @@ import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -53,10 +54,10 @@ public class ResetOffsetsSubcommand extends DryRunCommand {
      * Run the "reset-offsets" command.
      *
      * @return The command return code
-     * @throws Exception Any exception during the run
+     * @throws IOException Any exception during the run
      */
     @Override
-    public Integer onAuthSuccess() throws Exception {
+    public Integer onAuthSuccess() throws IOException {
         String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
 
         Map<String, Object> consumerGroupResetOffsetSpec = new HashMap<>();

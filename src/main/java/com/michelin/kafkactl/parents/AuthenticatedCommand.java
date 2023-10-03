@@ -6,6 +6,7 @@ import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.LoginService;
 import jakarta.inject.Inject;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -35,10 +36,10 @@ public abstract class AuthenticatedCommand implements Callable<Integer> {
      * Run the command.
      *
      * @return The command return code
-     * @throws Exception Any exception during the run
+     * @throws IOException Any exception during the run
      */
     @Override
-    public Integer call() throws Exception {
+    public Integer call() throws IOException {
         if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
             return 1;
         }
@@ -82,7 +83,7 @@ public abstract class AuthenticatedCommand implements Callable<Integer> {
      * Run after authentication success.
      *
      * @return The command return code
-     * @throws Exception Any exception during the run
+     * @throws IOException Any exception during the run
      */
-    public abstract Integer onAuthSuccess() throws Exception;
+    public abstract Integer onAuthSuccess() throws IOException;
 }

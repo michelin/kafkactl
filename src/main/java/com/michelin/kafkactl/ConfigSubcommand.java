@@ -11,6 +11,7 @@ import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.core.util.StringUtils;
 import jakarta.inject.Inject;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,10 +57,10 @@ public class ConfigSubcommand implements Callable<Integer> {
      * Run the "config" command.
      *
      * @return The command return code
-     * @throws Exception Any exception during the run
+     * @throws IOException Any exception during the run
      */
     @Override
-    public Integer call() throws Exception {
+    public Integer call() throws IOException {
         if (action.equals(ConfigAction.CURRENT_CONTEXT)) {
             Map<String, Object> specs = new HashMap<>();
 
