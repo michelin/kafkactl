@@ -441,6 +441,14 @@ public class ResourceService {
         return fileService.parseResourceListFromString(scanner.next());
     }
 
+    /**
+     * Validate if the resources are allowed on the server
+     * for the current user.
+     * If not, throw an exception.
+     *
+     * @param resources   The resources to validate
+     * @param commandSpec The command that triggered the action
+     */
     public void validateAllowedResources(List<Resource> resources, CommandLine.Model.CommandSpec commandSpec) {
         List<Resource> notAllowedResourceTypes = apiResourcesService.filterNotAllowedResourceTypes(resources);
         if (!notAllowedResourceTypes.isEmpty()) {
@@ -454,6 +462,12 @@ public class ResourceService {
         }
     }
 
+    /**
+     * Enrich the schema file with the content of the schema.
+     *
+     * @param resources   The resources to enrich
+     * @param commandSpec The command that triggered the action
+     */
     public void enrichSchemaContent(List<Resource> resources, CommandLine.Model.CommandSpec commandSpec) {
         resources
             .stream()

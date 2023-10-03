@@ -1,29 +1,39 @@
 package com.michelin.kafkactl;
 
+import static com.michelin.kafkactl.services.ResourceService.SCHEMA_FILE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
-import com.michelin.kafkactl.services.*;
+import com.michelin.kafkactl.services.ApiResourcesService;
+import com.michelin.kafkactl.services.FormatService;
+import com.michelin.kafkactl.services.LoginService;
+import com.michelin.kafkactl.services.ResourceService;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.*;
-
-import static com.michelin.kafkactl.ApplySubcommand.SCHEMA_FILE;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DiffSubcommandTest {
@@ -103,16 +113,17 @@ class DiffSubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
+        CommandLine cmd = new CommandLine(diffSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
-            .thenReturn(Collections.singletonList(resource));
-
-        CommandLine cmd = new CommandLine(diffSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setErr(new PrintWriter(sw));
+        doThrow(new CommandLine.ParameterException(cmd.getCommandSpec().commandLine(),
+            "The server does not have resource type(s) Topic."))
+            .when(resourceService).validateAllowedResources(any(), any());
 
         int code = cmd.execute("-f", "topic.yml");
         assertEquals(2, code);
@@ -137,8 +148,6 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
-            .thenReturn(Collections.emptyList());
 
         CommandLine cmd = new CommandLine(diffSubcommand);
         StringWriter sw = new StringWriter();
@@ -168,8 +177,6 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
-            .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
         when(apiResourcesService.getResourceDefinitionByKind(any()))
@@ -221,8 +228,6 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
-            .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
         when(apiResourcesService.getResourceDefinitionByKind(any()))
@@ -277,8 +282,6 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
-            .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
         when(apiResourcesService.getResourceDefinitionByKind(any()))
@@ -337,8 +340,6 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
-            .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
         when(apiResourcesService.getResourceDefinitionByKind(any()))
@@ -398,8 +399,6 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
-            .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
         when(apiResourcesService.getResourceDefinitionByKind(any()))
@@ -460,10 +459,9 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
-            .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
+        doCallRealMethod().when(resourceService).enrichSchemaContent(any(), any());
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
@@ -523,8 +521,6 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
-            .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
         when(apiResourcesService.getResourceDefinitionByKind(any()))
@@ -573,10 +569,9 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
-            .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
+        doCallRealMethod().when(resourceService).enrichSchemaContent(any(), any());
 
         CommandLine cmd = new CommandLine(diffSubcommand);
         StringWriter sw = new StringWriter();

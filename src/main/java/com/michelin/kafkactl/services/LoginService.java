@@ -1,11 +1,11 @@
 package com.michelin.kafkactl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.client.BearerAccessRefreshToken;
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.client.UserInfoResponse;
 import com.michelin.kafkactl.client.UsernameAndPasswordRequest;
+import com.michelin.kafkactl.config.KafkactlConfig;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Singleton;
