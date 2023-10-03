@@ -107,7 +107,7 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.singletonList(resource));
 
         CommandLine cmd = new CommandLine(diffSubcommand);
@@ -137,7 +137,7 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.emptyList());
 
         CommandLine cmd = new CommandLine(diffSubcommand);
@@ -168,7 +168,7 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
@@ -221,7 +221,7 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
@@ -277,7 +277,7 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
@@ -337,7 +337,7 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
@@ -398,7 +398,7 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
@@ -460,7 +460,7 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
@@ -523,7 +523,7 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
@@ -573,7 +573,7 @@ class DiffSubcommandTest {
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.emptyList());
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");

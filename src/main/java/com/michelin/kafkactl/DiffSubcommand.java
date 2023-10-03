@@ -1,7 +1,5 @@
 package com.michelin.kafkactl;
 
-import static com.michelin.kafkactl.ApplySubcommand.SCHEMA_FILE;
-
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;
@@ -61,17 +59,11 @@ public class DiffSubcommand extends AuthenticatedCommand {
     @Inject
     public FormatService formatService;
 
-    @CommandLine.ParentCommand
-    public KafkactlCommand kafkactlCommand;
-
     @Option(names = {"-f", "--file"}, description = "YAML file or directory containing resources.")
     public Optional<File> file;
 
     @Option(names = {"-R", "--recursive"}, description = "Search file recursively.")
     public boolean recursive;
-
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
 
     /**
      * Run the "diff" command.
@@ -89,52 +81,12 @@ public class DiffSubcommand extends AuthenticatedCommand {
         List<Resource> resources = resourceService.parseResources(file, recursive, commandSpec);
 
         try {
-            // Validate resource types from resources
-            List<Resource> invalidResources = apiResourcesService.validateResourceTypes(resources);
-            if (!invalidResources.isEmpty()) {
-                String invalid = invalidResources
-                    .stream()
-                    .map(Resource::getKind)
-                    .distinct()
-                    .collect(Collectors.joining(", "));
-                throw new CommandLine.ParameterException(commandSpec.commandLine(),
-                    "The server does not have resource type(s) " + invalid + ".");
-            }
-
-            // Validate namespace mismatch
-            String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
-            List<Resource> namespaceMismatch = resources
-                .stream()
-                .filter(resource -> resource.getMetadata().getNamespace() != null
-                    && !resource.getMetadata().getNamespace().equals(namespace))
-                .toList();
-
-            if (!namespaceMismatch.isEmpty()) {
-                String invalid = namespaceMismatch
-                    .stream()
-                    .map(resource -> resource.getKind() + "/" + resource.getMetadata().getName())
-                    .distinct()
-                    .collect(Collectors.joining(", "));
-                throw new CommandLine.ParameterException(commandSpec.commandLine(),
-                    "Namespace mismatch between Kafkactl and YAML document " + invalid + ".");
-            }
-
-            // Load schema content
-            resources.stream()
-                .filter(resource -> resource.getKind().equals("Schema")
-                    && StringUtils.isNotEmpty((CharSequence) resource.getSpec().get(SCHEMA_FILE)))
-                .forEach(resource -> {
-                    try {
-                        resource.getSpec().put("schema",
-                            Files.readString(new File(resource.getSpec().get(SCHEMA_FILE).toString()).toPath()));
-                    } catch (Exception e) {
-                        throw new CommandLine.ParameterException(commandSpec.commandLine(),
-                            "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE)
-                                + ". Schema path must be relative to the CLI.");
-                    }
-                });
+            resourceService.validateAllowedResources(resources, commandSpec);
+            super.validateNamespace(resources);
+            resourceService.enrichSchemaContent(resources, commandSpec);
 
             // Process each document individually, return 0 when all succeed
+            String namespace = getNamespace();
             int errors = resources.stream()
                 .map(resource -> {
                     ApiResource apiResource =

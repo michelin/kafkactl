@@ -7,7 +7,6 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Api resources service.
@@ -56,12 +55,12 @@ public class ApiResourcesService {
     }
 
     /**
-     * Validate resource types to get only allowed resource types.
+     * Get not allowed resources.
      *
      * @param resources The resources
      * @return The allowed resources
      */
-    public List<Resource> validateResourceTypes(List<Resource> resources) {
+    public List<Resource> filterNotAllowedResourceTypes(List<Resource> resources) {
         List<String> allowedKinds = listResourceDefinitions()
             .stream()
             .map(ApiResource::getKind)
@@ -70,6 +69,6 @@ public class ApiResourcesService {
         return resources
             .stream()
             .filter(resource -> !allowedKinds.contains(resource.getKind()))
-            .collect(Collectors.toList());
+            .toList();
     }
 }

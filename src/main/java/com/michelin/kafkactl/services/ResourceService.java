@@ -13,16 +13,19 @@ import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.models.SchemaCompatibility;
+import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.io.File;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 import picocli.CommandLine;
 
 /**
@@ -30,6 +33,8 @@ import picocli.CommandLine;
  */
 @Singleton
 public class ResourceService {
+    public static final String SCHEMA_FILE = "schemaFile";
+
     @Inject
     NamespacedResourceClient namespacedClient;
 
@@ -44,6 +49,9 @@ public class ResourceService {
 
     @Inject
     FileService fileService;
+
+    @Inject
+    ApiResourcesService apiResourcesService;
 
     /**
      * List all resources of the given types.
@@ -431,5 +439,35 @@ public class ResourceService {
         Scanner scanner = new Scanner(System.in);
         scanner.useDelimiter("\\Z");
         return fileService.parseResourceListFromString(scanner.next());
+    }
+
+    public void validateAllowedResources(List<Resource> resources, CommandLine.Model.CommandSpec commandSpec) {
+        List<Resource> notAllowedResourceTypes = apiResourcesService.filterNotAllowedResourceTypes(resources);
+        if (!notAllowedResourceTypes.isEmpty()) {
+            String kinds = notAllowedResourceTypes
+                .stream()
+                .map(Resource::getKind)
+                .distinct()
+                .collect(Collectors.joining(", "));
+            throw new CommandLine.ParameterException(commandSpec.commandLine(),
+                "The server does not have resource type(s) " + kinds + ".");
+        }
+    }
+
+    public void enrichSchemaContent(List<Resource> resources, CommandLine.Model.CommandSpec commandSpec) {
+        resources
+            .stream()
+            .filter(resource -> resource.getKind().equals("Schema")
+                && StringUtils.isNotEmpty((CharSequence) resource.getSpec().get(SCHEMA_FILE)))
+            .forEach(resource -> {
+                try {
+                    resource.getSpec().put("schema",
+                        Files.readString(new File(resource.getSpec().get(SCHEMA_FILE).toString()).toPath()));
+                } catch (Exception e) {
+                    throw new CommandLine.ParameterException(commandSpec.commandLine(),
+                        "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE)
+                            + ". Schema path must be relative to the CLI.");
+                }
+            });
     }
 }

@@ -67,7 +67,7 @@ public class DeleteSubcommand extends DryRunCommand {
 
         try {
             // Validate resource types from resources
-            List<Resource> invalidResources = apiResourcesService.validateResourceTypes(resources);
+            List<Resource> invalidResources = apiResourcesService.filterNotAllowedResourceTypes(resources);
             if (!invalidResources.isEmpty()) {
                 String invalid = invalidResources
                     .stream()

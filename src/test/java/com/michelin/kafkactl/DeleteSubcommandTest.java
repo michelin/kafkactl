@@ -105,7 +105,7 @@ class DeleteSubcommandTest {
             .thenReturn(Collections.singletonList(new File("path")));
         when(fileService.parseResourceListFromFiles(any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.singletonList(resource));
 
         CommandLine cmd = new CommandLine(deleteSubcommand);
@@ -153,7 +153,7 @@ class DeleteSubcommandTest {
             .thenReturn(Collections.singletonList(new File("path")));
         when(fileService.parseResourceListFromFiles(any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.emptyList());
 
         CommandLine cmd = new CommandLine(deleteSubcommand);
@@ -192,7 +192,7 @@ class DeleteSubcommandTest {
             .thenReturn(Collections.singletonList(new File("path")));
         when(fileService.parseResourceListFromFiles(any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.emptyList());
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
@@ -222,7 +222,7 @@ class DeleteSubcommandTest {
             .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByCommandName(any()))
             .thenReturn(Optional.of(apiResource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.emptyList());
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
@@ -263,7 +263,7 @@ class DeleteSubcommandTest {
             .thenReturn(Collections.singletonList(new File("path")));
         when(fileService.parseResourceListFromFiles(any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.emptyList());
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
@@ -306,7 +306,7 @@ class DeleteSubcommandTest {
             .thenReturn(Collections.singletonList(new File("path")));
         when(fileService.parseResourceListFromFiles(any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.emptyList());
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
@@ -339,7 +339,7 @@ class DeleteSubcommandTest {
             .thenReturn(Collections.singletonList(new File("path")));
         when(fileService.parseResourceListFromFiles(any()))
             .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
+        when(apiResourcesService.filterNotAllowedResourceTypes(any()))
             .thenReturn(Collections.emptyList());
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenThrow(exception);

@@ -4,7 +4,6 @@ import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.parents.DryRunCommand;
-import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FileService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.ResourceService;
@@ -35,11 +34,6 @@ import picocli.CommandLine.Option;
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
 public class ApplySubcommand extends DryRunCommand {
-    public static final String SCHEMA_FILE = "schemaFile";
-
-    @Inject
-    public ApiResourcesService apiResourcesService;
-
     @Inject
     public FormatService formatService;
 
@@ -48,9 +42,6 @@ public class ApplySubcommand extends DryRunCommand {
 
     @Inject
     public ResourceService resourceService;
-
-    @Inject
-    public KafkactlConfig kafkactlConfig;
 
     @Option(names = {"-f", "--file"}, description = "YAML file or directory containing resources.")
     public Optional<File> file;
@@ -75,57 +66,15 @@ public class ApplySubcommand extends DryRunCommand {
         List<Resource> resources = resourceService.parseResources(file, recursive, commandSpec);
 
         try {
-            // Validate resource types from resources
-            List<Resource> invalidResources = apiResourcesService.validateResourceTypes(resources);
-            if (!invalidResources.isEmpty()) {
-                String invalid = invalidResources
-                    .stream()
-                    .map(Resource::getKind)
-                    .distinct()
-                    .collect(Collectors.joining(", "));
-                throw new CommandLine.ParameterException(commandSpec.commandLine(),
-                    "The server does not have resource type(s) " + invalid + ".");
-            }
-
-            // Validate namespace mismatch
-            String namespace = kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
-            List<Resource> namespaceMismatch = resources
-                .stream()
-                .filter(resource -> resource.getMetadata().getNamespace() != null
-                    && !resource.getMetadata().getNamespace().equals(namespace))
-                .toList();
-
-            if (!namespaceMismatch.isEmpty()) {
-                String invalid = namespaceMismatch
-                    .stream()
-                    .map(resource -> resource.getKind() + "/" + resource.getMetadata().getName())
-                    .distinct()
-                    .collect(Collectors.joining(", "));
-                throw new CommandLine.ParameterException(commandSpec.commandLine(),
-                    "Namespace mismatch between Kafkactl and YAML document " + invalid + ".");
-            }
-
-            // Load schema content
-            resources
-                .stream()
-                .filter(resource -> resource.getKind().equals("Schema")
-                    && StringUtils.isNotEmpty((CharSequence) resource.getSpec().get(SCHEMA_FILE)))
-                .forEach(resource -> {
-                    try {
-                        resource.getSpec().put("schema",
-                            Files.readString(new File(resource.getSpec().get(SCHEMA_FILE).toString()).toPath()));
-                    } catch (Exception e) {
-                        throw new CommandLine.ParameterException(commandSpec.commandLine(),
-                            "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE)
-                                + ". Schema path must be relative to the CLI.");
-                    }
-                });
+            resourceService.validateAllowedResources(resources, commandSpec);
+            validateNamespace(resources);
+            resourceService.enrichSchemaContent(resources, commandSpec);
 
             int errors = resources.stream()
                 .map(resource -> {
                     ApiResource apiResource =
                         apiResourcesService.getResourceDefinitionByKind(resource.getKind()).orElseThrow();
-                    return resourceService.apply(apiResource, namespace, resource, dryRun, commandSpec);
+                    return resourceService.apply(apiResource, getNamespace(), resource, dryRun, commandSpec);
                 })
                 .mapToInt(value -> value != null ? 0 : 1)
                 .sum();

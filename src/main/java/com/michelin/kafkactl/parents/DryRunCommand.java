@@ -1,5 +1,8 @@
 package com.michelin.kafkactl.parents;
 
+import com.michelin.kafkactl.models.Resource;
+import java.util.List;
+import java.util.stream.Collectors;
 import picocli.CommandLine;
 
 @CommandLine.Command

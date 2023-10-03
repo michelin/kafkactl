@@ -184,7 +184,7 @@ class ApiResourcesServiceTest {
         when(resourceClient.listResourceDefinitions(any()))
                 .thenReturn(List.of(apiResource, otherApiResource));
 
-        List<Resource> actual = apiResourcesService.validateResourceTypes(Collections.singletonList(resource));
+        List<Resource> actual = apiResourcesService.filterNotAllowedResourceTypes(Collections.singletonList(resource));
 
         assertTrue(actual.isEmpty());
     }
@@ -214,7 +214,7 @@ class ApiResourcesServiceTest {
         when(resourceClient.listResourceDefinitions(any()))
                 .thenReturn(List.of(apiResource, otherApiResource));
 
-        List<Resource> actual = apiResourcesService.validateResourceTypes(Collections.singletonList(resource));
+        List<Resource> actual = apiResourcesService.filterNotAllowedResourceTypes(Collections.singletonList(resource));
 
         assertEquals(resource, actual.get(0));
     }
