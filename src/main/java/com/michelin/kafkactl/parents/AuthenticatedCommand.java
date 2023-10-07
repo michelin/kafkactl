@@ -18,19 +18,19 @@ import picocli.CommandLine;
 @CommandLine.Command
 public abstract class AuthenticatedCommand implements Callable<Integer> {
     @Inject
-    protected LoginService loginService;
+    public LoginService loginService;
 
     @Inject
-    protected ApiResourcesService apiResourcesService;
+    public ApiResourcesService apiResourcesService;
 
     @Inject
-    protected KafkactlConfig kafkactlConfig;
+    public KafkactlConfig kafkactlConfig;
 
     @CommandLine.ParentCommand
-    protected KafkactlCommand kafkactlCommand;
+    public KafkactlCommand kafkactlCommand;
 
     @CommandLine.Spec
-    protected CommandLine.Model.CommandSpec commandSpec;
+    public CommandLine.Model.CommandSpec commandSpec;
 
     /**
      * Run the command.
