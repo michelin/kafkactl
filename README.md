@@ -578,11 +578,17 @@ spec:
     min.insync.replicas: '2'
     cleanup.policy: delete
     retention.ms: '60000'
+  tags:
+    - tag1
+    - tag2
+    - tag3
 ```
 
 - The `metadata.name` field must be part of your allowed ACLs. Visit your namespace's ACLs to understand which topics you are allowed to manage.
 - The validation of `spec` properties, and especially `spec.config` properties, depends on the topic validation rules associated with your namespace.
 - `spec.replicationFactor` and `spec.partitions` are immutable and cannot be modified once the topic is created.
+- The `metadata.tags` field represents a list of tags associated with the topic within a Confluent Cloud cluster.
+  You can learn more about using tags in the [Confluent Cloud documentation](https://docs.confluent.io/cloud/current/stream-governance/stream-catalog.html).
 
 #### ACL
 
