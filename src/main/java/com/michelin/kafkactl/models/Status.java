@@ -1,16 +1,15 @@
 package com.michelin.kafkactl.models;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.ReflectiveAccess;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
+/**
+ * Status.
+ */
 @Data
 @Builder
 @ReflectiveAccess
@@ -27,24 +26,24 @@ public class Status {
     private StatusDetails details;
     private int code;
 
+    /**
+     * Status phase.
+     */
+    public enum StatusPhase {
+        Success,
+        Failed
+    }
+
+    /**
+     * Status details.
+     */
     @Data
     @Builder
     @NoArgsConstructor
+    @AllArgsConstructor
     public static class StatusDetails {
         private String name;
         private String kind;
         private List<String> causes;
-
-        @JsonCreator
-        public StatusDetails(@JsonProperty("name") String name, @JsonProperty("kind") String kind, @JsonProperty("causes") List<String> causes) {
-            this.name = name;
-            this.kind = kind;
-            this.causes = causes;
-        }
-    }
-
-    public enum StatusPhase {
-        Success,
-        Failed
     }
 }

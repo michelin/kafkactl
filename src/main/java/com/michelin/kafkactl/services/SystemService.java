@@ -1,10 +1,16 @@
 package com.michelin.kafkactl.services;
 
-public class SystemService {
-    private SystemService() { }
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+/**
+ * The system service.
+ */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class SystemService {
     /**
-     * Get a system environment variable by name
+     * Get a system environment variable by name.
+     *
      * @param name The var name
      * @return The system environment variable
      */
@@ -13,7 +19,8 @@ public class SystemService {
     }
 
     /**
-     * Get a system property by name
+     * Get a system property by name.
+     *
      * @param name The property name
      * @return The system property name
      */
@@ -22,8 +29,9 @@ public class SystemService {
     }
 
     /**
-     * Set a system property
-     * @param key The name
+     * Set a system property.
+     *
+     * @param key   The name
      * @param value The value
      */
     public static void setProperty(String key, String value) {

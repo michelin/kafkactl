@@ -1,2 +1,2 @@
 @ECHO OFF
-%JAVA_HOME%\bin\java -jar .\build\libs\kafkactl-1.10.3-SNAPSHOT.jar %*
+java -jar .\build\libs\kafkactl-1.11.3-SNAPSHOT.jar %*

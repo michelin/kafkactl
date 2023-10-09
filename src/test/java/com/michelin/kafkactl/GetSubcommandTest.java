@@ -1,7 +1,14 @@
 package com.michelin.kafkactl;
 
-import com.michelin.kafkactl.client.ClusterResourceClient;
-import com.michelin.kafkactl.client.NamespacedResourceClient;
+import static com.michelin.kafkactl.services.FormatService.TABLE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
@@ -11,26 +18,17 @@ import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static com.michelin.kafkactl.services.FormatService.TABLE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GetSubcommandTest {
@@ -58,7 +56,7 @@ class GetSubcommandTest {
     @Test
     void shouldNotGetWhenNotAuthenticated() {
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(false);
+            .thenReturn(false);
 
         CommandLine cmd = new CommandLine(getSubcommand);
         StringWriter sw = new StringWriter();
@@ -71,17 +69,17 @@ class GetSubcommandTest {
     @Test
     void shouldNotGetWhenUnknownOutput() {
         ApiResource apiResource = ApiResource.builder()
-                .kind("Topic")
-                .path("topics")
-                .names(List.of("topics", "topic", "to"))
-                .namespaced(true)
-                .synchronizable(true)
-                .build();
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
-                .thenReturn(Optional.of(apiResource));
+            .thenReturn(true);
+        when(apiResourcesService.getResourceDefinitionByName(any()))
+            .thenReturn(Optional.of(apiResource));
 
         CommandLine cmd = new CommandLine(getSubcommand);
         StringWriter sw = new StringWriter();
@@ -95,9 +93,9 @@ class GetSubcommandTest {
     @Test
     void shouldNotGetWhenServerNotHaveResourceType() {
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
-                .thenReturn(Optional.empty());
+            .thenReturn(true);
+        when(apiResourcesService.getResourceDefinitionByName(any()))
+            .thenReturn(Optional.empty());
 
         CommandLine cmd = new CommandLine(getSubcommand);
         StringWriter sw = new StringWriter();
@@ -111,21 +109,21 @@ class GetSubcommandTest {
     @Test
     void shouldNotGetWhenHttpClientThrowException() {
         ApiResource apiResource = ApiResource.builder()
-                .kind("Topic")
-                .path("topics")
-                .names(List.of("topics", "topic", "to"))
-                .namespaced(true)
-                .synchronizable(true)
-                .build();
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
-                .thenReturn(Optional.of(apiResource));
+            .thenReturn(true);
+        when(apiResourcesService.getResourceDefinitionByName(any()))
+            .thenReturn(Optional.of(apiResource));
         HttpClientResponseException e = new HttpClientResponseException("error", HttpResponse.serverError());
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
-                .thenThrow(e);
+            .thenThrow(e);
 
         CommandLine cmd = new CommandLine(getSubcommand);
 
@@ -137,29 +135,29 @@ class GetSubcommandTest {
     @Test
     void shouldGetSingleResource() {
         ApiResource apiResource = ApiResource.builder()
-                .kind("Topic")
-                .path("topics")
-                .names(List.of("topics", "topic", "to"))
-                .namespaced(true)
-                .synchronizable(true)
-                .build();
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
 
         Resource resource = Resource.builder()
-                .kind("Topic")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.topic")
-                        .build())
-                .spec(Collections.emptyMap())
-                .build();
+            .kind("Topic")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.topic")
+                .build())
+            .spec(Collections.emptyMap())
+            .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
-                .thenReturn(Optional.of(apiResource));
+            .thenReturn(true);
+        when(apiResourcesService.getResourceDefinitionByName(any()))
+            .thenReturn(Optional.of(apiResource));
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
-                .thenReturn(resource);
+            .thenReturn(resource);
 
         CommandLine cmd = new CommandLine(getSubcommand);
 
@@ -171,20 +169,20 @@ class GetSubcommandTest {
     @Test
     void shouldGetAllTopicsSuccess() {
         ApiResource apiResource = ApiResource.builder()
-                .kind("Topic")
-                .path("topics")
-                .names(List.of("topics", "topic", "to"))
-                .namespaced(true)
-                .synchronizable(true)
-                .build();
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByCommandName(any()))
-                .thenReturn(Optional.of(apiResource));
+            .thenReturn(true);
+        when(apiResourcesService.getResourceDefinitionByName(any()))
+            .thenReturn(Optional.of(apiResource));
         when(resourceService.listAll(any(), any(), any()))
-                .thenReturn(0);
+            .thenReturn(0);
 
         CommandLine cmd = new CommandLine(getSubcommand);
         StringWriter sw = new StringWriter();
@@ -198,39 +196,39 @@ class GetSubcommandTest {
     @Test
     void shouldGetAll() {
         ApiResource apiResource = ApiResource.builder()
-                .kind("Topic")
-                .path("topics")
-                .names(List.of("topics", "topic", "to"))
-                .namespaced(true)
-                .synchronizable(true)
-                .build();
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
 
         ApiResource nonNamespacedApiResource = ApiResource.builder()
-                .kind("Topic")
-                .path("topics")
-                .names(List.of("topics", "topic", "to"))
-                .namespaced(false)
-                .synchronizable(true)
-                .build();
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(false)
+            .synchronizable(true)
+            .build();
 
         Resource resource = Resource.builder()
-                .kind("Topic")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.topic")
-                        .build())
-                .spec(Collections.emptyMap())
-                .build();
+            .kind("Topic")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.topic")
+                .build())
+            .spec(Collections.emptyMap())
+            .build();
 
         kafkactlCommand.optionalNamespace = Optional.empty();
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("namespace");
+            .thenReturn("namespace");
         when(apiResourcesService.listResourceDefinitions())
-                .thenReturn(List.of(apiResource, nonNamespacedApiResource));
+            .thenReturn(List.of(apiResource, nonNamespacedApiResource));
         when(resourceService.listAll(any(), any(), any()))
-                .thenReturn(0);
+            .thenReturn(0);
 
         CommandLine cmd = new CommandLine(getSubcommand);
 

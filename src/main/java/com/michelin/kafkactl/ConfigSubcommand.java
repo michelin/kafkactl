@@ -1,5 +1,9 @@
 package com.michelin.kafkactl;
 
+import static com.michelin.kafkactl.services.FormatService.TABLE;
+import static com.michelin.kafkactl.utils.constants.ConstantKind.CONTEXT;
+
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.ConfigService;
@@ -7,26 +11,29 @@ import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.core.util.StringUtils;
 import jakarta.inject.Inject;
-import lombok.Getter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.Callable;
 import picocli.CommandLine;
 
-import java.util.*;
-import java.util.concurrent.Callable;
-
-import static com.michelin.kafkactl.services.FormatService.TABLE;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.CONTEXT;
-
+/**
+ * Config subcommand.
+ */
 @CommandLine.Command(name = "config",
-        headerHeading = "@|bold Usage|@:",
-        synopsisHeading = " ",
-        descriptionHeading = "%n@|bold Description|@:%n%n",
-        description = "Manage configuration.",
-        parameterListHeading = "%n@|bold Parameters|@:%n",
-        optionListHeading = "%n@|bold Options|@:%n",
-        commandListHeading = "%n@|bold Commands|@:%n",
-        usageHelpAutoWidth = true,
-        versionProvider = VersionProvider.class,
-        mixinStandardHelpOptions = true)
+    headerHeading = "@|bold Usage|@:",
+    synopsisHeading = " ",
+    descriptionHeading = "%n@|bold Description|@:%n%n",
+    description = "Manage configuration.",
+    parameterListHeading = "%n@|bold Parameters|@:%n",
+    optionListHeading = "%n@|bold Options|@:%n",
+    commandListHeading = "%n@|bold Commands|@:%n",
+    usageHelpAutoWidth = true,
+    versionProvider = VersionProvider.class,
+    mixinStandardHelpOptions = true)
 public class ConfigSubcommand implements Callable<Integer> {
     @Inject
     public KafkactlConfig kafkactlConfig;
@@ -40,38 +47,42 @@ public class ConfigSubcommand implements Callable<Integer> {
     @CommandLine.Parameters(index = "0", description = "Action to perform (${COMPLETION-CANDIDATES}).", arity = "1")
     public ConfigAction action;
 
-    @CommandLine.Parameters(index="1", defaultValue = "", description = "Context to use.", arity = "1")
+    @CommandLine.Parameters(index = "1", defaultValue = "", description = "Context to use.", arity = "1")
     public String context;
 
     @CommandLine.Spec
     public CommandLine.Model.CommandSpec commandSpec;
 
     /**
-     * Run the "config" command
+     * Run the "config" command.
+     *
      * @return The command return code
-     * @throws Exception Any exception during the run
+     * @throws IOException Any exception during the run
      */
     @Override
-    public Integer call() throws Exception {
+    public Integer call() throws IOException {
         if (action.equals(ConfigAction.CURRENT_CONTEXT)) {
-            Map<String,Object> specs = new HashMap<>();
+            Map<String, Object> specs = new HashMap<>();
 
-            if (kafkactlConfig.getCurrentNamespace() != null)
+            if (kafkactlConfig.getCurrentNamespace() != null) {
                 specs.put("namespace", kafkactlConfig.getCurrentNamespace());
+            }
 
-            if (kafkactlConfig.getApi() != null)
+            if (kafkactlConfig.getApi() != null) {
                 specs.put("api", kafkactlConfig.getApi());
+            }
 
-            if (kafkactlConfig.getUserToken() != null)
+            if (kafkactlConfig.getUserToken() != null) {
                 specs.put("token", kafkactlConfig.getUserToken());
+            }
 
             String currentContextName = configService.getCurrentContextName();
             Resource currentContextAsResource = Resource.builder()
-                    .metadata(ObjectMeta.builder()
-                            .name(currentContextName != null ? currentContextName : StringUtils.EMPTY_STRING)
-                            .build())
-                    .spec(specs)
-                    .build();
+                .metadata(ObjectMeta.builder()
+                    .name(currentContextName != null ? currentContextName : StringUtils.EMPTY_STRING)
+                    .build())
+                .spec(specs)
+                .build();
 
             formatService.displayList(CONTEXT, List.of(currentContextAsResource), TABLE, commandSpec);
             return 0;
@@ -85,17 +96,17 @@ public class ConfigSubcommand implements Callable<Integer> {
         if (action.equals(ConfigAction.GET_CONTEXTS)) {
             List<Resource> allContextsAsResources = new ArrayList<>();
             kafkactlConfig.getContexts().forEach(userContext -> {
-                Map<String,Object> specs = new HashMap<>();
+                Map<String, Object> specs = new HashMap<>();
                 specs.put("namespace", userContext.getDefinition().getNamespace());
                 specs.put("api", userContext.getDefinition().getApi());
                 specs.put("token", userContext.getDefinition().getUserToken());
 
                 Resource currentContextAsResource = Resource.builder()
-                        .metadata(ObjectMeta.builder()
-                                .name(userContext.getName())
-                                .build())
-                        .spec(specs)
-                        .build();
+                    .metadata(ObjectMeta.builder()
+                        .name(userContext.getName())
+                        .build())
+                    .spec(specs)
+                    .build();
 
                 allContextsAsResources.add(currentContextAsResource);
             });
@@ -119,22 +130,24 @@ public class ConfigSubcommand implements Callable<Integer> {
 
         return 1;
     }
-}
 
-enum ConfigAction {
-    GET_CONTEXTS("get-contexts"),
-    CURRENT_CONTEXT("current-context"),
-    USE_CONTEXT("use-context");
+    /**
+     * Config actions.
+     */
+    public enum ConfigAction {
+        GET_CONTEXTS("get-contexts"),
+        CURRENT_CONTEXT("current-context"),
+        USE_CONTEXT("use-context");
 
-    @Getter
-    private final String name;
+        private final String name;
 
-    ConfigAction(String name) {
-        this.name = name;
-    }
+        ConfigAction(String name) {
+            this.name = name;
+        }
 
-    @Override
-    public String toString() {
-        return name;
+        @Override
+        public String toString() {
+            return name;
+        }
     }
 }

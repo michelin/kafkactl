@@ -1,5 +1,6 @@
 package com.michelin.kafkactl;
 
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.services.ConfigService;
 import com.michelin.kafkactl.services.FormatService;
 import org.junit.jupiter.api.Test;
@@ -37,13 +38,13 @@ class ConfigSubcommandTest {
     @Test
     void shouldGetCurrentContext() {
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("namespace");
+            .thenReturn("namespace");
         when(kafkactlConfig.getApi())
-                .thenReturn("ns4kafka.com");
+            .thenReturn("ns4kafka.com");
         when(kafkactlConfig.getUserToken())
-                .thenReturn("user-token");
+            .thenReturn("user-token");
         when(configService.getCurrentContextName())
-                .thenReturn("current-context");
+            .thenReturn("current-context");
 
         CommandLine cmd = new CommandLine(configSubcommand);
         StringWriter sw = new StringWriter();
@@ -52,14 +53,14 @@ class ConfigSubcommandTest {
         int code = cmd.execute("current-context");
         assertEquals(0, code);
         verify(formatService).displayList(eq("Context"),
-                argThat(currentContext -> currentContext.get(0).getMetadata().getName().equals("current-context")),
-                eq(TABLE), eq(cmd.getCommandSpec()));
+            argThat(currentContext -> currentContext.get(0).getMetadata().getName().equals("current-context")),
+            eq(TABLE), eq(cmd.getCommandSpec()));
     }
 
     @Test
     void shouldGetEmptyContexts() {
         when(kafkactlConfig.getContexts())
-                .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
 
         CommandLine cmd = new CommandLine(configSubcommand);
         StringWriter sw = new StringWriter();
@@ -73,16 +74,16 @@ class ConfigSubcommandTest {
     @Test
     void shouldGetContexts() {
         KafkactlConfig.Context context = KafkactlConfig.Context.builder()
-                .name("name")
-                .definition(KafkactlConfig.Context.ApiContext.builder()
-                        .api("api")
-                        .namespace("namespace")
-                        .userToken("userToken")
-                        .build())
-                .build();
+            .name("name")
+            .definition(KafkactlConfig.Context.ApiContext.builder()
+                .api("api")
+                .namespace("namespace")
+                .userToken("userToken")
+                .build())
+            .build();
 
         when(kafkactlConfig.getContexts())
-                .thenReturn(Collections.singletonList(context));
+            .thenReturn(Collections.singletonList(context));
 
         CommandLine cmd = new CommandLine(configSubcommand);
         StringWriter sw = new StringWriter();
@@ -91,25 +92,25 @@ class ConfigSubcommandTest {
         int code = cmd.execute("get-contexts");
         assertEquals(0, code);
         verify(formatService).displayList(eq("Context"),
-                argThat(currentContext -> currentContext.get(0).getMetadata().getName().equals("name")),
-                eq(TABLE), eq(cmd.getCommandSpec()));
+            argThat(currentContext -> currentContext.get(0).getMetadata().getName().equals("name")),
+            eq(TABLE), eq(cmd.getCommandSpec()));
     }
 
     @Test
     void shouldUseContextNotFound() {
         KafkactlConfig.Context context = KafkactlConfig.Context.builder()
-                .name("name")
-                .definition(KafkactlConfig.Context.ApiContext.builder()
-                        .api("api")
-                        .namespace("namespace")
-                        .userToken("userToken")
-                        .build())
-                .build();
+            .name("name")
+            .definition(KafkactlConfig.Context.ApiContext.builder()
+                .api("api")
+                .namespace("namespace")
+                .userToken("userToken")
+                .build())
+            .build();
 
         when(kafkactlConfig.getContexts())
-                .thenReturn(Collections.singletonList(context));
+            .thenReturn(Collections.singletonList(context));
         when(configService.getContextByName(any()))
-                .thenReturn(Optional.empty());
+            .thenReturn(Optional.empty());
 
         CommandLine cmd = new CommandLine(configSubcommand);
         StringWriter sw = new StringWriter();
@@ -123,18 +124,18 @@ class ConfigSubcommandTest {
     @Test
     void shouldUseContext() {
         KafkactlConfig.Context context = KafkactlConfig.Context.builder()
-                .name("name")
-                .definition(KafkactlConfig.Context.ApiContext.builder()
-                        .api("api")
-                        .namespace("namespace")
-                        .userToken("userToken")
-                        .build())
-                .build();
+            .name("name")
+            .definition(KafkactlConfig.Context.ApiContext.builder()
+                .api("api")
+                .namespace("namespace")
+                .userToken("userToken")
+                .build())
+            .build();
 
         when(kafkactlConfig.getContexts())
-                .thenReturn(Collections.singletonList(context));
+            .thenReturn(Collections.singletonList(context));
         when(configService.getContextByName(any()))
-                .thenReturn(Optional.of(context));
+            .thenReturn(Optional.of(context));
 
         CommandLine cmd = new CommandLine(configSubcommand);
         StringWriter sw = new StringWriter();

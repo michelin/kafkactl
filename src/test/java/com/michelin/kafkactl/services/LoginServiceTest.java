@@ -1,7 +1,7 @@
 package com.michelin.kafkactl.services;
 
 import com.michelin.kafkactl.KafkactlCommand;
-import com.michelin.kafkactl.KafkactlConfig;
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.client.BearerAccessRefreshToken;
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.client.UserInfoResponse;
@@ -49,7 +49,7 @@ class LoginServiceTest {
     @Test
     void shouldNotBeAuthenticatedWhenJwtNotExist() {
         when(kafkactlConfig.getConfigDirectory())
-                .thenReturn("src/test/resources");
+            .thenReturn("src/test/resources");
 
         CommandLine cmd = new CommandLine(new KafkactlCommand());
         StringWriter sw = new StringWriter();
@@ -64,9 +64,9 @@ class LoginServiceTest {
     void shouldNotBeAuthenticatedWhenThrowUnauthorized() {
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.unauthorized());
         when(kafkactlConfig.getConfigDirectory())
-                .thenReturn("src/test/resources/login");
+            .thenReturn("src/test/resources/login");
         when(clusterResourceClient.tokenInfo(any()))
-                .thenThrow(exception);
+            .thenThrow(exception);
 
         CommandLine cmd = new CommandLine(new KafkactlCommand());
         StringWriter sw = new StringWriter();
@@ -82,9 +82,9 @@ class LoginServiceTest {
     void shouldNotBeAuthenticatedWhenThrowException() {
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         when(kafkactlConfig.getConfigDirectory())
-                .thenReturn("src/test/resources/login");
+            .thenReturn("src/test/resources/login");
         when(clusterResourceClient.tokenInfo(any()))
-                .thenThrow(exception);
+            .thenThrow(exception);
 
         CommandLine cmd = new CommandLine(new KafkactlCommand());
         StringWriter sw = new StringWriter();
@@ -108,9 +108,9 @@ class LoginServiceTest {
         cmd.setOut(new PrintWriter(sw));
 
         when(kafkactlConfig.getConfigDirectory())
-                .thenReturn("src/test/resources/login");
+            .thenReturn("src/test/resources/login");
         when(clusterResourceClient.tokenInfo(any()))
-                .thenReturn(userInfoResponse);
+            .thenReturn(userInfoResponse);
 
         LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
         boolean actual = loginService.isAuthenticated(cmd.getCommandSpec(), true);
@@ -131,9 +131,9 @@ class LoginServiceTest {
         cmd.setOut(new PrintWriter(sw));
 
         when(kafkactlConfig.getConfigDirectory())
-                .thenReturn("src/test/resources/login");
+            .thenReturn("src/test/resources/login");
         when(clusterResourceClient.tokenInfo(any()))
-                .thenReturn(userInfoResponse);
+            .thenReturn(userInfoResponse);
 
         LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
 
@@ -149,10 +149,10 @@ class LoginServiceTest {
     @Test
     void shouldNotLoginWhenHttpClientResponseException() {
         when(kafkactlConfig.getConfigDirectory())
-                .thenReturn("src/test/resources/login");
+            .thenReturn("src/test/resources/login");
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         when(clusterResourceClient.login(any()))
-                .thenThrow(exception);
+            .thenThrow(exception);
 
         CommandLine cmd = new CommandLine(new KafkactlCommand());
         StringWriter sw = new StringWriter();
@@ -174,9 +174,9 @@ class LoginServiceTest {
         bearerAccessRefreshToken.setRoles(Collections.singletonList("user"));
 
         when(kafkactlConfig.getConfigDirectory())
-                .thenReturn("src/test/resources/login");
+            .thenReturn("src/test/resources/login");
         when(clusterResourceClient.login(any()))
-                .thenReturn(bearerAccessRefreshToken);
+            .thenReturn(bearerAccessRefreshToken);
 
         CommandLine cmd = new CommandLine(new KafkactlCommand());
         StringWriter sw = new StringWriter();
@@ -206,9 +206,9 @@ class LoginServiceTest {
         cmd.setOut(new PrintWriter(sw));
 
         when(kafkactlConfig.getConfigDirectory())
-                .thenReturn("src/test/resources/login");
+            .thenReturn("src/test/resources/login");
         when(clusterResourceClient.tokenInfo(any()))
-                .thenReturn(userInfoResponse);
+            .thenReturn(userInfoResponse);
 
         LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
 
@@ -240,11 +240,11 @@ class LoginServiceTest {
         cmd.setOut(new PrintWriter(sw));
 
         when(kafkactlConfig.getConfigDirectory())
-                .thenReturn("src/test/resources/login");
+            .thenReturn("src/test/resources/login");
         when(clusterResourceClient.tokenInfo(any()))
-                .thenReturn(userInfoResponse);
+            .thenReturn(userInfoResponse);
         when(clusterResourceClient.login(any()))
-                .thenReturn(bearerAccessRefreshToken);
+            .thenReturn(bearerAccessRefreshToken);
 
         LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
 
@@ -275,11 +275,11 @@ class LoginServiceTest {
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         when(kafkactlConfig.getConfigDirectory())
-                .thenReturn("src/test/resources/login");
+            .thenReturn("src/test/resources/login");
         when(clusterResourceClient.tokenInfo(any()))
-                .thenReturn(userInfoResponse);
+            .thenReturn(userInfoResponse);
         when(clusterResourceClient.login(any()))
-                .thenThrow(exception);
+            .thenThrow(exception);
 
         LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
 

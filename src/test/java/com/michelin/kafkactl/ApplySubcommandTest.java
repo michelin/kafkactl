@@ -1,5 +1,17 @@
 package com.michelin.kafkactl;
 
+import static com.michelin.kafkactl.services.ResourceService.SCHEMA_FILE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
@@ -9,6 +21,13 @@ import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,30 +35,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.*;
-
-import static com.michelin.kafkactl.ApplySubcommand.SCHEMA_FILE;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class ApplySubcommandTest {
     @Mock
     private LoginService loginService;
 
     @Mock
-    private ApiResourcesService apiResourcesService;
-
-    @Mock
     public FormatService formatService;
 
     @Mock
     private ResourceService resourceService;
+
+    @Mock
+    public ApiResourcesService apiResourcesService;
 
     @Mock
     private KafkactlConfig kafkactlConfig;
@@ -57,7 +65,7 @@ class ApplySubcommandTest {
         cmd.setErr(new PrintWriter(sw));
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(false);
+            .thenReturn(false);
 
         int code = cmd.execute();
         assertEquals(1, code);
@@ -70,7 +78,7 @@ class ApplySubcommandTest {
         cmd.setErr(new PrintWriter(sw));
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
 
         int code = cmd.execute();
         assertEquals(2, code);
@@ -84,10 +92,10 @@ class ApplySubcommandTest {
         cmd.setErr(new PrintWriter(sw));
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-                .thenThrow(new CommandLine.ParameterException(cmd.getCommandSpec().commandLine(),
-                        "Could not find YAML or YML files in topic directory."));
+            .thenThrow(new CommandLine.ParameterException(cmd.getCommandSpec().commandLine(),
+                "Could not find YAML or YML files in topic directory."));
 
         int code = cmd.execute("-f", "topic");
         assertEquals(2, code);
@@ -97,24 +105,25 @@ class ApplySubcommandTest {
     @Test
     void shouldNotApplyWhenInvalidResources() {
         Resource resource = Resource.builder()
-                .kind("Topic")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.topic")
-                        .build())
-                .spec(Collections.emptyMap())
-                .build();
+            .kind("Topic")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.topic")
+                .build())
+            .spec(Collections.emptyMap())
+            .build();
 
         CommandLine cmd = new CommandLine(applySubcommand);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
-                .thenReturn(Collections.singletonList(resource));
+            .thenReturn(Collections.singletonList(resource));
+        doThrow(new CommandLine.ParameterException(cmd.getCommandSpec().commandLine(),
+            "The server does not have resource type(s) Topic."))
+            .when(resourceService).validateAllowedResources(any(), any());
 
         int code = cmd.execute("-f", "topic.yml");
         assertEquals(2, code);
@@ -124,23 +133,21 @@ class ApplySubcommandTest {
     @Test
     void shouldNotApplyWhenNamespaceMismatch() {
         Resource resource = Resource.builder()
-                .kind("Topic")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.topic")
-                        .namespace("namespace")
-                        .build())
-                .spec(Collections.emptyMap())
-                .build();
+            .kind("Topic")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.topic")
+                .namespace("namespace")
+                .build())
+            .spec(Collections.emptyMap())
+            .build();
 
         kafkactlCommand.optionalNamespace = Optional.of("namespaceMismatch");
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
-                .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.singletonList(resource));
 
         CommandLine cmd = new CommandLine(applySubcommand);
         StringWriter sw = new StringWriter();
@@ -154,28 +161,26 @@ class ApplySubcommandTest {
     @Test
     void shouldNotApplyWhenHttpClientResponseException() {
         Resource resource = Resource.builder()
-                .kind("Topic")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.topic")
-                        .namespace("namespace")
-                        .build())
-                .spec(Collections.emptyMap())
-                .build();
+            .kind("Topic")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.topic")
+                .namespace("namespace")
+                .build())
+            .spec(Collections.emptyMap())
+            .build();
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
-                .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("namespace");
+            .thenReturn("namespace");
         when(apiResourcesService.getResourceDefinitionByKind(any()))
-                .thenThrow(exception);
+            .thenThrow(exception);
 
         CommandLine cmd = new CommandLine(applySubcommand);
 
@@ -187,39 +192,37 @@ class ApplySubcommandTest {
     @Test
     void shouldApply() {
         Resource resource = Resource.builder()
-                .kind("Topic")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.topic")
-                        .namespace("namespace")
-                        .build())
-                .spec(Collections.emptyMap())
-                .build();
+            .kind("Topic")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.topic")
+                .namespace("namespace")
+                .build())
+            .spec(Collections.emptyMap())
+            .build();
 
         ApiResource apiResource = ApiResource.builder()
-                .kind("Topic")
-                .path("topics")
-                .names(List.of("topics", "topic", "to"))
-                .namespaced(true)
-                .synchronizable(true)
-                .build();
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
-                .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("namespace");
+            .thenReturn("namespace");
         when(apiResourcesService.getResourceDefinitionByKind(any()))
-                .thenReturn(Optional.of(apiResource));
+            .thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
-                .thenReturn(HttpResponse
-                        .ok(resource)
-                        .header("X-Ns4kafka-Result", "Created"));
+            .thenReturn(HttpResponse
+                .ok(resource)
+                .header("X-Ns4kafka-Result", "Created"));
 
         CommandLine cmd = new CommandLine(applySubcommand);
         StringWriter sw = new StringWriter();
@@ -233,38 +236,36 @@ class ApplySubcommandTest {
     @Test
     void shouldApplyDryRun() {
         Resource resource = Resource.builder()
-                .kind("Topic")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.topic")
-                        .build())
-                .spec(Collections.emptyMap())
-                .build();
+            .kind("Topic")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.topic")
+                .build())
+            .spec(Collections.emptyMap())
+            .build();
 
         ApiResource apiResource = ApiResource.builder()
-                .kind("Topic")
-                .path("topics")
-                .names(List.of("topics", "topic", "to"))
-                .namespaced(true)
-                .synchronizable(true)
-                .build();
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
-                .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("namespace");
+            .thenReturn("namespace");
         when(apiResourcesService.getResourceDefinitionByKind(any()))
-                .thenReturn(Optional.of(apiResource));
+            .thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
-                .thenReturn(HttpResponse
-                        .ok(resource)
-                        .header("X-Ns4kafka-Result", "Created"));
+            .thenReturn(HttpResponse
+                .ok(resource)
+                .header("X-Ns4kafka-Result", "Created"));
 
         CommandLine cmd = new CommandLine(applySubcommand);
         StringWriter sw = new StringWriter();
@@ -282,39 +283,38 @@ class ApplySubcommandTest {
         specs.put(SCHEMA_FILE, "src/test/resources/person.avsc");
 
         Resource resource = Resource.builder()
-                .kind("Schema")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.schema")
-                        .namespace("namespace")
-                        .build())
-                .spec(specs)
-                .build();
+            .kind("Schema")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.schema")
+                .namespace("namespace")
+                .build())
+            .spec(specs)
+            .build();
 
         ApiResource apiResource = ApiResource.builder()
-                .kind("Schema")
-                .namespaced(true)
-                .synchronizable(false)
-                .path("schemas")
-                .names(List.of("schemas", "schema", "sc"))
-                .build();
+            .kind("Schema")
+            .namespaced(true)
+            .synchronizable(false)
+            .path("schemas")
+            .names(List.of("schemas", "schema", "sc"))
+            .build();
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
-                .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("namespace");
+            .thenReturn("namespace");
+        doCallRealMethod().when(resourceService).enrichSchemaContent(any(), any());
         when(apiResourcesService.getResourceDefinitionByKind(any()))
-                .thenReturn(Optional.of(apiResource));
+            .thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
-                .thenReturn(HttpResponse
-                        .ok(resource)
-                        .header("X-Ns4kafka-Result", "Created"));
+            .thenReturn(HttpResponse
+                .ok(resource)
+                .header("X-Ns4kafka-Result", "Created"));
 
         CommandLine cmd = new CommandLine(applySubcommand);
         StringWriter sw = new StringWriter();
@@ -332,38 +332,36 @@ class ApplySubcommandTest {
         specs.put("schema", "{schema}");
 
         Resource resource = Resource.builder()
-                .kind("Schema")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.schema")
-                        .namespace("namespace")
-                        .build())
-                .spec(specs)
-                .build();
+            .kind("Schema")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.schema")
+                .namespace("namespace")
+                .build())
+            .spec(specs)
+            .build();
 
         ApiResource apiResource = ApiResource.builder()
-                .kind("Schema")
-                .namespaced(true)
-                .synchronizable(false)
-                .path("schemas")
-                .names(List.of("schemas", "schema", "sc"))
-                .build();
+            .kind("Schema")
+            .namespaced(true)
+            .synchronizable(false)
+            .path("schemas")
+            .names(List.of("schemas", "schema", "sc"))
+            .build();
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
-                .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("namespace");
+            .thenReturn("namespace");
         when(apiResourcesService.getResourceDefinitionByKind(any()))
-                .thenReturn(Optional.of(apiResource));
+            .thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
-                .thenReturn(HttpResponse
-                        .ok(resource));
+            .thenReturn(HttpResponse
+                .ok(resource));
 
         CommandLine cmd = new CommandLine(applySubcommand);
         StringWriter sw = new StringWriter();
@@ -380,25 +378,24 @@ class ApplySubcommandTest {
         specs.put(SCHEMA_FILE, "src/test/resources/not-exist.avsc");
 
         Resource resource = Resource.builder()
-                .kind("Schema")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.schema")
-                        .namespace("namespace")
-                        .build())
-                .spec(specs)
-                .build();
+            .kind("Schema")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.schema")
+                .namespace("namespace")
+                .build())
+            .spec(specs)
+            .build();
 
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-                .thenReturn(Collections.singletonList(resource));
-        when(apiResourcesService.validateResourceTypes(any()))
-                .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("namespace");
+            .thenReturn("namespace");
+        doCallRealMethod().when(resourceService).enrichSchemaContent(any(), any());
 
         CommandLine cmd = new CommandLine(applySubcommand);
         StringWriter sw = new StringWriter();
@@ -406,6 +403,7 @@ class ApplySubcommandTest {
 
         int code = cmd.execute("-f", "topic.yml");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains("Cannot open schema file src/test/resources/not-exist.avsc. Schema path must be relative to the CLI."));
+        assertTrue(sw.toString().contains(
+            "Cannot open schema file src/test/resources/not-exist.avsc. Schema path must be relative to the CLI."));
     }
 }

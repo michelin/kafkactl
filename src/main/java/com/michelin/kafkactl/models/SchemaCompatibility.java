@@ -1,7 +1,13 @@
 package com.michelin.kafkactl.models;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * Schema compatibility.
+ */
+@Getter
+@AllArgsConstructor
 public enum SchemaCompatibility {
     GLOBAL("global"),
     BACKWARD("backward"),
@@ -12,12 +18,7 @@ public enum SchemaCompatibility {
     FULL_TRANSITIVE("full-transitive"),
     NONE("none");
 
-    @Getter
     private final String name;
-
-    SchemaCompatibility(String name) {
-        this.name = name;
-    }
 
     @Override
     public String toString() {

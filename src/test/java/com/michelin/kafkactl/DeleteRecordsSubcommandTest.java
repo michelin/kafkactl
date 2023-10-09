@@ -1,5 +1,6 @@
 package com.michelin.kafkactl;
 
+import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,7 @@ class DeleteRecordsSubcommandTest {
     @Test
     void shouldNotDeleteWhenNotAuthenticated() {
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(false);
+            .thenReturn(false);
 
         CommandLine cmd = new CommandLine(deleteRecordsSubcommand);
         StringWriter sw = new StringWriter();
@@ -54,11 +55,11 @@ class DeleteRecordsSubcommandTest {
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("namespace");
+            .thenReturn("namespace");
         when(resourceService.deleteRecords(any(), any(), anyBoolean(), any()))
-                .thenReturn(0);
+            .thenReturn(0);
 
         CommandLine cmd = new CommandLine(deleteRecordsSubcommand);
         StringWriter sw = new StringWriter();
@@ -74,11 +75,11 @@ class DeleteRecordsSubcommandTest {
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("namespace");
+            .thenReturn("namespace");
         when(resourceService.deleteRecords(any(), any(), anyBoolean(), any()))
-                .thenReturn(0);
+            .thenReturn(0);
 
         CommandLine cmd = new CommandLine(deleteRecordsSubcommand);
 
@@ -91,11 +92,11 @@ class DeleteRecordsSubcommandTest {
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+            .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
-                .thenReturn("namespace");
+            .thenReturn("namespace");
         when(resourceService.deleteRecords(any(), any(), anyBoolean(), any()))
-                .thenReturn(1);
+            .thenReturn(1);
 
         CommandLine cmd = new CommandLine(deleteRecordsSubcommand);
 

@@ -1,5 +1,12 @@
 package com.michelin.kafkactl.utils.constants;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+/**
+ * Constant kind.
+ */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ConstantKind {
     public static final String RESOURCE_DEFINITION = "ResourceDefinition";
     public static final String CHANGE_CONNECTOR_STATE = "ChangeConnectorState";
@@ -12,6 +19,4 @@ public class ConstantKind {
     public static final String SUBJECT = "Subject";
     public static final String SCHEMA_COMPATIBILITY_STATE = "SchemaCompatibilityState";
     public static final String VAULT_RESPONSE = "VaultResponse";
-
-    private ConstantKind() { }
 }
