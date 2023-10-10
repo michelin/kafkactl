@@ -4,6 +4,7 @@ plugins {
     id("jacoco")
     id("org.sonarqube") version "4.4.1.3373"
     id("pl.allegro.tech.build.axion-release") version "1.15.5"
+    id("checkstyle")
 }
 
 version = scmVersion.version
