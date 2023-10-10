@@ -1,8 +1,22 @@
 package com.michelin.kafkactl;
 
+import static com.michelin.kafkactl.ResetOffsetsSubcommand.OPTIONS;
+import static com.michelin.kafkactl.ResetOffsetsSubcommand.RESET_METHOD;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,18 +25,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Optional;
-
-import static com.michelin.kafkactl.ResetOffsetsSubcommand.OPTIONS;
-import static com.michelin.kafkactl.ResetOffsetsSubcommand.RESET_METHOD;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ResetOffsetsSubcommandTest {
@@ -108,8 +110,8 @@ class ResetOffsetsSubcommandTest {
         int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--by-duration=PT10M");
         assertEquals(0, code);
         verify(resourceService).resetOffsets(eq("namespace"), eq("myGroup"),
-            argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("BY_DURATION") &&
-                resource.getSpec().get(OPTIONS).equals("PT10M")),
+            argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("BY_DURATION")
+                && resource.getSpec().get(OPTIONS).equals("PT10M")),
             eq(false), eq(cmd.getCommandSpec()));
     }
 
@@ -128,8 +130,8 @@ class ResetOffsetsSubcommandTest {
         int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--to-offset=50");
         assertEquals(0, code);
         verify(resourceService).resetOffsets(eq("namespace"), eq("myGroup"),
-            argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("TO_OFFSET") &&
-                resource.getSpec().get(OPTIONS).equals(50)),
+            argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("TO_OFFSET")
+                && resource.getSpec().get(OPTIONS).equals(50)),
             eq(false), eq(cmd.getCommandSpec()));
     }
 }

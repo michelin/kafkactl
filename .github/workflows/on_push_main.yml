@@ -39,6 +39,9 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
+      - name: Check Style
+        run: ./gradlew checkstyleMain checkstyleTest
+
       - name: Build and analyze
         id: build_jar
         env:
@@ -98,6 +101,9 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
+      - name: Check Style
+        run: ./gradlew checkstyleMain checkstyleTest
+
       - name: Build
         id: build_native
         run: |
@@ -137,6 +143,9 @@ jobs:
 
       - name: Configure Pagefile
         uses: al-cheb/configure-pagefile-action@v1.3
+
+      - name: Check Style
+        run: ./gradlew checkstyleMain checkstyleTest
 
       - name: Build
         run: |

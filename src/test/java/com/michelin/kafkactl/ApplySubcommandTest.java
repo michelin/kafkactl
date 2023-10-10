@@ -170,15 +170,16 @@ class ApplySubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
-        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
-        kafkactlCommand.optionalNamespace = Optional.empty();
-
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenThrow(exception);
 
@@ -201,14 +202,6 @@ class ApplySubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
-        ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
-
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -217,6 +210,15 @@ class ApplySubcommandTest {
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
@@ -244,14 +246,6 @@ class ApplySubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
-        ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
-
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -260,6 +254,15 @@ class ApplySubcommandTest {
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
@@ -292,14 +295,6 @@ class ApplySubcommandTest {
             .spec(specs)
             .build();
 
-        ApiResource apiResource = ApiResource.builder()
-            .kind("Schema")
-            .namespaced(true)
-            .synchronizable(false)
-            .path("schemas")
-            .names(List.of("schemas", "schema", "sc"))
-            .build();
-
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -309,6 +304,15 @@ class ApplySubcommandTest {
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
         doCallRealMethod().when(resourceService).enrichSchemaContent(any(), any());
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Schema")
+            .namespaced(true)
+            .synchronizable(false)
+            .path("schemas")
+            .names(List.of("schemas", "schema", "sc"))
+            .build();
+
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
@@ -341,14 +345,6 @@ class ApplySubcommandTest {
             .spec(specs)
             .build();
 
-        ApiResource apiResource = ApiResource.builder()
-            .kind("Schema")
-            .namespaced(true)
-            .synchronizable(false)
-            .path("schemas")
-            .names(List.of("schemas", "schema", "sc"))
-            .build();
-
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -357,6 +353,15 @@ class ApplySubcommandTest {
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Schema")
+            .namespaced(true)
+            .synchronizable(false)
+            .path("schemas")
+            .names(List.of("schemas", "schema", "sc"))
+            .build();
+
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))

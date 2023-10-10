@@ -1,14 +1,14 @@
 package com.michelin.kafkactl;
 
+import static com.michelin.kafkactl.config.KafkactlConfig.KAFKACTL_CONFIG;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
+
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.services.SystemService;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
-
-import static com.michelin.kafkactl.config.KafkactlConfig.KAFKACTL_CONFIG;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 class KafkactlConfigTest {
     private final KafkactlConfig kafkactlConfig = new KafkactlConfig();
@@ -33,8 +33,8 @@ class KafkactlConfigTest {
                 .thenReturn("src/main/resources/config.yml");
 
             String actual = kafkactlConfig.getConfigDirectory();
-            assertEquals("src" + System.getProperty("file.separator") + "main" + System.getProperty("file.separator") +
-                    "resources",
+            assertEquals("src" + System.getProperty("file.separator") + "main" + System.getProperty("file.separator")
+                    + "resources",
                 actual);
         }
     }

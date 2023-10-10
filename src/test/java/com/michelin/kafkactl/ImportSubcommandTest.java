@@ -154,12 +154,18 @@ class ImportSubcommandTest {
 
     @Test
     void shouldImportAllResources() {
-        ApiResource apiResource = ApiResource.builder()
+        kafkactlCommand.optionalNamespace = Optional.empty();
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+        when(kafkactlConfig.getCurrentNamespace())
+            .thenReturn("namespace");
+
+        ApiResource nonSyncApiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
             .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
+            .namespaced(false)
+            .synchronizable(false)
             .build();
 
         ApiResource nonNamespacedApiResource = ApiResource.builder()
@@ -170,19 +176,14 @@ class ImportSubcommandTest {
             .synchronizable(true)
             .build();
 
-        ApiResource nonSyncApiResource = ApiResource.builder()
+        ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
             .names(List.of("topics", "topic", "to"))
-            .namespaced(false)
-            .synchronizable(false)
+            .namespaced(true)
+            .synchronizable(true)
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.empty();
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
-        when(kafkactlConfig.getCurrentNamespace())
-            .thenReturn("namespace");
         when(apiResourcesService.listResourceDefinitions())
             .thenReturn(List.of(apiResource, nonNamespacedApiResource, nonSyncApiResource));
         when(resourceService.importAll(any(), any(), anyBoolean(), any()))
