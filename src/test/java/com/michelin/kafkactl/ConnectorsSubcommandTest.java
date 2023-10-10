@@ -167,13 +167,15 @@ class ConnectorsSubcommandTest {
             .names(List.of("connects", "connect", "co"))
             .build();
 
-        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+
         when(resourceService.listResourcesWithType(any(), any()))
             .thenThrow(exception);
 

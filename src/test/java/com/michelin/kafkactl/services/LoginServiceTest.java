@@ -1,12 +1,26 @@
 package com.michelin.kafkactl.services;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import com.michelin.kafkactl.KafkactlCommand;
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.client.BearerAccessRefreshToken;
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.client.UserInfoResponse;
+import com.michelin.kafkactl.config.KafkactlConfig;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collections;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,15 +28,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
-
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LoginServiceTest {
@@ -185,10 +190,10 @@ class LoginServiceTest {
         LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
 
         boolean actual = loginService.login(cmd.getCommandSpec(), "username", "passwd", true);
+        assertTrue(actual);
         assertTrue(sw.toString().contains("Authenticating..."));
         assertTrue(sw.toString().contains("Authentication successful. Welcome username!"));
         assertTrue(sw.toString().contains("Your session is valid until"));
-        assertTrue(actual);
 
         String token = loginService.getAuthorization();
         assertEquals("Bearer accessToken", token);

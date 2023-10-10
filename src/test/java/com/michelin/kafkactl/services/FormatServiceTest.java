@@ -1,5 +1,10 @@
 package com.michelin.kafkactl.services;
 
+import static com.michelin.kafkactl.services.FormatService.TABLE;
+import static com.michelin.kafkactl.services.FormatService.YAML;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.michelin.kafkactl.KafkactlCommand;
 import com.michelin.kafkactl.models.ObjectMeta;
 import com.michelin.kafkactl.models.Resource;
@@ -8,9 +13,6 @@ import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
-import org.junit.jupiter.api.Test;
-import picocli.CommandLine;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.Instant;
@@ -18,11 +20,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-import static com.michelin.kafkactl.services.FormatService.TABLE;
-import static com.michelin.kafkactl.services.FormatService.YAML;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import picocli.CommandLine;
 
 @MicronautTest
 class FormatServiceTest {
@@ -32,17 +31,17 @@ class FormatServiceTest {
     @Test
     void shouldDisplayListTable() {
         Resource resource = Resource.builder()
-                .kind("Topic")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.topic")
-                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
-                        .build())
-                .spec(Map.of("configs",
-                        Map.of("retention.ms", "60000",
-                        "cleanup.policy", "delete"
-                        )))
-                .build();
+            .kind("Topic")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.topic")
+                .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                .build())
+            .spec(Map.of("configs",
+                Map.of("retention.ms", "60000",
+                    "cleanup.policy", "delete"
+                )))
+            .build();
 
         CommandLine cmd = new CommandLine(new KafkactlCommand());
         StringWriter sw = new StringWriter();
@@ -57,13 +56,13 @@ class FormatServiceTest {
     @Test
     void shouldDisplayListTableEmptySpecs() {
         Resource resource = Resource.builder()
-                .kind("Topic")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.topic")
-                        .build())
-                .spec(Collections.emptyMap())
-                .build();
+            .kind("Topic")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.topic")
+                .build())
+            .spec(Collections.emptyMap())
+            .build();
 
         CommandLine cmd = new CommandLine(new KafkactlCommand());
         StringWriter sw = new StringWriter();
@@ -78,17 +77,17 @@ class FormatServiceTest {
     @Test
     void shouldDisplayListYaml() {
         Resource resource = Resource.builder()
-                .kind("Topic")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.topic")
-                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
-                        .build())
-                .spec(Map.of("configs",
-                        Map.of("retention.ms", "60000",
-                                "cleanup.policy", "delete"
-                        )))
-                .build();
+            .kind("Topic")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.topic")
+                .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                .build())
+            .spec(Map.of("configs",
+                Map.of("retention.ms", "60000",
+                    "cleanup.policy", "delete"
+                )))
+            .build();
 
         CommandLine cmd = new CommandLine(new KafkactlCommand());
         StringWriter sw = new StringWriter();
@@ -104,13 +103,13 @@ class FormatServiceTest {
     @Test
     void shouldDisplayListYamlEmptySpecs() {
         Resource resource = Resource.builder()
-                .kind("Topic")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.topic")
-                        .build())
-                .spec(Collections.emptyMap())
-                .build();
+            .kind("Topic")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.topic")
+                .build())
+            .spec(Collections.emptyMap())
+            .build();
 
         CommandLine cmd = new CommandLine(new KafkactlCommand());
         StringWriter sw = new StringWriter();
@@ -124,19 +123,19 @@ class FormatServiceTest {
     @Test
     void shouldDisplayResourceWithAnArrayCell() {
         Resource resource = Resource.builder()
-                .kind("RoleBinding")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("roleBinding")
-                        .build())
-                .spec(Map.of(
-                        "subject", Map.of("subjectName", "GROUP"),
-                        "role",
-                        Map.of(
-                                "resourceTypes", List.of("topics", "acls", "connectors"),
-                                "verbs", List.of("GET", "POST", "PUT", "DELETE"))
-                ))
-                .build();
+            .kind("RoleBinding")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("roleBinding")
+                .build())
+            .spec(Map.of(
+                "subject", Map.of("subjectName", "GROUP"),
+                "role",
+                Map.of(
+                    "resourceTypes", List.of("topics", "acls", "connectors"),
+                    "verbs", List.of("GET", "POST", "PUT", "DELETE"))
+            ))
+            .build();
 
         CommandLine cmd = new CommandLine(new KafkactlCommand());
         StringWriter sw = new StringWriter();
@@ -151,17 +150,17 @@ class FormatServiceTest {
     @Test
     void shouldDisplaySingle() {
         Resource resource = Resource.builder()
-                .kind("Topic")
-                .apiVersion("v1")
-                .metadata(ObjectMeta.builder()
-                        .name("prefix.topic")
-                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
-                        .build())
-                .spec(Map.of("configs",
-                        Map.of("retention.ms", "60000",
-                                "cleanup.policy", "delete"
-                        )))
-                .build();
+            .kind("Topic")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.topic")
+                .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                .build())
+            .spec(Map.of("configs",
+                Map.of("retention.ms", "60000",
+                    "cleanup.policy", "delete"
+                )))
+            .build();
 
         CommandLine cmd = new CommandLine(new KafkactlCommand());
         StringWriter sw = new StringWriter();
@@ -180,12 +179,12 @@ class FormatServiceTest {
         cmd.setErr(new PrintWriter(sw));
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse
-                .serverError(Status.builder()
-                        .details(Status.StatusDetails.builder()
-                                .causes(List.of("Error 1", "Error 2", "Error 3", "Error 4", "Error 5"))
-                                .build())
-                        .message("An error occurred")
-                        .build()));
+            .serverError(Status.builder()
+                .details(Status.StatusDetails.builder()
+                    .causes(List.of("Error 1", "Error 2", "Error 3", "Error 4", "Error 5"))
+                    .build())
+                .message("An error occurred")
+                .build()));
 
         formatService.displayError(exception, "Topic", "myTopic", cmd.getCommandSpec());
 
@@ -204,9 +203,9 @@ class FormatServiceTest {
         cmd.setErr(new PrintWriter(sw));
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse
-                .serverError(Status.builder()
-                        .message("An error occurred")
-                        .build()));
+            .serverError(Status.builder()
+                .message("An error occurred")
+                .build()));
 
         formatService.displayError(exception, "Topic", "myTopic", cmd.getCommandSpec());
 
@@ -220,7 +219,7 @@ class FormatServiceTest {
         cmd.setErr(new PrintWriter(sw));
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse
-                .serverError());
+            .serverError());
 
         formatService.displayError(exception, "Topic", "myTopic", cmd.getCommandSpec());
 
@@ -234,12 +233,12 @@ class FormatServiceTest {
         cmd.setErr(new PrintWriter(sw));
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse
-                .serverError(Status.builder()
-                        .details(Status.StatusDetails.builder()
-                                .causes(List.of("Error 1", "Error 2", "Error 3", "Error 4", "Error 5"))
-                                .build())
-                        .message("An error occurred")
-                        .build()));
+            .serverError(Status.builder()
+                .details(Status.StatusDetails.builder()
+                    .causes(List.of("Error 1", "Error 2", "Error 3", "Error 4", "Error 5"))
+                    .build())
+                .message("An error occurred")
+                .build()));
 
         formatService.displayError(exception, "Topic", cmd.getCommandSpec());
 
@@ -258,9 +257,9 @@ class FormatServiceTest {
         cmd.setErr(new PrintWriter(sw));
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse
-                .serverError(Status.builder()
-                        .message("An error occurred")
-                        .build()));
+            .serverError(Status.builder()
+                .message("An error occurred")
+                .build()));
 
         formatService.displayError(exception, "Topic", cmd.getCommandSpec());
 
@@ -274,7 +273,7 @@ class FormatServiceTest {
         cmd.setErr(new PrintWriter(sw));
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse
-                .serverError());
+            .serverError());
 
         formatService.displayError(exception, "Topic", cmd.getCommandSpec());
 
@@ -288,12 +287,12 @@ class FormatServiceTest {
         cmd.setErr(new PrintWriter(sw));
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse
-                .serverError(Status.builder()
-                        .details(Status.StatusDetails.builder()
-                                .causes(List.of("Error 1", "Error 2", "Error 3", "Error 4", "Error 5"))
-                                .build())
-                        .message("An error occurred")
-                        .build()));
+            .serverError(Status.builder()
+                .details(Status.StatusDetails.builder()
+                    .causes(List.of("Error 1", "Error 2", "Error 3", "Error 4", "Error 5"))
+                    .build())
+                .message("An error occurred")
+                .build()));
 
         formatService.displayError(exception, cmd.getCommandSpec());
 
@@ -312,9 +311,9 @@ class FormatServiceTest {
         cmd.setErr(new PrintWriter(sw));
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse
-                .serverError(Status.builder()
-                        .message("An error occurred")
-                        .build()));
+            .serverError(Status.builder()
+                .message("An error occurred")
+                .build()));
 
         formatService.displayError(exception, cmd.getCommandSpec());
 
@@ -328,7 +327,7 @@ class FormatServiceTest {
         cmd.setErr(new PrintWriter(sw));
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse
-                .serverError());
+            .serverError());
 
         formatService.displayError(exception, cmd.getCommandSpec());
 

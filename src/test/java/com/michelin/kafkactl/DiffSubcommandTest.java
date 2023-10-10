@@ -38,14 +38,11 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class DiffSubcommandTest {
     @Mock
+    public FormatService formatService;
+    @Mock
     private LoginService loginService;
-
     @Mock
     private ApiResourcesService apiResourcesService;
-
-    @Mock
-    public FormatService formatService;
-
     @Mock
     private ResourceService resourceService;
 
@@ -170,7 +167,6 @@ class DiffSubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
-        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -179,6 +175,9 @@ class DiffSubcommandTest {
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenThrow(exception);
 
@@ -191,6 +190,36 @@ class DiffSubcommandTest {
 
     @Test
     void shouldNotDiffWhenHttpClientResponseExceptionDuringApply() {
+        Resource resource = Resource.builder()
+            .kind("Topic")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.topic")
+                .namespace("namespace")
+                .build())
+            .spec(Collections.emptyMap())
+            .build();
+
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
+            .thenReturn(Collections.singletonList(resource));
+        when(kafkactlConfig.getCurrentNamespace())
+            .thenReturn("namespace");
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+            .thenReturn(Optional.of(apiResource));
+
         Resource live = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
@@ -204,34 +233,6 @@ class DiffSubcommandTest {
             ))
             .build();
 
-        Resource resource = Resource.builder()
-            .kind("Topic")
-            .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
-                .name("prefix.topic")
-                .namespace("namespace")
-                .build())
-            .spec(Collections.emptyMap())
-            .build();
-
-        ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
-
-        kafkactlCommand.optionalNamespace = Optional.empty();
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
-        when(resourceService.parseResources(any(), anyBoolean(), any()))
-            .thenReturn(Collections.singletonList(resource));
-        when(kafkactlConfig.getCurrentNamespace())
-            .thenReturn("namespace");
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenReturn(Optional.of(apiResource));
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
             .thenReturn(live);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
@@ -245,6 +246,36 @@ class DiffSubcommandTest {
 
     @Test
     void shouldNotDiffApplyHasNoBody() {
+        Resource resource = Resource.builder()
+            .kind("Topic")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.topic")
+                .namespace("namespace")
+                .build())
+            .spec(Collections.emptyMap())
+            .build();
+
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
+            .thenReturn(Collections.singletonList(resource));
+        when(kafkactlConfig.getCurrentNamespace())
+            .thenReturn("namespace");
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+            .thenReturn(Optional.of(apiResource));
+
         Resource live = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
@@ -258,34 +289,6 @@ class DiffSubcommandTest {
             ))
             .build();
 
-        Resource resource = Resource.builder()
-            .kind("Topic")
-            .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
-                .name("prefix.topic")
-                .namespace("namespace")
-                .build())
-            .spec(Collections.emptyMap())
-            .build();
-
-        ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
-
-        kafkactlCommand.optionalNamespace = Optional.empty();
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
-        when(resourceService.parseResources(any(), anyBoolean(), any()))
-            .thenReturn(Collections.singletonList(resource));
-        when(kafkactlConfig.getCurrentNamespace())
-            .thenReturn("namespace");
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenReturn(Optional.of(apiResource));
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
             .thenReturn(live);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
@@ -299,19 +302,6 @@ class DiffSubcommandTest {
 
     @Test
     void shouldDiff() {
-        Resource live = Resource.builder()
-            .kind("Topic")
-            .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
-                .name("prefix.topic")
-                .namespace("namespace")
-                .build())
-            .spec(Map.of(
-                "replicationFactor", 3,
-                "partitions", 3
-            ))
-            .build();
-
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
@@ -326,14 +316,6 @@ class DiffSubcommandTest {
             ))
             .build();
 
-        ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
-
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -342,8 +324,31 @@ class DiffSubcommandTest {
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
+
+        Resource live = Resource.builder()
+            .kind("Topic")
+            .apiVersion("v1")
+            .metadata(ObjectMeta.builder()
+                .name("prefix.topic")
+                .namespace("namespace")
+                .build())
+            .spec(Map.of(
+                "replicationFactor", 3,
+                "partitions", 3
+            ))
+            .build();
+
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
             .thenReturn(live);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
@@ -385,14 +390,6 @@ class DiffSubcommandTest {
             ))
             .build();
 
-        ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
-
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -401,6 +398,15 @@ class DiffSubcommandTest {
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
@@ -445,14 +451,6 @@ class DiffSubcommandTest {
             .spec(specs)
             .build();
 
-        ApiResource apiResource = ApiResource.builder()
-            .kind("Schema")
-            .namespaced(true)
-            .synchronizable(false)
-            .path("schemas")
-            .names(List.of("schemas", "schema", "sc"))
-            .build();
-
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -462,6 +460,15 @@ class DiffSubcommandTest {
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
         doCallRealMethod().when(resourceService).enrichSchemaContent(any(), any());
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Schema")
+            .namespaced(true)
+            .synchronizable(false)
+            .path("schemas")
+            .names(List.of("schemas", "schema", "sc"))
+            .build();
+
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
@@ -507,14 +514,6 @@ class DiffSubcommandTest {
             .spec(specs)
             .build();
 
-        ApiResource apiResource = ApiResource.builder()
-            .kind("Schema")
-            .namespaced(true)
-            .synchronizable(false)
-            .path("schemas")
-            .names(List.of("schemas", "schema", "sc"))
-            .build();
-
         kafkactlCommand.optionalNamespace = Optional.empty();
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -523,6 +522,15 @@ class DiffSubcommandTest {
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Schema")
+            .namespaced(true)
+            .synchronizable(false)
+            .path("schemas")
+            .names(List.of("schemas", "schema", "sc"))
+            .build();
+
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))

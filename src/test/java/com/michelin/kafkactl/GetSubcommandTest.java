@@ -142,6 +142,12 @@ class GetSubcommandTest {
             .synchronizable(true)
             .build();
 
+        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+        when(apiResourcesService.getResourceDefinitionByName(any()))
+            .thenReturn(Optional.of(apiResource));
+
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
@@ -151,11 +157,6 @@ class GetSubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.of(apiResource));
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
             .thenReturn(resource);
 
@@ -195,13 +196,11 @@ class GetSubcommandTest {
 
     @Test
     void shouldGetAll() {
-        ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+        kafkactlCommand.optionalNamespace = Optional.empty();
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+        when(kafkactlConfig.getCurrentNamespace())
+            .thenReturn("namespace");
 
         ApiResource nonNamespacedApiResource = ApiResource.builder()
             .kind("Topic")
@@ -211,20 +210,14 @@ class GetSubcommandTest {
             .synchronizable(true)
             .build();
 
-        Resource resource = Resource.builder()
+        ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
-            .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
-                .name("prefix.topic")
-                .build())
-            .spec(Collections.emptyMap())
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.empty();
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
-        when(kafkactlConfig.getCurrentNamespace())
-            .thenReturn("namespace");
         when(apiResourcesService.listResourceDefinitions())
             .thenReturn(List.of(apiResource, nonNamespacedApiResource));
         when(resourceService.listAll(any(), any(), any()))

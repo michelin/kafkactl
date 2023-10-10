@@ -1,16 +1,15 @@
 package com.michelin.kafkactl.services;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.michelin.kafkactl.models.Resource;
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.io.File;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class FileServiceTest {
@@ -41,7 +40,8 @@ class FileServiceTest {
 
     @Test
     void shouldParseResourceListFromFiles() {
-        List<Resource> actual = fileService.parseResourceListFromFiles(Collections.singletonList(new File("src/test/resources/topics/topic.yml")));
+        List<Resource> actual = fileService.parseResourceListFromFiles(
+            Collections.singletonList(new File("src/test/resources/topics/topic.yml")));
         assertEquals("Topic", actual.get(0).getKind());
         assertEquals("myPrefix.topic", actual.get(0).getMetadata().getName());
         assertEquals(3, actual.get(0).getSpec().get("replicationFactor"));
@@ -51,7 +51,8 @@ class FileServiceTest {
     @Test
     void shouldParseResourceListFromString() {
         List<Resource> actual = fileService
-                .parseResourceListFromString("{\"apiVersion\": \"v1\", \"kind\": \"Topic\", \"metadata\": {\"name\": \"myTopic\"}}");
+            .parseResourceListFromString(
+                "{\"apiVersion\": \"v1\", \"kind\": \"Topic\", \"metadata\": {\"name\": \"myTopic\"}}");
 
         assertEquals(1, actual.size());
         assertEquals("v1", actual.get(0).getApiVersion());

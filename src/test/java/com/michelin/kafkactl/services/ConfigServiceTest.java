@@ -1,22 +1,28 @@
 package com.michelin.kafkactl.services;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+
 import com.michelin.kafkactl.KafkactlCommand;
 import com.michelin.kafkactl.config.KafkactlConfig;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
-
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ConfigServiceTest {
@@ -154,15 +160,6 @@ class ConfigServiceTest {
 
     @Test
     void shouldUpdateConfigurationContext() throws IOException {
-        KafkactlConfig.Context contextToSet = KafkactlConfig.Context.builder()
-            .name("name")
-            .definition(KafkactlConfig.Context.ApiContext.builder()
-                .userToken("userToken")
-                .api("https://ns4kafka.com")
-                .namespace("namespace")
-                .build())
-            .build();
-
         CommandLine cmd = new CommandLine(new KafkactlCommand());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
@@ -171,6 +168,17 @@ class ConfigServiceTest {
             .thenReturn("src/test/resources/config.yml");
 
         String backUp = Files.readString(Paths.get(kafkactlConfig.getConfigPath()));
+
+        assertFalse(backUp.contains("  current-namespace"));
+
+        KafkactlConfig.Context contextToSet = KafkactlConfig.Context.builder()
+            .name("name")
+            .definition(KafkactlConfig.Context.ApiContext.builder()
+                .userToken("userToken")
+                .api("https://ns4kafka.com")
+                .namespace("namespace")
+                .build())
+            .build();
 
         configService.updateConfigurationContext(contextToSet);
 
