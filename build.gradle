@@ -133,7 +133,16 @@ test {
     }
 }
 
+checkstyle {
+    toolVersion = '10.12.3'
+    configFile = file(".checkstyle/checkstyle.xml")
+    ignoreFailures = false
+    maxErrors = 0
+    maxWarnings = 0
+}
+
 import org.apache.tools.ant.filters.ReplaceTokens
+
 processResources {
     filesMatching("application.yml") {
         filter(ReplaceTokens, tokens: [version: project.version])
