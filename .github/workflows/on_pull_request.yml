@@ -52,7 +52,7 @@ jobs:
           report_paths: '**/build/test-results/test/TEST-*.xml'
 
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: kafkactl-jar
           path: ${{ github.workspace }}/build/libs/kafkactl-${{ steps.build_jar.outputs.current_version }}.jar
@@ -96,7 +96,7 @@ jobs:
           echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
 
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: kafkactl-linux
           path: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}
@@ -136,7 +136,7 @@ jobs:
         shell: cmd
 
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: kafkactl-windows
           path: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-*.exe
