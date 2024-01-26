@@ -182,7 +182,7 @@ class GetSubcommandTest {
             .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
-        when(resourceService.listAll(any(), any(), any()))
+        when(resourceService.listAll(any(), any(), any(), any()))
             .thenReturn(0);
 
         CommandLine cmd = new CommandLine(getSubcommand);
@@ -191,7 +191,8 @@ class GetSubcommandTest {
 
         int code = cmd.execute("topics");
         assertEquals(0, code);
-        verify(resourceService).listAll(Collections.singletonList(apiResource), "namespace", cmd.getCommandSpec());
+        verify(resourceService)
+            .listAll(Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec());
     }
 
     @Test
@@ -220,13 +221,14 @@ class GetSubcommandTest {
 
         when(apiResourcesService.listResourceDefinitions())
             .thenReturn(List.of(apiResource, nonNamespacedApiResource));
-        when(resourceService.listAll(any(), any(), any()))
+        when(resourceService.listAll(any(), any(), any(), any()))
             .thenReturn(0);
 
         CommandLine cmd = new CommandLine(getSubcommand);
 
         int code = cmd.execute("all");
         assertEquals(0, code);
-        verify(resourceService).listAll(Collections.singletonList(apiResource), "namespace", cmd.getCommandSpec());
+        verify(resourceService)
+            .listAll(Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec());
     }
 }

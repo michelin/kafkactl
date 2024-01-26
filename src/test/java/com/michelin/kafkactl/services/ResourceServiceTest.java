@@ -94,7 +94,9 @@ class ResourceServiceTest {
         when(namespacedClient.list(any(), any(), any()))
             .thenReturn(Collections.singletonList(resource));
 
-        int actual = resourceService.listAll(Collections.singletonList(apiResource), "namespace", cmd.getCommandSpec());
+        int actual = resourceService.listAll(
+            Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec()
+        );
 
         assertEquals(0, actual);
         verify(formatService).displayList("Topic", Collections.singletonList(resource), TABLE, cmd.getCommandSpec());
@@ -125,7 +127,9 @@ class ResourceServiceTest {
         when(nonNamespacedClient.list(any(), any()))
             .thenReturn(Collections.singletonList(resource));
 
-        int actual = resourceService.listAll(Collections.singletonList(apiResource), "namespace", cmd.getCommandSpec());
+        int actual = resourceService.listAll(
+            Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec()
+        );
 
         assertEquals(0, actual);
         verify(formatService).displayList("Topic", Collections.singletonList(resource), TABLE, cmd.getCommandSpec());
@@ -150,7 +154,9 @@ class ResourceServiceTest {
             .synchronizable(true)
             .build();
 
-        int actual = resourceService.listAll(Collections.singletonList(apiResource), "namespace", cmd.getCommandSpec());
+        int actual = resourceService.listAll(
+            Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec()
+        );
 
         assertEquals(0, actual);
         assertTrue(sw.toString().contains("No topic to display."));
@@ -174,7 +180,9 @@ class ResourceServiceTest {
         when(namespacedClient.list(any(), any(), any()))
             .thenThrow(exception);
 
-        int actual = resourceService.listAll(Collections.singletonList(apiResource), "namespace", cmd.getCommandSpec());
+        int actual = resourceService.listAll(
+            Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec()
+        );
 
         assertEquals(1, actual);
         verify(formatService).displayError(exception, cmd.getCommandSpec());
@@ -227,7 +235,7 @@ class ResourceServiceTest {
             .thenReturn(Collections.singletonList(connectorResource));
 
         int actual =
-            resourceService.listAll(List.of(apiResourceOne, apiResourceTwo), "namespace", cmd.getCommandSpec());
+            resourceService.listAll(List.of(apiResourceOne, apiResourceTwo), "namespace", TABLE, cmd.getCommandSpec());
 
         assertEquals(0, actual);
         verify(formatService).displayList("Topic", Collections.singletonList(topicResource), TABLE,
@@ -274,7 +282,7 @@ class ResourceServiceTest {
             .thenThrow(exception);
 
         int actual =
-            resourceService.listAll(List.of(apiResourceOne, apiResourceTwo), "namespace", cmd.getCommandSpec());
+            resourceService.listAll(List.of(apiResourceOne, apiResourceTwo), "namespace", TABLE, cmd.getCommandSpec());
 
         assertEquals(1, actual);
         verify(formatService).displayList("Topic", Collections.singletonList(topicResource), TABLE,

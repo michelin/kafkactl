@@ -66,7 +66,7 @@ public class GetSubcommand extends AuthenticatedCommand {
 
         // List resources based on parameters
         if (resourceName.isEmpty() || apiResources.size() > 1) {
-            return resourceService.listAll(apiResources, namespace, commandSpec);
+            return resourceService.listAll(apiResources, namespace, output, commandSpec);
         }
 
         try {

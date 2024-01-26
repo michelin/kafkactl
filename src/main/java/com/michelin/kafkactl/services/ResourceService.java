@@ -61,13 +61,14 @@ public class ResourceService {
      * @param commandSpec  The command that triggered the action
      * @return A map of resource type and list of resources
      */
-    public int listAll(List<ApiResource> apiResources, String namespace, CommandLine.Model.CommandSpec commandSpec) {
+    public int listAll(List<ApiResource> apiResources, String namespace,
+                       String output, CommandLine.Model.CommandSpec commandSpec) {
         // Get a single kind of resources
         if (apiResources.size() == 1) {
             try {
                 List<Resource> resources = listResourcesWithType(apiResources.get(0), namespace);
                 if (!resources.isEmpty()) {
-                    formatService.displayList(resources.get(0).getKind(), resources, TABLE, commandSpec);
+                    formatService.displayList(resources.get(0).getKind(), resources, output, commandSpec);
                 } else {
                     commandSpec.commandLine().getOut()
                         .println("No " + formatService.prettifyKind(apiResources.get(0).getKind()).toLowerCase()
@@ -87,7 +88,7 @@ public class ResourceService {
                 try {
                     List<Resource> resources = listResourcesWithType(apiResource, namespace);
                     if (!resources.isEmpty()) {
-                        formatService.displayList(resources.get(0).getKind(), resources, TABLE, commandSpec);
+                        formatService.displayList(resources.get(0).getKind(), resources, output, commandSpec);
                     }
                     return 0;
                 } catch (HttpClientResponseException exception) {
