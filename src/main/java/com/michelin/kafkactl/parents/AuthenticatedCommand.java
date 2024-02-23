@@ -71,11 +71,11 @@ public abstract class AuthenticatedCommand implements Callable<Integer> {
         if (!namespaceMismatch.isEmpty()) {
             String invalid = namespaceMismatch
                 .stream()
-                .map(resource -> resource.getKind() + "/" + resource.getMetadata().getName())
+                .map(resource -> "\"" + resource.getKind() + "/" + resource.getMetadata().getName() + "\"")
                 .distinct()
                 .collect(Collectors.joining(", "));
             throw new CommandLine.ParameterException(commandSpec.commandLine(),
-                "Namespace mismatch between Kafkactl and YAML document " + invalid + ".");
+                "Namespace mismatch between Kafkactl configuration and YAML resource(s): " + invalid + ".");
         }
     }
 

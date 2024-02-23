@@ -21,7 +21,7 @@ import lombok.ToString;
 @ReflectiveAccess
 @NoArgsConstructor
 @AllArgsConstructor
-public class ObjectMeta {
+public class Metadata {
     private String name;
     private String namespace;
     private String cluster;

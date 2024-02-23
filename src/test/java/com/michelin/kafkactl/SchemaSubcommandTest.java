@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.config.KafkactlConfig;
-import com.michelin.kafkactl.models.ObjectMeta;
+import com.michelin.kafkactl.models.Metadata;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
@@ -79,7 +79,7 @@ class SchemaSubcommandTest {
         Resource resource = Resource.builder()
             .kind("SchemaCompatibilityState")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.schema-value")
                 .namespace("namespace")
                 .build())

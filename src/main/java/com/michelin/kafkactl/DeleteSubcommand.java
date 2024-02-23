@@ -1,7 +1,7 @@
 package com.michelin.kafkactl;
 
 import com.michelin.kafkactl.models.ApiResource;
-import com.michelin.kafkactl.models.ObjectMeta;
+import com.michelin.kafkactl.models.Metadata;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.parents.DryRunCommand;
 import com.michelin.kafkactl.services.FileService;
@@ -105,7 +105,7 @@ public class DeleteSubcommand extends DryRunCommand {
         }
         // Generate a single resource with minimum details from input
         return List.of(Resource.builder()
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name(config.nameConfig.name)
                 .namespace(namespace)
                 .build())

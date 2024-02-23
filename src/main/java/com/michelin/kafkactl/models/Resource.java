@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class Resource {
     private String apiVersion;
     private String kind;
-    private ObjectMeta metadata;
+    private Metadata metadata;
     @JsonInclude(value = JsonInclude.Include.NON_ABSENT)
     private Map<String, Object> spec;
     private Object status;

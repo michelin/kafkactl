@@ -3,7 +3,7 @@ package com.michelin.kafkactl;
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.RESOURCE_DEFINITION;
 
-import com.michelin.kafkactl.models.ObjectMeta;
+import com.michelin.kafkactl.models.Metadata;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.parents.AuthenticatedCommand;
 import com.michelin.kafkactl.services.FormatService;
@@ -44,7 +44,7 @@ public class ApiResourcesSubcommand extends AuthenticatedCommand {
             List<Resource> resources = apiResourcesService.listResourceDefinitions()
                 .stream()
                 .map(apiResource -> Resource.builder()
-                    .metadata(ObjectMeta.builder()
+                    .metadata(Metadata.builder()
                         .name(apiResource.getKind())
                         .build())
                     .spec(Map.of("names", String.join(",", apiResource.getNames()),
