@@ -152,7 +152,8 @@ class DiffSubcommandTest {
 
         int code = cmd.execute("-f", "topic.yml");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains("Namespace mismatch between Kafkactl and YAML document Topic/prefix.topic."));
+        assertTrue(sw.toString().contains("Namespace mismatch between Kafkactl configuration and YAML resource(s): "
+            + "\"Topic/prefix.topic\"."));
     }
 
     @Test
