@@ -13,7 +13,7 @@ import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
-import com.michelin.kafkactl.models.ObjectMeta;
+import com.michelin.kafkactl.models.Metadata;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FormatService;
@@ -104,7 +104,7 @@ class DiffSubcommandTest {
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.topic")
                 .build())
             .spec(Collections.emptyMap())
@@ -132,7 +132,7 @@ class DiffSubcommandTest {
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.topic")
                 .namespace("namespace")
                 .build())
@@ -152,7 +152,8 @@ class DiffSubcommandTest {
 
         int code = cmd.execute("-f", "topic.yml");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains("Namespace mismatch between Kafkactl and YAML document Topic/prefix.topic."));
+        assertTrue(sw.toString().contains("Namespace mismatch between Kafkactl configuration and YAML resource(s): "
+            + "\"Topic/prefix.topic\"."));
     }
 
     @Test
@@ -160,7 +161,7 @@ class DiffSubcommandTest {
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.topic")
                 .namespace("namespace")
                 .build())
@@ -193,7 +194,7 @@ class DiffSubcommandTest {
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.topic")
                 .namespace("namespace")
                 .build())
@@ -223,7 +224,7 @@ class DiffSubcommandTest {
         Resource live = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.topic")
                 .namespace("namespace")
                 .build())
@@ -249,7 +250,7 @@ class DiffSubcommandTest {
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.topic")
                 .namespace("namespace")
                 .build())
@@ -279,7 +280,7 @@ class DiffSubcommandTest {
         Resource live = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.topic")
                 .namespace("namespace")
                 .build())
@@ -305,7 +306,7 @@ class DiffSubcommandTest {
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.topic")
                 .namespace("namespace")
                 .build())
@@ -339,7 +340,7 @@ class DiffSubcommandTest {
         Resource live = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.topic")
                 .namespace("namespace")
                 .build())
@@ -379,7 +380,7 @@ class DiffSubcommandTest {
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.topic")
                 .namespace("namespace")
                 .build())
@@ -444,7 +445,7 @@ class DiffSubcommandTest {
         Resource resource = Resource.builder()
             .kind("Schema")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.schema")
                 .namespace("namespace")
                 .build())
@@ -507,7 +508,7 @@ class DiffSubcommandTest {
         Resource resource = Resource.builder()
             .kind("Schema")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.schema")
                 .namespace("namespace")
                 .build())
@@ -564,7 +565,7 @@ class DiffSubcommandTest {
         Resource resource = Resource.builder()
             .kind("Schema")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.schema")
                 .namespace("namespace")
                 .build())

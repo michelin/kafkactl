@@ -4,7 +4,7 @@ import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.CONTEXT;
 
 import com.michelin.kafkactl.config.KafkactlConfig;
-import com.michelin.kafkactl.models.ObjectMeta;
+import com.michelin.kafkactl.models.Metadata;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.ConfigService;
 import com.michelin.kafkactl.services.FormatService;
@@ -78,7 +78,7 @@ public class ConfigSubcommand implements Callable<Integer> {
 
             String currentContextName = configService.getCurrentContextName();
             Resource currentContextAsResource = Resource.builder()
-                .metadata(ObjectMeta.builder()
+                .metadata(Metadata.builder()
                     .name(currentContextName != null ? currentContextName : StringUtils.EMPTY_STRING)
                     .build())
                 .spec(specs)
@@ -102,7 +102,7 @@ public class ConfigSubcommand implements Callable<Integer> {
                 specs.put("token", userContext.getDefinition().getUserToken());
 
                 Resource currentContextAsResource = Resource.builder()
-                    .metadata(ObjectMeta.builder()
+                    .metadata(Metadata.builder()
                         .name(userContext.getName())
                         .build())
                     .spec(specs)

@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.ApiResource;
-import com.michelin.kafkactl.models.ObjectMeta;
+import com.michelin.kafkactl.models.Metadata;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.ApiResourcesService;
 import com.michelin.kafkactl.services.FileService;
@@ -101,7 +101,7 @@ class DeleteSubcommandTest {
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.topic")
                 .namespace("namespace")
                 .build())
@@ -147,7 +147,7 @@ class DeleteSubcommandTest {
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.topic")
                 .namespace("namespace")
                 .build())
@@ -163,7 +163,8 @@ class DeleteSubcommandTest {
 
         int code = cmd.execute("-f", "topic");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains("Namespace mismatch between Kafkactl and YAML document Topic/prefix.topic."));
+        assertTrue(sw.toString().contains("Namespace mismatch between Kafkactl configuration and YAML resource(s): "
+            + "\"Topic/prefix.topic\"."));
     }
 
     @Test
@@ -177,7 +178,7 @@ class DeleteSubcommandTest {
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.topic")
                 .namespace("namespace")
                 .build())
@@ -247,7 +248,7 @@ class DeleteSubcommandTest {
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.topic")
                 .build())
             .spec(Collections.emptyMap())
@@ -289,7 +290,7 @@ class DeleteSubcommandTest {
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.topic")
                 .namespace("namespace")
                 .build())
@@ -329,7 +330,7 @@ class DeleteSubcommandTest {
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .name("prefix.topic")
                 .namespace("namespace")
                 .build())

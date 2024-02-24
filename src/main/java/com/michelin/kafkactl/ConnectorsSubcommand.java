@@ -5,7 +5,7 @@ import static com.michelin.kafkactl.utils.constants.ConstantKind.CHANGE_CONNECTO
 import static com.michelin.kafkactl.utils.constants.ConstantKind.CONNECTOR;
 
 import com.michelin.kafkactl.models.ApiResource;
-import com.michelin.kafkactl.models.ObjectMeta;
+import com.michelin.kafkactl.models.Metadata;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.parents.AuthenticatedCommand;
 import com.michelin.kafkactl.services.FormatService;
@@ -72,7 +72,7 @@ public class ConnectorsSubcommand extends AuthenticatedCommand {
             List<Resource> changeConnectorResponses = connectors.stream()
                 // Prepare request object
                 .map(connector -> Resource.builder()
-                    .metadata(ObjectMeta.builder()
+                    .metadata(Metadata.builder()
                         .namespace(namespace)
                         .name(connector)
                         .build())

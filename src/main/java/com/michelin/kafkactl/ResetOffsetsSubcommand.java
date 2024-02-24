@@ -1,6 +1,6 @@
 package com.michelin.kafkactl;
 
-import com.michelin.kafkactl.models.ObjectMeta;
+import com.michelin.kafkactl.models.Metadata;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.parents.DryRunCommand;
 import com.michelin.kafkactl.services.FormatService;
@@ -84,7 +84,7 @@ public class ResetOffsetsSubcommand extends DryRunCommand {
         Resource consumerGroupResetOffset = Resource.builder()
             .apiVersion("v1")
             .kind("ConsumerGroupResetOffsets")
-            .metadata(ObjectMeta.builder()
+            .metadata(Metadata.builder()
                 .namespace(namespace)
                 .name(group)
                 .build())
