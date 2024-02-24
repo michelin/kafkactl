@@ -88,7 +88,7 @@ dockerfile {
 dockerfileNative {
     baseImage("ubuntu:22.04")
     editDockerfile {
-        after('COPY --from=graalvm /home/app/application /app/application') {
+        after('COPY --link --from=graalvm /home/app/application /app/application') {
             insert('RUN ln -s /app/application /usr/bin/kafkactl && chmod 777 /usr/bin/kafkactl')
         }
     }
