@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.services.ConfigService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import java.io.PrintWriter;
@@ -30,6 +31,9 @@ class UsersSubcommandTest {
     public ResourceService resourceService;
 
     @Mock
+    private ConfigService configService;
+
+    @Mock
     public KafkactlConfig kafkactlConfig;
 
     @Mock
@@ -39,7 +43,24 @@ class UsersSubcommandTest {
     private UsersSubcommand usersSubcommand;
 
     @Test
+    void shouldReturnInvalidCurrentContext() {
+        CommandLine cmd = new CommandLine(usersSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(false);
+
+        int code = cmd.execute("user");
+        assertEquals(1, code);
+        assertTrue(sw.toString().contains("No valid current context found. "
+            + "Use \"kafkactl config use-context\" to set a valid context."));
+    }
+
+    @Test
     void shouldNotUpdateUserWhenNotAuthenticated() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(false);
 
@@ -51,6 +72,8 @@ class UsersSubcommandTest {
 
     @Test
     void shouldNotUpdateUserWhenUnknownOutput() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
 
@@ -67,6 +90,8 @@ class UsersSubcommandTest {
     void shouldNotUpdateUserWhenNotConfirmed() {
         kafkactlCommand.optionalNamespace = Optional.empty();
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
@@ -87,6 +112,8 @@ class UsersSubcommandTest {
     void shouldUpdateUser() {
         kafkactlCommand.optionalNamespace = Optional.empty();
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())

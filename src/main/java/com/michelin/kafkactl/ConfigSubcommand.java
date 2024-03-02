@@ -89,8 +89,8 @@ public class ConfigSubcommand implements Callable<Integer> {
         }
 
         if (kafkactlConfig.getContexts().isEmpty()) {
-            commandSpec.commandLine().getOut().println("No context pre-defined.");
-            return 0;
+            commandSpec.commandLine().getErr().println("No context pre-defined.");
+            return 1;
         }
 
         if (action.equals(ConfigAction.GET_CONTEXTS)) {

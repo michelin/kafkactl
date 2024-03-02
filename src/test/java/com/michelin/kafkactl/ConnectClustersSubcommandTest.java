@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.services.ConfigService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import java.io.PrintWriter;
@@ -30,6 +31,9 @@ class ConnectClustersSubcommandTest {
     private ResourceService resourceService;
 
     @Mock
+    private ConfigService configService;
+
+    @Mock
     private LoginService loginService;
 
     @Mock
@@ -39,11 +43,28 @@ class ConnectClustersSubcommandTest {
     private ConnectClustersSubcommand connectClustersSubcommand;
 
     @Test
+    void shouldReturnInvalidCurrentContext() {
+        CommandLine cmd = new CommandLine(connectClustersSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(false);
+
+        int code = cmd.execute("vaults");
+        assertEquals(1, code);
+        assertTrue(sw.toString().contains("No valid current context found. "
+            + "Use \"kafkactl config use-context\" to set a valid context."));
+    }
+
+    @Test
     void shouldNotExecuteWhenNotLoggedIn() {
         CommandLine cmd = new CommandLine(connectClustersSubcommand);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(false);
 
@@ -53,6 +74,8 @@ class ConnectClustersSubcommandTest {
 
     @Test
     void shouldListAvailableVaultsClustersSuccess() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
 
@@ -70,6 +93,8 @@ class ConnectClustersSubcommandTest {
 
     @Test
     void shouldListAvailableVaultsClustersFail() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
 
@@ -87,6 +112,8 @@ class ConnectClustersSubcommandTest {
 
     @Test
     void shouldDisplayErrorMessageWhenNoSecretsPassed() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();
@@ -103,6 +130,8 @@ class ConnectClustersSubcommandTest {
 
     @Test
     void shouldVaultSuccess() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         kafkactlCommand.optionalNamespace = Optional.empty();

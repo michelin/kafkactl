@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.services.ConfigService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
 import java.io.PrintWriter;
@@ -35,6 +36,9 @@ class ResetOffsetsSubcommandTest {
     public ResourceService resourceService;
 
     @Mock
+    private ConfigService configService;
+
+    @Mock
     public KafkactlConfig kafkactlConfig;
 
     @Mock
@@ -44,7 +48,24 @@ class ResetOffsetsSubcommandTest {
     private ResetOffsetsSubcommand resetOffsetsSubcommand;
 
     @Test
+    void shouldReturnInvalidCurrentContext() {
+        CommandLine cmd = new CommandLine(resetOffsetsSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(false);
+
+        int code = cmd.execute("--group", "myGroup", "--all-topics", "--to-earliest");
+        assertEquals(1, code);
+        assertTrue(sw.toString().contains("No valid current context found. "
+            + "Use \"kafkactl config use-context\" to set a valid context."));
+    }
+
+    @Test
     void shouldNotResetWhenNotAuthenticated() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(false);
 
@@ -63,6 +84,9 @@ class ResetOffsetsSubcommandTest {
         "--shift-by=10,SHIFT_BY"})
     void shouldResetOffsetsToEarliest(String method, String expectedMethod) {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
@@ -80,6 +104,9 @@ class ResetOffsetsSubcommandTest {
     @Test
     void shouldResetOffsetsToEarliestDryRun() {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
@@ -100,6 +127,9 @@ class ResetOffsetsSubcommandTest {
     @Test
     void shouldResetOffsetsByDuration() {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
@@ -118,6 +148,9 @@ class ResetOffsetsSubcommandTest {
     @Test
     void shouldResetOffsetsToOffset() {
         kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())

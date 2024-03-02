@@ -99,6 +99,7 @@ public class LoginService {
                     UNEXPECTED_ERROR, e.getMessage(), e.getStatus().getCode()));
             }
         }
+
         return false;
     }
 
