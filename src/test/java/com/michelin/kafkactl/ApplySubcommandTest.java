@@ -16,6 +16,7 @@ import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Metadata;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.ApiResourcesService;
+import com.michelin.kafkactl.services.ConfigService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
@@ -50,6 +51,9 @@ class ApplySubcommandTest {
     public ApiResourcesService apiResourcesService;
 
     @Mock
+    private ConfigService configService;
+
+    @Mock
     private KafkactlConfig kafkactlConfig;
 
     @Mock
@@ -59,11 +63,28 @@ class ApplySubcommandTest {
     private ApplySubcommand applySubcommand;
 
     @Test
+    void shouldReturnInvalidCurrentContext() {
+        CommandLine cmd = new CommandLine(applySubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(false);
+
+        int code = cmd.execute();
+        assertEquals(1, code);
+        assertTrue(sw.toString().contains("No valid current context found. "
+            + "Use \"kafkactl config use-context\" to set a valid context."));
+    }
+
+    @Test
     void shouldNotApplyWhenNotAuthenticated() {
         CommandLine cmd = new CommandLine(applySubcommand);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(false);
 
@@ -77,6 +98,8 @@ class ApplySubcommandTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
 
@@ -91,6 +114,8 @@ class ApplySubcommandTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
@@ -104,6 +129,15 @@ class ApplySubcommandTest {
 
     @Test
     void shouldNotApplyWhenInvalidResources() {
+        CommandLine cmd = new CommandLine(applySubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
@@ -113,12 +147,6 @@ class ApplySubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
-        CommandLine cmd = new CommandLine(applySubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setErr(new PrintWriter(sw));
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
         doThrow(new CommandLine.ParameterException(cmd.getCommandSpec().commandLine(),
@@ -132,6 +160,13 @@ class ApplySubcommandTest {
 
     @Test
     void shouldNotApplyWhenNamespaceMismatch() {
+        kafkactlCommand.optionalNamespace = Optional.of("namespaceMismatch");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
@@ -142,10 +177,6 @@ class ApplySubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.of("namespaceMismatch");
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
 
@@ -171,6 +202,8 @@ class ApplySubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
@@ -193,6 +226,13 @@ class ApplySubcommandTest {
 
     @Test
     void shouldApply() {
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
@@ -203,10 +243,6 @@ class ApplySubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.empty();
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
@@ -238,6 +274,13 @@ class ApplySubcommandTest {
 
     @Test
     void shouldApplyDryRun() {
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
@@ -247,10 +290,6 @@ class ApplySubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.empty();
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
@@ -286,6 +325,13 @@ class ApplySubcommandTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE, "src/test/resources/person.avsc");
 
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Schema")
             .apiVersion("v1")
@@ -296,10 +342,6 @@ class ApplySubcommandTest {
             .spec(specs)
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.empty();
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
@@ -336,6 +378,13 @@ class ApplySubcommandTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put("schema", "{schema}");
 
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Schema")
             .apiVersion("v1")
@@ -346,10 +395,6 @@ class ApplySubcommandTest {
             .spec(specs)
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.empty();
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
@@ -383,6 +428,13 @@ class ApplySubcommandTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE, "src/test/resources/not-exist.avsc");
 
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Schema")
             .apiVersion("v1")
@@ -393,10 +445,6 @@ class ApplySubcommandTest {
             .spec(specs)
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.empty();
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())

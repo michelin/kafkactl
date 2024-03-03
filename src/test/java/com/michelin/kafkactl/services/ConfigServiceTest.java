@@ -192,4 +192,54 @@ class ConfigServiceTest {
         writer.append(backUp);
         writer.close();
     }
+
+    @Test
+    void shouldBeValid() {
+        when(kafkactlConfig.getApi())
+            .thenReturn("https://ns4kafka.com");
+        when(kafkactlConfig.getCurrentNamespace())
+            .thenReturn("namespace");
+        when(kafkactlConfig.getUserToken())
+            .thenReturn("userToken");
+
+        boolean actual = configService.isCurrentContextValid();
+
+        assertTrue(actual);
+    }
+
+    @Test
+    void shouldBeInvalidWhenApiIsNull() {
+        when(kafkactlConfig.getApi())
+            .thenReturn(null);
+
+        boolean actual = configService.isCurrentContextValid();
+
+        assertFalse(actual);
+    }
+
+    @Test
+    void shouldBeInvalidWhenCurrentNamespaceIsNull() {
+        when(kafkactlConfig.getApi())
+            .thenReturn("https://ns4kafka.com");
+        when(kafkactlConfig.getCurrentNamespace())
+            .thenReturn(null);
+
+        boolean actual = configService.isCurrentContextValid();
+
+        assertFalse(actual);
+    }
+
+    @Test
+    void shouldBeInvalidWhenUserTokenIsNull() {
+        when(kafkactlConfig.getApi())
+            .thenReturn("https://ns4kafka.com");
+        when(kafkactlConfig.getCurrentNamespace())
+            .thenReturn("namespace");
+        when(kafkactlConfig.getUserToken())
+            .thenReturn(null);
+
+        boolean actual = configService.isCurrentContextValid();
+
+        assertFalse(actual);
+    }
 }

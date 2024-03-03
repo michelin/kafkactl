@@ -13,6 +13,7 @@ import com.michelin.kafkactl.models.ApiResource;
 import com.michelin.kafkactl.models.Metadata;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.ApiResourcesService;
+import com.michelin.kafkactl.services.ConfigService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
@@ -45,6 +46,9 @@ class GetSubcommandTest {
     public ResourceService resourceService;
 
     @Mock
+    private ConfigService configService;
+
+    @Mock
     public KafkactlConfig kafkactlConfig;
 
     @Mock
@@ -54,7 +58,24 @@ class GetSubcommandTest {
     private GetSubcommand getSubcommand;
 
     @Test
+    void shouldReturnInvalidCurrentContext() {
+        CommandLine cmd = new CommandLine(getSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(false);
+
+        int code = cmd.execute("topics");
+        assertEquals(1, code);
+        assertTrue(sw.toString().contains("No valid current context found. "
+            + "Use \"kafkactl config use-context\" to set a valid context."));
+    }
+
+    @Test
     void shouldNotGetWhenNotAuthenticated() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(false);
 
@@ -76,6 +97,8 @@ class GetSubcommandTest {
             .synchronizable(true)
             .build();
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any()))
@@ -92,6 +115,8 @@ class GetSubcommandTest {
 
     @Test
     void shouldNotGetWhenServerNotHaveResourceType() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any()))
@@ -108,6 +133,13 @@ class GetSubcommandTest {
 
     @Test
     void shouldNotGetWhenHttpClientThrowException() {
+        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
@@ -115,10 +147,7 @@ class GetSubcommandTest {
             .namespaced(true)
             .synchronizable(true)
             .build();
-
-        kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        
         when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
         HttpClientResponseException e = new HttpClientResponseException("error", HttpResponse.serverError());
@@ -134,6 +163,13 @@ class GetSubcommandTest {
 
     @Test
     void shouldGetSingleResource() {
+        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
@@ -142,9 +178,6 @@ class GetSubcommandTest {
             .synchronizable(true)
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
 
@@ -169,6 +202,13 @@ class GetSubcommandTest {
 
     @Test
     void shouldGetAllTopicsSuccess() {
+        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
@@ -177,9 +217,6 @@ class GetSubcommandTest {
             .synchronizable(true)
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
         when(resourceService.listAll(any(), any(), any(), any()))
@@ -198,6 +235,9 @@ class GetSubcommandTest {
     @Test
     void shouldGetAll() {
         kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())

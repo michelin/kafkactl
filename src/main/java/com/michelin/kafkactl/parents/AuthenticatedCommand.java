@@ -1,9 +1,11 @@
 package com.michelin.kafkactl.parents;
 
+import com.michelin.kafkactl.ConfigSubcommand;
 import com.michelin.kafkactl.KafkactlCommand;
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.Resource;
 import com.michelin.kafkactl.services.ApiResourcesService;
+import com.michelin.kafkactl.services.ConfigService;
 import com.michelin.kafkactl.services.LoginService;
 import jakarta.inject.Inject;
 import java.io.IOException;
@@ -24,6 +26,9 @@ public abstract class AuthenticatedCommand implements Callable<Integer> {
     public ApiResourcesService apiResourcesService;
 
     @Inject
+    public ConfigService configService;
+
+    @Inject
     public KafkactlConfig kafkactlConfig;
 
     @CommandLine.ParentCommand
@@ -40,6 +45,14 @@ public abstract class AuthenticatedCommand implements Callable<Integer> {
      */
     @Override
     public Integer call() throws IOException {
+        if (!configService.isCurrentContextValid()) {
+            CommandLine configSubcommand = new CommandLine(new ConfigSubcommand());
+            commandSpec.commandLine().getErr().println("No valid current context found. Use \"kafkactl "
+                + configSubcommand.getCommandName() + " "
+                + ConfigSubcommand.ConfigAction.USE_CONTEXT + "\" to set a valid context.");
+            return 1;
+        }
+
         if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
             return 1;
         }

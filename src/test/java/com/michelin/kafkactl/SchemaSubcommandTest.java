@@ -3,6 +3,7 @@ package com.michelin.kafkactl;
 import static com.michelin.kafkactl.services.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.SCHEMA_COMPATIBILITY_STATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -13,9 +14,12 @@ import static org.mockito.Mockito.when;
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.models.Metadata;
 import com.michelin.kafkactl.models.Resource;
+import com.michelin.kafkactl.services.ConfigService;
 import com.michelin.kafkactl.services.FormatService;
 import com.michelin.kafkactl.services.LoginService;
 import com.michelin.kafkactl.services.ResourceService;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -34,6 +38,9 @@ class SchemaSubcommandTest {
     public ResourceService resourceService;
 
     @Mock
+    private ConfigService configService;
+
+    @Mock
     public KafkactlConfig kafkactlConfig;
 
     @Mock
@@ -46,7 +53,24 @@ class SchemaSubcommandTest {
     private SchemaSubcommand schemaSubcommand;
 
     @Test
+    void shouldReturnInvalidCurrentContext() {
+        CommandLine cmd = new CommandLine(schemaSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(false);
+
+        int code = cmd.execute("backward", "mySubject");
+        assertEquals(1, code);
+        assertTrue(sw.toString().contains("No valid current context found. "
+            + "Use \"kafkactl config use-context\" to set a valid context."));
+    }
+
+    @Test
     void shouldNotUpdateCompatWhenNotAuthenticated() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(false);
 
@@ -58,6 +82,8 @@ class SchemaSubcommandTest {
 
     @Test
     void shouldNotUpdateCompatWhenEmptyResponseList() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(resourceService.changeSchemaCompatibility(any(), any(), any(), any()))
@@ -86,6 +112,8 @@ class SchemaSubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(resourceService.changeSchemaCompatibility(any(), any(), any(), any()))

@@ -82,4 +82,14 @@ public class ConfigService {
 
         loginService.deleteJwtFile();
     }
+
+    /**
+     * Check if the current context is valid.
+     *
+     * @return True if the current context is valid, false otherwise
+     */
+    public boolean isCurrentContextValid() {
+        return kafkactlConfig.getApi() != null && kafkactlConfig.getCurrentNamespace() != null
+            && kafkactlConfig.getUserToken() != null;
+    }
 }

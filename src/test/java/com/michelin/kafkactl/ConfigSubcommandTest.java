@@ -66,10 +66,10 @@ class ConfigSubcommandTest {
 
         CommandLine cmd = new CommandLine(configSubcommand);
         StringWriter sw = new StringWriter();
-        cmd.setOut(new PrintWriter(sw));
+        cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("get-contexts");
-        assertEquals(0, code);
+        assertEquals(1, code);
         assertTrue(sw.toString().contains("No context pre-defined."));
     }
 
