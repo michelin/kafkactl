@@ -30,6 +30,9 @@ class DeleteRecordsSubcommandTest {
     private ResourceService resourceService;
 
     @Mock
+    private ConfigService configService;
+
+    @Mock
     private KafkactlConfig kafkactlConfig;
 
     @Mock
@@ -39,7 +42,24 @@ class DeleteRecordsSubcommandTest {
     private DeleteRecordsSubcommand deleteRecordsSubcommand;
 
     @Test
+    void shouldReturnInvalidCurrentContext() {
+        CommandLine cmd = new CommandLine(deleteRecordsSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(false);
+
+        int code = cmd.execute("topic");
+        assertEquals(1, code);
+        assertTrue(sw.toString().contains("No valid current context found. "
+            + "Use \"kafkactl config use-context\" to set a valid context."));
+    }
+
+    @Test
     void shouldNotDeleteWhenNotAuthenticated() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(false);
 
@@ -55,6 +75,8 @@ class DeleteRecordsSubcommandTest {
     void shouldDeleteDryRunSuccess() {
         kafkactlCommand.optionalNamespace = Optional.empty();
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
@@ -75,6 +97,8 @@ class DeleteRecordsSubcommandTest {
     void shouldDeleteSuccess() {
         kafkactlCommand.optionalNamespace = Optional.empty();
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
@@ -92,6 +116,8 @@ class DeleteRecordsSubcommandTest {
     void shouldDeleteFail() {
         kafkactlCommand.optionalNamespace = Optional.empty();
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())

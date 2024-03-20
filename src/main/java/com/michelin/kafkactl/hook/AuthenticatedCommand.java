@@ -24,6 +24,9 @@ public abstract class AuthenticatedCommand implements Callable<Integer> {
     public ApiResourcesService apiResourcesService;
 
     @Inject
+    public ConfigService configService;
+
+    @Inject
     public KafkactlConfig kafkactlConfig;
 
     @CommandLine.ParentCommand
@@ -40,7 +43,19 @@ public abstract class AuthenticatedCommand implements Callable<Integer> {
      */
     @Override
     public Integer call() throws IOException {
-        return loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose) ? onAuthSuccess() : 1;
+        if (!configService.isCurrentContextValid()) {
+            CommandLine configSubcommand = new CommandLine(new ConfigSubcommand());
+            commandSpec.commandLine().getErr().println("No valid current context found. Use \"kafkactl "
+                + configSubcommand.getCommandName() + " "
+                + ConfigSubcommand.ConfigAction.USE_CONTEXT + "\" to set a valid context.");
+            return 1;
+        }
+
+        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
+            return 1;
+        }
+
+        return onAuthSuccess();
     }
 
     /**

@@ -53,13 +53,33 @@ class ConnectorsSubcommandTest {
     private FormatService formatService;
 
     @Mock
+    private ConfigService configService;
+
+    @Mock
     private KafkactlCommand kafkactlCommand;
 
     @InjectMocks
     private ConnectorsSubcommand connectorsSubcommand;
 
     @Test
+    void shouldReturnInvalidCurrentContext() {
+        CommandLine cmd = new CommandLine(connectorsSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(false);
+
+        int code = cmd.execute("pause", "my-connector");
+        assertEquals(1, code);
+        assertTrue(sw.toString().contains("No valid current context found. "
+            + "Use \"kafkactl config use-context\" to set a valid context."));
+    }
+
+    @Test
     void shouldNotChangeStateWhenNotAuthenticated() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(false);
 
@@ -73,6 +93,8 @@ class ConnectorsSubcommandTest {
 
     @Test
     void shouldNotChangeStateWhenEmptyConnectorsList() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(resourceService.changeConnectorState(any(), any(), any(), any()))
@@ -103,6 +125,8 @@ class ConnectorsSubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(resourceService.changeConnectorState(any(), any(), any(), any()))
@@ -139,6 +163,8 @@ class ConnectorsSubcommandTest {
             .names(List.of("connects", "connect", "co"))
             .build();
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any()))
@@ -161,6 +187,13 @@ class ConnectorsSubcommandTest {
 
     @Test
     void shouldNotChangeStateWhenHttpClientResponseException() {
+        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         ApiResource apiResource = ApiResource.builder()
             .kind("Connector")
             .namespaced(true)
@@ -169,10 +202,6 @@ class ConnectorsSubcommandTest {
             .names(List.of("connects", "connect", "co"))
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.of("namespace");
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
 
@@ -190,6 +219,8 @@ class ConnectorsSubcommandTest {
 
     @Test
     void shouldThrowExceptionWhenChangeStateOfAll() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any()))

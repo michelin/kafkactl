@@ -53,11 +53,31 @@ class DeleteSubcommandTest {
     @Mock
     private KafkactlCommand kafkactlCommand;
 
+    @Mock
+    private ConfigService configService;
+
     @InjectMocks
     private DeleteSubcommand deleteSubcommand;
 
     @Test
+    void shouldReturnInvalidCurrentContext() {
+        CommandLine cmd = new CommandLine(deleteSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(false);
+
+        int code = cmd.execute("topic", "myTopic");
+        assertEquals(1, code);
+        assertTrue(sw.toString().contains("No valid current context found. "
+            + "Use \"kafkactl config use-context\" to set a valid context."));
+    }
+
+    @Test
     void shouldNotDeleteByNameWhenNotAuthenticated() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(false);
 
@@ -72,6 +92,9 @@ class DeleteSubcommandTest {
     @Test
     void shouldNotDeleteByFileWhenYmlFileNotFound() {
         kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
@@ -95,6 +118,9 @@ class DeleteSubcommandTest {
         cmd.setErr(new PrintWriter(sw));
 
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
@@ -124,6 +150,9 @@ class DeleteSubcommandTest {
     @Test
     void shouldNotDeleteByNameWhenInvalidResources() {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any()))
@@ -141,6 +170,9 @@ class DeleteSubcommandTest {
     @Test
     void shouldNotDeleteByFileWhenNamespaceMismatch() {
         kafkactlCommand.optionalNamespace = Optional.of("namespaceMismatch");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
@@ -172,6 +204,9 @@ class DeleteSubcommandTest {
     @Test
     void shouldDeleteByFileSuccess() {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
@@ -213,6 +248,13 @@ class DeleteSubcommandTest {
 
     @Test
     void shouldDeleteByNameSuccess() {
+        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
@@ -221,9 +263,6 @@ class DeleteSubcommandTest {
             .synchronizable(true)
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
         when(apiResourcesService.getResourceDefinitionByKind(any()))
@@ -242,6 +281,9 @@ class DeleteSubcommandTest {
     @Test
     void shouldDeleteByFileDryRunSuccess() {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
@@ -284,6 +326,9 @@ class DeleteSubcommandTest {
     @Test
     void shouldDeleteByFileFail() {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
@@ -324,6 +369,9 @@ class DeleteSubcommandTest {
     @Test
     void shouldNotDeleteByFileWhenHttpClientResponseException() {
         kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))

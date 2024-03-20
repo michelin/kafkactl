@@ -3,6 +3,7 @@ package com.michelin.kafkactl.command;
 import static com.michelin.kafkactl.service.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.RESOURCE_DEFINITION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -33,20 +34,45 @@ import picocli.CommandLine;
 class ApiResourcesSubcommandTest {
     @Mock
     public FormatService formatService;
+
     @Mock
     private ApiResourcesService apiResourcesService;
+
+    @Mock
+    private ConfigService configService;
+
     @Mock
     private LoginService loginService;
+
     @Mock
     private KafkactlCommand kafkactlCommand;
+
     @InjectMocks
     private ApiResourcesSubcommand apiResourcesSubcommand;
+
+    @Test
+    void shouldReturnInvalidCurrentContext() {
+        CommandLine cmd = new CommandLine(apiResourcesSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(false);
+
+        int code = cmd.execute();
+        assertEquals(1, code);
+        assertTrue(sw.toString().contains("No valid current context found. "
+            + "Use \"kafkactl config use-context\" to set a valid context."));
+    }
 
     @Test
     void shouldNotDisplayApiResourcesWhenNotAuthenticated() {
         CommandLine cmd = new CommandLine(apiResourcesSubcommand);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
 
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(false);
@@ -57,6 +83,15 @@ class ApiResourcesSubcommandTest {
 
     @Test
     void shouldDisplayApiResources() {
+        CommandLine cmd = new CommandLine(apiResourcesSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
@@ -65,12 +100,6 @@ class ApiResourcesSubcommandTest {
             .synchronizable(true)
             .build();
 
-        CommandLine cmd = new CommandLine(apiResourcesSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setOut(new PrintWriter(sw));
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(apiResourcesService.listResourceDefinitions())
             .thenReturn(Collections.singletonList(apiResource));
 
@@ -83,14 +112,17 @@ class ApiResourcesSubcommandTest {
 
     @Test
     void shouldDisplayError() {
-        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
-
         CommandLine cmd = new CommandLine(apiResourcesSubcommand);
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+
         when(apiResourcesService.listResourceDefinitions())
             .thenThrow(exception);
 

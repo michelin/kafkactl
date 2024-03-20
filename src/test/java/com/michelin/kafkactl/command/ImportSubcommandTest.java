@@ -38,6 +38,9 @@ class ImportSubcommandTest {
     public ApiResourcesService apiResourcesService;
 
     @Mock
+    private ConfigService configService;
+
+    @Mock
     public KafkactlConfig kafkactlConfig;
 
     @Mock
@@ -47,7 +50,24 @@ class ImportSubcommandTest {
     private ImportSubcommand importSubcommand;
 
     @Test
+    void shouldReturnInvalidCurrentContext() {
+        CommandLine cmd = new CommandLine(importSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(false);
+
+        int code = cmd.execute("topic");
+        assertEquals(1, code);
+        assertTrue(sw.toString().contains("No valid current context found. "
+            + "Use \"kafkactl config use-context\" to set a valid context."));
+    }
+
+    @Test
     void shouldNotImportWhenNotAuthenticated() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(false);
 
@@ -61,6 +81,8 @@ class ImportSubcommandTest {
 
     @Test
     void shouldNotImportWhenServerNotHaveResourceType() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any()))
@@ -85,6 +107,8 @@ class ImportSubcommandTest {
             .synchronizable(false)
             .build();
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any()))
@@ -101,6 +125,13 @@ class ImportSubcommandTest {
 
     @Test
     void shouldImportTopicResources() {
+        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
@@ -109,9 +140,6 @@ class ImportSubcommandTest {
             .synchronizable(true)
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
         when(resourceService.importAll(any(), any(), anyBoolean(), any()))
@@ -127,6 +155,13 @@ class ImportSubcommandTest {
 
     @Test
     void shouldImportTopicResourcesDryRun() {
+        kafkactlCommand.optionalNamespace = Optional.of("namespace");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
@@ -135,9 +170,6 @@ class ImportSubcommandTest {
             .synchronizable(true)
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.of("namespace");
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
         when(resourceService.importAll(any(), any(), anyBoolean(), any()))
@@ -157,6 +189,9 @@ class ImportSubcommandTest {
     @Test
     void shouldImportAllResources() {
         kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())

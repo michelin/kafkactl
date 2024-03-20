@@ -49,6 +49,9 @@ class DiffSubcommandTest {
     private ResourceService resourceService;
 
     @Mock
+    private ConfigService configService;
+
+    @Mock
     private KafkactlConfig kafkactlConfig;
 
     @Mock
@@ -58,7 +61,24 @@ class DiffSubcommandTest {
     private DiffSubcommand diffSubcommand;
 
     @Test
+    void shouldReturnInvalidCurrentContext() {
+        CommandLine cmd = new CommandLine(diffSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(false);
+
+        int code = cmd.execute();
+        assertEquals(1, code);
+        assertTrue(sw.toString().contains("No valid current context found. "
+            + "Use \"kafkactl config use-context\" to set a valid context."));
+    }
+
+    @Test
     void shouldNotDiffWhenNotAuthenticated() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(false);
 
@@ -72,6 +92,8 @@ class DiffSubcommandTest {
 
     @Test
     void shouldNotDiffWhenNoFileInStdin() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
 
@@ -90,6 +112,8 @@ class DiffSubcommandTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
@@ -103,6 +127,15 @@ class DiffSubcommandTest {
 
     @Test
     void shouldNotDiffWhenInvalidResources() {
+        CommandLine cmd = new CommandLine(diffSubcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
@@ -112,12 +145,6 @@ class DiffSubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
-        CommandLine cmd = new CommandLine(diffSubcommand);
-        StringWriter sw = new StringWriter();
-        cmd.setErr(new PrintWriter(sw));
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
         doThrow(new CommandLine.ParameterException(cmd.getCommandSpec().commandLine(),
@@ -131,6 +158,13 @@ class DiffSubcommandTest {
 
     @Test
     void shouldNotDiffWhenNamespaceMismatch() {
+        kafkactlCommand.optionalNamespace = Optional.of("namespaceMismatch");
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
@@ -141,10 +175,6 @@ class DiffSubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.of("namespaceMismatch");
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
 
@@ -160,6 +190,13 @@ class DiffSubcommandTest {
 
     @Test
     void shouldNotDiffWhenHttpClientResponseException() {
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
@@ -170,10 +207,6 @@ class DiffSubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.empty();
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
@@ -193,6 +226,13 @@ class DiffSubcommandTest {
 
     @Test
     void shouldNotDiffWhenHttpClientResponseExceptionDuringApply() {
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
@@ -203,10 +243,6 @@ class DiffSubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.empty();
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
@@ -249,6 +285,13 @@ class DiffSubcommandTest {
 
     @Test
     void shouldNotDiffApplyHasNoBody() {
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
@@ -259,10 +302,6 @@ class DiffSubcommandTest {
             .spec(Collections.emptyMap())
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.empty();
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
@@ -305,6 +344,13 @@ class DiffSubcommandTest {
 
     @Test
     void shouldDiff() {
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
@@ -319,10 +365,6 @@ class DiffSubcommandTest {
             ))
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.empty();
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
@@ -379,6 +421,13 @@ class DiffSubcommandTest {
 
     @Test
     void shouldDiffWhenNoLive() {
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Topic")
             .apiVersion("v1")
@@ -393,10 +442,6 @@ class DiffSubcommandTest {
             ))
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.empty();
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
@@ -444,6 +489,13 @@ class DiffSubcommandTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE, "src/test/resources/person.avsc");
 
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Schema")
             .apiVersion("v1")
@@ -454,10 +506,6 @@ class DiffSubcommandTest {
             .spec(specs)
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.empty();
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
@@ -507,6 +555,13 @@ class DiffSubcommandTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put("schema", "{schema}");
 
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Schema")
             .apiVersion("v1")
@@ -517,10 +572,6 @@ class DiffSubcommandTest {
             .spec(specs)
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.empty();
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
@@ -564,6 +615,13 @@ class DiffSubcommandTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE, "src/test/resources/not-exist.avsc");
 
+        kafkactlCommand.optionalNamespace = Optional.empty();
+
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
         Resource resource = Resource.builder()
             .kind("Schema")
             .apiVersion("v1")
@@ -574,10 +632,6 @@ class DiffSubcommandTest {
             .spec(specs)
             .build();
 
-        kafkactlCommand.optionalNamespace = Optional.empty();
-
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
         when(kafkactlConfig.getCurrentNamespace())
