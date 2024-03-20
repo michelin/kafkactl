@@ -25,14 +25,14 @@ public class ConnectClusterVaultSubcommand extends AuthenticatedCommand {
     /**
      * Gets or sets the Connect cluster name that will vault the secrets.
      */
-    @CommandLine.Parameters(index = "1", defaultValue = "",
+    @CommandLine.Parameters(index = "0", defaultValue = "",
         description = "Connect cluster name that will vault the secrets.", arity = "1")
     public String connectCluster;
 
     /**
      * Gets or sets the list of secrets to vault.
      */
-    @CommandLine.Parameters(index = "2..*", description = "Secrets to vaults separated by space.", arity = "0..*")
+    @CommandLine.Parameters(index = "1..*", description = "Secrets to vaults separated by space.", arity = "0..*")
     public List<String> secrets;
 
     /**

@@ -39,6 +39,7 @@ public class AuthRenewSubcommand implements Callable<Integer> {
             return 0;
         }
 
+        commandSpec.commandLine().getErr().println("Failed to renew JWT.");
         return 1;
     }
 }

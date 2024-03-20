@@ -1,4 +1,4 @@
-package com.michelin.kafkactl.command.connectcluster;
+package com.michelin.kafkactl.command.auth;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,10 +11,13 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
 
+/**
+ * Auth subcommand test.
+ */
 @ExtendWith(MockitoExtension.class)
-class ConnectClusterSubcommandTest {
+public class AuthSubcommandTest {
     @InjectMocks
-    private ConnectClusterSubcommand subcommand;
+    private AuthSubcommand subcommand;
 
     @Test
     void shouldDisplayUsageWhenNoSubcommand() {
@@ -24,6 +27,6 @@ class ConnectClusterSubcommandTest {
 
         int code = cmd.execute();
         assertEquals(0, code);
-        assertTrue(sw.toString().contains("Usage: connect-clusters"));
+        assertTrue(sw.toString().contains("Usage: auth"));
     }
 }
