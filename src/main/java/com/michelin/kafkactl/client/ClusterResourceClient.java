@@ -1,7 +1,7 @@
 package com.michelin.kafkactl.client;
 
-import com.michelin.kafkactl.models.ApiResource;
-import com.michelin.kafkactl.models.Resource;
+import com.michelin.kafkactl.model.ApiResource;
+import com.michelin.kafkactl.model.Resource;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Delete;

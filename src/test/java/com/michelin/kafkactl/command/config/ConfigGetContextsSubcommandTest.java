@@ -1,0 +1,75 @@
+package com.michelin.kafkactl.command.config;
+
+import static com.michelin.kafkactl.service.FormatService.TABLE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.service.FormatService;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Collections;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import picocli.CommandLine;
+
+/**
+ * Config get contexts subcommand test.
+ */
+@ExtendWith(MockitoExtension.class)
+public class ConfigGetContextsSubcommandTest {
+    @Mock
+    private KafkactlConfig kafkactlConfig;
+
+    @Mock
+    private FormatService formatService;
+
+    @InjectMocks
+    private ConfigGetContextsSubcommand subcommand;
+
+    @Test
+    void shouldGetEmptyContexts() {
+        when(kafkactlConfig.getContexts())
+            .thenReturn(Collections.emptyList());
+
+        CommandLine cmd = new CommandLine(subcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute();
+        assertEquals(0, code);
+        assertTrue(sw.toString().contains("No context pre-defined."));
+    }
+
+    @Test
+    void shouldGetContexts() {
+        KafkactlConfig.Context context = KafkactlConfig.Context.builder()
+            .name("name")
+            .definition(KafkactlConfig.Context.ApiContext.builder()
+                .api("api")
+                .namespace("namespace")
+                .userToken("userToken")
+                .build())
+            .build();
+
+        when(kafkactlConfig.getContexts())
+            .thenReturn(Collections.singletonList(context));
+
+        CommandLine cmd = new CommandLine(subcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute();
+        assertEquals(0, code);
+        verify(formatService).displayList(eq("Context"),
+            argThat(currentContext -> currentContext.get(0).getMetadata().getName().equals("name")),
+            eq(TABLE), eq(cmd.getCommandSpec()));
+    }
+}

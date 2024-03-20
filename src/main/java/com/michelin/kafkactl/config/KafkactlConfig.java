@@ -1,7 +1,7 @@
 package com.michelin.kafkactl.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.michelin.kafkactl.services.SystemService;
+import com.michelin.kafkactl.service.SystemService;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.convert.format.MapFormat;
