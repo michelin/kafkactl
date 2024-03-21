@@ -16,7 +16,6 @@ import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import picocli.CommandLine;
@@ -63,14 +62,14 @@ public class ConnectorsSubcommand extends AuthenticatedCommand {
                 ApiResource connectType = apiResourcesService.getResourceDefinitionByKind(CONNECTOR)
                     .orElseThrow(() -> new CommandLine.ParameterException(commandSpec.commandLine(),
                         "The server does not have resource type Connector."));
+
                 connectors = resourceService.listResourcesWithType(connectType, namespace)
                     .stream()
                     .map(resource -> resource.getMetadata().getName())
-                    .collect(Collectors.toList());
+                    .toList();
             }
 
             List<Resource> changeConnectorResponses = connectors.stream()
-                // Prepare request object
                 .map(connector -> Resource.builder()
                     .metadata(Metadata.builder()
                         .namespace(namespace)
@@ -82,7 +81,7 @@ public class ConnectorsSubcommand extends AuthenticatedCommand {
                     changeConnectorStateRequest.getMetadata().getName(), changeConnectorStateRequest, commandSpec))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(Collectors.toList());
+                .toList();
 
             if (!changeConnectorResponses.isEmpty()) {
                 formatService.displayList(CHANGE_CONNECTOR_STATE, changeConnectorResponses, TABLE, commandSpec);

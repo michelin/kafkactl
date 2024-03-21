@@ -44,27 +44,27 @@ public class ConfigGetContextsSubcommand implements Callable<Integer> {
     public Integer call() {
         if (kafkactlConfig.getContexts().isEmpty()) {
             commandSpec.commandLine().getOut().println("No context pre-defined.");
-            return 0;
+        } else {
+            List<Resource> allContextsAsResources = new ArrayList<>();
+            kafkactlConfig.getContexts().forEach(userContext -> {
+                Map<String, Object> specs = new HashMap<>();
+                specs.put("namespace", userContext.getDefinition().getNamespace());
+                specs.put("api", userContext.getDefinition().getApi());
+                specs.put("token", userContext.getDefinition().getUserToken());
+
+                Resource currentContextAsResource = Resource.builder()
+                    .metadata(Metadata.builder()
+                        .name(userContext.getName())
+                        .build())
+                    .spec(specs)
+                    .build();
+
+                allContextsAsResources.add(currentContextAsResource);
+            });
+
+            formatService.displayList(CONTEXT, allContextsAsResources, TABLE, commandSpec);
         }
 
-        List<Resource> allContextsAsResources = new ArrayList<>();
-        kafkactlConfig.getContexts().forEach(userContext -> {
-            Map<String, Object> specs = new HashMap<>();
-            specs.put("namespace", userContext.getDefinition().getNamespace());
-            specs.put("api", userContext.getDefinition().getApi());
-            specs.put("token", userContext.getDefinition().getUserToken());
-
-            Resource currentContextAsResource = Resource.builder()
-                .metadata(Metadata.builder()
-                    .name(userContext.getName())
-                    .build())
-                .spec(specs)
-                .build();
-
-            allContextsAsResources.add(currentContextAsResource);
-        });
-
-        formatService.displayList(CONTEXT, allContextsAsResources, TABLE, commandSpec);
         return 0;
     }
 }
