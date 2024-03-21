@@ -11,9 +11,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.michelin.kafkactl.command.KafkactlCommand;
-import com.michelin.kafkactl.command.ResetOffsetsSubcommand;
 import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.service.LoginService;
 import com.michelin.kafkactl.service.ResourceService;
 import java.io.PrintWriter;

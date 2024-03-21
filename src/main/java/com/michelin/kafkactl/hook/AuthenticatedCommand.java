@@ -1,6 +1,8 @@
 package com.michelin.kafkactl.hook;
 
 import com.michelin.kafkactl.command.KafkactlCommand;
+import com.michelin.kafkactl.command.config.ConfigSubcommand;
+import com.michelin.kafkactl.command.config.ConfigUseContextSubcommand;
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.ApiResourcesService;
@@ -46,9 +48,10 @@ public abstract class AuthenticatedCommand implements Callable<Integer> {
     public Integer call() throws IOException {
         if (!configService.isCurrentContextValid()) {
             CommandLine configSubcommand = new CommandLine(new ConfigSubcommand());
+            CommandLine configUseContextSubcommand = new CommandLine(new ConfigUseContextSubcommand());
             commandSpec.commandLine().getErr().println("No valid current context found. Use \"kafkactl "
                 + configSubcommand.getCommandName() + " "
-                + ConfigSubcommand.ConfigAction.USE_CONTEXT + "\" to set a valid context.");
+                + configUseContextSubcommand.getCommandName() + "\" to set a valid context.");
             return 1;
         }
 
