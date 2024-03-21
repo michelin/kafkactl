@@ -21,7 +21,7 @@ import picocli.CommandLine;
  * Auth subcommand test.
  */
 @ExtendWith(MockitoExtension.class)
-public class AuthRenewSubcommandTest {
+class AuthRenewSubcommandTest {
     @Mock
     public LoginService loginService;
 

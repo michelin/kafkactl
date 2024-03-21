@@ -23,7 +23,7 @@ import picocli.CommandLine;
  * Config current context subcommand test.
  */
 @ExtendWith(MockitoExtension.class)
-public class ConfigCurrentContextSubcommandTest {
+class ConfigCurrentContextSubcommandTest {
     @Mock
     private KafkactlConfig kafkactlConfig;
 

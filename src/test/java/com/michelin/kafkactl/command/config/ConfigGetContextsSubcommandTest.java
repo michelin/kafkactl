@@ -24,7 +24,7 @@ import picocli.CommandLine;
  * Config get contexts subcommand test.
  */
 @ExtendWith(MockitoExtension.class)
-public class ConfigGetContextsSubcommandTest {
+class ConfigGetContextsSubcommandTest {
     @Mock
     private KafkactlConfig kafkactlConfig;
 
