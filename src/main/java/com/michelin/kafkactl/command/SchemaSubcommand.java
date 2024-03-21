@@ -3,9 +3,9 @@ package com.michelin.kafkactl.command;
 import static com.michelin.kafkactl.service.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.SCHEMA_COMPATIBILITY_STATE;
 
+import com.michelin.kafkactl.hook.AuthenticatedCommand;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.SchemaCompatibility;
-import com.michelin.kafkactl.hook.AuthenticatedCommand;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;

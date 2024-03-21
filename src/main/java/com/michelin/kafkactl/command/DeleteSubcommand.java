@@ -1,9 +1,9 @@
 package com.michelin.kafkactl.command;
 
+import com.michelin.kafkactl.hook.DryRunCommand;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
-import com.michelin.kafkactl.hook.DryRunCommand;
 import com.michelin.kafkactl.service.FileService;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;

@@ -3,9 +3,9 @@ package com.michelin.kafkactl.command;
 import static com.michelin.kafkactl.service.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.RESOURCE_DEFINITION;
 
+import com.michelin.kafkactl.hook.AuthenticatedCommand;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
-import com.michelin.kafkactl.hook.AuthenticatedCommand;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;

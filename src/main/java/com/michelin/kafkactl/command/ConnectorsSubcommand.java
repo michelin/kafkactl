@@ -4,10 +4,10 @@ import static com.michelin.kafkactl.service.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.CHANGE_CONNECTOR_STATE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.CONNECTOR;
 
+import com.michelin.kafkactl.hook.AuthenticatedCommand;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
-import com.michelin.kafkactl.hook.AuthenticatedCommand;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
