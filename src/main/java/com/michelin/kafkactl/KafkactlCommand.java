@@ -1,7 +1,18 @@
-package com.michelin.kafkactl.command;
+package com.michelin.kafkactl;
 
 import static com.michelin.kafkactl.config.KafkactlConfig.KAFKACTL_CONFIG;
 
+import com.michelin.kafkactl.command.ApiResourcesSubcommand;
+import com.michelin.kafkactl.command.ApplySubcommand;
+import com.michelin.kafkactl.command.ConnectorsSubcommand;
+import com.michelin.kafkactl.command.DeleteRecordsSubcommand;
+import com.michelin.kafkactl.command.DeleteSubcommand;
+import com.michelin.kafkactl.command.DiffSubcommand;
+import com.michelin.kafkactl.command.GetSubcommand;
+import com.michelin.kafkactl.command.ImportSubcommand;
+import com.michelin.kafkactl.command.ResetOffsetsSubcommand;
+import com.michelin.kafkactl.command.SchemaSubcommand;
+import com.michelin.kafkactl.command.UsersSubcommand;
 import com.michelin.kafkactl.command.auth.AuthSubcommand;
 import com.michelin.kafkactl.command.config.ConfigSubcommand;
 import com.michelin.kafkactl.command.connectcluster.ConnectClusterSubcommand;

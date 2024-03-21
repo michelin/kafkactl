@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.hook;
 
-import com.michelin.kafkactl.command.KafkactlCommand;
+import com.michelin.kafkactl.KafkactlCommand;
 import com.michelin.kafkactl.command.config.ConfigSubcommand;
 import com.michelin.kafkactl.command.config.ConfigUseContextSubcommand;
 import com.michelin.kafkactl.config.KafkactlConfig;

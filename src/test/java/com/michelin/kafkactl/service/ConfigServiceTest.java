@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import com.michelin.kafkactl.command.KafkactlCommand;
+import com.michelin.kafkactl.KafkactlCommand;
 import com.michelin.kafkactl.config.KafkactlConfig;
 import java.io.BufferedWriter;
 import java.io.FileWriter;

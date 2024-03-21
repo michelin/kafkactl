@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.command.auth;
 
-import com.michelin.kafkactl.command.KafkactlCommand;
+import com.michelin.kafkactl.KafkactlCommand;
 import com.michelin.kafkactl.utils.VersionProvider;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;

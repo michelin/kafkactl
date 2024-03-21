@@ -5,7 +5,7 @@ import static com.michelin.kafkactl.service.FormatService.YAML;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.michelin.kafkactl.command.KafkactlCommand;
+import com.michelin.kafkactl.KafkactlCommand;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.Status;

@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
-import com.michelin.kafkactl.command.KafkactlCommand;
+import com.michelin.kafkactl.KafkactlCommand;
 import com.michelin.kafkactl.service.LoginService;
 import java.io.PrintWriter;
 import java.io.StringWriter;
