@@ -4,6 +4,7 @@ import com.michelin.kafkactl.command.KafkactlCommand;
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.ApiResourcesService;
+import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.service.LoginService;
 import jakarta.inject.Inject;
 import java.io.IOException;
