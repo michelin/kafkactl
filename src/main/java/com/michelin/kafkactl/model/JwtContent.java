@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.model;
 
-import io.micronaut.core.annotation.Introspected;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  * Jwt content.
  */
 @Data
-@Introspected
+@ReflectiveAccess
 @NoArgsConstructor
 public class JwtContent {
     private List<RoleBinding> roleBindings = new ArrayList<>();
@@ -19,7 +19,7 @@ public class JwtContent {
      * Role binding.
      */
     @Data
-    @Introspected
+    @ReflectiveAccess
     @NoArgsConstructor
     public static class RoleBinding {
         private String namespace;

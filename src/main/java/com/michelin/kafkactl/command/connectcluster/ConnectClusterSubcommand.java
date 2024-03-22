@@ -8,6 +8,9 @@ import picocli.CommandLine;
  * Connect clusters subcommand.
  */
 @CommandLine.Command(name = "connect-clusters",
+    subcommands = {
+        ConnectClusterVaultSubcommand.class,
+    },
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
     descriptionHeading = "%n@|bold Description|@:%n%n",

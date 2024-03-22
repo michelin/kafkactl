@@ -22,7 +22,13 @@ Kafka resources using YAML descriptors.
 * [Usage](#usage)
     * [Api Resources](#api-resources)
     * [Apply](#apply)
+    * [Auth](#auth)
+        * [Info](#info)
+        * [Renew](#renew)
     * [Config](#config)
+        * [Current Context](#current-context)
+        * [Get Contexts](#get-contexts)
+        * [Use Context](#use-context)
     * [Connect Clusters](#connect-clusters)
     * [Connectors](#connectors)
     * [Delete Records](#delete-records)
@@ -35,7 +41,17 @@ Kafka resources using YAML descriptors.
     * [Reset Password](#reset-password)
 * [Resources](#resources)
     * [User](#user)
+        * [Topic](#topic)
+        * [ACL](#acl)
+        * [Connector](#connector)
+        * [Connect Cluster](#connect-cluster)
+        * [Kafka Streams](#kafka-streams)
+        * [Schema](#schema)
     * [Administrator](#administrator)
+        * [Namespace](#namespace)
+        * [ACL Owner](#acl-owner)
+        * [Role Binding](#role-binding)
+        * [Quota](#quota)
 * [CI/CD](#cicd)
 * [Contribution](#contribution)
 
@@ -176,6 +192,80 @@ Example(s):
 kafkactl api-resources
 ```
 
+### Auth
+
+The `auth` command allows you to interact with authentication.
+
+```console
+Usage: kafkactl auth [-hvV] [-n=<optionalNamespace>] [COMMAND]
+
+Description:
+
+Interact with authentication.
+
+Options:
+  -h, --help      Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
+  -V, --version   Print version information and exit.
+
+Commands:
+  info   Get the JWT token information.
+  renew  Renew the JWT token.
+```
+
+#### Info
+
+The `info` command allows you to get the JWT token information.
+
+```console
+Usage: kafkactl auth info [-hvV] [-n=<optionalNamespace>] [-o=<output>]
+
+Description:
+
+Get the JWT token information.
+
+Options:
+  -h, --help              Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                          Override namespace defined in config or YAML resources.
+  -o, --output=<output>   Output format. One of: yaml|table
+  -v, --verbose           Enable the verbose mode.
+  -V, --version           Print version information and exit.
+```
+
+Example(s):
+
+```console
+kafkactl auth info
+```
+
+#### Renew
+
+The `renew` command allows you to renew the JWT token.
+
+```console
+Usage: kafkactl auth renew [-hvV] [-n=<optionalNamespace>]
+
+Description:
+
+Renew the JWT token.
+
+Options:
+  -h, --help      Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
+  -V, --version   Print version information and exit.
+```
+
+Example(s):
+
+```console
+kafkactl auth renew
+```
+
 ### Apply
 
 The `apply` command allows you to deploy a resource.
@@ -212,15 +302,60 @@ The resources have to be described in YAML manifests.
 The `config` command allows you to manage your Kafka contexts.
 
 ```console
-Usage: kafkactl config [-hvV] [-n=<optionalNamespace>] <action> <context>
+Usage: kafkactl config [-hvV] [-n=<optionalNamespace>] [COMMAND]
 
 Description:
 
 Manage configuration.
 
-Parameters:
-      <action>    Action to perform (get-contexts, current-context, use-context).
-      <context>   Context to use.
+Options:
+  -h, --help      Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
+  -V, --version   Print version information and exit.
+
+Commands:
+  get-contexts     Get all contexts.
+  use-context      Use a context.
+  current-context  Get the current context.
+```
+
+#### Current Context
+
+The `current-context` command allows you to check the current context.
+
+```console
+Usage: kafkactl config current-context [-hvV] [-n=<optionalNamespace>]
+
+Description:
+
+Get the current context.
+
+Options:
+  -h, --help      Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
+  -V, --version   Print version information and exit.
+```
+
+Example(s):
+
+```console
+kafkactl config current-context
+```
+
+#### Get Contexts
+
+The `get-contexts` command allows you to list all the contexts defined in your configuration file.
+
+```console
+Usage: kafkactl config get-contexts [-hvV] [-n=<optionalNamespace>]
+
+Description:
+
+Get all contexts.
 
 Options:
   -h, --help      Show this help message and exit.
@@ -234,8 +369,34 @@ Example(s):
 
 ```console
 kafkactl config get-contexts
+```
+
+#### Use Context
+
+The `use-context` command allows you to switch to a different context.
+
+```console
+Usage: kafkactl config use-context [-hvV] [-n=<optionalNamespace>] <context>
+
+Description:
+
+Use a context.
+
+Parameters:
+      <context>   Context to use.
+
+Options:
+  -h, --help      Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
+  -V, --version   Print version information and exit.
+```
+
+Example(s):
+
+```console
 kafkactl config use-context local
-kafkactl config current-context
 ```
 
 ### Connect Clusters
