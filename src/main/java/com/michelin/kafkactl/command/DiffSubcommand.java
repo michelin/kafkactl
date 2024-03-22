@@ -3,7 +3,7 @@ package com.michelin.kafkactl.command;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;
-import com.michelin.kafkactl.hook.AuthenticatedCommand;
+import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FileService;
@@ -39,7 +39,7 @@ import picocli.CommandLine.Option;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class DiffSubcommand extends AuthenticatedCommand {
+public class DiffSubcommand extends AuthenticatedHook {
     @Inject
     public FileService fileService;
 

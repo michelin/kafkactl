@@ -294,6 +294,7 @@ class LoginServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void shouldReadJwtFile() throws IOException {
         CommandLine cmd = new CommandLine(new KafkactlCommand());
         StringWriter sw = new StringWriter();
@@ -309,6 +310,7 @@ class LoginServiceTest {
         assertEquals("anotherNamespace", actual.get(0).getSpec().get("namespace"));
         assertIterableEquals(List.of(GET), (List<JwtContent.RoleBinding.Verb>) actual.get(0).getSpec().get("verbs"));
         assertIterableEquals(List.of("quota"), (List<String>) actual.get(0).getSpec().get("resources"));
+
         assertEquals("anotherNamespace", actual.get(1).getSpec().get("namespace"));
         assertIterableEquals(List.of(GET, POST, PUT, DELETE),
             (List<JwtContent.RoleBinding.Verb>) actual.get(1).getSpec().get("verbs"));

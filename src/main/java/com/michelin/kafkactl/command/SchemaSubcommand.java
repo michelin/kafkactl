@@ -3,7 +3,7 @@ package com.michelin.kafkactl.command;
 import static com.michelin.kafkactl.service.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.SCHEMA_COMPATIBILITY_STATE;
 
-import com.michelin.kafkactl.hook.AuthenticatedCommand;
+import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.SchemaCompatibility;
 import com.michelin.kafkactl.service.FormatService;
@@ -29,7 +29,7 @@ import picocli.CommandLine;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class SchemaSubcommand extends AuthenticatedCommand {
+public class SchemaSubcommand extends AuthenticatedHook {
     @Inject
     public ResourceService resourceService;
 

@@ -3,7 +3,7 @@ package com.michelin.kafkactl.command;
 import static com.michelin.kafkactl.service.FormatService.TABLE;
 import static com.michelin.kafkactl.service.FormatService.YAML;
 
-import com.michelin.kafkactl.hook.AuthenticatedCommand;
+import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
@@ -26,7 +26,7 @@ import picocli.CommandLine;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class UsersSubcommand extends AuthenticatedCommand {
+public class UsersSubcommand extends AuthenticatedHook {
     @Inject
     public ResourceService resourceService;
 

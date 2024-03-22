@@ -33,6 +33,20 @@ class ConfigUseContextSubcommandTest {
     private ConfigUseContextSubcommand subcommand;
 
     @Test
+    void shouldGetEmptyContexts() {
+        when(kafkactlConfig.getContexts())
+            .thenReturn(Collections.emptyList());
+
+        CommandLine cmd = new CommandLine(subcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute();
+        assertEquals(0, code);
+        assertTrue(sw.toString().contains("No context pre-defined."));
+    }
+
+    @Test
     void shouldUseContextNotFound() {
         KafkactlConfig.Context context = KafkactlConfig.Context.builder()
             .name("name")

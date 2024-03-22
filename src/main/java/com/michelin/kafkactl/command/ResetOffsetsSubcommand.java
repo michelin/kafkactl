@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.command;
 
-import com.michelin.kafkactl.hook.DryRunCommand;
+import com.michelin.kafkactl.hook.DryRunHook;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FormatService;
@@ -31,7 +31,7 @@ import picocli.CommandLine.Option;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class ResetOffsetsSubcommand extends DryRunCommand {
+public class ResetOffsetsSubcommand extends DryRunHook {
     public static final String RESET_METHOD = "method";
     public static final String OPTIONS = "options";
 

@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.command;
 
-import com.michelin.kafkactl.hook.DryRunCommand;
+import com.michelin.kafkactl.hook.DryRunHook;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FileService;
@@ -30,7 +30,7 @@ import picocli.CommandLine.Option;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class ApplySubcommand extends DryRunCommand {
+public class ApplySubcommand extends DryRunHook {
     @Inject
     public FormatService formatService;
 

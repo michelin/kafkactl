@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.command.connectcluster;
 
-import com.michelin.kafkactl.hook.AuthenticatedCommand;
+import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
 import jakarta.inject.Inject;
@@ -21,7 +21,7 @@ import picocli.CommandLine;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class ConnectClusterVaultSubcommand extends AuthenticatedCommand {
+public class ConnectClusterVaultSubcommand extends AuthenticatedHook {
     /**
      * Gets or sets the Connect cluster name that will vault the secrets.
      */

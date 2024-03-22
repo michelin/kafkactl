@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.command;
 
-import com.michelin.kafkactl.hook.DryRunCommand;
+import com.michelin.kafkactl.hook.DryRunHook;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.utils.VersionProvider;
@@ -22,7 +22,7 @@ import picocli.CommandLine.Parameters;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class DeleteRecordsSubcommand extends DryRunCommand {
+public class DeleteRecordsSubcommand extends DryRunHook {
     @Inject
     public ResourceService resourceService;
 

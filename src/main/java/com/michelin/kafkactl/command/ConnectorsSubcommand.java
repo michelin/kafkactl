@@ -4,7 +4,7 @@ import static com.michelin.kafkactl.service.FormatService.TABLE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.CHANGE_CONNECTOR_STATE;
 import static com.michelin.kafkactl.utils.constants.ConstantKind.CONNECTOR;
 
-import com.michelin.kafkactl.hook.AuthenticatedCommand;
+import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
@@ -34,7 +34,7 @@ import picocli.CommandLine;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class ConnectorsSubcommand extends AuthenticatedCommand {
+public class ConnectorsSubcommand extends AuthenticatedHook {
     @Inject
     public ResourceService resourceService;
 

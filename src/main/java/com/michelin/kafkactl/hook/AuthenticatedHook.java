@@ -1,17 +1,13 @@
 package com.michelin.kafkactl.hook;
 
 import com.michelin.kafkactl.KafkactlCommand;
-import com.michelin.kafkactl.command.config.ConfigSubcommand;
-import com.michelin.kafkactl.command.config.ConfigUseContextSubcommand;
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.ApiResourcesService;
-import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.service.LoginService;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import picocli.CommandLine;
 
@@ -19,15 +15,12 @@ import picocli.CommandLine;
  * Authenticated command.
  */
 @CommandLine.Command
-public abstract class AuthenticatedCommand implements Callable<Integer> {
+public abstract class AuthenticatedHook extends ValidCurrentContextHook {
     @Inject
     public LoginService loginService;
 
     @Inject
     public ApiResourcesService apiResourcesService;
-
-    @Inject
-    public ConfigService configService;
 
     @Inject
     public KafkactlConfig kafkactlConfig;
@@ -45,15 +38,8 @@ public abstract class AuthenticatedCommand implements Callable<Integer> {
      * @throws IOException Any exception during the run
      */
     @Override
-    public Integer call() throws IOException {
-        if (!configService.isCurrentContextValid()) {
-            CommandLine configSubcommand = new CommandLine(new ConfigSubcommand());
-            CommandLine configUseContextSubcommand = new CommandLine(new ConfigUseContextSubcommand());
-            commandSpec.commandLine().getErr().println("No valid current context found. Use \"kafkactl "
-                + configSubcommand.getCommandName() + " "
-                + configUseContextSubcommand.getCommandName() + "\" to set a valid context.");
-            return 1;
-        }
+    public Integer call() throws Exception {
+        super.call();
 
         if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
             return 1;
