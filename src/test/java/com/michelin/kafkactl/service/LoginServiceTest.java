@@ -1,7 +1,12 @@
 package com.michelin.kafkactl.service;
 
+import static com.michelin.kafkactl.model.JwtContent.RoleBinding.Verb.DELETE;
+import static com.michelin.kafkactl.model.JwtContent.RoleBinding.Verb.GET;
+import static com.michelin.kafkactl.model.JwtContent.RoleBinding.Verb.POST;
+import static com.michelin.kafkactl.model.JwtContent.RoleBinding.Verb.PUT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -11,6 +16,8 @@ import com.michelin.kafkactl.client.BearerAccessRefreshToken;
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.client.UserInfoResponse;
 import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.model.JwtContent;
+import com.michelin.kafkactl.model.Resource;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import java.io.BufferedWriter;
@@ -21,6 +28,7 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -267,13 +275,6 @@ class LoginServiceTest {
         userInfoResponse.setExp(10);
         userInfoResponse.setActive(false);
 
-        BearerAccessRefreshToken bearerAccessRefreshToken = new BearerAccessRefreshToken();
-        bearerAccessRefreshToken.setUsername("username");
-        bearerAccessRefreshToken.setAccessToken("accessToken");
-        bearerAccessRefreshToken.setTokenType("tokenType");
-        bearerAccessRefreshToken.setExpiresIn(1);
-        bearerAccessRefreshToken.setRoles(Collections.singletonList("user"));
-
         CommandLine cmd = new CommandLine(new KafkactlCommand());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
@@ -290,5 +291,38 @@ class LoginServiceTest {
 
         boolean actual = loginService.doAuthenticate(cmd.getCommandSpec(), false);
         assertFalse(actual);
+    }
+
+    @Test
+    void shouldReadJwtFile() throws IOException {
+        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        when(kafkactlConfig.getConfigDirectory())
+            .thenReturn("src/test/resources/login");
+
+        LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
+        List<Resource> actual = loginService.readJwtFile();
+
+        assertEquals(2, actual.size());
+        assertEquals("anotherNamespace", actual.get(0).getSpec().get("namespace"));
+        assertIterableEquals(List.of(GET), (List<JwtContent.RoleBinding.Verb>) actual.get(0).getSpec().get("verbs"));
+        assertIterableEquals(List.of("quota"), (List<String>) actual.get(0).getSpec().get("resources"));
+        assertEquals("anotherNamespace", actual.get(1).getSpec().get("namespace"));
+        assertIterableEquals(List.of(GET, POST, PUT, DELETE),
+            (List<JwtContent.RoleBinding.Verb>) actual.get(1).getSpec().get("verbs"));
+        assertIterableEquals(List.of("schemas", "schemas/config", "topics", "topics/import", "topics/delete-records",
+            "connectors", "connectors/import", "connectors/change-state", "connect-clusters", "connect-clusters/vaults",
+            "acls", "consumer-groups/reset", "streams"), (List<String>) actual.get(1).getSpec().get("resources"));
+    }
+
+    @Test
+    void shouldJwtExists() {
+        when(kafkactlConfig.getConfigDirectory())
+            .thenReturn("src/test/resources/login");
+
+        LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
+        assertTrue(loginService.jwtFileExists());
     }
 }

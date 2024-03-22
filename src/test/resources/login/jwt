@@ -1,9 +1,10 @@
 {
-  "username": "test@test",
+  "info": "This is a fake token, it is only for testing purposes and expired anyway",
+  "username": "admin",
   "roles": [
     "isAdmin()"
   ],
-  "access_token": "a-fake-access-token",
+  "access_token": "eyJhbGciOiJIUtI1NiJ9.eyJyb2xlQmluZGluZ3MiOlt7Im5hbWVzcGFjZSI6ImFub3RoZXJOYW1lc3BhY2UiLCJ2ZXJicyI6WyJHRVQiXSwicmVzb3VyY2VzIjpbInF1b3RhIl19LHsibmFtZXNwYWNlIjoiYW5vdGhlck5hbWVzcGFjZSIsInZlcmJzIjpbIkdFVCIsIlBPU1QiLCJQVVQiLCJERUxFVEUiXSwicmVzb3VyY2VzIjpbInNjaGVtYXMiLCJzY2hlbWFzL2NvbmZpZyIsInRvcGljcyIsInRvcGljcy9pbXBvcnQiLCJ0b3BpY3MvZGVsZXRlLXJlY29yZHMiLCJjb25uZWN0b3JzIiwiY29ubmVjdG9ycy9pbXBvcnQiLCJjb25uZWN0b3JzL2NoYW5nZS1zdGF0ZSIsImNvbm5lY3QtY2x1c3RlcnMiLCJjb25uZWN0LWNsdXN0ZXJzL3ZhdWx0cyIsImFjbHMiLCJjb25zdW1lci1ncm91cHMvcmVzZXQiLCJzdHJlYW1zIl19XSwic3ViIjoiYWRtaW4iLCJuYmYiOjE3MTEwNjUwMjQsInJvbGVzIjpbImlzQWRtaW4oKSJdLCJpc3MiOiJuczRrYWZrYSIsImV4cCI6MTcxMTA2ODYyNCwiaWF0IjoxNzExMDY1MDI0fQ.eb4TDIivmPwzoc4UVP3td1o6AxMhZ8zpSXlw5a-sW30",
   "token_type": "Bearer",
   "expires_in": 60
 }
