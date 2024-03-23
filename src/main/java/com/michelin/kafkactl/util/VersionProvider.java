@@ -11,7 +11,7 @@ import picocli.CommandLine;
 @Singleton
 public class VersionProvider implements CommandLine.IVersionProvider {
     @Inject
-    public KafkactlConfig kafkactlConfig;
+    private KafkactlConfig kafkactlConfig;
 
     @Override
     public String[] getVersion() {

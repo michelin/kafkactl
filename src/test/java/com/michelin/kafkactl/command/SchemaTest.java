@@ -33,25 +33,25 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class SchemaTest {
     @Mock
-    public LoginService loginService;
+    LoginService loginService;
 
     @Mock
-    public ResourceService resourceService;
+    ResourceService resourceService;
 
     @Mock
-    private ConfigService configService;
+    ConfigService configService;
 
     @Mock
-    public KafkactlConfig kafkactlConfig;
+    KafkactlConfig kafkactlConfig;
 
     @Mock
-    public Kafkactl kafkactl;
+    Kafkactl kafkactl;
 
     @Mock
-    private FormatService formatService;
+    FormatService formatService;
 
     @InjectMocks
-    private Schema schema;
+    Schema schema;
 
     @Test
     void shouldReturnInvalidCurrentContext() {

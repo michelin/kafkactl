@@ -12,8 +12,6 @@ import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import picocli.CommandLine;
 
 /**
@@ -52,7 +50,7 @@ public class ApiResources extends AuthenticatedHook {
                         "namespaced", String.valueOf(apiResource.isNamespaced()),
                         "synchronizable", String.valueOf(apiResource.isSynchronizable())))
                     .build())
-                .collect(Collectors.toList());
+                .toList();
 
             formatService.displayList(RESOURCE_DEFINITION, resources, TABLE, commandSpec);
             return 0;

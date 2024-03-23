@@ -20,10 +20,10 @@ import org.yaml.snakeyaml.Yaml;
 @Singleton
 public class ConfigService {
     @Inject
-    public KafkactlConfig kafkactlConfig;
+    private KafkactlConfig kafkactlConfig;
 
     @Inject
-    public LoginService loginService;
+    private LoginService loginService;
 
     /**
      * Return the name of the current context according to the current api, namespace

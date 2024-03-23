@@ -28,13 +28,13 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class AuthInfoTest {
     @Mock
-    public LoginService loginService;
+    LoginService loginService;
 
     @Mock
-    private FormatService formatService;
+    FormatService formatService;
 
     @InjectMocks
-    private AuthInfo subcommand;
+    AuthInfo subcommand;
 
     @Test
     void shouldDoNothingIfJwtNotExist() {

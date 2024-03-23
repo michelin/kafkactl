@@ -14,10 +14,10 @@ import java.util.Optional;
 @Singleton
 public class ApiResourcesService {
     @Inject
-    public ClusterResourceClient resourceClient;
+    private ClusterResourceClient resourceClient;
 
     @Inject
-    public LoginService loginService;
+    private LoginService loginService;
 
     /**
      * List all resource definitions.

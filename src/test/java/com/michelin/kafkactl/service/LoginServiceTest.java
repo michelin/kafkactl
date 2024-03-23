@@ -40,12 +40,12 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class LoginServiceTest {
     @Mock
-    public ClusterResourceClient clusterResourceClient;
+    ClusterResourceClient clusterResourceClient;
 
     @Mock
-    public KafkactlConfig kafkactlConfig;
+    KafkactlConfig kafkactlConfig;
 
-    private String backUpJwt;
+    String backUpJwt;
 
     @BeforeEach
     void setUp() throws IOException {

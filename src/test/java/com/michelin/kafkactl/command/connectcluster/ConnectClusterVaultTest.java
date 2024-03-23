@@ -26,22 +26,22 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class ConnectClusterVaultTest {
     @Mock
-    private KafkactlConfig kafkactlConfig;
+    KafkactlConfig kafkactlConfig;
 
     @Mock
-    private ResourceService resourceService;
+    ResourceService resourceService;
 
     @Mock
-    private ConfigService configService;
+    ConfigService configService;
 
     @Mock
-    private LoginService loginService;
+    LoginService loginService;
 
     @Mock
-    private Kafkactl kafkactl;
+    Kafkactl kafkactl;
 
     @InjectMocks
-    private ConnectClusterVault subcommand;
+    ConnectClusterVault subcommand;
 
     @Test
     void shouldReturnInvalidCurrentContext() {

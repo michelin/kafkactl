@@ -13,14 +13,14 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class KafkactlTest {
     @InjectMocks
-    private Kafkactl kafkactl;
+    Kafkactl kafkactl;
 
     @Test
     void shouldSetVerbose() {
         CommandLine cmd = new CommandLine(kafkactl);
         int code = cmd.execute("-v");
         assertEquals(0, code);
-        assertTrue(kafkactl.verbose);
+        assertTrue(Kafkactl.verbose);
     }
 
     @Test
@@ -28,6 +28,6 @@ class KafkactlTest {
         CommandLine cmd = new CommandLine(kafkactl);
         int code = cmd.execute();
         assertEquals(0, code);
-        assertFalse(kafkactl.verbose);
+        assertFalse(Kafkactl.verbose);
     }
 }

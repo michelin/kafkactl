@@ -14,7 +14,7 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class ConnectClusterTest {
     @InjectMocks
-    private ConnectCluster subcommand;
+    ConnectCluster subcommand;
 
     @Test
     void shouldDisplayUsageWhenNoSubcommand() {

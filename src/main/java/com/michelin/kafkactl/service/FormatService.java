@@ -37,7 +37,7 @@ public class FormatService {
         List.of("KIND:/kind", "NAME:/metadata/name", "AGE:/metadata/creationTimestamp%AGO");
 
     @Inject
-    public KafkactlConfig kafkactlConfig;
+    private KafkactlConfig kafkactlConfig;
 
     /**
      * Display a list of resources.

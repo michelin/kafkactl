@@ -30,8 +30,8 @@ public class Status {
      * Status phase.
      */
     public enum StatusPhase {
-        Success,
-        Failed
+        SUCCESS,
+        FAILED
     }
 
     /**

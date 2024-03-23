@@ -17,7 +17,7 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class AuthTest {
     @InjectMocks
-    private Auth subcommand;
+    Auth subcommand;
 
     @Test
     void shouldDisplayUsageWhenNoSubcommand() {

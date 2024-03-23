@@ -26,22 +26,22 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class ResetPasswordTest {
     @Mock
-    public LoginService loginService;
+    LoginService loginService;
 
     @Mock
-    public ResourceService resourceService;
+    ResourceService resourceService;
 
     @Mock
-    private ConfigService configService;
+    ConfigService configService;
 
     @Mock
-    public KafkactlConfig kafkactlConfig;
+    KafkactlConfig kafkactlConfig;
 
     @Mock
-    public Kafkactl kafkactl;
+    Kafkactl kafkactl;
 
     @InjectMocks
-    private ResetPassword resetPassword;
+    ResetPassword resetPassword;
 
     @Test
     void shouldReturnInvalidCurrentContext() {

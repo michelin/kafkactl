@@ -22,13 +22,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ApiResourcesServiceTest {
     @Mock
-    public ClusterResourceClient resourceClient;
+    ClusterResourceClient resourceClient;
 
     @Mock
-    public LoginService loginService;
+    LoginService loginService;
 
     @InjectMocks
-    public ApiResourcesService apiResourcesService;
+    ApiResourcesService apiResourcesService;
 
     @Test
     void shouldListResourceDefinitions() {

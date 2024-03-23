@@ -40,25 +40,28 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class DiffTest {
     @Mock
-    public FormatService formatService;
-    @Mock
-    private LoginService loginService;
-    @Mock
-    private ApiResourcesService apiResourcesService;
-    @Mock
-    private ResourceService resourceService;
+    FormatService formatService;
 
     @Mock
-    private ConfigService configService;
+    LoginService loginService;
 
     @Mock
-    private KafkactlConfig kafkactlConfig;
+    ApiResourcesService apiResourcesService;
 
     @Mock
-    private Kafkactl kafkactl;
+    ResourceService resourceService;
+
+    @Mock
+    ConfigService configService;
+
+    @Mock
+    KafkactlConfig kafkactlConfig;
+
+    @Mock
+    Kafkactl kafkactl;
 
     @InjectMocks
-    private Diff diff;
+    Diff diff;
 
     @Test
     void shouldReturnInvalidCurrentContext() {

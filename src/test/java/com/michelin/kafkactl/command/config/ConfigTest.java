@@ -14,7 +14,7 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class ConfigTest {
     @InjectMocks
-    private Config subcommand;
+    Config subcommand;
 
     @Test
     void shouldDisplayUsageWhenNoSubcommand() {

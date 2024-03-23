@@ -37,27 +37,27 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class DeleteTest {
     @Mock
-    public FormatService formatService;
+    FormatService formatService;
     @Mock
-    private KafkactlConfig kafkactlConfig;
+    KafkactlConfig kafkactlConfig;
     @Mock
-    private ResourceService resourceService;
+    ResourceService resourceService;
     @Mock
-    private LoginService loginService;
+    LoginService loginService;
     @Mock
-    private ApiResourcesService apiResourcesService;
+    ApiResourcesService apiResourcesService;
 
     @Mock
-    private FileService fileService;
+    FileService fileService;
 
     @Mock
-    private Kafkactl kafkactl;
+    Kafkactl kafkactl;
 
     @Mock
-    private ConfigService configService;
+    ConfigService configService;
 
     @InjectMocks
-    private Delete delete;
+    Delete delete;
 
     @Test
     void shouldReturnInvalidCurrentContext() {

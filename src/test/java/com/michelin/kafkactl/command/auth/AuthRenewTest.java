@@ -22,10 +22,10 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class AuthRenewTest {
     @Mock
-    public LoginService loginService;
+    LoginService loginService;
 
     @InjectMocks
-    private AuthRenew subcommand;
+    AuthRenew subcommand;
 
     @Test
     void shouldSuccessWhenRenewSucceed() {

@@ -38,28 +38,28 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class ConnectorTest {
     @Mock
-    private LoginService loginService;
+    LoginService loginService;
 
     @Mock
-    private KafkactlConfig kafkactlConfig;
+    KafkactlConfig kafkactlConfig;
 
     @Mock
-    private ResourceService resourceService;
+    ResourceService resourceService;
 
     @Mock
-    private ApiResourcesService apiResourcesService;
+    ApiResourcesService apiResourcesService;
 
     @Mock
-    private FormatService formatService;
+    FormatService formatService;
 
     @Mock
-    private ConfigService configService;
+    ConfigService configService;
 
     @Mock
-    private Kafkactl kafkactl;
+    Kafkactl kafkactl;
 
     @InjectMocks
-    private Connector connector;
+    Connector connector;
 
     @Test
     void shouldReturnInvalidCurrentContext() {

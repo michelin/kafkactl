@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class FileServiceTest {
     @InjectMocks
-    public FileService fileService;
+    FileService fileService;
 
     @Test
     void shouldComputeYamlFileListRecursive() {

@@ -35,28 +35,28 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class GetTest {
     @Mock
-    public LoginService loginService;
+    LoginService loginService;
 
     @Mock
-    public FormatService formatService;
+    FormatService formatService;
 
     @Mock
-    public ApiResourcesService apiResourcesService;
+    ApiResourcesService apiResourcesService;
 
     @Mock
-    public ResourceService resourceService;
+    ResourceService resourceService;
 
     @Mock
-    private ConfigService configService;
+    ConfigService configService;
 
     @Mock
-    public KafkactlConfig kafkactlConfig;
+    KafkactlConfig kafkactlConfig;
 
     @Mock
-    public Kafkactl kafkactl;
+    Kafkactl kafkactl;
 
     @InjectMocks
-    private Get get;
+    Get get;
 
     @Test
     void shouldReturnInvalidCurrentContext() {

@@ -11,7 +11,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.service.ApiResourcesService;
 import com.michelin.kafkactl.service.ConfigService;
@@ -33,19 +32,16 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class ApiResourcesTest {
     @Mock
-    public FormatService formatService;
+    FormatService formatService;
 
     @Mock
-    private ApiResourcesService apiResourcesService;
+    ApiResourcesService apiResourcesService;
 
     @Mock
-    private ConfigService configService;
+    ConfigService configService;
 
     @Mock
-    private LoginService loginService;
-
-    @Mock
-    private Kafkactl kafkactl;
+    LoginService loginService;
 
     @InjectMocks
     private ApiResources apiResources;

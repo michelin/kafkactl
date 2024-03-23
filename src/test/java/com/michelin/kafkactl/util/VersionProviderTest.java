@@ -13,10 +13,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class VersionProviderTest {
     @Mock
-    public KafkactlConfig kafkactlConfig;
+    KafkactlConfig kafkactlConfig;
 
     @InjectMocks
-    public VersionProvider versionProvider;
+    VersionProvider versionProvider;
 
     @Test
     void shouldGetVersion() {

@@ -26,13 +26,13 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class ConfigGetContextsTest {
     @Mock
-    private KafkactlConfig kafkactlConfig;
+    KafkactlConfig kafkactlConfig;
 
     @Mock
-    private FormatService formatService;
+    FormatService formatService;
 
     @InjectMocks
-    private ConfigGetContexts subcommand;
+    ConfigGetContexts subcommand;
 
     @Test
     void shouldGetEmptyContexts() {

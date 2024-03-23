@@ -36,22 +36,22 @@ public class ResourceService {
     public static final String SCHEMA_FILE = "schemaFile";
 
     @Inject
-    NamespacedResourceClient namespacedClient;
+    private NamespacedResourceClient namespacedClient;
 
     @Inject
-    ClusterResourceClient nonNamespacedClient;
+    private ClusterResourceClient nonNamespacedClient;
 
     @Inject
-    LoginService loginService;
+    private LoginService loginService;
 
     @Inject
-    FormatService formatService;
+    private FormatService formatService;
 
     @Inject
-    FileService fileService;
+    private FileService fileService;
 
     @Inject
-    ApiResourcesService apiResourcesService;
+    private ApiResourcesService apiResourcesService;
 
     /**
      * List all resources of the given types.

@@ -26,7 +26,7 @@ import picocli.CommandLine;
 @MicronautTest
 class FormatServiceTest {
     @Inject
-    public FormatService formatService;
+    FormatService formatService;
 
     @Test
     void shouldDisplayListTable() {
