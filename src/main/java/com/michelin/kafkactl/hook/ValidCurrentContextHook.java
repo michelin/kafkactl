@@ -14,7 +14,7 @@ import picocli.CommandLine;
 @CommandLine.Command
 public abstract class ValidCurrentContextHook implements Callable<Integer> {
     @Inject
-    protected ConfigService configService;
+    public ConfigService configService;
 
     @CommandLine.Spec
     public CommandLine.Model.CommandSpec commandSpec;
