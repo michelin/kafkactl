@@ -10,6 +10,7 @@ import com.michelin.kafkactl.model.SchemaCompatibility;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.util.VersionProvider;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.List;
@@ -32,9 +33,11 @@ import picocli.CommandLine;
     mixinStandardHelpOptions = true)
 public class Schema extends AuthenticatedHook {
     @Inject
+    @ReflectiveAccess
     private ResourceService resourceService;
 
     @Inject
+    @ReflectiveAccess
     private FormatService formatService;
 
     @CommandLine.Parameters(index = "0", description = "Compatibility to set (${COMPLETION-CANDIDATES}).", arity = "1")

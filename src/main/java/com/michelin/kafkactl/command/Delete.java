@@ -9,6 +9,7 @@ import com.michelin.kafkactl.service.FileService;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.util.VersionProvider;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.io.File;
@@ -36,12 +37,15 @@ import picocli.CommandLine.Parameters;
     mixinStandardHelpOptions = true)
 public class Delete extends DryRunHook {
     @Inject
+    @ReflectiveAccess
     private ResourceService resourceService;
 
     @Inject
+    @ReflectiveAccess
     private FormatService formatService;
 
     @Inject
+    @ReflectiveAccess
     private FileService fileService;
 
     @ArgGroup(multiplicity = "1")

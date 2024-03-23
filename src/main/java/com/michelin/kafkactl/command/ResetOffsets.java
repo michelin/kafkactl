@@ -6,6 +6,7 @@ import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.util.VersionProvider;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.time.Duration;
@@ -36,6 +37,7 @@ public class ResetOffsets extends DryRunHook {
     public static final String OPTIONS = "options";
 
     @Inject
+    @ReflectiveAccess
     private ResourceService resourceService;
 
     @Option(names = {"--group"}, required = true, description = "Consumer group name.")

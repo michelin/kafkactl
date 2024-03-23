@@ -10,6 +10,7 @@ import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.util.VersionProvider;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.io.IOException;
@@ -36,9 +37,11 @@ import picocli.CommandLine.Parameters;
     mixinStandardHelpOptions = true)
 public class Get extends AuthenticatedHook {
     @Inject
+    @ReflectiveAccess
     private ResourceService resourceService;
 
     @Inject
+    @ReflectiveAccess
     private FormatService formatService;
 
     @Parameters(index = "0", description = "Resource type or 'all' to display resources of all types.", arity = "1")

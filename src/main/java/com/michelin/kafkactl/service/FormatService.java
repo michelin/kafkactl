@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.Status;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.naming.conventions.StringConvention;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
@@ -37,6 +38,7 @@ public class FormatService {
         List.of("KIND:/kind", "NAME:/metadata/name", "AGE:/metadata/creationTimestamp%AGO");
 
     @Inject
+    @ReflectiveAccess
     private KafkactlConfig kafkactlConfig;
 
     /**

@@ -6,6 +6,7 @@ import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.util.VersionProvider;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.io.File;
@@ -31,9 +32,11 @@ import picocli.CommandLine.Option;
     mixinStandardHelpOptions = true)
 public class Apply extends DryRunHook {
     @Inject
+    @ReflectiveAccess
     private FormatService formatService;
 
     @Inject
+    @ReflectiveAccess
     private ResourceService resourceService;
 
     @Option(names = {"-f", "--file"}, description = "YAML file or directory containing resources.")

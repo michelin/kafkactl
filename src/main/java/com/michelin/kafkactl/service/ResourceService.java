@@ -13,6 +13,7 @@ import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.SchemaCompatibility;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
@@ -36,21 +37,27 @@ public class ResourceService {
     public static final String SCHEMA_FILE = "schemaFile";
 
     @Inject
+    @ReflectiveAccess
     private NamespacedResourceClient namespacedClient;
 
     @Inject
+    @ReflectiveAccess
     private ClusterResourceClient nonNamespacedClient;
 
     @Inject
+    @ReflectiveAccess
     private LoginService loginService;
 
     @Inject
+    @ReflectiveAccess
     private FormatService formatService;
 
     @Inject
+    @ReflectiveAccess
     private FileService fileService;
 
     @Inject
+    @ReflectiveAccess
     private ApiResourcesService apiResourcesService;
 
     /**

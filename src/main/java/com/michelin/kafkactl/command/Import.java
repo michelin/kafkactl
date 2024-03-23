@@ -5,6 +5,7 @@ import com.michelin.kafkactl.hook.DryRunHook;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.util.VersionProvider;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,7 @@ import picocli.CommandLine.Parameters;
     mixinStandardHelpOptions = true)
 public class Import extends DryRunHook {
     @Inject
+    @ReflectiveAccess
     private ResourceService resourceService;
 
     @Parameters(index = "0", description = "Resource type.", arity = "1")

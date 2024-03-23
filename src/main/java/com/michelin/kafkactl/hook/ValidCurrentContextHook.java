@@ -3,6 +3,7 @@ package com.michelin.kafkactl.hook;
 import com.michelin.kafkactl.command.config.Config;
 import com.michelin.kafkactl.command.config.ConfigUseContext;
 import com.michelin.kafkactl.service.ConfigService;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -14,10 +15,11 @@ import picocli.CommandLine;
 @CommandLine.Command
 public abstract class ValidCurrentContextHook implements Callable<Integer> {
     @Inject
-    public ConfigService configService;
+    @ReflectiveAccess
+    private ConfigService configService;
 
     @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
+    protected CommandLine.Model.CommandSpec commandSpec;
 
     @Override
     public Integer call() throws Exception {

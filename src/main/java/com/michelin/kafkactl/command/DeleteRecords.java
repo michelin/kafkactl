@@ -4,6 +4,7 @@ import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.hook.DryRunHook;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.util.VersionProvider;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
@@ -24,6 +25,7 @@ import picocli.CommandLine.Parameters;
     mixinStandardHelpOptions = true)
 public class DeleteRecords extends DryRunHook {
     @Inject
+    @ReflectiveAccess
     private ResourceService resourceService;
 
     @Parameters(description = "Name of the topic.", arity = "1")

@@ -12,6 +12,7 @@ import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.util.VersionProvider;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.util.List;
@@ -37,9 +38,11 @@ import picocli.CommandLine;
     mixinStandardHelpOptions = true)
 public class Connector extends AuthenticatedHook {
     @Inject
+    @ReflectiveAccess
     private ResourceService resourceService;
 
     @Inject
+    @ReflectiveAccess
     private FormatService formatService;
 
     @CommandLine.Parameters(index = "0", description = "Action to perform (${COMPLETION-CANDIDATES}).", arity = "1")

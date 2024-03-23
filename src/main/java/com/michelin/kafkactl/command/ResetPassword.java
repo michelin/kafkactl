@@ -7,6 +7,7 @@ import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.util.VersionProvider;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.List;
@@ -28,6 +29,7 @@ import picocli.CommandLine;
     mixinStandardHelpOptions = true)
 public class ResetPassword extends AuthenticatedHook {
     @Inject
+    @ReflectiveAccess
     private ResourceService resourceService;
 
     @CommandLine.Parameters(description = "The user to reset password.", arity = "1")

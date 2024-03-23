@@ -5,6 +5,7 @@ import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.ApiResourcesService;
 import com.michelin.kafkactl.service.LoginService;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.List;
@@ -17,16 +18,16 @@ import picocli.CommandLine;
 @CommandLine.Command
 public abstract class AuthenticatedHook extends ValidCurrentContextHook {
     @Inject
-    public LoginService loginService;
+    @ReflectiveAccess
+    protected LoginService loginService;
 
     @Inject
-    public ApiResourcesService apiResourcesService;
+    @ReflectiveAccess
+    protected ApiResourcesService apiResourcesService;
 
     @Inject
-    public KafkactlConfig kafkactlConfig;
-
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
+    @ReflectiveAccess
+    protected KafkactlConfig kafkactlConfig;
 
     @Override
     public Integer onContextValid() throws IOException {

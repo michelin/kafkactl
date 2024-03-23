@@ -3,6 +3,7 @@ package com.michelin.kafkactl.command.auth;
 import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.service.LoginService;
 import com.michelin.kafkactl.util.VersionProvider;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -24,6 +25,7 @@ import picocli.CommandLine;
     mixinStandardHelpOptions = true)
 public class AuthRenew implements Callable<Integer> {
     @Inject
+    @ReflectiveAccess
     private LoginService loginService;
 
     @CommandLine.Spec

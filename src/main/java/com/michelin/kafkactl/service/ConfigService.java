@@ -1,6 +1,7 @@
 package com.michelin.kafkactl.service;
 
 import com.michelin.kafkactl.config.KafkactlConfig;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.io.File;
@@ -20,9 +21,11 @@ import org.yaml.snakeyaml.Yaml;
 @Singleton
 public class ConfigService {
     @Inject
+    @ReflectiveAccess
     private KafkactlConfig kafkactlConfig;
 
     @Inject
+    @ReflectiveAccess
     private LoginService loginService;
 
     /**

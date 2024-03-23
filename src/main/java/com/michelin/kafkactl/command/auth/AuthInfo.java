@@ -5,6 +5,7 @@ import static com.michelin.kafkactl.util.constant.ResourceKind.AUTH_INFO;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.LoginService;
 import com.michelin.kafkactl.util.VersionProvider;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -26,9 +27,11 @@ import picocli.CommandLine;
     mixinStandardHelpOptions = true)
 public class AuthInfo implements Callable<Integer> {
     @Inject
+    @ReflectiveAccess
     private LoginService loginService;
 
     @Inject
+    @ReflectiveAccess
     private FormatService formatService;
 
     @CommandLine.Spec

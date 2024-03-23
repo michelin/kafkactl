@@ -9,6 +9,7 @@ import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.util.VersionProvider;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.util.StringUtils;
 import jakarta.inject.Inject;
 import java.util.HashMap;
@@ -32,9 +33,11 @@ import picocli.CommandLine;
     mixinStandardHelpOptions = true)
 public class ConfigCurrentContext extends ValidCurrentContextHook {
     @Inject
+    @ReflectiveAccess
     private KafkactlConfig kafkactlConfig;
 
     @Inject
+    @ReflectiveAccess
     private FormatService formatService;
 
     @CommandLine.Spec

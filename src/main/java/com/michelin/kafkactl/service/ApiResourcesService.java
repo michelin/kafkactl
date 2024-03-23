@@ -3,6 +3,7 @@ package com.michelin.kafkactl.service;
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.List;
@@ -14,9 +15,11 @@ import java.util.Optional;
 @Singleton
 public class ApiResourcesService {
     @Inject
+    @ReflectiveAccess
     private ClusterResourceClient resourceClient;
 
     @Inject
+    @ReflectiveAccess
     private LoginService loginService;
 
     /**

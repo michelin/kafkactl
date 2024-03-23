@@ -3,6 +3,7 @@ package com.michelin.kafkactl.command.config;
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.util.VersionProvider;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.Optional;
@@ -25,9 +26,11 @@ import picocli.CommandLine;
     mixinStandardHelpOptions = true)
 public class ConfigUseContext implements Callable<Integer> {
     @Inject
+    @ReflectiveAccess
     private KafkactlConfig kafkactlConfig;
 
     @Inject
+    @ReflectiveAccess
     private ConfigService configService;
 
     @CommandLine.Parameters(index = "0", defaultValue = "", description = "Context to use.", arity = "1")
