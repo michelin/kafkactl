@@ -1,12 +1,12 @@
 package com.michelin.kafkactl.service;
 
 import static com.michelin.kafkactl.service.FormatService.TABLE;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.CONNECTOR;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.CONNECT_CLUSTER;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.CONSUMER_GROUP_RESET_OFFSET_RESPONSE;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.DELETE_RECORDS_RESPONSE;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.SUBJECT;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.VAULT_RESPONSE;
+import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR;
+import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECT_CLUSTER;
+import static com.michelin.kafkactl.util.constant.ResourceKind.CONSUMER_GROUP_RESET_OFFSET_RESPONSE;
+import static com.michelin.kafkactl.util.constant.ResourceKind.DELETE_RECORDS_RESPONSE;
+import static com.michelin.kafkactl.util.constant.ResourceKind.SUBJECT;
+import static com.michelin.kafkactl.util.constant.ResourceKind.VAULT_RESPONSE;
 
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.client.NamespacedResourceClient;

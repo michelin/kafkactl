@@ -1,15 +1,15 @@
 package com.michelin.kafkactl.service;
 
 import static com.michelin.kafkactl.service.FormatService.TABLE;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.CHANGE_CONNECTOR_STATE;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.CONNECTOR;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.CONNECT_CLUSTER;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.CONSUMER_GROUP_RESET_OFFSET_RESPONSE;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.DELETE_RECORDS_RESPONSE;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.KAFKA_USER_RESET_PASSWORD;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.SCHEMA_COMPATIBILITY_STATE;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.SUBJECT;
-import static com.michelin.kafkactl.utils.constants.ConstantKind.VAULT_RESPONSE;
+import static com.michelin.kafkactl.util.constant.ResourceKind.CHANGE_CONNECTOR_STATE;
+import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR;
+import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECT_CLUSTER;
+import static com.michelin.kafkactl.util.constant.ResourceKind.CONSUMER_GROUP_RESET_OFFSET_RESPONSE;
+import static com.michelin.kafkactl.util.constant.ResourceKind.DELETE_RECORDS_RESPONSE;
+import static com.michelin.kafkactl.util.constant.ResourceKind.KAFKA_USER_RESET_PASSWORD;
+import static com.michelin.kafkactl.util.constant.ResourceKind.SCHEMA_COMPATIBILITY_STATE;
+import static com.michelin.kafkactl.util.constant.ResourceKind.SUBJECT;
+import static com.michelin.kafkactl.util.constant.ResourceKind.VAULT_RESPONSE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.michelin.kafkactl.KafkactlCommand;
+import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.model.ApiResource;
@@ -89,7 +89,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         when(namespacedClient.list(any(), any(), any()))
             .thenReturn(Collections.singletonList(resource));
@@ -122,7 +122,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         when(nonNamespacedClient.list(any(), any()))
             .thenReturn(Collections.singletonList(resource));
@@ -137,7 +137,7 @@ class ResourceServiceTest {
 
     @Test
     void shouldListAllWhenEmptyResponse() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -172,7 +172,7 @@ class ResourceServiceTest {
             .synchronizable(true)
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
@@ -226,7 +226,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
@@ -272,7 +272,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
@@ -455,7 +455,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.notFound());
 
@@ -481,7 +481,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -519,7 +519,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -556,7 +556,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -584,7 +584,7 @@ class ResourceServiceTest {
 
     @Test
     void shouldDeleteNamespacedResource() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -610,7 +610,7 @@ class ResourceServiceTest {
 
     @Test
     void shouldDeleteNonNamespacedResource() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -644,7 +644,7 @@ class ResourceServiceTest {
             .synchronizable(true)
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         when(namespacedClient.delete(any(), any(), any(), any(), anyBoolean()))
@@ -666,7 +666,7 @@ class ResourceServiceTest {
             .synchronizable(true)
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         when(namespacedClient.delete(any(), any(), any(), any(), anyBoolean()))
             .thenReturn(HttpResponse.notFound());
@@ -699,7 +699,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         when(namespacedClient.importResources(any(), any(), any(), anyBoolean()))
             .thenReturn(Collections.singletonList(topicResource));
@@ -722,7 +722,7 @@ class ResourceServiceTest {
             .synchronizable(true)
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -746,7 +746,7 @@ class ResourceServiceTest {
             .synchronizable(true)
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         when(namespacedClient.importResources(any(), any(), any(), anyBoolean()))
@@ -771,7 +771,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         when(namespacedClient.deleteRecords(any(), any(), any(), anyBoolean()))
             .thenReturn(Collections.singletonList(topicResource));
@@ -785,7 +785,7 @@ class ResourceServiceTest {
 
     @Test
     void shouldDeleteRecordsEmpty() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -800,7 +800,7 @@ class ResourceServiceTest {
 
     @Test
     void shouldDeleteRecordsFail() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -826,7 +826,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         when(namespacedClient.resetOffsets(any(), any(), any(), any(), anyBoolean()))
             .thenReturn(Collections.singletonList(topicResource));
@@ -850,7 +850,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -875,7 +875,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -900,7 +900,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         when(namespacedClient.changeConnectorState(any(), any(), any(), any()))
             .thenReturn(HttpResponse.ok(changeConnectorStateResource));
@@ -924,7 +924,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         when(namespacedClient.changeConnectorState(any(), any(), any(), any()))
             .thenReturn(HttpResponse.notFound(changeConnectorStateResource));
@@ -950,7 +950,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         when(namespacedClient.changeConnectorState(any(), any(), any(), any()))
@@ -975,7 +975,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         when(namespacedClient.changeSchemaCompatibility(any(), any(), any(), any()))
             .thenReturn(HttpResponse.ok(changeSchemaCompatResource));
@@ -999,7 +999,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         when(namespacedClient.changeSchemaCompatibility(any(), any(), any(), any()))
             .thenReturn(HttpResponse.notFound(changeConnectorStateResource));
@@ -1016,7 +1016,7 @@ class ResourceServiceTest {
 
     @Test
     void shouldChangeSchemaCompatFail() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         when(namespacedClient.changeSchemaCompatibility(any(), any(), any(), any()))
@@ -1041,7 +1041,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         when(namespacedClient.resetPassword(any(), any(), any()))
             .thenReturn(HttpResponse.ok(changeSchemaCompatResource));
@@ -1063,7 +1063,7 @@ class ResourceServiceTest {
             .spec(Map.of())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         when(namespacedClient.resetPassword(any(), any(), any()))
             .thenReturn(HttpResponse.notFound(changeConnectorStateResource));
@@ -1077,7 +1077,7 @@ class ResourceServiceTest {
 
     @Test
     void shouldResetPasswordFail() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         when(namespacedClient.resetPassword(any(), any(), any()))
@@ -1103,7 +1103,7 @@ class ResourceServiceTest {
         when(namespacedClient.listAvailableVaultsConnectClusters(any(), any()))
             .thenReturn(Collections.singletonList(availableVaults));
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         int actual = resourceService.listAvailableVaultsConnectClusters("namespace", cmd.getCommandSpec());
 
@@ -1117,7 +1117,7 @@ class ResourceServiceTest {
         when(namespacedClient.listAvailableVaultsConnectClusters(any(), any()))
             .thenReturn(Collections.emptyList());
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -1133,7 +1133,7 @@ class ResourceServiceTest {
         when(namespacedClient.listAvailableVaultsConnectClusters(any(), any()))
             .thenThrow(exception);
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         int actual = resourceService.listAvailableVaultsConnectClusters("namespace", cmd.getCommandSpec());
 
@@ -1155,7 +1155,7 @@ class ResourceServiceTest {
         when(namespacedClient.vaultsOnConnectClusters(any(), any(), any(), any()))
             .thenReturn(Collections.singletonList(availableVaults));
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         int actual =
             resourceService.vaultsOnConnectClusters("namespace", "connectCluster", Collections.singletonList("passwd"),
@@ -1172,7 +1172,7 @@ class ResourceServiceTest {
         when(namespacedClient.listAvailableVaultsConnectClusters(any(), any()))
             .thenThrow(exception);
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         int actual = resourceService.listAvailableVaultsConnectClusters("namespace", cmd.getCommandSpec());
 
@@ -1182,7 +1182,7 @@ class ResourceServiceTest {
 
     @Test
     void shouldParse() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         doCallRealMethod()
             .when(fileService).computeYamlFileList(any(), anyBoolean());
@@ -1202,7 +1202,7 @@ class ResourceServiceTest {
 
     @Test
     void shouldNotParseNotFound() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
         when(fileService.computeYamlFileList(any(), anyBoolean()))
             .thenReturn(Collections.emptyList());

@@ -37,8 +37,8 @@ Kafka resources using YAML descriptors.
     * [Get](#get)
     * [Import](#import)
     * [Reset Offsets](#reset-offsets)
-    * [Schemas](#schemas)
     * [Reset Password](#reset-password)
+    * [Schemas](#schemas)
 * [Resources](#resources)
     * [User](#user)
         * [Topic](#topic)
@@ -675,6 +675,36 @@ Example(s):
 kafkactl reset-offsets --group myConsumerGroup --topic myTopic --to-earliest
 ```
 
+### Reset Password
+
+The `reset-password` command allows you to reset the password of a user.
+
+```console
+Usage: kafkactl reset-password [-hvV] [--execute] [-n=<optionalNamespace>] [-o=<output>] <user>
+
+Description:
+
+Reset a Kafka password.
+
+Parameters:
+      <user>              The user to reset password.
+
+Options:
+      --execute           This option is mandatory to change the password
+  -h, --help              Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                          Override namespace defined in config or YAML resources.
+  -o, --output=<output>   Output format. One of: yaml|table
+  -v, --verbose           Enable the verbose mode.
+  -V, --version           Print version information and exit.
+```
+
+Example(s):
+
+```console
+kafkactl reset-password myUser
+```
+
 ### Schemas
 
 The `schemas` command allows you to modify the schema compatibility.
@@ -705,36 +735,6 @@ Example(s):
 
 ```console
 kafkactl schemas forward-transitive mySubject-value
-```
-
-### Reset Password
-
-The `reset-password` command allows you to reset the password of a user.
-
-```console
-Usage: kafkactl reset-password [-hvV] [--execute] [-n=<optionalNamespace>] [-o=<output>] <user>
-
-Description:
-
-Reset a Kafka password.
-
-Parameters:
-      <user>              The user to reset password.
-
-Options:
-      --execute           This option is mandatory to change the password
-  -h, --help              Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                          Override namespace defined in config or YAML resources.
-  -o, --output=<output>   Output format. One of: yaml|table
-  -v, --verbose           Enable the verbose mode.
-  -V, --version           Print version information and exit.
-```
-
-Example(s):
-
-```console
-kafkactl reset-password myUser
 ```
 
 ## Resources

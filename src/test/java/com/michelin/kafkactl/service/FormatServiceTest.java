@@ -5,7 +5,7 @@ import static com.michelin.kafkactl.service.FormatService.YAML;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.michelin.kafkactl.KafkactlCommand;
+import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.Status;
@@ -43,7 +43,7 @@ class FormatServiceTest {
                 )))
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -64,7 +64,7 @@ class FormatServiceTest {
             .spec(Collections.emptyMap())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -89,7 +89,7 @@ class FormatServiceTest {
                 )))
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -111,7 +111,7 @@ class FormatServiceTest {
             .spec(Collections.emptyMap())
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -137,7 +137,7 @@ class FormatServiceTest {
             ))
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -162,7 +162,7 @@ class FormatServiceTest {
                 )))
             .build();
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -174,7 +174,7 @@ class FormatServiceTest {
 
     @Test
     void shouldDisplayErrorWithNameKindAndDetails() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
@@ -198,7 +198,7 @@ class FormatServiceTest {
 
     @Test
     void shouldDisplayErrorWithNameKindButNoDetails() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
@@ -214,7 +214,7 @@ class FormatServiceTest {
 
     @Test
     void shouldDisplayErrorWithNameKindButNoStatus() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
@@ -228,7 +228,7 @@ class FormatServiceTest {
 
     @Test
     void shouldDisplayErrorWithNameAndDetails() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
@@ -252,7 +252,7 @@ class FormatServiceTest {
 
     @Test
     void shouldDisplayErrorWithNameButNoDetails() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
@@ -268,7 +268,7 @@ class FormatServiceTest {
 
     @Test
     void shouldDisplayErrorWithNameButNoStatus() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
@@ -282,7 +282,7 @@ class FormatServiceTest {
 
     @Test
     void shouldDisplayErrorWithDetails() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
@@ -306,7 +306,7 @@ class FormatServiceTest {
 
     @Test
     void shouldDisplayErrorWithNoDetails() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
@@ -322,7 +322,7 @@ class FormatServiceTest {
 
     @Test
     void shouldDisplayErrorWithNoStatus() {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 

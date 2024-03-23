@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import com.michelin.kafkactl.KafkactlCommand;
+import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.config.KafkactlConfig;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -160,7 +160,7 @@ class ConfigServiceTest {
 
     @Test
     void shouldUpdateConfigurationContext() throws IOException {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 

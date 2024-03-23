@@ -1,5 +1,6 @@
 package com.michelin.kafkactl.hook;
 
+import java.io.IOException;
 import picocli.CommandLine;
 
 /**
@@ -11,11 +12,11 @@ public abstract class DryRunHook extends AuthenticatedHook {
     public boolean dryRun;
 
     @Override
-    public Integer call() throws Exception {
+    public Integer onContextValid() throws IOException {
         if (dryRun) {
             commandSpec.commandLine().getOut().println("Dry run execution.");
         }
 
-        return super.call();
+        return super.onContextValid();
     }
 }

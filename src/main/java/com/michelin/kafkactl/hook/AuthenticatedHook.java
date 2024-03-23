@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.hook;
 
-import com.michelin.kafkactl.KafkactlCommand;
+import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.ApiResourcesService;
@@ -25,23 +25,12 @@ public abstract class AuthenticatedHook extends ValidCurrentContextHook {
     @Inject
     public KafkactlConfig kafkactlConfig;
 
-    @CommandLine.ParentCommand
-    public KafkactlCommand kafkactlCommand;
-
     @CommandLine.Spec
     public CommandLine.Model.CommandSpec commandSpec;
 
-    /**
-     * Run the command.
-     *
-     * @return The command return code
-     * @throws IOException Any exception during the run
-     */
     @Override
-    public Integer call() throws Exception {
-        super.call();
-
-        if (!loginService.doAuthenticate(commandSpec, kafkactlCommand.verbose)) {
+    public Integer onContextValid() throws IOException {
+        if (!loginService.doAuthenticate(commandSpec, Kafkactl.verbose)) {
             return 1;
         }
 
@@ -54,7 +43,7 @@ public abstract class AuthenticatedHook extends ValidCurrentContextHook {
      * @return The current namespace
      */
     protected String getNamespace() {
-        return kafkactlCommand.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
+        return Kafkactl.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
     }
 
     /**

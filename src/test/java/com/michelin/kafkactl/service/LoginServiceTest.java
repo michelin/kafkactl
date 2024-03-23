@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.michelin.kafkactl.KafkactlCommand;
+import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.client.BearerAccessRefreshToken;
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.client.UserInfoResponse;
@@ -64,7 +64,7 @@ class LoginServiceTest {
         when(kafkactlConfig.getConfigDirectory())
             .thenReturn("src/test/resources");
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -81,7 +81,7 @@ class LoginServiceTest {
         when(clusterResourceClient.tokenInfo(any()))
             .thenThrow(exception);
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
@@ -99,7 +99,7 @@ class LoginServiceTest {
         when(clusterResourceClient.tokenInfo(any()))
             .thenThrow(exception);
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
@@ -116,7 +116,7 @@ class LoginServiceTest {
         userInfoResponse.setExp(10);
         userInfoResponse.setActive(false);
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -139,7 +139,7 @@ class LoginServiceTest {
         userInfoResponse.setExp(10);
         userInfoResponse.setActive(true);
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -167,7 +167,7 @@ class LoginServiceTest {
         when(clusterResourceClient.login(any()))
             .thenThrow(exception);
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
@@ -191,7 +191,7 @@ class LoginServiceTest {
         when(clusterResourceClient.login(any()))
             .thenReturn(bearerAccessRefreshToken);
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -214,7 +214,7 @@ class LoginServiceTest {
         userInfoResponse.setExp(10);
         userInfoResponse.setActive(true);
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -248,7 +248,7 @@ class LoginServiceTest {
         bearerAccessRefreshToken.setExpiresIn(1);
         bearerAccessRefreshToken.setRoles(Collections.singletonList("user"));
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -275,7 +275,7 @@ class LoginServiceTest {
         userInfoResponse.setExp(10);
         userInfoResponse.setActive(false);
 
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
@@ -296,7 +296,7 @@ class LoginServiceTest {
     @Test
     @SuppressWarnings("unchecked")
     void shouldReadJwtFile() throws IOException {
-        CommandLine cmd = new CommandLine(new KafkactlCommand());
+        CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
