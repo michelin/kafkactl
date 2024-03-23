@@ -1,5 +1,6 @@
 package com.michelin.kafkactl.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -31,7 +32,24 @@ public class Status {
      */
     public enum StatusPhase {
         SUCCESS,
-        FAILED
+        FAILED;
+
+        /**
+         * Build status phase from string.
+         * This is because Ns4Kafka returns capitalised status phases.
+         *
+         * @param key the key
+         * @return the status phase
+         */
+        @JsonCreator
+        public static StatusPhase fromString(String key) {
+            for (StatusPhase type : StatusPhase.values()) {
+                if (type.name().equalsIgnoreCase(key)) {
+                    return type;
+                }
+            }
+            return null;
+        }
     }
 
     /**
