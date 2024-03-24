@@ -80,7 +80,7 @@ class ConnectClusterVaultTest {
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
 
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
         when(resourceService.listAvailableVaultsConnectClusters(any(), any()))
             .thenReturn(0);
@@ -99,7 +99,7 @@ class ConnectClusterVaultTest {
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
 
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
         when(resourceService.listAvailableVaultsConnectClusters(any(), any()))
             .thenReturn(1);
@@ -117,7 +117,7 @@ class ConnectClusterVaultTest {
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
 
         CommandLine cmd = new CommandLine(subcommand);
@@ -135,7 +135,7 @@ class ConnectClusterVaultTest {
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
 
         when(resourceService.vaultsOnConnectClusters(any(), any(), any(), any()))

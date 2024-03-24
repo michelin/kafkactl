@@ -84,7 +84,7 @@ class ResetOffsetsTest {
         "--to-datetime=2000-01-01T12:00:00Z,TO_DATETIME",
         "--shift-by=10,SHIFT_BY"})
     void shouldResetOffsetsToEarliest(String method, String expectedMethod) {
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -104,7 +104,7 @@ class ResetOffsetsTest {
 
     @Test
     void shouldResetOffsetsToEarliestDryRun() {
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -127,7 +127,7 @@ class ResetOffsetsTest {
 
     @Test
     void shouldResetOffsetsByDuration() {
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -148,7 +148,7 @@ class ResetOffsetsTest {
 
     @Test
     void shouldResetOffsetsToOffset() {
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);

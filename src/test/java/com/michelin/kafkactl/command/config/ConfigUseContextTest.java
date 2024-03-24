@@ -68,7 +68,7 @@ class ConfigUseContextTest {
 
         int code = cmd.execute("context");
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("No context exists with the name: context"));
+        assertTrue(sw.toString().contains("No context exists with the name \"context\"."));
     }
 
     @Test

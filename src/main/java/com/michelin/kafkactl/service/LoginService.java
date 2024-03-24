@@ -8,7 +8,6 @@ import com.michelin.kafkactl.client.UserInfoResponse;
 import com.michelin.kafkactl.client.UsernameAndPasswordRequest;
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.JwtContent;
-import com.michelin.kafkactl.model.Resource;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Singleton;
@@ -18,8 +17,6 @@ import java.nio.file.Files;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import picocli.CommandLine;
 
 /**
@@ -163,24 +160,13 @@ public class LoginService {
      * @return The JWT info
      * @throws IOException Any exception during the run
      */
-    public List<Resource> readJwtFile() throws IOException {
+    public JwtContent readJwtFile() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         BearerAccessRefreshToken authInfo = objectMapper.readValue(jwtFile, BearerAccessRefreshToken.class);
-        JwtContent jwtContent = objectMapper.readValue(new String(Base64.getUrlDecoder()
+        return objectMapper.readValue(new String(Base64.getUrlDecoder()
             .decode(authInfo.getAccessToken().split("\\.")[1])), JwtContent.class);
-
-        return jwtContent.getRoleBindings()
-            .stream()
-            .map(roleBinding -> Resource.builder()
-                .spec(Map.of(
-                    "namespace", roleBinding.getNamespace(),
-                    "verbs", roleBinding.getVerbs(),
-                    "resources", roleBinding.getResources()
-                ))
-                .build())
-            .toList();
     }
 
     /**

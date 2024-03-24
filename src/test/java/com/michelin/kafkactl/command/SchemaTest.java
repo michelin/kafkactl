@@ -90,7 +90,7 @@ class SchemaTest {
         when(resourceService.changeSchemaCompatibility(any(), any(), any(), any()))
             .thenReturn(Optional.empty());
 
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
@@ -120,7 +120,7 @@ class SchemaTest {
         when(resourceService.changeSchemaCompatibility(any(), any(), any(), any()))
             .thenReturn(Optional.of(resource));
 
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");

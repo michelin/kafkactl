@@ -17,7 +17,6 @@ import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.client.UserInfoResponse;
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.JwtContent;
-import com.michelin.kafkactl.model.Resource;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import java.io.BufferedWriter;
@@ -294,7 +293,6 @@ class LoginServiceTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void shouldReadJwtFile() throws IOException {
         CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
@@ -304,19 +302,22 @@ class LoginServiceTest {
             .thenReturn("src/test/resources/fake_login");
 
         LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
-        List<Resource> actual = loginService.readJwtFile();
+        JwtContent actual = loginService.readJwtFile();
 
-        assertEquals(2, actual.size());
-        assertEquals("anotherNamespace", actual.get(0).getSpec().get("namespace"));
-        assertIterableEquals(List.of(GET), (List<JwtContent.RoleBinding.Verb>) actual.get(0).getSpec().get("verbs"));
-        assertIterableEquals(List.of("quota"), (List<String>) actual.get(0).getSpec().get("resources"));
+        assertEquals("admin", actual.getSub());
+        assertEquals(1711068624L, actual.getExp());
 
-        assertEquals("anotherNamespace", actual.get(1).getSpec().get("namespace"));
-        assertIterableEquals(List.of(GET, POST, PUT, DELETE),
-            (List<JwtContent.RoleBinding.Verb>) actual.get(1).getSpec().get("verbs"));
+        assertIterableEquals(List.of("isAdmin()"), actual.getRoles());
+
+        assertEquals("anotherNamespace", actual.getRoleBindings().get(0).getNamespace());
+        assertIterableEquals(List.of(GET), actual.getRoleBindings().get(0).getVerbs());
+        assertIterableEquals(List.of("quota"), actual.getRoleBindings().get(0).getResources());
+
+        assertEquals("anotherNamespace", actual.getRoleBindings().get(1).getNamespace());
+        assertIterableEquals(List.of(GET, POST, PUT, DELETE), actual.getRoleBindings().get(1).getVerbs());
         assertIterableEquals(List.of("schemas", "schemas/config", "topics", "topics/import", "topics/delete-records",
             "connectors", "connectors/import", "connectors/change-state", "connect-clusters", "connect-clusters/vaults",
-            "acls", "consumer-groups/reset", "streams"), (List<String>) actual.get(1).getSpec().get("resources"));
+            "acls", "consumer-groups/reset", "streams"), actual.getRoleBindings().get(1).getResources());
     }
 
     @Test

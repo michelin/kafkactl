@@ -134,7 +134,7 @@ class GetTest {
 
     @Test
     void shouldNotGetWhenHttpClientThrowException() {
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -164,7 +164,7 @@ class GetTest {
 
     @Test
     void shouldGetSingleResource() {
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -203,7 +203,7 @@ class GetTest {
 
     @Test
     void shouldGetAllTopicsSuccess() {
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -235,7 +235,7 @@ class GetTest {
 
     @Test
     void shouldGetAll() {
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);

@@ -57,10 +57,10 @@ public class ResetPassword extends AuthenticatedHook {
 
         String namespace = Kafkactl.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
         if (!confirmed) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(),
-                "You are about to change your Kafka password for the namespace " + namespace + ".\n"
-                    + "Active connections will be killed instantly.\n\n"
-                    + "To execute this operation, rerun the command with option --execute.");
+            commandSpec.commandLine().getOut().println("You are about to change your Kafka password "
+                + "for the namespace " + namespace + ".\n"
+                + "Active connections will be killed instantly.\n\n"
+                + "To execute this operation, rerun the command with option --execute.");
         }
 
         return resourceService.resetPassword(namespace, user, output, commandSpec);

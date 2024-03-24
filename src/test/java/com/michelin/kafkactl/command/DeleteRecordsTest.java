@@ -73,7 +73,7 @@ class DeleteRecordsTest {
 
     @Test
     void shouldDeleteDryRunSuccess() {
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -95,7 +95,7 @@ class DeleteRecordsTest {
 
     @Test
     void shouldDeleteSuccess() {
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -114,7 +114,7 @@ class DeleteRecordsTest {
 
     @Test
     void shouldDeleteFail() {
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);

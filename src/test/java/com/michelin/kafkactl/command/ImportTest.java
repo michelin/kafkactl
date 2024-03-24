@@ -125,7 +125,7 @@ class ImportTest {
 
     @Test
     void shouldImportTopicResources() {
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -155,7 +155,7 @@ class ImportTest {
 
     @Test
     void shouldImportTopicResourcesDryRun() {
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -188,7 +188,7 @@ class ImportTest {
 
     @Test
     void shouldImportAllResources() {
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);

@@ -48,7 +48,7 @@ public class ConfigUseContext implements Callable<Integer> {
 
         Optional<KafkactlConfig.Context> optionalContextToSet = configService.getContextByName(context);
         if (optionalContextToSet.isEmpty()) {
-            commandSpec.commandLine().getErr().println("No context exists with the name: " + context);
+            commandSpec.commandLine().getErr().println("No context exists with the name \"" + context + "\".");
             return 1;
         }
 

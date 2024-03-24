@@ -89,7 +89,7 @@ class ResetPasswordTest {
 
     @Test
     void shouldNotUpdateUserWhenNotConfirmed() {
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -100,10 +100,10 @@ class ResetPasswordTest {
 
         CommandLine cmd = new CommandLine(resetPassword);
         StringWriter sw = new StringWriter();
-        cmd.setErr(new PrintWriter(sw));
+        cmd.setOut(new PrintWriter(sw));
 
         int code = cmd.execute("user");
-        assertEquals(2, code);
+        assertEquals(0, code);
         assertTrue(sw.toString().contains("You are about to change your Kafka password for the namespace namespace."));
         assertTrue(sw.toString().contains("Active connections will be killed instantly."));
         assertTrue(sw.toString().contains("To execute this operation, rerun the command with option --execute."));
@@ -111,7 +111,7 @@ class ResetPasswordTest {
 
     @Test
     void shouldUpdateUser() {
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);

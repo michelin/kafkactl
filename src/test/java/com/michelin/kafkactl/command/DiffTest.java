@@ -161,7 +161,7 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenNamespaceMismatch() {
-        kafkactl.optionalNamespace = Optional.of("namespaceMismatch");
+        Kafkactl.optionalNamespace = Optional.of("namespaceMismatch");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -193,7 +193,7 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenHttpClientResponseException() {
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -229,7 +229,7 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenHttpClientResponseExceptionDuringApply() {
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -288,7 +288,7 @@ class DiffTest {
 
     @Test
     void shouldNotDiffApplyHasNoBody() {
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -347,7 +347,7 @@ class DiffTest {
 
     @Test
     void shouldDiff() {
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -424,7 +424,7 @@ class DiffTest {
 
     @Test
     void shouldDiffWhenNoLive() {
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -492,7 +492,7 @@ class DiffTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE, "src/test/resources/person.avsc");
 
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -558,7 +558,7 @@ class DiffTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put("schema", "{schema}");
 
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -618,7 +618,7 @@ class DiffTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE, "src/test/resources/not-exist.avsc");
 
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);

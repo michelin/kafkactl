@@ -100,7 +100,7 @@ class ConnectorTest {
         when(resourceService.changeConnectorState(any(), any(), any(), any()))
             .thenReturn(Optional.empty());
 
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
@@ -132,7 +132,7 @@ class ConnectorTest {
         when(resourceService.changeConnectorState(any(), any(), any(), any()))
             .thenReturn(Optional.of(resource));
 
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         CommandLine cmd = new CommandLine(connector);
 
@@ -174,7 +174,7 @@ class ConnectorTest {
         when(resourceService.changeConnectorState(any(), any(), any(), any()))
             .thenReturn(Optional.of(resource));
 
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         CommandLine cmd = new CommandLine(connector);
 
@@ -187,7 +187,7 @@ class ConnectorTest {
 
     @Test
     void shouldNotChangeStateWhenHttpClientResponseException() {
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -226,7 +226,7 @@ class ConnectorTest {
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.empty());
 
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         CommandLine cmd = new CommandLine(connector);
         StringWriter sw = new StringWriter();

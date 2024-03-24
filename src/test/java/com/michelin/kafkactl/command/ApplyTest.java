@@ -161,7 +161,7 @@ class ApplyTest {
 
     @Test
     void shouldNotApplyWhenNamespaceMismatch() {
-        kafkactl.optionalNamespace = Optional.of("namespaceMismatch");
+        Kafkactl.optionalNamespace = Optional.of("namespaceMismatch");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -213,7 +213,7 @@ class ApplyTest {
             .thenReturn("namespace");
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenThrow(exception);
@@ -227,7 +227,7 @@ class ApplyTest {
 
     @Test
     void shouldApply() {
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -275,7 +275,7 @@ class ApplyTest {
 
     @Test
     void shouldApplyDryRun() {
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -326,7 +326,7 @@ class ApplyTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE, "src/test/resources/person.avsc");
 
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -379,7 +379,7 @@ class ApplyTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put("schema", "{schema}");
 
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -429,7 +429,7 @@ class ApplyTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE, "src/test/resources/not-exist.avsc");
 
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);

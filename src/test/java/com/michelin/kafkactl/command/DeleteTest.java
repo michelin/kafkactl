@@ -91,7 +91,7 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByFileWhenYmlFileNotFound() {
-        kafkactl.optionalNamespace = Optional.empty();
+        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -117,7 +117,7 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -149,7 +149,7 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByNameWhenInvalidResources() {
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -169,7 +169,7 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByFileWhenNamespaceMismatch() {
-        kafkactl.optionalNamespace = Optional.of("namespaceMismatch");
+        Kafkactl.optionalNamespace = Optional.of("namespaceMismatch");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -203,7 +203,7 @@ class DeleteTest {
 
     @Test
     void shouldDeleteByFileSuccess() {
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -248,7 +248,7 @@ class DeleteTest {
 
     @Test
     void shouldDeleteByNameSuccess() {
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -280,7 +280,7 @@ class DeleteTest {
 
     @Test
     void shouldDeleteByFileDryRunSuccess() {
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -325,7 +325,7 @@ class DeleteTest {
 
     @Test
     void shouldDeleteByFileFail() {
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -368,7 +368,7 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByFileWhenHttpClientResponseException() {
-        kafkactl.optionalNamespace = Optional.of("namespace");
+        Kafkactl.optionalNamespace = Optional.of("namespace");
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
