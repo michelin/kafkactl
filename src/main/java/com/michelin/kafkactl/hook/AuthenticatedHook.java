@@ -10,12 +10,13 @@ import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
-import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.ParameterException;
 
 /**
  * Authenticated command.
  */
-@CommandLine.Command
+@Command
 public abstract class AuthenticatedHook extends ValidCurrentContextHook {
     @Inject
     @ReflectiveAccess
@@ -65,7 +66,7 @@ public abstract class AuthenticatedHook extends ValidCurrentContextHook {
                 .map(resource -> "\"" + resource.getKind() + "/" + resource.getMetadata().getName() + "\"")
                 .distinct()
                 .collect(Collectors.joining(", "));
-            throw new CommandLine.ParameterException(commandSpec.commandLine(),
+            throw new ParameterException(commandSpec.commandLine(),
                 "Namespace mismatch between Kafkactl configuration and YAML resource(s): " + invalid + ".");
         }
     }

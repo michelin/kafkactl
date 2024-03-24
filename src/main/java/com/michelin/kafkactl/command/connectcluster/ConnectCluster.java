@@ -3,11 +3,14 @@ package com.michelin.kafkactl.command.connectcluster;
 import com.michelin.kafkactl.util.VersionProvider;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Spec;
 
 /**
  * Connect clusters subcommand.
  */
-@CommandLine.Command(name = "connect-clusters",
+@Command(name = "connect-clusters",
     subcommands = {
         ConnectClusterVault.class,
     },
@@ -22,8 +25,8 @@ import picocli.CommandLine;
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
 public class ConnectCluster implements Callable<Integer> {
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
+    @Spec
+    public CommandSpec commandSpec;
 
     @Override
     public Integer call() {

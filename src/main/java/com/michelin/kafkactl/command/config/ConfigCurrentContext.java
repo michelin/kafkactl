@@ -15,12 +15,14 @@ import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Spec;
 
 /**
  * Config current context subcommand.
  */
-@CommandLine.Command(name = "current-context",
+@Command(name = "current-context",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
     descriptionHeading = "%n@|bold Description|@:%n%n",
@@ -40,8 +42,8 @@ public class ConfigCurrentContext extends ValidCurrentContextHook {
     @ReflectiveAccess
     private FormatService formatService;
 
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
+    @Spec
+    public CommandSpec commandSpec;
 
     @Override
     public Integer onContextValid() {

@@ -24,6 +24,10 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.ScopeType;
+import picocli.CommandLine.Spec;
 
 /**
  * Kafkactl command.
@@ -56,17 +60,17 @@ import picocli.CommandLine.Command;
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
 public class Kafkactl implements Callable<Integer> {
-    @CommandLine.Option(names = {"-v",
-        "--verbose"}, description = "Enable the verbose mode.", scope = CommandLine.ScopeType.INHERIT)
+    @Option(names = {"-v",
+        "--verbose"}, description = "Enable the verbose mode.", scope = ScopeType.INHERIT)
     public static boolean verbose;
 
-    @CommandLine.Option(names = {"-n",
+    @Option(names = {"-n",
         "--namespace"}, description = "Override namespace defined in config or YAML resources.",
-        scope = CommandLine.ScopeType.INHERIT)
+        scope = ScopeType.INHERIT)
     public static Optional<String> optionalNamespace;
 
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
+    @Spec
+    public CommandSpec commandSpec;
 
     /**
      * Main Micronaut method

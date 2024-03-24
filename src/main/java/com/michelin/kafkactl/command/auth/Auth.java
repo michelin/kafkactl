@@ -3,11 +3,14 @@ package com.michelin.kafkactl.command.auth;
 import com.michelin.kafkactl.util.VersionProvider;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Spec;
 
 /**
  * Auth subcommand.
  */
-@CommandLine.Command(name = "auth",
+@Command(name = "auth",
     subcommands = {
         AuthInfo.class,
         AuthRenew.class
@@ -23,8 +26,8 @@ import picocli.CommandLine;
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
 public class Auth implements Callable<Integer> {
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
+    @Spec
+    public CommandSpec commandSpec;
 
     @Override
     public Integer call() {

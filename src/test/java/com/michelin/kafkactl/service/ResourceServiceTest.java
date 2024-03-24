@@ -48,6 +48,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
+import picocli.CommandLine.ParameterException;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceServiceTest {
@@ -1207,7 +1208,7 @@ class ResourceServiceTest {
         when(fileService.computeYamlFileList(any(), anyBoolean()))
             .thenReturn(Collections.emptyList());
 
-        CommandLine.ParameterException actual = assertThrows(CommandLine.ParameterException.class,
+        ParameterException actual = assertThrows(ParameterException.class,
             () -> resourceService.parseResources(Optional.of(new File("src/test/resources/topics/topic.yml")), false,
                 cmd.getCommandSpec()));
 

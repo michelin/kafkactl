@@ -15,10 +15,10 @@ import jakarta.inject.Inject;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
-import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 
 /**
@@ -95,7 +95,7 @@ public class Delete extends DryRunHook {
             List<File> yamlFiles =
                 fileService.computeYamlFileList(config.fileConfig.file.get(), config.fileConfig.recursive);
             if (yamlFiles.isEmpty()) {
-                throw new CommandLine.ParameterException(commandSpec.commandLine(),
+                throw new ParameterException(commandSpec.commandLine(),
                     "Could not find YAML or YML files in " + config.fileConfig.file.get().getName() + " directory.");
             }
             // Load each files
@@ -105,7 +105,7 @@ public class Delete extends DryRunHook {
         Optional<ApiResource> optionalApiResource =
             apiResourcesService.getResourceDefinitionByName(config.nameConfig.resourceType);
         if (optionalApiResource.isEmpty()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(),
+            throw new ParameterException(commandSpec.commandLine(),
                 "The server does not have resource type(s) " + config.nameConfig.resourceType + ".");
         }
 

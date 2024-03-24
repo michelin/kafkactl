@@ -1,14 +1,15 @@
 package com.michelin.kafkactl.hook;
 
 import java.io.IOException;
-import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 /**
  * Dry run abstract command.
  */
-@CommandLine.Command
+@Command
 public abstract class DryRunHook extends AuthenticatedHook {
-    @CommandLine.Option(names = {"--dry-run"}, description = "Does not persist resources. Validate only.")
+    @Option(names = {"--dry-run"}, description = "Does not persist resources. Validate only.")
     public boolean dryRun;
 
     @Override

@@ -15,12 +15,13 @@ import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Parameters;
 
 /**
  * Schema subcommand.
  */
-@CommandLine.Command(name = "schemas",
+@Command(name = "schemas",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
     descriptionHeading = "%n@|bold Description|@:%n%n",
@@ -40,10 +41,10 @@ public class Schema extends AuthenticatedHook {
     @ReflectiveAccess
     private FormatService formatService;
 
-    @CommandLine.Parameters(index = "0", description = "Compatibility to set (${COMPLETION-CANDIDATES}).", arity = "1")
+    @Parameters(index = "0", description = "Compatibility to set (${COMPLETION-CANDIDATES}).", arity = "1")
     public SchemaCompatibility compatibility;
 
-    @CommandLine.Parameters(index = "1..*", description = "Subject names separated by space.", arity = "1..*")
+    @Parameters(index = "1..*", description = "Subject names separated by space.", arity = "1..*")
     public List<String> subjects;
 
     /**

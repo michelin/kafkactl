@@ -36,6 +36,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
+import picocli.CommandLine.ParameterException;
 
 @ExtendWith(MockitoExtension.class)
 class DiffTest {
@@ -120,7 +121,7 @@ class DiffTest {
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-            .thenThrow(new CommandLine.ParameterException(cmd.getCommandSpec().commandLine(),
+            .thenThrow(new ParameterException(cmd.getCommandSpec().commandLine(),
                 "Could not find YAML or YML files in topic directory."));
 
         int code = cmd.execute("-f", "topic");
@@ -150,7 +151,7 @@ class DiffTest {
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
             .thenReturn(Collections.singletonList(resource));
-        doThrow(new CommandLine.ParameterException(cmd.getCommandSpec().commandLine(),
+        doThrow(new ParameterException(cmd.getCommandSpec().commandLine(),
             "The server does not have resource type(s) Topic."))
             .when(resourceService).validateAllowedResources(any(), any());
 

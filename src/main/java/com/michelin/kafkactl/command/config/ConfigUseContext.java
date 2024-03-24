@@ -8,12 +8,15 @@ import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Parameters;
+import picocli.CommandLine.Spec;
 
 /**
  * Config use context subcommand.
  */
-@CommandLine.Command(name = "use-context",
+@Command(name = "use-context",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
     descriptionHeading = "%n@|bold Description|@:%n%n",
@@ -33,11 +36,11 @@ public class ConfigUseContext implements Callable<Integer> {
     @ReflectiveAccess
     private ConfigService configService;
 
-    @CommandLine.Parameters(index = "0", defaultValue = "", description = "Context to use.", arity = "1")
+    @Parameters(index = "0", defaultValue = "", description = "Context to use.", arity = "1")
     public String context;
 
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
+    @Spec
+    public CommandSpec commandSpec;
 
     @Override
     public Integer call() throws IOException {

@@ -25,7 +25,8 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
-import picocli.CommandLine;
+import picocli.CommandLine.Help;
+import picocli.CommandLine.Model.CommandSpec;
 
 /**
  * Format service.
@@ -49,8 +50,7 @@ public class FormatService {
      * @param output      The type of display
      * @param commandSpec The command spec used to print the output
      */
-    public void displayList(String kind, List<Resource> resources, String output,
-                            CommandLine.Model.CommandSpec commandSpec) {
+    public void displayList(String kind, List<Resource> resources, String output, CommandSpec commandSpec) {
         if (output.equals(TABLE)) {
             printTable(kind, resources, commandSpec);
         } else if (output.equals(YAML)) {
@@ -65,7 +65,7 @@ public class FormatService {
      * @param output      The type of display
      * @param commandSpec The command spec used to print the output
      */
-    public void displaySingle(Resource resource, String output, CommandLine.Model.CommandSpec commandSpec) {
+    public void displaySingle(Resource resource, String output, CommandSpec commandSpec) {
         displayList(resource.getKind(), List.of(resource), output, commandSpec);
     }
 
@@ -78,8 +78,7 @@ public class FormatService {
      * @param name        The resource name
      * @param commandSpec The command spec used to print the output
      */
-    public void displayError(HttpClientResponseException exception, String kind, String name,
-                             CommandLine.Model.CommandSpec commandSpec) {
+    public void displayError(HttpClientResponseException exception, String kind, String name, CommandSpec commandSpec) {
         Optional<Status> statusOptional = exception.getResponse().getBody(Status.class);
         String prettyKind = prettifyKind(kind);
         if (statusOptional.isPresent() && statusOptional.get().getDetails() != null
@@ -103,8 +102,7 @@ public class FormatService {
      * @param kind        The resource kind
      * @param commandSpec The command spec used to print the output
      */
-    public void displayError(HttpClientResponseException exception, String kind,
-                             CommandLine.Model.CommandSpec commandSpec) {
+    public void displayError(HttpClientResponseException exception, String kind, CommandSpec commandSpec) {
         Optional<Status> statusOptional = exception.getResponse().getBody(Status.class);
         String prettyKind = prettifyKind(kind);
         if (statusOptional.isPresent() && statusOptional.get().getDetails() != null
@@ -125,7 +123,7 @@ public class FormatService {
      * @param exception   The HTTP client exception
      * @param commandSpec The command spec used to print the output
      */
-    public void displayError(HttpClientResponseException exception, CommandLine.Model.CommandSpec commandSpec) {
+    public void displayError(HttpClientResponseException exception, CommandSpec commandSpec) {
         Optional<Status> statusOptional = exception.getResponse().getBody(Status.class);
         if (statusOptional.isPresent() && statusOptional.get().getDetails() != null
             && !statusOptional.get().getDetails().getCauses().isEmpty()) {
@@ -147,7 +145,7 @@ public class FormatService {
      * @param resources   The list of resources
      * @param commandSpec The command spec used to print the output
      */
-    private void printTable(String kind, List<Resource> resources, CommandLine.Model.CommandSpec commandSpec) {
+    private void printTable(String kind, List<Resource> resources, CommandSpec commandSpec) {
         String hyphenatedKind = StringConvention.HYPHENATED.format(kind);
         List<String> formats = kafkactlConfig.getTableFormat().getOrDefault(hyphenatedKind, defaults);
 
@@ -161,7 +159,7 @@ public class FormatService {
      * @param resources   The list of resources
      * @param commandSpec The command spec used to print the output
      */
-    private void printYaml(List<Resource> resources, CommandLine.Model.CommandSpec commandSpec) {
+    private void printYaml(List<Resource> resources, CommandSpec commandSpec) {
         DumperOptions options = new DumperOptions();
         options.setExplicitStart(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
@@ -219,15 +217,12 @@ public class FormatService {
 
         @Override
         public String toString() {
-            CommandLine.Help.Column[] sizedColumns = this.columns
+            Help.Column[] sizedColumns = this.columns
                 .stream()
-                .map(column -> new CommandLine.Help.Column(column.size, column.indent,
-                    CommandLine.Help.Column.Overflow.SPAN))
-                .toArray(CommandLine.Help.Column[]::new);
+                .map(column -> new Help.Column(column.size, column.indent, Help.Column.Overflow.SPAN))
+                .toArray(Help.Column[]::new);
 
-            CommandLine.Help.TextTable tt = CommandLine.Help.TextTable.forColumns(
-                CommandLine.Help.defaultColorScheme(CommandLine.Help.Ansi.AUTO),
-                sizedColumns);
+            Help.TextTable tt = Help.TextTable.forColumns(Help.defaultColorScheme(Help.Ansi.AUTO), sizedColumns);
 
             // Create Header Row
             tt.addRowValues(this.columns.stream().map(column -> column.header).toArray(String[]::new));

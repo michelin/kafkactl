@@ -16,9 +16,9 @@ import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 
 /**
@@ -90,7 +90,7 @@ public class Get extends AuthenticatedHook {
      */
     private void validateOutput() {
         if (!List.of(TABLE, YAML).contains(output)) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(),
+            throw new ParameterException(commandSpec.commandLine(),
                 "Invalid value " + output + " for option -o.");
         }
     }
@@ -116,7 +116,7 @@ public class Get extends AuthenticatedHook {
             return List.of(optionalApiResource.get());
         }
 
-        throw new CommandLine.ParameterException(commandSpec.commandLine(),
+        throw new ParameterException(commandSpec.commandLine(),
             "The server does not have resource type " + resourceType + ".");
     }
 }

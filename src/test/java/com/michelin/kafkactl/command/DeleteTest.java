@@ -33,6 +33,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
+import picocli.CommandLine.ParameterException;
 
 @ExtendWith(MockitoExtension.class)
 class DeleteTest {
@@ -138,7 +139,7 @@ class DeleteTest {
 
         when(fileService.parseResourceListFromFiles(any()))
             .thenReturn(Collections.singletonList(resource));
-        doThrow(new CommandLine.ParameterException(cmd.getCommandSpec().commandLine(),
+        doThrow(new ParameterException(cmd.getCommandSpec().commandLine(),
             "The server does not have resource type(s) Topic."))
             .when(resourceService).validateAllowedResources(any(), any());
 

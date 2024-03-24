@@ -20,12 +20,14 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.ParameterException;
+import picocli.CommandLine.Parameters;
 
 /**
  * Connectors subcommand.
  */
-@CommandLine.Command(name = "connectors",
+@Command(name = "connectors",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
     descriptionHeading = "%n@|bold Description|@:%n%n",
@@ -45,10 +47,10 @@ public class Connector extends AuthenticatedHook {
     @ReflectiveAccess
     private FormatService formatService;
 
-    @CommandLine.Parameters(index = "0", description = "Action to perform (${COMPLETION-CANDIDATES}).", arity = "1")
+    @Parameters(index = "0", description = "Action to perform (${COMPLETION-CANDIDATES}).", arity = "1")
     public ConnectorAction action;
 
-    @CommandLine.Parameters(index = "1..*",
+    @Parameters(index = "1..*",
         description = "Connector names separated by space or \"all\" for all connectors.", arity = "1..*")
     public List<String> connectors;
 
@@ -64,7 +66,7 @@ public class Connector extends AuthenticatedHook {
         try {
             if (connectors.stream().anyMatch(s -> s.equalsIgnoreCase("ALL"))) {
                 ApiResource connectType = apiResourcesService.getResourceDefinitionByKind(CONNECTOR)
-                    .orElseThrow(() -> new CommandLine.ParameterException(commandSpec.commandLine(),
+                    .orElseThrow(() -> new ParameterException(commandSpec.commandLine(),
                         "The server does not have resource type Connector."));
 
                 connectors = resourceService.listResourcesWithType(connectType, namespace)

@@ -27,7 +27,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.stream.Collectors;
-import picocli.CommandLine;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.ParameterException;
 
 /**
  * Resource service.
@@ -68,8 +69,7 @@ public class ResourceService {
      * @param commandSpec  The command that triggered the action
      * @return A map of resource type and list of resources
      */
-    public int listAll(List<ApiResource> apiResources, String namespace,
-                       String output, CommandLine.Model.CommandSpec commandSpec) {
+    public int listAll(List<ApiResource> apiResources, String namespace, String output, CommandSpec commandSpec) {
         // Get a single kind of resources
         if (apiResources.size() == 1) {
             try {
@@ -156,7 +156,7 @@ public class ResourceService {
      * @return An HTTP response
      */
     public HttpResponse<Resource> apply(ApiResource apiResource, String namespace, Resource resource, boolean dryRun,
-                                        CommandLine.Model.CommandSpec commandSpec) {
+                                        CommandSpec commandSpec) {
         try {
             HttpResponse<Resource> response = apiResource.isNamespaced()
                 ? namespacedClient.apply(namespace, apiResource.getPath(), loginService.getAuthorization(), resource,
@@ -185,7 +185,7 @@ public class ResourceService {
      * @return true if deletion succeeded, false otherwise
      */
     public boolean delete(ApiResource apiResource, String namespace, String resource, boolean dryRun,
-                          CommandLine.Model.CommandSpec commandSpec) {
+                          CommandSpec commandSpec) {
         try {
             HttpResponse<Void> response = apiResource.isNamespaced()
                 ? namespacedClient.delete(namespace, apiResource.getPath(), resource, loginService.getAuthorization(),
@@ -216,8 +216,7 @@ public class ResourceService {
      * @param commandSpec  The command that triggered the action
      * @return 0 if the command succeed, 1 otherwise
      */
-    public int importAll(List<ApiResource> apiResources, String namespace, boolean dryRun,
-                         CommandLine.Model.CommandSpec commandSpec) {
+    public int importAll(List<ApiResource> apiResources, String namespace, boolean dryRun, CommandSpec commandSpec) {
         int errors = apiResources
             .stream()
             .map(apiResource -> {
@@ -251,8 +250,7 @@ public class ResourceService {
      * @param commandSpec The command that triggered the action
      * @return The deleted records response
      */
-    public int deleteRecords(String namespace, String topic, boolean dryRun,
-                             CommandLine.Model.CommandSpec commandSpec) {
+    public int deleteRecords(String namespace, String topic, boolean dryRun, CommandSpec commandSpec) {
         try {
             List<Resource> resources =
                 namespacedClient.deleteRecords(loginService.getAuthorization(), namespace, topic, dryRun);
@@ -279,7 +277,7 @@ public class ResourceService {
      * @return 0 if the command succeeded, 1 otherwise
      */
     public int resetOffsets(String namespace, String group, Resource resource, boolean dryRun,
-                            CommandLine.Model.CommandSpec commandSpec) {
+                            CommandSpec commandSpec) {
         try {
             List<Resource> resources =
                 namespacedClient.resetOffsets(loginService.getAuthorization(), namespace, group, resource, dryRun);
@@ -305,7 +303,7 @@ public class ResourceService {
      * @return The resource
      */
     public Optional<Resource> changeConnectorState(String namespace, String connector, Resource changeConnectorState,
-                                                   CommandLine.Model.CommandSpec commandSpec) {
+                                                   CommandSpec commandSpec) {
         try {
             HttpResponse<Resource> response =
                 namespacedClient.changeConnectorState(namespace, connector, changeConnectorState,
@@ -333,7 +331,7 @@ public class ResourceService {
      */
     public Optional<Resource> changeSchemaCompatibility(String namespace, String subject,
                                                         SchemaCompatibility compatibility,
-                                                        CommandLine.Model.CommandSpec commandSpec) {
+                                                        CommandSpec commandSpec) {
         try {
             HttpResponse<Resource> response = namespacedClient.changeSchemaCompatibility(namespace, subject,
                 Map.of("compatibility", compatibility.name()), loginService.getAuthorization());
@@ -359,7 +357,7 @@ public class ResourceService {
      * @param commandSpec The command that triggered the action
      * @return 0 if the command succeeded, 1 otherwise
      */
-    public int resetPassword(String namespace, String user, String output, CommandLine.Model.CommandSpec commandSpec) {
+    public int resetPassword(String namespace, String user, String output, CommandSpec commandSpec) {
         try {
             HttpResponse<Resource> response =
                 namespacedClient.resetPassword(namespace, user, loginService.getAuthorization());
@@ -384,7 +382,7 @@ public class ResourceService {
      * @param commandSpec The command that triggered the action
      * @return 0 if the command succeeded, 1 otherwise
      */
-    public int listAvailableVaultsConnectClusters(String namespace, CommandLine.Model.CommandSpec commandSpec) {
+    public int listAvailableVaultsConnectClusters(String namespace, CommandSpec commandSpec) {
         try {
             List<Resource> availableConnectClusters =
                 namespacedClient.listAvailableVaultsConnectClusters(namespace, loginService.getAuthorization());
@@ -411,7 +409,7 @@ public class ResourceService {
      * @return 0 if the command succeeded, 1 otherwise
      */
     public int vaultsOnConnectClusters(final String namespace, final String connectCluster,
-                                       final List<String> passwords, CommandLine.Model.CommandSpec commandSpec) {
+                                       final List<String> passwords, CommandSpec commandSpec) {
         try {
             List<Resource> results = namespacedClient.vaultsOnConnectClusters(namespace, connectCluster, passwords,
                 loginService.getAuthorization());
@@ -431,13 +429,12 @@ public class ResourceService {
      * @param commandSpec The command that triggered the action
      * @return The list of resources
      */
-    public List<Resource> parseResources(Optional<File> file, boolean recursive,
-                                         CommandLine.Model.CommandSpec commandSpec) {
+    public List<Resource> parseResources(Optional<File> file, boolean recursive, CommandSpec commandSpec) {
         if (file.isPresent()) {
             // List all files to process
             List<File> yamlFiles = fileService.computeYamlFileList(file.get(), recursive);
             if (yamlFiles.isEmpty()) {
-                throw new CommandLine.ParameterException(commandSpec.commandLine(),
+                throw new ParameterException(commandSpec.commandLine(),
                     "Could not find YAML or YML files in " + file.get().getName() + " directory.");
             }
             // Load each files
@@ -457,7 +454,7 @@ public class ResourceService {
      * @param resources   The resources to validate
      * @param commandSpec The command that triggered the action
      */
-    public void validateAllowedResources(List<Resource> resources, CommandLine.Model.CommandSpec commandSpec) {
+    public void validateAllowedResources(List<Resource> resources, CommandSpec commandSpec) {
         List<Resource> notAllowedResourceTypes = apiResourcesService.filterNotAllowedResourceTypes(resources);
         if (!notAllowedResourceTypes.isEmpty()) {
             String kinds = notAllowedResourceTypes
@@ -465,7 +462,7 @@ public class ResourceService {
                 .map(Resource::getKind)
                 .distinct()
                 .collect(Collectors.joining(", "));
-            throw new CommandLine.ParameterException(commandSpec.commandLine(),
+            throw new ParameterException(commandSpec.commandLine(),
                 "The server does not have resource type(s) " + kinds + ".");
         }
     }
@@ -476,7 +473,7 @@ public class ResourceService {
      * @param resources   The resources to enrich
      * @param commandSpec The command that triggered the action
      */
-    public void enrichSchemaContent(List<Resource> resources, CommandLine.Model.CommandSpec commandSpec) {
+    public void enrichSchemaContent(List<Resource> resources, CommandSpec commandSpec) {
         resources
             .stream()
             .filter(resource -> resource.getKind().equals("Schema")
@@ -486,7 +483,7 @@ public class ResourceService {
                     resource.getSpec().put("schema",
                         Files.readString(new File(resource.getSpec().get(SCHEMA_FILE).toString()).toPath()));
                 } catch (Exception e) {
-                    throw new CommandLine.ParameterException(commandSpec.commandLine(),
+                    throw new ParameterException(commandSpec.commandLine(),
                         "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE)
                             + ". Schema path must be relative to the CLI.");
                 }

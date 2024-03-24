@@ -21,9 +21,9 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.ParameterException;
 
 /**
  * Diff subcommand.
@@ -64,7 +64,7 @@ public class Diff extends AuthenticatedHook {
         // If we have none or both stdin and File set, we stop
         boolean hasStdin = System.in.available() > 0;
         if (hasStdin == file.isPresent()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Required one of -f or stdin.");
+            throw new ParameterException(commandSpec.commandLine(), "Required one of -f or stdin.");
         }
 
         List<Resource> resources = resourceService.parseResources(file, recursive, commandSpec);

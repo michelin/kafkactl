@@ -7,12 +7,14 @@ import com.michelin.kafkactl.util.VersionProvider;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.util.List;
-import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.ParameterException;
+import picocli.CommandLine.Parameters;
 
 /**
  * Connect cluster vault subcommand.
  */
-@CommandLine.Command(name = "vaults",
+@Command(name = "vaults",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
     descriptionHeading = "%n@|bold Description|@:%n%n",
@@ -28,11 +30,11 @@ public class ConnectClusterVault extends AuthenticatedHook {
     @ReflectiveAccess
     private ResourceService resourceService;
 
-    @CommandLine.Parameters(index = "0", defaultValue = "",
+    @Parameters(index = "0", defaultValue = "",
         description = "Connect cluster name that will vault the secrets.", arity = "1")
     public String connectClusterName;
 
-    @CommandLine.Parameters(index = "1..*", description = "Secrets to vaults separated by space.", arity = "0..*")
+    @Parameters(index = "1..*", description = "Secrets to vaults separated by space.", arity = "0..*")
     public List<String> secrets;
 
     @Override
@@ -46,7 +48,7 @@ public class ConnectClusterVault extends AuthenticatedHook {
 
         // if connect cluster define but no secrets to encrypt => show error no secrets to encrypt.
         if (secrets == null) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "No secrets to encrypt.");
+            throw new ParameterException(commandSpec.commandLine(), "No secrets to encrypt.");
         }
 
         // if connect cluster and secrets define.

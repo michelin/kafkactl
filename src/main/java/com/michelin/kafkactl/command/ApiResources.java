@@ -13,12 +13,12 @@ import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Map;
-import picocli.CommandLine;
+import picocli.CommandLine.Command;
 
 /**
  * Api resources subcommand.
  */
-@CommandLine.Command(name = "api-resources",
+@Command(name = "api-resources",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
     descriptionHeading = "%n@|bold Description|@:%n%n",

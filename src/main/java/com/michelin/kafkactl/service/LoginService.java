@@ -17,7 +17,7 @@ import java.nio.file.Files;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
-import picocli.CommandLine;
+import picocli.CommandLine.Model.CommandSpec;
 
 /**
  * Login service.
@@ -63,7 +63,7 @@ public class LoginService {
      * @param commandSpec The command spec used to print the output
      * @return true if the user is authenticated, false otherwise
      */
-    public boolean doAuthenticate(CommandLine.Model.CommandSpec commandSpec, boolean verbose) {
+    public boolean doAuthenticate(CommandSpec commandSpec, boolean verbose) {
         return isAuthenticated(commandSpec, verbose)
             || login(commandSpec, "gitlab", kafkactlConfig.getUserToken(), verbose);
     }
@@ -75,7 +75,7 @@ public class LoginService {
      * @param commandSpec The command spec used to print the output
      * @return true if he is, false otherwise
      */
-    public boolean isAuthenticated(CommandLine.Model.CommandSpec commandSpec, boolean verbose) {
+    public boolean isAuthenticated(CommandSpec commandSpec, boolean verbose) {
         try {
             if (!jwtFile.exists()) {
                 return false;
@@ -115,7 +115,7 @@ public class LoginService {
      * @param commandSpec The command spec used to print the output
      * @return true if he is authenticated, false otherwise
      */
-    public boolean login(CommandLine.Model.CommandSpec commandSpec, String user, String password, boolean verbose) {
+    public boolean login(CommandSpec commandSpec, String user, String password, boolean verbose) {
         try {
             if (verbose) {
                 commandSpec.commandLine().getOut().println("Authenticating...");

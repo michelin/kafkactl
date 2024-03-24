@@ -8,18 +8,21 @@ import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Spec;
 
 /**
  * Command hook to check if the current context is valid.
  */
-@CommandLine.Command
+@Command
 public abstract class ValidCurrentContextHook implements Callable<Integer> {
     @Inject
     @ReflectiveAccess
     protected ConfigService configService;
 
-    @CommandLine.Spec
-    protected CommandLine.Model.CommandSpec commandSpec;
+    @Spec
+    protected CommandSpec commandSpec;
 
     @Override
     public Integer call() throws Exception {

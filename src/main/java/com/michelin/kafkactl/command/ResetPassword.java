@@ -11,12 +11,15 @@ import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.List;
-import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.ParameterException;
+import picocli.CommandLine.Parameters;
 
 /**
  * Users subcommand.
  */
-@CommandLine.Command(name = "reset-password",
+@Command(name = "reset-password",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
     descriptionHeading = "%n@|bold Description|@:%n%n",
@@ -32,13 +35,13 @@ public class ResetPassword extends AuthenticatedHook {
     @ReflectiveAccess
     private ResourceService resourceService;
 
-    @CommandLine.Parameters(description = "The user to reset password.", arity = "1")
+    @Parameters(description = "The user to reset password.", arity = "1")
     public String user;
 
-    @CommandLine.Option(names = {"--execute"}, description = "This option is mandatory to change the password")
+    @Option(names = {"--execute"}, description = "This option is mandatory to change the password")
     public boolean confirmed;
 
-    @CommandLine.Option(names = {"-o",
+    @Option(names = {"-o",
         "--output"}, description = "Output format. One of: yaml|table", defaultValue = "table")
     public String output;
 
@@ -51,7 +54,7 @@ public class ResetPassword extends AuthenticatedHook {
     @Override
     public Integer onAuthSuccess() throws IOException {
         if (!List.of(TABLE, YAML).contains(output)) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(),
+            throw new ParameterException(commandSpec.commandLine(),
                 "Invalid value " + output + " for option -o.");
         }
 

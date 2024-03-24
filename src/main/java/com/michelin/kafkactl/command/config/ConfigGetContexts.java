@@ -15,12 +15,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Spec;
 
 /**
  * Config get contexts subcommand.
  */
-@CommandLine.Command(name = "get-contexts",
+@Command(name = "get-contexts",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
     descriptionHeading = "%n@|bold Description|@:%n%n",
@@ -40,8 +42,8 @@ public class ConfigGetContexts implements Callable<Integer> {
     @ReflectiveAccess
     private FormatService formatService;
 
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
+    @Spec
+    public CommandSpec commandSpec;
 
     @Override
     public Integer call() {

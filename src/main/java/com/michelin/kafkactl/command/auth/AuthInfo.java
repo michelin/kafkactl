@@ -14,12 +14,15 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Spec;
 
 /**
  * Auth info subcommand.
  */
-@CommandLine.Command(name = "info",
+@Command(name = "info",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
     descriptionHeading = "%n@|bold Description|@:%n%n",
@@ -39,10 +42,10 @@ public class AuthInfo implements Callable<Integer> {
     @ReflectiveAccess
     private FormatService formatService;
 
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
+    @Spec
+    public CommandSpec commandSpec;
 
-    @CommandLine.Option(names = {"-o",
+    @Option(names = {"-o",
         "--output"}, description = "Output format. One of: yaml|table", defaultValue = "table")
     public String output;
 

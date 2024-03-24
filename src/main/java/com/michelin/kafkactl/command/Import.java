@@ -9,8 +9,8 @@ import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 
 /**
@@ -67,12 +67,12 @@ public class Import extends DryRunHook {
         Optional<ApiResource> optionalApiResource =
             apiResourcesService.getResourceDefinitionByName(resourceType);
         if (optionalApiResource.isEmpty()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(),
+            throw new ParameterException(commandSpec.commandLine(),
                 "The server does not have resource type " + resourceType + ".");
         }
 
         if (!optionalApiResource.get().isSynchronizable()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(),
+            throw new ParameterException(commandSpec.commandLine(),
                 "Resource of type " + resourceType + " is not synchronizable.");
         }
 

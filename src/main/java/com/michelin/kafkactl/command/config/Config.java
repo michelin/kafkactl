@@ -1,14 +1,16 @@
 package com.michelin.kafkactl.command.config;
 
 import com.michelin.kafkactl.util.VersionProvider;
-import java.io.IOException;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Spec;
 
 /**
  * Config subcommand.
  */
-@CommandLine.Command(name = "config",
+@Command(name = "config",
     subcommands = {
         ConfigGetContexts.class,
         ConfigUseContext.class,
@@ -25,8 +27,8 @@ import picocli.CommandLine;
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
 public class Config implements Callable<Integer> {
-    @CommandLine.Spec
-    public CommandLine.Model.CommandSpec commandSpec;
+    @Spec
+    public CommandSpec commandSpec;
 
     @Override
     public Integer call() {

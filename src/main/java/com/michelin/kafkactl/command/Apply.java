@@ -13,13 +13,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import picocli.CommandLine;
+import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.ParameterException;
 
 /**
  * Apply subcommand.
  */
-@CommandLine.Command(name = "apply",
+@Command(name = "apply",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
     descriptionHeading = "%n@|bold Description|@:%n%n",
@@ -56,7 +57,7 @@ public class Apply extends DryRunHook {
         // If we have none or both stdin and File set, we stop
         boolean hasStdin = System.in.available() > 0;
         if (hasStdin == file.isPresent()) {
-            throw new CommandLine.ParameterException(commandSpec.commandLine(), "Required one of -f or stdin.");
+            throw new ParameterException(commandSpec.commandLine(), "Required one of -f or stdin.");
         }
 
         List<Resource> resources = resourceService.parseResources(file, recursive, commandSpec);
