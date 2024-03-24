@@ -30,6 +30,7 @@ Kafka resources using YAML descriptors.
         * [Get Contexts](#get-contexts)
         * [Use Context](#use-context)
     * [Connect Clusters](#connect-clusters)
+        * [Vaults](#vaults)
     * [Connectors](#connectors)
     * [Delete Records](#delete-records)
     * [Delete](#delete)
@@ -154,6 +155,7 @@ Options:
 Commands:
   api-resources     Print the supported API resources on the server.
   apply             Create or update a resource.
+  auth              Interact with authentication.
   config            Manage configuration.
   connect-clusters  Interact with connect clusters.
   connectors        Interact with connectors.
@@ -404,28 +406,48 @@ kafkactl config use-context local
 The `connect-clusters` command allows you to interact with Kafka Connect clusters.
 
 ```console
-Usage: kafkactl connect-clusters [-hvV] [-n=<optionalNamespace>] <action> <connectCluster> [<secrets>...]
+Usage: kafkactl connect-clusters [-hvV] [-n=<optionalNamespace>] [COMMAND]
 
 Description:
 
 Interact with connect clusters.
 
-Parameters:
-      <action>           Action to perform (vaults).
-      <connectCluster>   Connect cluster name that will vault the secrets.
-      [<secrets>...]     Secrets to vaults separated by space.
-
 Options:
-  -h, --help             Show this help message and exit.
+  -h, --help      Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                         Override namespace defined in config or YAML resources.
-  -v, --verbose          Enable the verbose mode.
-  -V, --version          Print version information and exit.
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
+  -V, --version   Print version information and exit.
+
+Commands:
+  vaults  Vault secrets for a connect cluster.
 ```
 
-- `action`: This option specifies the action to execute, which can only be `vaults` for now.
-- `connectCluster`: If defined, this option specifies the name of a Connect cluster to use to vault sensitive connector
-  configuration.
+#### Vaults
+
+The `vaults` command allows you to vault sensitive connector configuration.
+
+```console
+Usage: kafkactl connect-clusters vaults [-hvV] [-n=<optionalNamespace>] <connectClusterName> [<secrets>...]
+
+Description:
+
+Vault secrets for a connect cluster.
+
+Parameters:
+      <connectClusterName>   Connect cluster name that will vault the secrets.
+      [<secrets>...]         Secrets to vaults separated by space.
+
+Options:
+  -h, --help                 Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                             Override namespace defined in config or YAML resources.
+  -v, --verbose              Enable the verbose mode.
+  -V, --version              Print version information and exit.
+```
+
+- `connectClusterName`: If defined, this option specifies the name of a Connect cluster to use to vault sensitive
+  connector configuration.
 - `secrets`: This option specifies the clear text to encrypt. You can specify one or more secrets as command arguments.
 
 Example(s):
