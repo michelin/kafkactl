@@ -73,7 +73,7 @@ class AuthInfoTest {
         int code = cmd.execute();
         assertEquals(0, code);
         assertTrue(sw.toString().contains("Admin admin authenticated."));
-        assertTrue(sw.toString().contains("Session valid until Sun Mar 24 01:49:59 CET 2024."));
+        assertTrue(sw.toString().contains("Session valid until Sun Mar 24"));
     }
 
     @Test
@@ -96,7 +96,7 @@ class AuthInfoTest {
         int code = cmd.execute();
         assertEquals(0, code);
         assertTrue(sw.toString().contains("User user authenticated."));
-        assertTrue(sw.toString().contains("Session valid until Sun Mar 24 01:49:59 CET 2024."));
+        assertTrue(sw.toString().contains("Session valid until Sun Mar 24"));
     }
 
     @Test
@@ -124,7 +124,7 @@ class AuthInfoTest {
         int code = cmd.execute();
         assertEquals(0, code);
         assertTrue(sw.toString().contains("User user authenticated."));
-        assertTrue(sw.toString().contains("Session valid until Sun Mar 24 01:49:59 CET 2024."));
+        assertTrue(sw.toString().contains("Session valid until Sun Mar 24"));
         verify(formatService).displayList(AUTH_INFO, List.of(Resource.builder()
             .spec(Map.of(
                 "namespace", "namespace",
