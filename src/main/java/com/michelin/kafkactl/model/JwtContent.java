@@ -35,7 +35,7 @@ public class JwtContent {
     public static class RoleBinding {
         private String namespace;
         private List<Verb> verbs;
-        private List<String> resources;
+        private List<String> resourceTypes;
 
         /**
          * Verb.

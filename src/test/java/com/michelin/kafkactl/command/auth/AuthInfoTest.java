@@ -110,7 +110,7 @@ class AuthInfoTest {
             .roleBindings(List.of(JwtContent.RoleBinding.builder()
                 .namespace("namespace")
                 .verbs(List.of(GET))
-                .resources(List.of("resource"))
+                .resourceTypes(List.of("resource"))
                 .build()))
             .build();
 

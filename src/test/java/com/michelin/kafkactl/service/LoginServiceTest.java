@@ -230,7 +230,7 @@ class LoginServiceTest {
         assertTrue(actual);
 
         String token = loginService.getAuthorization();
-        assertTrue(token.startsWith("Bearer eyJhbGciOiJIUtI1N"));
+        assertTrue(token.startsWith("Bearer eyJ"));
     }
 
     @Test
@@ -305,19 +305,19 @@ class LoginServiceTest {
         JwtContent actual = loginService.readJwtFile();
 
         assertEquals("admin", actual.getSub());
-        assertEquals(1711068624L, actual.getExp());
+        assertEquals(1711313691L, actual.getExp());
 
         assertIterableEquals(List.of("isAdmin()"), actual.getRoles());
 
         assertEquals("anotherNamespace", actual.getRoleBindings().get(0).getNamespace());
         assertIterableEquals(List.of(GET), actual.getRoleBindings().get(0).getVerbs());
-        assertIterableEquals(List.of("quota"), actual.getRoleBindings().get(0).getResources());
+        assertIterableEquals(List.of("quota"), actual.getRoleBindings().get(0).getResourceTypes());
 
         assertEquals("anotherNamespace", actual.getRoleBindings().get(1).getNamespace());
         assertIterableEquals(List.of(GET, POST, PUT, DELETE), actual.getRoleBindings().get(1).getVerbs());
         assertIterableEquals(List.of("schemas", "schemas/config", "topics", "topics/import", "topics/delete-records",
             "connectors", "connectors/import", "connectors/change-state", "connect-clusters", "connect-clusters/vaults",
-            "acls", "consumer-groups/reset", "streams"), actual.getRoleBindings().get(1).getResources());
+            "acls", "consumer-groups/reset", "streams"), actual.getRoleBindings().get(1).getResourceTypes());
     }
 
     @Test

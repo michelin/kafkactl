@@ -76,7 +76,7 @@ public class AuthInfo implements Callable<Integer> {
                         .spec(Map.of(
                             "namespace", roleBinding.getNamespace(),
                             "verbs", roleBinding.getVerbs(),
-                            "resources", roleBinding.getResources()
+                            "resources", roleBinding.getResourceTypes()
                         ))
                         .build())
                     .toList();
