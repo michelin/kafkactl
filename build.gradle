@@ -46,7 +46,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.michelin.kafkactl.KafkactlCommand")
+    mainClass.set("com.michelin.kafkactl.Kafkactl")
 }
 
 java {

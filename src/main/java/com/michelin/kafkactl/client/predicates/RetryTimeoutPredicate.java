@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.client.predicates;
 
-import com.michelin.kafkactl.models.Status;
+import com.michelin.kafkactl.model.Status;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.retry.annotation.RetryPredicate;
 import io.netty.handler.codec.http.HttpResponseStatus;

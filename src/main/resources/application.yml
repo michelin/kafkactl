@@ -16,23 +16,6 @@ logger:
 kafkactl:
   version: @version@
   table-format:
-    ResourceDefinition:
-      - "KIND:/metadata/name"
-      - "NAMES:/spec/names"
-      - "NAMESPACED:/spec/namespaced"
-      - "SYNCHRONIZABLE:/spec/synchronizable"
-    Namespace:
-      - "NAMESPACE:/metadata/name"
-      - "CLUSTER:/metadata/cluster"
-      - "USER:/spec/kafkaUser"
-      - "CONNECTS:/spec/connectClusters"
-      - "LDAP:/metadata/labels/support-group"
-      - "CONTACTS:/metadata/labels/contacts"
-    Topic:
-      - "TOPIC:/metadata/name"
-      - "RETENTION:/spec/configs/retention.ms%PERIOD"
-      - "POLICY:/spec/configs/cleanup.policy"
-      - "AGE:/metadata/creationTimestamp%AGO"
     AccessControlEntry:
       - "ACL:/metadata/name"
       - "GRANTED_BY:/metadata/namespace"
@@ -42,56 +25,27 @@ kafkactl:
       - "PATTERN:/spec/resourcePatternType"
       - "PERMISSION:/spec/permission"
       - "AGE:/metadata/creationTimestamp%AGO"
+    AuthInfo:
+      - "NAMESPACE:/spec/namespace"
+      - "VERBS:/spec/verbs"
+      - "RESOURCES:/spec/resources"
+    ChangeConnectorState:
+      - "CONNECTOR:/metadata/name"
+      - "STATUS:/status/code"
+      - "ERROR_MSG:/status/errorMessage"
+    ConnectCluster:
+      - "NAME:/metadata/name"
+      - "URL:/spec/url"
+      - "STATUS:/spec/status"
+      - "ERROR_MSG:/spec/statusMessage"
     Connector:
       - "CONNECTOR:/metadata/name"
       - "WORKERS:/spec/connectCluster"
       - "CLASS:/spec/config/connector.class"
       - "TOPICS:/spec/config/topics"
       - "AGE:/metadata/creationTimestamp%AGO"
-    ConnectCluster:
-      - "NAME:/metadata/name"
-      - "URL:/spec/url"
-      - "STATUS:/spec/status"
-      - "ERROR_MSG:/spec/statusMessage"
-    RoleBinding:
-      - "ROLE BINDING:/metadata/name"
-      - "GROUP:/spec/subject/subjectName"
-      - "VERBS:/spec/role/verbs"
-      - "RESOURCES:/spec/role/resourceTypes"
-    ResourceQuotaResponse:
-      - "QUOTA:/metadata/name"
-      - "COUNT/TOPICS:/spec/countTopic"
-      - "COUNT/PARTITIONS:/spec/countPartition"
-      - "DISK/TOPICS:/spec/diskTopic"
-      - "COUNT/CONNECTORS:/spec/countConnector"
-      - "USER/CONSUMER_BYTE_RATE:/spec/consumerByteRate"
-      - "USER/PRODUCER_BYTE_RATE:/spec/producerByteRate"
-    ChangeConnectorState:
-      - "CONNECTOR:/metadata/name"
-      - "STATUS:/status/code"
-      - "ERROR_MSG:/status/errorMessage"
-    Schema:
-      - "SUBJECT:/metadata/name"
-      - "ID:/spec/id"
-      - "VERSION:/spec/version"
-      - "CONFIG:/spec/compatibility"
-      - "TYPE:/spec/schemaType"
-    SchemaList:
-      - "SUBJECT:/metadata/name"
-    SchemaCompatibilityState:
-      - "SUBJECT:/metadata/name"
-      - "CONFIG:/spec/compatibility"
-    KafkaUserResetPassword:
-      - "NAMESPACE:/metadata/namespace"
-      - "CLUSTER:/metadata/cluster"
-      - "USER:/metadata/name"
-      - "PASSWORD:/spec/newPassword"
     ConsumerGroupResetOffsetsResponse:
-      - "CONSUMER GROUP:/spec/consumerGroup"
-      - "TOPIC:/spec/topic"
-      - "PARTITION:/spec/partition"
-      - "OFFSET:/spec/offset"
-    DeleteRecordsResponse:
+      - "CONSUMER_GROUP:/spec/consumerGroup"
       - "TOPIC:/spec/topic"
       - "PARTITION:/spec/partition"
       - "OFFSET:/spec/offset"
@@ -100,9 +54,59 @@ kafkactl:
       - "NAMESPACE:/spec/namespace"
       - "API:/spec/api"
       - "TOKEN:/spec/token"
+    DeleteRecordsResponse:
+      - "TOPIC:/spec/topic"
+      - "PARTITION:/spec/partition"
+      - "OFFSET:/spec/offset"
+    KafkaUserResetPassword:
+      - "NAMESPACE:/metadata/namespace"
+      - "CLUSTER:/metadata/cluster"
+      - "USER:/metadata/name"
+      - "PASSWORD:/spec/newPassword"
+    Namespace:
+      - "NAMESPACE:/metadata/name"
+      - "CLUSTER:/metadata/cluster"
+      - "USER:/spec/kafkaUser"
+      - "CONNECTS:/spec/connectClusters"
+      - "LDAP:/metadata/labels/support-group"
+      - "CONTACTS:/metadata/labels/contacts"
+    ResourceDefinition:
+      - "KIND:/metadata/name"
+      - "NAMES:/spec/names"
+      - "NAMESPACED:/spec/namespaced"
+      - "SYNCHRONIZABLE:/spec/synchronizable"
+    ResourceQuotaResponse:
+      - "QUOTA:/metadata/name"
+      - "COUNT/TOPICS:/spec/countTopic"
+      - "COUNT/PARTITIONS:/spec/countPartition"
+      - "DISK/TOPICS:/spec/diskTopic"
+      - "COUNT/CONNECTORS:/spec/countConnector"
+      - "USER/CONSUMER_BYTE_RATE:/spec/consumerByteRate"
+      - "USER/PRODUCER_BYTE_RATE:/spec/producerByteRate"
+    RoleBinding:
+      - "ROLE_BINDING:/metadata/name"
+      - "GROUP:/spec/subject/subjectName"
+      - "VERBS:/spec/role/verbs"
+      - "RESOURCES:/spec/role/resourceTypes"
+    Schema:
+      - "SUBJECT:/metadata/name"
+      - "ID:/spec/id"
+      - "VERSION:/spec/version"
+      - "CONFIG:/spec/compatibility"
+      - "TYPE:/spec/schemaType"
+    SchemaCompatibilityState:
+      - "SUBJECT:/metadata/name"
+      - "CONFIG:/spec/compatibility"
+    SchemaList:
+      - "SUBJECT:/metadata/name"
+    Topic:
+      - "TOPIC:/metadata/name"
+      - "RETENTION:/spec/configs/retention.ms%PERIOD"
+      - "POLICY:/spec/configs/cleanup.policy"
+      - "AGE:/metadata/creationTimestamp%AGO"
     VaultResponse:
-      - "CLEAR TEXT:/spec/clearText"
-      - "ENCRYPTED TEXT:/spec/encrypted"
+      - "CLEAR_TEXT:/spec/clearText"
+      - "ENCRYPTED_TEXT:/spec/encrypted"
   retry:
     apply:
       delay: "2s"
@@ -113,9 +117,7 @@ kafkactl:
       attempt: "10"
       multiplier: "1.0"
   contexts:
-    -
-
-      #  current-namespace: namespace
+    - #  current-namespace: namespace
       #  api: http://localhost:8080
       #  user-token: token
       #  contexts:
