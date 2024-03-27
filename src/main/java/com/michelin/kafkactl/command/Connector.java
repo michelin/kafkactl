@@ -4,7 +4,6 @@ import static com.michelin.kafkactl.service.FormatService.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CHANGE_CONNECTOR_STATE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR;
 
-import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Metadata;
@@ -30,7 +29,7 @@ import picocli.CommandLine.Parameters;
 @Command(name = "connectors",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@:%n%n",
+    descriptionHeading = "%n@|bold Description|@: ",
     description = "Interact with connectors.",
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
@@ -61,7 +60,7 @@ public class Connector extends AuthenticatedHook {
      */
     @Override
     public Integer onAuthSuccess() {
-        String namespace = Kafkactl.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
+        String namespace = getNamespace();
 
         try {
             if (connectors.stream().anyMatch(s -> s.equalsIgnoreCase("ALL"))) {

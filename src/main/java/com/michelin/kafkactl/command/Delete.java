@@ -1,6 +1,5 @@
 package com.michelin.kafkactl.command;
 
-import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.hook.DryRunHook;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Metadata;
@@ -27,7 +26,7 @@ import picocli.CommandLine.Parameters;
 @Command(name = "delete",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@:%n%n",
+    descriptionHeading = "%n@|bold Description|@: ",
     description = "Delete a resource.",
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
@@ -58,7 +57,7 @@ public class Delete extends DryRunHook {
      */
     @Override
     public Integer onAuthSuccess() {
-        String namespace = Kafkactl.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
+        String namespace = getNamespace();
         List<Resource> resources = parseResources(namespace);
 
         try {

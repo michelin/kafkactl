@@ -1208,9 +1208,10 @@ class ResourceServiceTest {
         when(fileService.computeYamlFileList(any(), anyBoolean()))
             .thenReturn(Collections.emptyList());
 
+        Optional<File> file = Optional.of(new File("src/test/resources/topics/topic.yml"));
+        CommandLine.Model.CommandSpec spec = cmd.getCommandSpec();
         ParameterException actual = assertThrows(ParameterException.class,
-            () -> resourceService.parseResources(Optional.of(new File("src/test/resources/topics/topic.yml")), false,
-                cmd.getCommandSpec()));
+            () -> resourceService.parseResources(file, false, spec));
 
         assertEquals("Could not find YAML or YML files in topic.yml directory.", actual.getMessage());
     }

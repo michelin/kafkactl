@@ -125,8 +125,6 @@ class ImportTest {
 
     @Test
     void shouldImportTopicResources() {
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -147,7 +145,7 @@ class ImportTest {
 
         CommandLine cmd = new CommandLine(importCmd);
 
-        int code = cmd.execute("topic");
+        int code = cmd.execute("topic", "-n", "namespace");
         assertEquals(0, code);
         verify(resourceService).importAll(Collections.singletonList(apiResource), "namespace", false,
             cmd.getCommandSpec());
@@ -155,8 +153,6 @@ class ImportTest {
 
     @Test
     void shouldImportTopicResourcesDryRun() {
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -179,7 +175,7 @@ class ImportTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("topic", "--dry-run");
+        int code = cmd.execute("topic", "--dry-run", "-n", "namespace");
         assertEquals(0, code);
         assertTrue(sw.toString().contains("Dry run execution."));
         verify(resourceService).importAll(Collections.singletonList(apiResource), "namespace", true,
@@ -188,8 +184,6 @@ class ImportTest {
 
     @Test
     void shouldImportAllResources() {
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))

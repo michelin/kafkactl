@@ -1,11 +1,10 @@
 package com.michelin.kafkactl.command.config;
 
 import com.michelin.kafkactl.util.VersionProvider;
-import java.util.concurrent.Callable;
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
+
 
 /**
  * Config subcommand.
@@ -18,7 +17,8 @@ import picocli.CommandLine.Spec;
     },
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@:%n%n",
+    synopsisSubcommandLabel = "COMMAND",
+    descriptionHeading = "%n@|bold Description|@: ",
     description = "Manage configuration.",
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
@@ -26,13 +26,7 @@ import picocli.CommandLine.Spec;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class Config implements Callable<Integer> {
+public class Config {
     @Spec
     public CommandSpec commandSpec;
-
-    @Override
-    public Integer call() {
-        commandSpec.commandLine().getOut().println(new CommandLine(this).getUsageMessage());
-        return 0;
-    }
 }

@@ -162,8 +162,6 @@ class ApplyTest {
 
     @Test
     void shouldNotApplyWhenNamespaceMismatch() {
-        Kafkactl.optionalNamespace = Optional.of("namespaceMismatch");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -186,7 +184,7 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic.yml");
+        int code = cmd.execute("-f", "topic.yml", "-n", "namespaceMismatch");
         assertEquals(2, code);
         assertTrue(sw.toString().contains("Namespace mismatch between Kafkactl configuration and YAML resource(s): "
             + "\"Topic/prefix.topic\"."));
@@ -214,7 +212,6 @@ class ApplyTest {
             .thenReturn("namespace");
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
-        Kafkactl.optionalNamespace = Optional.empty();
 
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenThrow(exception);
@@ -228,8 +225,6 @@ class ApplyTest {
 
     @Test
     void shouldApply() {
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -276,8 +271,6 @@ class ApplyTest {
 
     @Test
     void shouldApplyDryRun() {
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -326,8 +319,6 @@ class ApplyTest {
     void shouldApplySchema() {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE, "src/test/resources/person.avsc");
-
-        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -380,8 +371,6 @@ class ApplyTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put("schema", "{schema}");
 
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -429,8 +418,6 @@ class ApplyTest {
     void shouldNotApplySchemaWhenNotExist() {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE, "src/test/resources/not-exist.avsc");
-
-        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);

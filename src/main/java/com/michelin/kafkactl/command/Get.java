@@ -3,7 +3,6 @@ package com.michelin.kafkactl.command;
 import static com.michelin.kafkactl.service.FormatService.TABLE;
 import static com.michelin.kafkactl.service.FormatService.YAML;
 
-import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
@@ -27,7 +26,7 @@ import picocli.CommandLine.Parameters;
 @Command(name = "get",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@:%n%n",
+    descriptionHeading = "%n@|bold Description|@: ",
     description = "Get resources by resource type for the current namespace.",
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
@@ -65,8 +64,7 @@ public class Get extends AuthenticatedHook {
         List<ApiResource> apiResources = validateResourceType();
 
         validateOutput();
-
-        String namespace = Kafkactl.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
+        String namespace = getNamespace();
 
         // List resources based on parameters
         if (resourceName.isEmpty() || apiResources.size() > 1) {

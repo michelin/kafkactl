@@ -20,13 +20,10 @@ import com.michelin.kafkactl.service.SystemService;
 import com.michelin.kafkactl.util.VersionProvider;
 import io.micronaut.configuration.picocli.PicocliRunner;
 import io.micronaut.core.util.StringUtils;
-import java.util.Optional;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 
 /**
@@ -51,7 +48,7 @@ import picocli.CommandLine.Spec;
     },
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@:%n%n",
+    descriptionHeading = "%n@|bold Description|@: ",
     description = "These are common Kafkactl commands.",
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
@@ -60,15 +57,6 @@ import picocli.CommandLine.Spec;
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
 public class Kafkactl implements Callable<Integer> {
-    @Option(names = {"-v",
-        "--verbose"}, description = "Enable the verbose mode.", scope = ScopeType.INHERIT)
-    public static boolean verbose;
-
-    @Option(names = {"-n",
-        "--namespace"}, description = "Override namespace defined in config or YAML resources.",
-        scope = ScopeType.INHERIT)
-    public static Optional<String> optionalNamespace;
-
     @Spec
     public CommandSpec commandSpec;
 

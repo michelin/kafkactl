@@ -134,8 +134,6 @@ class GetTest {
 
     @Test
     void shouldNotGetWhenHttpClientThrowException() {
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -157,15 +155,13 @@ class GetTest {
 
         CommandLine cmd = new CommandLine(get);
 
-        int code = cmd.execute("topics", "myTopic");
+        int code = cmd.execute("topics", "myTopic", "-n", "namespace");
         assertEquals(1, code);
         verify(formatService).displayError(e, "Topic", "myTopic", cmd.getCommandSpec());
     }
 
     @Test
     void shouldGetSingleResource() {
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -196,15 +192,13 @@ class GetTest {
 
         CommandLine cmd = new CommandLine(get);
 
-        int code = cmd.execute("topics", "myTopic");
+        int code = cmd.execute("topics", "myTopic", "-n", "namespace");
         assertEquals(0, code);
         verify(formatService).displaySingle(resource, TABLE, cmd.getCommandSpec());
     }
 
     @Test
     void shouldGetAllTopicsSuccess() {
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -227,7 +221,7 @@ class GetTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("topics");
+        int code = cmd.execute("topics", "-n", "namespace");
         assertEquals(0, code);
         verify(resourceService)
             .listAll(Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec());
@@ -235,8 +229,6 @@ class GetTest {
 
     @Test
     void shouldGetAll() {
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))

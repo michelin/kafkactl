@@ -1,6 +1,5 @@
 package com.michelin.kafkactl.command;
 
-import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.hook.DryRunHook;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.service.ResourceService;
@@ -19,7 +18,7 @@ import picocli.CommandLine.Parameters;
 @Command(name = "import",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@:%n%n",
+    descriptionHeading = "%n@|bold Description|@: ",
     description = "Import non-synchronized resources.",
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
@@ -43,10 +42,7 @@ public class Import extends DryRunHook {
     public Integer onAuthSuccess() {
         // Validate resourceType + custom type ALL
         List<ApiResource> apiResources = validateResourceType();
-
-        String namespace = Kafkactl.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
-
-        return resourceService.importAll(apiResources, namespace, dryRun, commandSpec);
+        return resourceService.importAll(apiResources, getNamespace(), dryRun, commandSpec);
     }
 
     /**

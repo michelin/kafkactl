@@ -1,7 +1,8 @@
 package com.michelin.kafkactl.hook;
 
-import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.mixin.OptionalNamespace;
+import com.michelin.kafkactl.mixin.Verbose;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.ApiResourcesService;
 import com.michelin.kafkactl.service.LoginService;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Mixin;
 import picocli.CommandLine.ParameterException;
 
 /**
@@ -30,9 +32,15 @@ public abstract class AuthenticatedHook extends ValidCurrentContextHook {
     @ReflectiveAccess
     protected KafkactlConfig kafkactlConfig;
 
+    @Mixin
+    public OptionalNamespace optionalNamespaceMixin;
+
+    @Mixin
+    public Verbose verboseMixin;
+
     @Override
     public Integer onContextValid() throws IOException {
-        if (!loginService.doAuthenticate(commandSpec, Kafkactl.verbose)) {
+        if (!loginService.doAuthenticate(commandSpec, verboseMixin.verbose)) {
             return 1;
         }
 
@@ -45,7 +53,7 @@ public abstract class AuthenticatedHook extends ValidCurrentContextHook {
      * @return The current namespace
      */
     protected String getNamespace() {
-        return Kafkactl.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
+        return optionalNamespaceMixin.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
     }
 
     /**

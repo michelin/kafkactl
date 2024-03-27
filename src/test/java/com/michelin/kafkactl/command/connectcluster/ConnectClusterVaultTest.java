@@ -15,7 +15,6 @@ import com.michelin.kafkactl.service.ResourceService;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -80,7 +79,6 @@ class ConnectClusterVaultTest {
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
 
-        Kafkactl.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
         when(resourceService.listAvailableVaultsConnectClusters(any(), any()))
             .thenReturn(0);
@@ -99,7 +97,6 @@ class ConnectClusterVaultTest {
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
 
-        Kafkactl.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
         when(resourceService.listAvailableVaultsConnectClusters(any(), any()))
             .thenReturn(1);
@@ -117,7 +114,6 @@ class ConnectClusterVaultTest {
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
-        Kafkactl.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
 
         CommandLine cmd = new CommandLine(subcommand);
@@ -135,7 +131,6 @@ class ConnectClusterVaultTest {
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
-        Kafkactl.optionalNamespace = Optional.empty();
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
 
         when(resourceService.vaultsOnConnectClusters(any(), any(), any(), any()))

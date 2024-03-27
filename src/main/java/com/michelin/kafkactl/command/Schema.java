@@ -3,7 +3,6 @@ package com.michelin.kafkactl.command;
 import static com.michelin.kafkactl.service.FormatService.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.SCHEMA_COMPATIBILITY_STATE;
 
-import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.SchemaCompatibility;
@@ -24,7 +23,7 @@ import picocli.CommandLine.Parameters;
 @Command(name = "schemas",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@:%n%n",
+    descriptionHeading = "%n@|bold Description|@: ",
     description = "Interact with schemas.",
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
@@ -55,11 +54,10 @@ public class Schema extends AuthenticatedHook {
      */
     @Override
     public Integer onAuthSuccess() throws IOException {
-        String namespace = Kafkactl.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
-
         List<Resource> updatedSchemas = subjects
             .stream()
-            .map(subject -> resourceService.changeSchemaCompatibility(namespace, subject, compatibility, commandSpec))
+            .map(subject -> resourceService.changeSchemaCompatibility(getNamespace(), subject, compatibility,
+                commandSpec))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .toList();

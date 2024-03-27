@@ -1,6 +1,5 @@
 package com.michelin.kafkactl.command;
 
-import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.hook.DryRunHook;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.util.VersionProvider;
@@ -15,7 +14,7 @@ import picocli.CommandLine.Parameters;
 @Command(name = "delete-records",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@:%n%n",
+    descriptionHeading = "%n@|bold Description|@: ",
     description = "Delete all records within a topic.",
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
@@ -38,7 +37,6 @@ public class DeleteRecords extends DryRunHook {
      */
     @Override
     public Integer onAuthSuccess() {
-        String namespace = Kafkactl.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
-        return resourceService.deleteRecords(namespace, topic, dryRun, commandSpec);
+        return resourceService.deleteRecords(getNamespace(), topic, dryRun, commandSpec);
     }
 }

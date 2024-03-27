@@ -100,8 +100,6 @@ class ConnectorTest {
         when(resourceService.changeConnectorState(any(), any(), any(), any()))
             .thenReturn(Optional.empty());
 
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
 
@@ -132,11 +130,9 @@ class ConnectorTest {
         when(resourceService.changeConnectorState(any(), any(), any(), any()))
             .thenReturn(Optional.of(resource));
 
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         CommandLine cmd = new CommandLine(connector);
 
-        int code = cmd.execute("pause", "my-connector");
+        int code = cmd.execute("pause", "my-connector", "-n", "namespace");
         assertEquals(0, code);
         verify(formatService).displayList(eq(CHANGE_CONNECTOR_STATE),
             argThat(connectors -> connectors.get(0).equals(resource)),
@@ -174,11 +170,9 @@ class ConnectorTest {
         when(resourceService.changeConnectorState(any(), any(), any(), any()))
             .thenReturn(Optional.of(resource));
 
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         CommandLine cmd = new CommandLine(connector);
 
-        int code = cmd.execute("pause", "all");
+        int code = cmd.execute("pause", "all", "-n", "namespace");
         assertEquals(0, code);
         verify(formatService).displayList(eq(CHANGE_CONNECTOR_STATE),
             argThat(connectors -> connectors.get(0).equals(resource)),
@@ -187,8 +181,6 @@ class ConnectorTest {
 
     @Test
     void shouldNotChangeStateWhenHttpClientResponseException() {
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -212,7 +204,7 @@ class ConnectorTest {
 
         CommandLine cmd = new CommandLine(connector);
 
-        int code = cmd.execute("pause", "all");
+        int code = cmd.execute("pause", "all", "-n", "namespace");
         assertEquals(1, code);
         verify(formatService).displayError(exception, cmd.getCommandSpec());
     }
@@ -226,13 +218,11 @@ class ConnectorTest {
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.empty());
 
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         CommandLine cmd = new CommandLine(connector);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        int code = cmd.execute("pause", "all");
+        int code = cmd.execute("pause", "all", "-n", "namespace");
         assertEquals(2, code);
         assertTrue(sw.toString().contains("The server does not have resource type Connector."));
     }

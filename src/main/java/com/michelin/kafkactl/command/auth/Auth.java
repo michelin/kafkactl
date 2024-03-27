@@ -1,8 +1,6 @@
 package com.michelin.kafkactl.command.auth;
 
 import com.michelin.kafkactl.util.VersionProvider;
-import java.util.concurrent.Callable;
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
@@ -17,7 +15,8 @@ import picocli.CommandLine.Spec;
     },
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@:%n%n",
+    synopsisSubcommandLabel = "COMMAND",
+    descriptionHeading = "%n@|bold Description|@: ",
     description = "Interact with authentication.",
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
@@ -25,13 +24,7 @@ import picocli.CommandLine.Spec;
     usageHelpAutoWidth = true,
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
-public class Auth implements Callable<Integer> {
+public class Auth {
     @Spec
     public CommandSpec commandSpec;
-
-    @Override
-    public Integer call() {
-        commandSpec.commandLine().getOut().println(new CommandLine(this).getUsageMessage());
-        return 0;
-    }
 }

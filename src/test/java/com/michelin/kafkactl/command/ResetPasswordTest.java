@@ -15,7 +15,6 @@ import com.michelin.kafkactl.service.LoginService;
 import com.michelin.kafkactl.service.ResourceService;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -89,8 +88,6 @@ class ResetPasswordTest {
 
     @Test
     void shouldNotUpdateUserWhenNotConfirmed() {
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -111,8 +108,6 @@ class ResetPasswordTest {
 
     @Test
     void shouldUpdateUser() {
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
