@@ -6,7 +6,7 @@ import picocli.CommandLine.Option;
 /**
  * Optional namespace mixin.
  */
-public class OptionalNamespace {
+public class NamespaceMixin {
     @Option(names = {"-n",
         "--namespace"}, description = "Override namespace defined in config or YAML resources.")
     public Optional<String> optionalNamespace;

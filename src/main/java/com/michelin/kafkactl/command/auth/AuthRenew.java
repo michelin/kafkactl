@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.command.auth;
 
-import com.michelin.kafkactl.mixin.Verbose;
+import com.michelin.kafkactl.mixin.VerboseMixin;
 import com.michelin.kafkactl.service.LoginService;
 import com.michelin.kafkactl.util.VersionProvider;
 import io.micronaut.core.annotation.ReflectiveAccess;
@@ -32,7 +32,7 @@ public class AuthRenew implements Callable<Integer> {
     private LoginService loginService;
 
     @Mixin
-    public Verbose verboseMixin;
+    public VerboseMixin verboseMixin;
 
     @Spec
     public CommandSpec commandSpec;

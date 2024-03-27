@@ -1,8 +1,8 @@
 package com.michelin.kafkactl.hook;
 
 import com.michelin.kafkactl.config.KafkactlConfig;
-import com.michelin.kafkactl.mixin.OptionalNamespace;
-import com.michelin.kafkactl.mixin.Verbose;
+import com.michelin.kafkactl.mixin.NamespaceMixin;
+import com.michelin.kafkactl.mixin.VerboseMixin;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.ApiResourcesService;
 import com.michelin.kafkactl.service.LoginService;
@@ -33,10 +33,10 @@ public abstract class AuthenticatedHook extends ValidCurrentContextHook {
     protected KafkactlConfig kafkactlConfig;
 
     @Mixin
-    public OptionalNamespace optionalNamespaceMixin;
+    public NamespaceMixin namespaceMixinMixin;
 
     @Mixin
-    public Verbose verboseMixin;
+    public VerboseMixin verboseMixin;
 
     @Override
     public Integer onContextValid() throws IOException {
@@ -53,7 +53,7 @@ public abstract class AuthenticatedHook extends ValidCurrentContextHook {
      * @return The current namespace
      */
     protected String getNamespace() {
-        return optionalNamespaceMixin.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
+        return namespaceMixinMixin.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
     }
 
     /**
