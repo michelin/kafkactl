@@ -18,7 +18,6 @@ import com.michelin.kafkactl.service.LoginService;
 import com.michelin.kafkactl.service.ResourceService;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -84,8 +83,6 @@ class ResetOffsetsTest {
         "--to-datetime=2000-01-01T12:00:00Z,TO_DATETIME",
         "--shift-by=10,SHIFT_BY"})
     void shouldResetOffsetsToEarliest(String method, String expectedMethod) {
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -95,7 +92,7 @@ class ResetOffsetsTest {
 
         CommandLine cmd = new CommandLine(resetOffsets);
 
-        int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", method);
+        int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", method, "-n", "namespace");
         assertEquals(0, code);
         verify(resourceService).resetOffsets(eq("namespace"), eq("myGroup"),
             argThat(resource -> resource.getSpec().get(RESET_METHOD).equals(expectedMethod)),
@@ -104,8 +101,6 @@ class ResetOffsetsTest {
 
     @Test
     void shouldResetOffsetsToEarliestDryRun() {
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -117,7 +112,8 @@ class ResetOffsetsTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--to-earliest", "--dry-run");
+        int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--to-earliest",
+            "--dry-run", "-n", "namespace");
         assertEquals(0, code);
         assertTrue(sw.toString().contains("Dry run execution."));
         verify(resourceService).resetOffsets(eq("namespace"), eq("myGroup"),
@@ -127,8 +123,6 @@ class ResetOffsetsTest {
 
     @Test
     void shouldResetOffsetsByDuration() {
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -138,7 +132,7 @@ class ResetOffsetsTest {
 
         CommandLine cmd = new CommandLine(resetOffsets);
 
-        int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--by-duration=PT10M");
+        int code = cmd.execute("--group", "myGroup", "--topic", "myTopic", "--by-duration=PT10M", "-n", "namespace");
         assertEquals(0, code);
         verify(resourceService).resetOffsets(eq("namespace"), eq("myGroup"),
             argThat(resource -> resource.getSpec().get(RESET_METHOD).equals("BY_DURATION")
@@ -148,8 +142,6 @@ class ResetOffsetsTest {
 
     @Test
     void shouldResetOffsetsToOffset() {
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))

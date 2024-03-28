@@ -25,7 +25,7 @@ import picocli.CommandLine.Spec;
 @Command(name = "get-contexts",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@:%n%n",
+    descriptionHeading = "%n@|bold Description|@: ",
     description = "Get all contexts.",
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",

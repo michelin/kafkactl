@@ -16,8 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Spec;
 
 /**
  * Config current context subcommand.
@@ -25,7 +23,7 @@ import picocli.CommandLine.Spec;
 @Command(name = "current-context",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@:%n%n",
+    descriptionHeading = "%n@|bold Description|@: ",
     description = "Get the current context.",
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
@@ -41,9 +39,6 @@ public class ConfigCurrentContext extends ValidCurrentContextHook {
     @Inject
     @ReflectiveAccess
     private FormatService formatService;
-
-    @Spec
-    public CommandSpec commandSpec;
 
     @Override
     public Integer onContextValid() {

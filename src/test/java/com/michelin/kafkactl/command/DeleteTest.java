@@ -92,8 +92,6 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByFileWhenYmlFileNotFound() {
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -118,8 +116,6 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -143,15 +139,13 @@ class DeleteTest {
             "The server does not have resource type(s) Topic."))
             .when(resourceService).validateAllowedResources(any(), any());
 
-        int code = cmd.execute("-f", "topic");
+        int code = cmd.execute("-f", "topic", "-n", "namespace");
         assertEquals(2, code);
         assertTrue(sw.toString().contains("The server does not have resource type(s) Topic."));
     }
 
     @Test
     void shouldNotDeleteByNameWhenInvalidResources() {
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -163,15 +157,13 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        int code = cmd.execute("topic", "myTopic");
+        int code = cmd.execute("topic", "myTopic", "-n", "namespace");
         assertEquals(2, code);
         assertTrue(sw.toString().contains("The server does not have resource type(s) topic."));
     }
 
     @Test
     void shouldNotDeleteByFileWhenNamespaceMismatch() {
-        Kafkactl.optionalNamespace = Optional.of("namespaceMismatch");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -196,7 +188,7 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic");
+        int code = cmd.execute("-f", "topic", "-n", "namespaceMismatch");
         assertEquals(2, code);
         assertTrue(sw.toString().contains("Namespace mismatch between Kafkactl configuration and YAML resource(s): "
             + "\"Topic/prefix.topic\"."));
@@ -204,8 +196,6 @@ class DeleteTest {
 
     @Test
     void shouldDeleteByFileSuccess() {
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -243,14 +233,12 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic");
+        int code = cmd.execute("-f", "topic", "-n", "namespace");
         assertEquals(0, code);
     }
 
     @Test
     void shouldDeleteByNameSuccess() {
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -275,14 +263,12 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("topic", "prefix.topic");
+        int code = cmd.execute("topic", "prefix.topic", "-n", "namespace");
         assertEquals(0, code);
     }
 
     @Test
     void shouldDeleteByFileDryRunSuccess() {
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -319,15 +305,13 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic", "--dry-run");
+        int code = cmd.execute("-f", "topic", "--dry-run", "-n", "namespace");
         assertEquals(0, code);
         assertTrue(sw.toString().contains("Dry run execution."));
     }
 
     @Test
     void shouldDeleteByFileFail() {
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -363,14 +347,12 @@ class DeleteTest {
 
         CommandLine cmd = new CommandLine(delete);
 
-        int code = cmd.execute("-f", "topic");
+        int code = cmd.execute("-f", "topic", "-n", "namespace");
         assertEquals(1, code);
     }
 
     @Test
     void shouldNotDeleteByFileWhenHttpClientResponseException() {
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -398,7 +380,7 @@ class DeleteTest {
 
         CommandLine cmd = new CommandLine(delete);
 
-        int code = cmd.execute("-f", "topic");
+        int code = cmd.execute("-f", "topic", "-n", "namespace");
         assertEquals(1, code);
         verify(formatService).displayError(exception, cmd.getCommandSpec());
     }

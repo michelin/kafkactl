@@ -13,7 +13,6 @@ import com.michelin.kafkactl.service.LoginService;
 import com.michelin.kafkactl.service.ResourceService;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -73,8 +72,6 @@ class DeleteRecordsTest {
 
     @Test
     void shouldDeleteDryRunSuccess() {
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -95,8 +92,6 @@ class DeleteRecordsTest {
 
     @Test
     void shouldDeleteSuccess() {
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -114,8 +109,6 @@ class DeleteRecordsTest {
 
     @Test
     void shouldDeleteFail() {
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))

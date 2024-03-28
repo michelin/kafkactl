@@ -21,7 +21,7 @@ import picocli.CommandLine.Command;
 @Command(name = "api-resources",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@:%n%n",
+    descriptionHeading = "%n@|bold Description|@: ",
     description = "Print the supported API resources on the server.",
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",

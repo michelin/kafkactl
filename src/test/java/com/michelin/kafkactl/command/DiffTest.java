@@ -162,8 +162,6 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenNamespaceMismatch() {
-        Kafkactl.optionalNamespace = Optional.of("namespaceMismatch");
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -186,7 +184,7 @@ class DiffTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic.yml");
+        int code = cmd.execute("-f", "topic.yml", "-n", "namespaceMismatch");
         assertEquals(2, code);
         assertTrue(sw.toString().contains("Namespace mismatch between Kafkactl configuration and YAML resource(s): "
             + "\"Topic/prefix.topic\"."));
@@ -194,8 +192,6 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenHttpClientResponseException() {
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -230,8 +226,6 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenHttpClientResponseExceptionDuringApply() {
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -289,8 +283,6 @@ class DiffTest {
 
     @Test
     void shouldNotDiffApplyHasNoBody() {
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -348,8 +340,6 @@ class DiffTest {
 
     @Test
     void shouldDiff() {
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -425,8 +415,6 @@ class DiffTest {
 
     @Test
     void shouldDiffWhenNoLive() {
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -493,8 +481,6 @@ class DiffTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE, "src/test/resources/person.avsc");
 
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -559,8 +545,6 @@ class DiffTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put("schema", "{schema}");
 
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -618,8 +602,6 @@ class DiffTest {
     void shouldNotDiffSchemaWhenNotExist() {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE, "src/test/resources/not-exist.avsc");
-
-        Kafkactl.optionalNamespace = Optional.empty();
 
         when(configService.isCurrentContextValid())
             .thenReturn(true);

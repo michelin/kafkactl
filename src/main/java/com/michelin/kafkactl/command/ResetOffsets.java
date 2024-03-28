@@ -1,6 +1,5 @@
 package com.michelin.kafkactl.command;
 
-import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.hook.DryRunHook;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
@@ -24,7 +23,7 @@ import picocli.CommandLine.Option;
 @Command(name = "reset-offsets",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@:%n%n",
+    descriptionHeading = "%n@|bold Description|@: ",
     description = "Reset consumer group offsets.",
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
@@ -57,7 +56,7 @@ public class ResetOffsets extends DryRunHook {
      */
     @Override
     public Integer onAuthSuccess() throws IOException {
-        String namespace = Kafkactl.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
+        String namespace = getNamespace();
 
         Map<String, Object> consumerGroupResetOffsetSpec = new HashMap<>();
         consumerGroupResetOffsetSpec.put("topic", topic.allTopics ? "*" : topic.topic);

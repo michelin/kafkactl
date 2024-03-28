@@ -1,8 +1,6 @@
 package com.michelin.kafkactl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,16 +16,7 @@ class KafkactlTest {
     @Test
     void shouldSetVerbose() {
         CommandLine cmd = new CommandLine(kafkactl);
-        int code = cmd.execute("-v");
-        assertEquals(0, code);
-        assertTrue(Kafkactl.verbose);
-    }
-
-    @Test
-    void shouldNotSetVerbose() {
-        CommandLine cmd = new CommandLine(kafkactl);
         int code = cmd.execute();
         assertEquals(0, code);
-        assertFalse(Kafkactl.verbose);
     }
 }

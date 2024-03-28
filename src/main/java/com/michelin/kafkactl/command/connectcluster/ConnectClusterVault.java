@@ -1,6 +1,5 @@
 package com.michelin.kafkactl.command.connectcluster;
 
-import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.util.VersionProvider;
@@ -17,7 +16,7 @@ import picocli.CommandLine.Parameters;
 @Command(name = "vaults",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@:%n%n",
+    descriptionHeading = "%n@|bold Description|@: ",
     description = "Vault secrets for a connect cluster.",
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
@@ -39,7 +38,7 @@ public class ConnectClusterVault extends AuthenticatedHook {
 
     @Override
     public Integer onAuthSuccess() {
-        String namespace = Kafkactl.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
+        String namespace = getNamespace();
 
         // if no parameters, list the available connect cluster to vault secrets
         if (connectClusterName.isEmpty()) {

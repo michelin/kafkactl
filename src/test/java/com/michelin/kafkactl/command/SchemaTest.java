@@ -90,8 +90,6 @@ class SchemaTest {
         when(resourceService.changeSchemaCompatibility(any(), any(), any(), any()))
             .thenReturn(Optional.empty());
 
-        Kafkactl.optionalNamespace = Optional.empty();
-
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
 
@@ -120,14 +118,12 @@ class SchemaTest {
         when(resourceService.changeSchemaCompatibility(any(), any(), any(), any()))
             .thenReturn(Optional.of(resource));
 
-        Kafkactl.optionalNamespace = Optional.of("namespace");
-
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
 
         CommandLine cmd = new CommandLine(schema);
 
-        int code = cmd.execute("backward", "mySubject");
+        int code = cmd.execute("backward", "mySubject", "-n", "namespace");
         assertEquals(0, code);
         verify(formatService).displayList(eq(SCHEMA_COMPATIBILITY_STATE),
             argThat(schemas -> schemas.get(0).equals(resource)),

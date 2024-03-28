@@ -3,7 +3,6 @@ package com.michelin.kafkactl.command;
 import static com.michelin.kafkactl.service.FormatService.TABLE;
 import static com.michelin.kafkactl.service.FormatService.YAML;
 
-import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.service.ResourceService;
 import com.michelin.kafkactl.util.VersionProvider;
@@ -22,7 +21,7 @@ import picocli.CommandLine.Parameters;
 @Command(name = "reset-password",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@:%n%n",
+    descriptionHeading = "%n@|bold Description|@: ",
     description = "Reset a Kafka password.",
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
@@ -58,7 +57,7 @@ public class ResetPassword extends AuthenticatedHook {
                 "Invalid value " + output + " for option -o.");
         }
 
-        String namespace = Kafkactl.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
+        String namespace = getNamespace();
         if (!confirmed) {
             commandSpec.commandLine().getOut().println("You are about to change your Kafka password "
                 + "for the namespace " + namespace + ".\n"
