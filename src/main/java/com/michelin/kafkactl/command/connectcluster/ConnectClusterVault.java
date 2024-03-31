@@ -13,7 +13,7 @@ import picocli.CommandLine.Parameters;
 /**
  * Connect cluster vault subcommand.
  */
-@Command(name = "vaults",
+@Command(name = "vault",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
     descriptionHeading = "%n@|bold Description|@: ",

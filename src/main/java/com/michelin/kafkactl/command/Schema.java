@@ -20,7 +20,7 @@ import picocli.CommandLine.Parameters;
 /**
  * Schema subcommand.
  */
-@Command(name = "schemas",
+@Command(name = "schema",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
     descriptionHeading = "%n@|bold Description|@: ",
