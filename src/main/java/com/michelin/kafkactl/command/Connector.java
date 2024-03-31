@@ -26,7 +26,7 @@ import picocli.CommandLine.Parameters;
 /**
  * Connectors subcommand.
  */
-@Command(name = "connectors",
+@Command(name = "connector",
     headerHeading = "@|bold Usage|@:",
     synopsisHeading = " ",
     descriptionHeading = "%n@|bold Description|@: ",

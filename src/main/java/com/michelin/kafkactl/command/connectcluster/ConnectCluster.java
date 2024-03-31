@@ -8,7 +8,7 @@ import picocli.CommandLine.Spec;
 /**
  * Connect clusters subcommand.
  */
-@Command(name = "connect-clusters",
+@Command(name = "connect-cluster",
     subcommands = {
         ConnectClusterVault.class,
     },

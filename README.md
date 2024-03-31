@@ -29,9 +29,9 @@ Kafka resources using YAML descriptors.
         * [Current Context](#current-context)
         * [Get Contexts](#get-contexts)
         * [Use Context](#use-context)
-    * [Connect Clusters](#connect-clusters)
-        * [Vaults](#vaults)
-    * [Connectors](#connectors)
+    * [Connect Cluster](#connect-cluster)
+        * [Vault](#vault)
+    * [Connector](#connector)
     * [Delete Records](#delete-records)
     * [Delete](#delete)
     * [Diff](#diff)
@@ -39,15 +39,15 @@ Kafka resources using YAML descriptors.
     * [Import](#import)
     * [Reset Offsets](#reset-offsets)
     * [Reset Password](#reset-password)
-    * [Schemas](#schemas)
+    * [Schema](#schema)
 * [Resources](#resources)
     * [User](#user)
         * [Topic](#topic)
         * [ACL](#acl)
-        * [Connector](#connector)
-        * [Connect Cluster](#connect-cluster)
+        * [Connector](#connector-2)
+        * [Connect Cluster](#connect-cluster-2)
         * [Kafka Streams](#kafka-streams)
-        * [Schema](#schema)
+        * [Schema](#schema-2)
     * [Administrator](#administrator)
         * [Namespace](#namespace)
         * [ACL Owner](#acl-owner)
@@ -153,20 +153,20 @@ Options:
   -V, --version   Print version information and exit.
 
 Commands:
-  api-resources     Print the supported API resources on the server.
-  apply             Create or update a resource.
-  auth              Interact with authentication.
-  config            Manage configuration.
-  connect-clusters  Interact with connect clusters.
-  connectors        Interact with connectors.
-  delete-records    Delete all records within a topic.
-  delete            Delete a resource.
-  diff              Get differences between a new resource and a old resource.
-  get               Get resources by resource type for the current namespace.
-  import            Import non-synchronized resources.
-  reset-offsets     Reset consumer group offsets.
-  schemas           Interact with schemas.
-  reset-password    Reset a Kafka password.
+  api-resources    Print the supported API resources on the server.
+  apply            Create or update a resource.
+  auth             Interact with authentication.
+  config           Manage configuration.
+  connect-cluster  Interact with connect clusters.
+  connector        Interact with connectors.
+  delete-records   Delete all records within a topic.
+  delete           Delete a resource.
+  diff             Get differences between a new resource and a old resource.
+  get              Get resources by resource type for the current namespace.
+  import           Import non-synchronized resources.
+  reset-offsets    Reset consumer group offsets.
+  schema           Interact with schemas.
+  reset-password   Reset a Kafka password.
 ```
 
 ### Api Resources
@@ -401,12 +401,12 @@ Example(s):
 kafkactl config use-context local
 ```
 
-### Connect Clusters
+### Connect Cluster
 
-The `connect-clusters` command allows you to interact with Kafka Connect clusters.
+The `connect-cluster` command allows you to interact with Kafka Connect clusters.
 
 ```console
-Usage: kafkactl connect-clusters [-hvV] [-n=<optionalNamespace>] [COMMAND]
+Usage: kafkactl connect-cluster [-hvV] [-n=<optionalNamespace>] [COMMAND]
 
 Description:
 
@@ -420,15 +420,15 @@ Options:
   -V, --version   Print version information and exit.
 
 Commands:
-  vaults  Vault secrets for a connect cluster.
+  vault  Vault secrets for a connect cluster.
 ```
 
-#### Vaults
+#### Vault
 
-The `vaults` command allows you to vault sensitive connector configuration.
+The `vault` command allows you to vault sensitive connector configuration.
 
 ```console
-Usage: kafkactl connect-clusters vaults [-hvV] [-n=<optionalNamespace>] <connectClusterName> [<secrets>...]
+Usage: kafkactl connect-cluster vault [-hvV] [-n=<optionalNamespace>] <connectClusterName> [<secrets>...]
 
 Description:
 
@@ -453,16 +453,16 @@ Options:
 Example(s):
 
 ```console
-kafkactl connect-clusters vaults
-kafkactl connect-clusters vaults myConnectCluster someClearText
+kafkactl connect-cluster vault
+kafkactl connect-cluster vault myConnectCluster someClearText
 ```
 
-### Connectors
+### Connector
 
-The `connectors` command allows you to interact with Kafka Connect connectors.
+The `connector` command allows you to interact with Kafka Connect connectors.
 
 ```console
-Usage: kafkactl connectors [-hvV] [-n=<optionalNamespace>] <action> <connectors>...
+Usage: kafkactl connector [-hvV] [-n=<optionalNamespace>] <action> <connectors>...
 
 Description:
 
@@ -486,9 +486,9 @@ Options:
 Example(s):
 
 ```console
-kafkactl connectors pause myConnector
-kafkactl connectors resume myConnector
-kafkactl connectors restart myConnector
+kafkactl connector pause myConnector
+kafkactl connector resume myConnector
+kafkactl connector restart myConnector
 ```
 
 ### Delete Records
@@ -727,12 +727,12 @@ Example(s):
 kafkactl reset-password myUser
 ```
 
-### Schemas
+### Schema
 
-The `schemas` command allows you to modify the schema compatibility.
+The `schema` command allows you to modify the schema compatibility.
 
 ```console
-Usage: kafkactl schemas [-hvV] [-n=<optionalNamespace>] <compatibility> <subjects>...
+Usage: kafkactl schema [-hvV] [-n=<optionalNamespace>] <compatibility> <subjects>...
 
 Description:
 
@@ -756,7 +756,7 @@ Options:
 Example(s):
 
 ```console
-kafkactl schemas forward-transitive mySubject-value
+kafkactl schema forward-transitive mySubject-value
 ```
 
 ## Resources
@@ -827,7 +827,7 @@ Here are some points to keep in mind:
     - a sub prefix: “aaa_subprefix”
     - a literal topic name: “aaa_myTopic”
 
-#### Connector
+<h4 id="connector-2">Connector</h4>
 
 ```yaml
 ---
@@ -849,7 +849,7 @@ spec:
   to a Kafka Connect cluster that you have self-deployed or have been granted access to.
 - Everything else depend on the connect validation rules associated to your namespace.
 
-#### Connect Cluster
+<h4 id="connect-cluster-2">Connect Cluster</h4>
 
 The `Connect Cluster` resource declares a Connect cluster that has been self-deployed, so namespaces are autonomous to
 deploy connectors on it without any Ns4Kafka outage.
@@ -896,7 +896,7 @@ metadata:
 
 - `metadata.name` must correspond to your Kafka Streams `application.id`.
 
-#### Schema
+<h4 id="schema-2">Schema</h4>
 
 The `Schema` resource allows you to declare subjects for your schemas. You can either reference a local `avsc` file
 with `spec.schemaFile`, or define your schema directly inline with `spec.schema`.
@@ -1169,7 +1169,7 @@ kafkactl:
     entrypoint: [ '/bin/sh', '-c' ]
   before_script:
     - export KAFKACTL_CURRENT_NAMESPACE=test
-    - export KAFKACTL_API=http://ns4kafka-dev-api.domain.com
+    - export KAFKACTL_API=https://ns4kafka-dev-api.domain.com
     - export KAFKACTL_USER_TOKEN=${GITLAB_TOKEN}
   script:
     - kafkactl get all
@@ -1183,7 +1183,7 @@ kafkactl:
     entrypoint: [ '/bin/sh', '-c' ]
   before_script:
     - export KAFKACTL_CURRENT_NAMESPACE=test
-    - export KAFKACTL_API=http://ns4kafka-dev-api.domain.com
+    - export KAFKACTL_API=https://ns4kafka-dev-api.domain.com
     - export KAFKACTL_USER_TOKEN=${GITLAB_TOKEN}
   script:
     - java -jar /home/app/application.jar get all
