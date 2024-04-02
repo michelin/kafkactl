@@ -34,7 +34,7 @@ kafkactl:
       - "STATUS:/status/code"
       - "ERROR_MSG:/status/errorMessage"
     ConnectCluster:
-      - "NAME:/metadata/name"
+      - "CONNECT CLUSTER:/metadata/name"
       - "URL:/spec/url"
       - "STATUS:/spec/status"
       - "ERROR_MSG:/spec/statusMessage"
