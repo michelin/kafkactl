@@ -287,7 +287,7 @@ public class FormatService {
                             cell.elements().forEachRemaining(jsonNode -> children.add(jsonNode.asText()));
                             output = String.join(",", children);
                         } else {
-                            output = cell.asText(EMPTY_STRING);
+                            output = cell.asText();
                         }
                     }
                 }

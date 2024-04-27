@@ -61,7 +61,7 @@ Kafka resources using YAML descriptors.
 You can download Kafkactl from the project's releases page on GitHub at https://github.com/michelin/kafkactl/releases,
 which offers three different formats:
 
-- JAR (requires Java 17)
+- JAR (requires Java 21)
 - Windows
 - Linux
 
