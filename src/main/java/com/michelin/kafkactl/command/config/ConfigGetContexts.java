@@ -10,13 +10,13 @@ import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.util.VersionProvider;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 
 /**
@@ -34,6 +34,8 @@ import picocli.CommandLine.Spec;
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
 public class ConfigGetContexts implements Callable<Integer> {
+    private static final String MASKED = "[MASKED]";
+
     @Inject
     @ReflectiveAccess
     private KafkactlConfig kafkactlConfig;
@@ -45,29 +47,37 @@ public class ConfigGetContexts implements Callable<Integer> {
     @Spec
     public CommandSpec commandSpec;
 
+    @Option(names = {"-u", "--unmask-tokens"}, description = "Unmask tokens.")
+    public boolean unmaskTokens;
+
     @Override
     public Integer call() {
         if (kafkactlConfig.getContexts().isEmpty()) {
             commandSpec.commandLine().getOut().println("No context pre-defined.");
         } else {
-            List<Resource> allContextsAsResources = new ArrayList<>();
-            kafkactlConfig.getContexts().forEach(userContext -> {
-                Map<String, Object> specs = new HashMap<>();
-                specs.put("namespace", userContext.getDefinition().getNamespace());
-                specs.put("api", userContext.getDefinition().getApi());
-                specs.put("token", userContext.getDefinition().getUserToken());
+            List<Resource> contexts = kafkactlConfig.getContexts()
+                .stream()
+                .map(userContext -> {
+                    Map<String, Object> specs = new HashMap<>();
+                    specs.put("namespace", userContext.getDefinition().getNamespace());
+                    specs.put("api", userContext.getDefinition().getApi());
 
-                Resource currentContextAsResource = Resource.builder()
-                    .metadata(Metadata.builder()
-                        .name(userContext.getName())
-                        .build())
-                    .spec(specs)
-                    .build();
+                    if (unmaskTokens) {
+                        specs.put("token", userContext.getDefinition().getUserToken());
+                    } else {
+                        specs.put("token", MASKED);
+                    }
 
-                allContextsAsResources.add(currentContextAsResource);
-            });
+                    return Resource.builder()
+                        .metadata(Metadata.builder()
+                            .name(userContext.getName())
+                            .build())
+                        .spec(specs)
+                        .build();
+                })
+                .toList();
 
-            formatService.displayList(CONTEXT, allContextsAsResources, TABLE, commandSpec);
+            formatService.displayList(CONTEXT, contexts, TABLE, commandSpec);
         }
 
         return 0;
