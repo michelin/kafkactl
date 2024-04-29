@@ -49,7 +49,7 @@ class ConfigGetContextsTest {
     }
 
     @Test
-    void shouldGetContexts() {
+    void shouldGetContextsWithMaskedTokens() {
         KafkactlConfig.Context context = KafkactlConfig.Context.builder()
             .name("name")
             .definition(KafkactlConfig.Context.ApiContext.builder()
@@ -69,7 +69,34 @@ class ConfigGetContextsTest {
         int code = cmd.execute();
         assertEquals(0, code);
         verify(formatService).displayList(eq("Context"),
-            argThat(currentContext -> currentContext.get(0).getMetadata().getName().equals("name")),
+            argThat(currentContext -> currentContext.get(0).getMetadata().getName().equals("name")
+                && currentContext.get(0).getSpec().get("token").equals("[MASKED]")),
+            eq(TABLE), eq(cmd.getCommandSpec()));
+    }
+
+    @Test
+    void shouldGetContextsWithUnmaskedTokens() {
+        KafkactlConfig.Context context = KafkactlConfig.Context.builder()
+            .name("name")
+            .definition(KafkactlConfig.Context.ApiContext.builder()
+                .api("api")
+                .namespace("namespace")
+                .userToken("userToken")
+                .build())
+            .build();
+
+        when(kafkactlConfig.getContexts())
+            .thenReturn(Collections.singletonList(context));
+
+        CommandLine cmd = new CommandLine(subcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("-u");
+        assertEquals(0, code);
+        verify(formatService).displayList(eq("Context"),
+            argThat(currentContext -> currentContext.get(0).getMetadata().getName().equals("name")
+                && currentContext.get(0).getSpec().get("token").equals("userToken")),
             eq(TABLE), eq(cmd.getCommandSpec()));
     }
 }
