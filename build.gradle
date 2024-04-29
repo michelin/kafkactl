@@ -1,6 +1,6 @@
 plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("io.micronaut.application") version "4.3.5"
+    id("io.micronaut.application") version "4.3.6"
     id("jacoco")
     id("org.sonarqube") version "5.0.0.4638"
     id("pl.allegro.tech.build.axion-release") version "1.17.0"
@@ -50,8 +50,8 @@ application {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion('17')
-    targetCompatibility = JavaVersion.toVersion('17')
+    sourceCompatibility = JavaVersion.toVersion('21')
+    targetCompatibility = JavaVersion.toVersion('21')
 }
 
 micronaut {
@@ -82,7 +82,7 @@ graalvmNative {
 }
 
 dockerfile {
-    baseImage = "eclipse-temurin:17-jre-alpine"
+    baseImage = "eclipse-temurin:21-jre-alpine"
 }
 
 dockerfileNative {
