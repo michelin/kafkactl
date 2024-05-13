@@ -26,7 +26,7 @@ dependencies {
     implementation("io.micronaut.validation:micronaut-validation")
     implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("jakarta.validation:jakarta.validation-api")
-    implementation("org.ocpsoft.prettytime:prettytime:5.0.7.Final")
+    implementation("org.ocpsoft.prettytime:prettytime:5.0.8.Final")
     implementation("io.github.java-diff-utils:java-diff-utils:4.12")
     implementation("io.micronaut:micronaut-retry")
     implementation("org.yaml:snakeyaml")
