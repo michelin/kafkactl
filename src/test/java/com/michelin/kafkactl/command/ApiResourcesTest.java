@@ -102,7 +102,7 @@ class ApiResourcesTest {
         int code = cmd.execute();
         assertEquals(0, code);
         verify(formatService).displayList(eq(RESOURCE_DEFINITION),
-            argThat(resources -> resources.get(0).getMetadata().getName().equals("Topic")),
+            argThat(resources -> resources.getFirst().getMetadata().getName().equals("Topic")),
             eq(TABLE), eq(cmd.getCommandSpec()));
     }
 

@@ -309,7 +309,7 @@ class LoginServiceTest {
 
         assertIterableEquals(List.of("isAdmin()"), actual.getRoles());
 
-        assertEquals("anotherNamespace", actual.getRoleBindings().get(0).getNamespace());
+        assertEquals("anotherNamespace", actual.getRoleBindings().getFirst().getNamespace());
         assertIterableEquals(List.of(GET), actual.getRoleBindings().get(0).getVerbs());
         assertIterableEquals(List.of("quota"), actual.getRoleBindings().get(0).getResourceTypes());
 

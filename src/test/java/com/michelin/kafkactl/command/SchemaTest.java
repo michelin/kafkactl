@@ -126,7 +126,7 @@ class SchemaTest {
         int code = cmd.execute("backward", "mySubject", "-n", "namespace");
         assertEquals(0, code);
         verify(formatService).displayList(eq(SCHEMA_COMPATIBILITY_STATE),
-            argThat(schemas -> schemas.get(0).equals(resource)),
+            argThat(schemas -> schemas.getFirst().equals(resource)),
             eq(TABLE), eq(cmd.getCommandSpec()));
     }
 }

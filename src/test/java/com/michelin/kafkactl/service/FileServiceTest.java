@@ -27,14 +27,14 @@ class FileServiceTest {
     @Test
     void shouldComputeYamlFileListNonRecursive() {
         List<File> actual = fileService.computeYamlFileList(new File("src/test/resources"), false);
-        assertEquals("config.yml", actual.get(0).getName());
+        assertEquals("config.yml", actual.getFirst().getName());
         assertEquals(1, actual.size());
     }
 
     @Test
     void shouldComputeYamlFileListFile() {
         List<File> actual = fileService.computeYamlFileList(new File("src/test/resources/topics/topic.yml"), false);
-        assertEquals("topic.yml", actual.get(0).getName());
+        assertEquals("topic.yml", actual.getFirst().getName());
         assertEquals(1, actual.size());
     }
 
@@ -42,9 +42,9 @@ class FileServiceTest {
     void shouldParseResourceListFromFiles() {
         List<Resource> actual = fileService.parseResourceListFromFiles(
             Collections.singletonList(new File("src/test/resources/topics/topic.yml")));
-        assertEquals("Topic", actual.get(0).getKind());
-        assertEquals("myPrefix.topic", actual.get(0).getMetadata().getName());
-        assertEquals(3, actual.get(0).getSpec().get("replicationFactor"));
+        assertEquals("Topic", actual.getFirst().getKind());
+        assertEquals("myPrefix.topic", actual.getFirst().getMetadata().getName());
+        assertEquals(3, actual.getFirst().getSpec().get("replicationFactor"));
         assertEquals(1, actual.size());
     }
 
@@ -55,8 +55,8 @@ class FileServiceTest {
                 "{\"apiVersion\": \"v1\", \"kind\": \"Topic\", \"metadata\": {\"name\": \"myTopic\"}}");
 
         assertEquals(1, actual.size());
-        assertEquals("v1", actual.get(0).getApiVersion());
-        assertEquals("Topic", actual.get(0).getKind());
-        assertEquals("myTopic", actual.get(0).getMetadata().getName());
+        assertEquals("v1", actual.getFirst().getApiVersion());
+        assertEquals("Topic", actual.getFirst().getKind());
+        assertEquals("myTopic", actual.getFirst().getMetadata().getName());
     }
 }

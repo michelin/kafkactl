@@ -135,7 +135,7 @@ class ConnectorTest {
         int code = cmd.execute("pause", "my-connector", "-n", "namespace");
         assertEquals(0, code);
         verify(formatService).displayList(eq(CHANGE_CONNECTOR_STATE),
-            argThat(connectors -> connectors.get(0).equals(resource)),
+            argThat(connectors -> connectors.getFirst().equals(resource)),
             eq(TABLE), eq(cmd.getCommandSpec()));
     }
 
@@ -175,7 +175,7 @@ class ConnectorTest {
         int code = cmd.execute("pause", "all", "-n", "namespace");
         assertEquals(0, code);
         verify(formatService).displayList(eq(CHANGE_CONNECTOR_STATE),
-            argThat(connectors -> connectors.get(0).equals(resource)),
+            argThat(connectors -> connectors.getFirst().equals(resource)),
             eq(TABLE), eq(cmd.getCommandSpec()));
     }
 

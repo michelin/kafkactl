@@ -217,6 +217,6 @@ class ApiResourcesServiceTest {
 
         List<Resource> actual = apiResourcesService.filterNotAllowedResourceTypes(Collections.singletonList(resource));
 
-        assertEquals(resource, actual.get(0));
+        assertEquals(resource, actual.getFirst());
     }
 }
