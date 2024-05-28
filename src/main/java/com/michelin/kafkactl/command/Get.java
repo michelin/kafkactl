@@ -74,11 +74,11 @@ public class Get extends AuthenticatedHook {
         try {
             // Get individual resources for given types (k get topic topic1)
             Resource singleResource =
-                resourceService.getSingleResourceWithType(apiResources.get(0), namespace, resourceName.get(), true);
+                resourceService.getSingleResourceWithType(apiResources.getFirst(), namespace, resourceName.get(), true);
             formatService.displaySingle(singleResource, output, commandSpec);
             return 0;
         } catch (HttpClientResponseException e) {
-            formatService.displayError(e, apiResources.get(0).getKind(), resourceName.get(), commandSpec);
+            formatService.displayError(e, apiResources.getFirst().getKind(), resourceName.get(), commandSpec);
             return 1;
         }
     }

@@ -38,15 +38,13 @@ class ConfigCurrentContextTest {
     ConfigCurrentContext subcommand;
 
     @Test
-    void shouldGetCurrentContext() {
+    void shouldGetCurrentContextWithMaskedTokens() {
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(kafkactlConfig.getCurrentNamespace())
             .thenReturn("namespace");
         when(kafkactlConfig.getApi())
             .thenReturn("ns4kafka.com");
-        when(kafkactlConfig.getUserToken())
-            .thenReturn("user-token");
         when(configService.getCurrentContextName())
             .thenReturn("current-context");
 
@@ -57,8 +55,34 @@ class ConfigCurrentContextTest {
         int code = cmd.execute();
         assertEquals(0, code);
         verify(formatService).displayList(eq("Context"),
-            argThat(currentContext -> currentContext.get(0).getMetadata().getName().equals("current-context")),
+            argThat(currentContext -> currentContext.getFirst().getMetadata().getName().equals("current-context")
+                && currentContext.getFirst().getSpec().get("token").equals("[MASKED]")),
             eq(TABLE), eq(cmd.getCommandSpec()));
+    }
+
+    @Test
+    void shouldGetCurrentContextWithUnmaskedTokens() {
+        when(configService.isCurrentContextValid())
+                .thenReturn(true);
+        when(kafkactlConfig.getCurrentNamespace())
+                .thenReturn("namespace");
+        when(kafkactlConfig.getApi())
+                .thenReturn("ns4kafka.com");
+        when(kafkactlConfig.getUserToken())
+                .thenReturn("user-token");
+        when(configService.getCurrentContextName())
+                .thenReturn("current-context");
+
+        CommandLine cmd = new CommandLine(subcommand);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("-u");
+        assertEquals(0, code);
+        verify(formatService).displayList(eq("Context"),
+                argThat(currentContext -> currentContext.getFirst().getMetadata().getName().equals("current-context")
+                        && currentContext.getFirst().getSpec().get("token").equals("user-token")),
+                eq(TABLE), eq(cmd.getCommandSpec()));
     }
 
     @Test

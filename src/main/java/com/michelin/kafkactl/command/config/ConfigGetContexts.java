@@ -1,9 +1,11 @@
 package com.michelin.kafkactl.command.config;
 
+import static com.michelin.kafkactl.mixin.UnmaskTokenMixin.MASKED;
 import static com.michelin.kafkactl.service.FormatService.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONTEXT;
 
 import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.mixin.UnmaskTokenMixin;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FormatService;
@@ -15,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 
 /**
@@ -34,8 +36,6 @@ import picocli.CommandLine.Spec;
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
 public class ConfigGetContexts implements Callable<Integer> {
-    private static final String MASKED = "[MASKED]";
-
     @Inject
     @ReflectiveAccess
     private KafkactlConfig kafkactlConfig;
@@ -47,8 +47,8 @@ public class ConfigGetContexts implements Callable<Integer> {
     @Spec
     public CommandSpec commandSpec;
 
-    @Option(names = {"-u", "--unmask-tokens"}, description = "Unmask tokens.")
-    public boolean unmaskTokens;
+    @Mixin
+    public UnmaskTokenMixin unmaskTokenMixin;
 
     @Override
     public Integer call() {
@@ -62,7 +62,7 @@ public class ConfigGetContexts implements Callable<Integer> {
                     specs.put("namespace", userContext.getDefinition().getNamespace());
                     specs.put("api", userContext.getDefinition().getApi());
 
-                    if (unmaskTokens) {
+                    if (unmaskTokenMixin.unmaskTokens) {
                         specs.put("token", userContext.getDefinition().getUserToken());
                     } else {
                         specs.put("token", MASKED);

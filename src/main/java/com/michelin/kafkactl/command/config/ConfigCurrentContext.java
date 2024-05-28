@@ -1,10 +1,12 @@
 package com.michelin.kafkactl.command.config;
 
+import static com.michelin.kafkactl.mixin.UnmaskTokenMixin.MASKED;
 import static com.michelin.kafkactl.service.FormatService.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONTEXT;
 
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.hook.ValidCurrentContextHook;
+import com.michelin.kafkactl.mixin.UnmaskTokenMixin;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FormatService;
@@ -16,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Mixin;
 
 /**
  * Config current context subcommand.
@@ -40,12 +43,20 @@ public class ConfigCurrentContext extends ValidCurrentContextHook {
     @ReflectiveAccess
     private FormatService formatService;
 
+    @Mixin
+    public UnmaskTokenMixin unmaskTokenMixin;
+
     @Override
     public Integer onContextValid() {
         Map<String, Object> specs = new HashMap<>();
         specs.put("namespace", kafkactlConfig.getCurrentNamespace());
         specs.put("api", kafkactlConfig.getApi());
-        specs.put("token", kafkactlConfig.getUserToken());
+
+        if (unmaskTokenMixin.unmaskTokens) {
+            specs.put("token", kafkactlConfig.getUserToken());
+        } else {
+            specs.put("token", MASKED);
+        }
 
         String currentContextName = configService.getCurrentContextName();
         Resource currentContextAsResource = Resource.builder()

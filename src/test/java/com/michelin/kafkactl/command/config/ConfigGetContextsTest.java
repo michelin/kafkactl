@@ -69,8 +69,8 @@ class ConfigGetContextsTest {
         int code = cmd.execute();
         assertEquals(0, code);
         verify(formatService).displayList(eq("Context"),
-            argThat(currentContext -> currentContext.get(0).getMetadata().getName().equals("name")
-                && currentContext.get(0).getSpec().get("token").equals("[MASKED]")),
+            argThat(currentContext -> currentContext.getFirst().getMetadata().getName().equals("name")
+                && currentContext.getFirst().getSpec().get("token").equals("[MASKED]")),
             eq(TABLE), eq(cmd.getCommandSpec()));
     }
 
@@ -95,8 +95,8 @@ class ConfigGetContextsTest {
         int code = cmd.execute("-u");
         assertEquals(0, code);
         verify(formatService).displayList(eq("Context"),
-            argThat(currentContext -> currentContext.get(0).getMetadata().getName().equals("name")
-                && currentContext.get(0).getSpec().get("token").equals("userToken")),
+            argThat(currentContext -> currentContext.getFirst().getMetadata().getName().equals("name")
+                && currentContext.getFirst().getSpec().get("token").equals("userToken")),
             eq(TABLE), eq(cmd.getCommandSpec()));
     }
 }

@@ -1195,10 +1195,10 @@ class ResourceServiceTest {
                 cmd.getCommandSpec());
 
         assertEquals(1, actual.size());
-        assertEquals("Topic", actual.get(0).getKind());
-        assertEquals("myPrefix.topic", actual.get(0).getMetadata().getName());
-        assertEquals(3, actual.get(0).getSpec().get("replicationFactor"));
-        assertEquals(3, actual.get(0).getSpec().get("partitions"));
+        assertEquals("Topic", actual.getFirst().getKind());
+        assertEquals("myPrefix.topic", actual.getFirst().getMetadata().getName());
+        assertEquals(3, actual.getFirst().getSpec().get("replicationFactor"));
+        assertEquals(3, actual.getFirst().getSpec().get("partitions"));
     }
 
     @Test

@@ -73,12 +73,12 @@ public class ResourceService {
         // Get a single kind of resources
         if (apiResources.size() == 1) {
             try {
-                List<Resource> resources = listResourcesWithType(apiResources.get(0), namespace);
+                List<Resource> resources = listResourcesWithType(apiResources.getFirst(), namespace);
                 if (!resources.isEmpty()) {
-                    formatService.displayList(resources.get(0).getKind(), resources, output, commandSpec);
+                    formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
                 } else {
                     commandSpec.commandLine().getOut()
-                        .println("No " + formatService.prettifyKind(apiResources.get(0).getKind()).toLowerCase()
+                        .println("No " + formatService.prettifyKind(apiResources.getFirst().getKind()).toLowerCase()
                             + " to display.");
                 }
                 return 0;
@@ -95,7 +95,7 @@ public class ResourceService {
                 try {
                     List<Resource> resources = listResourcesWithType(apiResource, namespace);
                     if (!resources.isEmpty()) {
-                        formatService.displayList(resources.get(0).getKind(), resources, output, commandSpec);
+                        formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
                     }
                     return 0;
                 } catch (HttpClientResponseException exception) {
