@@ -4,6 +4,7 @@ import static io.micronaut.core.util.StringUtils.EMPTY_STRING;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.Resource;
@@ -287,7 +288,7 @@ public class FormatService {
                             cell.elements().forEachRemaining(jsonNode -> children.add(jsonNode.asText()));
                             output = String.join(",", children);
                         } else {
-                            output = cell.asText();
+                            output = cell.getNodeType().equals(JsonNodeType.NULL) ? EMPTY_STRING : cell.asText();
                         }
                     }
                 }
