@@ -1,27 +1,23 @@
 package com.michelin.kafkactl.service;
 
-import static io.micronaut.core.util.StringUtils.EMPTY_STRING;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.Status;
+import com.michelin.kafkactl.model.format.AgoFormat;
+import com.michelin.kafkactl.model.format.DefaultFormat;
+import com.michelin.kafkactl.model.format.OutputFormatStrategy;
+import com.michelin.kafkactl.model.format.PeriodFormat;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.naming.conventions.StringConvention;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import org.ocpsoft.prettytime.PrettyTime;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
@@ -235,63 +231,32 @@ public class FormatService {
 
         static class PrettyTextTableColumn {
             private final String header;
-            private final String jsonPointer;
-            private final String transform;
             private final int indent;
             private int size = -1;
+            private OutputFormatStrategy outputFormat;
 
             public PrettyTextTableColumn(int indent, String... elements) {
                 this.header = elements[0];
                 this.indent = indent;
 
                 if (elements[1].contains("%")) {
-                    this.jsonPointer = elements[1].split("%")[0];
-                    this.transform = elements[1].split("%")[1];
+                    String jsonPointer = elements[1].split("%")[0];
+                    String format = elements[1].split("%")[1];
+                    if (format.equals("AGO")) {
+                        this.outputFormat = new AgoFormat(jsonPointer);
+                    } else if (format.equals("PERIOD")) {
+                        this.outputFormat = new PeriodFormat(jsonPointer);
+                    }
                 } else {
-                    this.jsonPointer = elements[1];
-                    this.transform = "NONE";
+                    this.outputFormat = new DefaultFormat(elements[1]);
                 }
+
                 // Size should consider headers
                 this.size = Math.max(this.size, this.header.length() + indent);
             }
 
             public String transform(JsonNode node) {
-                String output;
-                JsonNode cell = node.at(this.jsonPointer);
-                switch (this.transform) {
-                    case "AGO" -> {
-                        try {
-                            StdDateFormat sdf = new StdDateFormat();
-                            Date d = sdf.parse(cell.asText());
-                            output = new PrettyTime().format(d);
-                        } catch (ParseException e) {
-                            output = EMPTY_STRING;
-                        }
-                    }
-                    case "PERIOD" -> {
-                        try {
-                            long ms = Long.parseLong(cell.asText());
-                            long days = TimeUnit.MILLISECONDS.toDays(ms);
-                            long hours = TimeUnit.MILLISECONDS.toHours(ms - TimeUnit.DAYS.toMillis(days));
-                            long minutes = TimeUnit.MILLISECONDS.toMinutes(
-                                ms - TimeUnit.DAYS.toMillis(days) - TimeUnit.HOURS.toMillis(hours));
-                            output = days > 0 ? (days + "d") : "";
-                            output += hours > 0 ? (hours + "h") : "";
-                            output += minutes > 0 ? (minutes + "m") : "";
-                        } catch (NumberFormatException e) {
-                            output = EMPTY_STRING;
-                        }
-                    }
-                    default -> {
-                        if (cell.isArray()) {
-                            List<String> children = new ArrayList<>();
-                            cell.elements().forEachRemaining(jsonNode -> children.add(jsonNode.asText()));
-                            output = String.join(",", children);
-                        } else {
-                            output = cell.getNodeType().equals(JsonNodeType.NULL) ? EMPTY_STRING : cell.asText();
-                        }
-                    }
-                }
+                String output = this.outputFormat.display(node);
                 // Check size for later
                 size = Math.max(size, output.length() + indent);
                 return output;
