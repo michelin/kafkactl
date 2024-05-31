@@ -54,6 +54,31 @@ class FormatServiceTest {
     }
 
     @Test
+    void shouldDisplayEmptyInsteadOfNull() {
+        Resource resource = Resource.builder()
+            .kind("Topic")
+            .apiVersion("v1")
+            .metadata(Metadata.builder()
+                .name(null)
+                .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                .build())
+            .spec(Map.of("configs",
+                Map.of("retention.ms", "60000",
+                    "cleanup.policy", "delete"
+                )))
+            .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        formatService.displayList("Topic", Collections.singletonList(resource), TABLE, cmd.getCommandSpec());
+
+        assertTrue(sw.toString().contains("TOPIC  RETENTION  POLICY  AGE"));
+        assertTrue(sw.toString().contains("       1m         delete"));
+    }
+
+    @Test
     void shouldDisplayListTableEmptySpecs() {
         Resource resource = Resource.builder()
             .kind("Topic")
