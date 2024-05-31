@@ -239,16 +239,20 @@ public class FormatService {
                 this.header = elements[0];
                 this.indent = indent;
 
-                if (elements[1].contains("%")) {
-                    String jsonPointer = elements[1].split("%")[0];
-                    String format = elements[1].split("%")[1];
-                    if (format.equals("AGO")) {
-                        this.outputFormat = new AgoFormat(jsonPointer);
-                    } else if (format.equals("PERIOD")) {
-                        this.outputFormat = new PeriodFormat(jsonPointer);
+                String[] field = elements[1].split("%");
+                if (field.length > 1) {
+                    switch (field[1]) {
+                        case "AGO":
+                            this.outputFormat = new AgoFormat(field[0]);
+                            break;
+                        case "PERIOD":
+                            this.outputFormat = new PeriodFormat(field[0]);
+                            break;
+                        default:
+                            break;
                     }
                 } else {
-                    this.outputFormat = new DefaultFormat(elements[1]);
+                    this.outputFormat = new DefaultFormat(field[0]);
                 }
 
                 // Size should consider headers
