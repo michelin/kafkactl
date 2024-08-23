@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -226,7 +227,7 @@ class DeleteTest {
 
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
             .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
@@ -238,7 +239,7 @@ class DeleteTest {
     }
 
     @Test
-    void shouldDeleteByNameSuccess() {
+    void shouldDeleteAllVersionsByNameSuccess() {
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -256,7 +257,7 @@ class DeleteTest {
             .thenReturn(Optional.of(apiResource));
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
             .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
@@ -264,6 +265,36 @@ class DeleteTest {
         cmd.setOut(new PrintWriter(sw));
 
         int code = cmd.execute("topic", "prefix.topic", "-n", "namespace");
+        assertEquals(0, code);
+    }
+
+    @Test
+    void shouldDeleteOneVersionByNameSuccess() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        when(apiResourcesService.getResourceDefinitionByName(any()))
+            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+            .thenReturn(Optional.of(apiResource));
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
+            .thenReturn(true);
+
+        CommandLine cmd = new CommandLine(delete);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("topic", "prefix.topic", "-n", "namespace", "-V", "latest");
         assertEquals(0, code);
     }
 
@@ -298,7 +329,7 @@ class DeleteTest {
 
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
             .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
@@ -342,7 +373,7 @@ class DeleteTest {
 
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
             .thenReturn(false);
 
         CommandLine cmd = new CommandLine(delete);

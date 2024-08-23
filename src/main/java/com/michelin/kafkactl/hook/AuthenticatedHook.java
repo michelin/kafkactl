@@ -33,7 +33,7 @@ public abstract class AuthenticatedHook extends ValidCurrentContextHook {
     protected KafkactlConfig kafkactlConfig;
 
     @Mixin
-    public NamespaceMixin namespaceMixinMixin;
+    public NamespaceMixin namespaceMixin;
 
     @Mixin
     public VerboseMixin verboseMixin;
@@ -53,7 +53,7 @@ public abstract class AuthenticatedHook extends ValidCurrentContextHook {
      * @return The current namespace
      */
     protected String getNamespace() {
-        return namespaceMixinMixin.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
+        return namespaceMixin.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
     }
 
     /**

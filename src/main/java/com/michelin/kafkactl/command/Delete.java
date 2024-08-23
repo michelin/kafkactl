@@ -13,6 +13,7 @@ import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
@@ -35,6 +36,8 @@ import picocli.CommandLine.Parameters;
     versionProvider = VersionProvider.class,
     mixinStandardHelpOptions = true)
 public class Delete extends DryRunHook {
+    public static final String VERSION = "version";
+
     @Inject
     @ReflectiveAccess
     private ResourceService resourceService;
@@ -69,8 +72,9 @@ public class Delete extends DryRunHook {
                 .map(resource -> {
                     ApiResource apiResource =
                         apiResourcesService.getResourceDefinitionByKind(resource.getKind()).orElseThrow();
-                    return resourceService.delete(apiResource, namespace, resource.getMetadata().getName(), dryRun,
-                        commandSpec);
+                    Map<String, Object> spec = resource.getSpec();
+                    return resourceService.delete(apiResource, namespace, resource.getMetadata().getName(),
+                        (spec != null ? (String) spec.get(VERSION) : null), dryRun, commandSpec);
                 })
                 .mapToInt(value -> Boolean.TRUE.equals(value) ? 0 : 1)
                 .sum();
@@ -83,7 +87,7 @@ public class Delete extends DryRunHook {
     }
 
     /**
-     * Parse given resources.
+     * Parse input resources (given by file or by name) to build the list of resources to delete.
      *
      * @param namespace The namespace
      * @return A list of resources
@@ -109,32 +113,54 @@ public class Delete extends DryRunHook {
         }
 
         // Generate a single resource with minimum details from input
-        return List.of(Resource.builder()
+        var builder = Resource.builder()
             .metadata(Metadata.builder()
                 .name(config.nameConfig.name)
                 .namespace(namespace)
                 .build())
-            .kind(optionalApiResource.get().getKind())
-            .build());
+            .kind(optionalApiResource.get().getKind());
+
+        if (config.nameConfig.version.isPresent()) {
+            builder = builder.spec(Map.of(VERSION, config.nameConfig.version.get()));
+        }
+        return List.of(builder.build());
     }
 
-    static class EitherOf {
+    /**
+     * By-name of by-file deletion config.
+     */
+    public static class EitherOf {
+        /**
+         * Configuration for deletion by name.
+         */
         @ArgGroup(exclusive = false)
         public ByName nameConfig;
 
+        /**
+         * Configuration for deletion by file.
+         */
         @ArgGroup(exclusive = false)
         public ByFile fileConfig;
     }
 
-    static class ByName {
+    /**
+     * By-name deletion config.
+     */
+    public static class ByName {
         @Parameters(index = "0", description = "Resource type.", arity = "1")
         public String resourceType;
 
         @Parameters(index = "1", description = "Resource name.", arity = "1")
         public String name;
+
+        @Option(names = {"-V", "--version"}, description = "Version of the resource to delete.", arity = "0..1")
+        public Optional<String> version;
     }
 
-    static class ByFile {
+    /**
+     * By-file deletion config.
+     */
+    public static class ByFile {
         @Option(names = {"-f", "--file"}, description = "YAML file or directory containing resources.")
         public Optional<File> file;
 
