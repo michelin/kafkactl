@@ -71,7 +71,8 @@ public class Delete extends DryRunHook {
                         apiResourcesService.getResourceDefinitionByKind(resource.getKind()).orElseThrow();
                     Map<String, Object> spec = resource.getSpec();
                     return resourceService.delete(apiResource, namespace, resource.getMetadata().getName(),
-                        (spec != null ? spec.get(VERSION).toString() : null), dryRun, commandSpec);
+                        (spec != null && spec.containsKey(VERSION) ? spec.get(VERSION).toString() : null),
+                        dryRun, commandSpec);
                 })
                 .mapToInt(value -> Boolean.TRUE.equals(value) ? 0 : 1)
                 .sum();
