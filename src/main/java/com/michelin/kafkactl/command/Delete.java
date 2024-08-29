@@ -7,7 +7,6 @@ import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FileService;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
-import com.michelin.kafkactl.util.VersionProvider;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
@@ -32,9 +31,7 @@ import picocli.CommandLine.Parameters;
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
     commandListHeading = "%n@|bold Commands|@:%n",
-    usageHelpAutoWidth = true,
-    versionProvider = VersionProvider.class,
-    mixinStandardHelpOptions = true)
+    usageHelpAutoWidth = true)
 public class Delete extends DryRunHook {
     public static final String VERSION = "version";
 
@@ -74,7 +71,7 @@ public class Delete extends DryRunHook {
                         apiResourcesService.getResourceDefinitionByKind(resource.getKind()).orElseThrow();
                     Map<String, Object> spec = resource.getSpec();
                     return resourceService.delete(apiResource, namespace, resource.getMetadata().getName(),
-                        (spec != null ? (String) spec.get(VERSION) : null), dryRun, commandSpec);
+                        (spec != null ? spec.get(VERSION).toString() : null), dryRun, commandSpec);
                 })
                 .mapToInt(value -> Boolean.TRUE.equals(value) ? 0 : 1)
                 .sum();
@@ -153,7 +150,8 @@ public class Delete extends DryRunHook {
         @Parameters(index = "1", description = "Resource name.", arity = "1")
         public String name;
 
-        @Option(names = {"-V", "--version"}, description = "Version of the resource to delete.", arity = "0..1")
+        @Option(names = {"-V", "--version"},
+                description = "Version of the resource to delete (only with <name> parameter).", arity = "0..1")
         public Optional<String> version;
     }
 
@@ -161,7 +159,7 @@ public class Delete extends DryRunHook {
      * By-file deletion config.
      */
     public static class ByFile {
-        @Option(names = {"-f", "--file"}, description = "YAML file or directory containing resources.")
+        @Option(names = {"-f", "--file"}, description = "YAML file or directory containing resources to delete.")
         public Optional<File> file;
 
         @Option(names = {"-R", "--recursive"}, description = "Search file recursively.")

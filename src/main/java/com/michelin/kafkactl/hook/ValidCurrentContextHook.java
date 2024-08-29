@@ -16,7 +16,7 @@ import picocli.CommandLine.Spec;
  * Command hook to check if the current context is valid.
  */
 @Command
-public abstract class ValidCurrentContextHook implements Callable<Integer> {
+public abstract class ValidCurrentContextHook extends HelpHook implements Callable<Integer> {
     @Inject
     @ReflectiveAccess
     protected ConfigService configService;

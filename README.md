@@ -139,17 +139,12 @@ After a successful authentication, a JWT token signed by Ns4Kafka is written to 
 ## Usage
 
 ```console
-Usage: kafkactl [-hvV] [-n=<optionalNamespace>] [COMMAND]
+Usage: kafkactl [-hV] [COMMAND]
 
-Description:
-
-These are common Kafkactl commands.
+Description: These are common Kafkactl commands.
 
 Options:
   -h, --help      Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or YAML resources.
-  -v, --verbose   Enable the verbose mode.
   -V, --version   Print version information and exit.
 
 Commands:
@@ -174,18 +169,15 @@ Commands:
 The `api-resources` command allows you to check which resources can be accessed through the API.
 
 ```console
-Usage: kafkactl api-resources [-hvV] [-n=<optionalNamespace>]
+Usage: kafkactl api-resources [-hv] [-n=<optionalNamespace>]
 
-Description:
-
-Print the supported API resources on the server.
+Description: Print the supported API resources on the server.
 
 Options:
   -h, --help      Show this help message and exit.
   -n, --namespace=<optionalNamespace>
                   Override namespace defined in config or YAML resources.
   -v, --verbose   Enable the verbose mode.
-  -V, --version   Print version information and exit.
 ```
 
 Example(s):
@@ -199,18 +191,12 @@ kafkactl api-resources
 The `auth` command allows you to interact with authentication.
 
 ```console
-Usage: kafkactl auth [-hvV] [-n=<optionalNamespace>] [COMMAND]
+Usage: kafkactl auth [-h] COMMAND
 
-Description:
-
-Interact with authentication.
+Description: Interact with authentication.
 
 Options:
-  -h, --help      Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or YAML resources.
-  -v, --verbose   Enable the verbose mode.
-  -V, --version   Print version information and exit.
+  -h, --help   Show this help message and exit.
 
 Commands:
   info   Get the JWT token information.
@@ -222,19 +208,14 @@ Commands:
 The `info` command allows you to get the JWT token information.
 
 ```console
-Usage: kafkactl auth info [-hvV] [-n=<optionalNamespace>] [-o=<output>]
+Usage: kafkactl auth info [-h] [-o=<output>]
 
-Description:
-
-Get the JWT token information.
+Description: Get the JWT token information.
 
 Options:
   -h, --help              Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                          Override namespace defined in config or YAML resources.
   -o, --output=<output>   Output format. One of: yaml|table
-  -v, --verbose           Enable the verbose mode.
-  -V, --version           Print version information and exit.
+
 ```
 
 Example(s):
@@ -248,18 +229,13 @@ kafkactl auth info
 The `renew` command allows you to renew the JWT token.
 
 ```console
-Usage: kafkactl auth renew [-hvV] [-n=<optionalNamespace>]
+Usage: kafkactl auth renew [-hv]
 
-Description:
-
-Renew the JWT token.
+Description: Renew the JWT token.
 
 Options:
   -h, --help      Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or YAML resources.
   -v, --verbose   Enable the verbose mode.
-  -V, --version   Print version information and exit.
 ```
 
 Example(s):
@@ -273,11 +249,9 @@ kafkactl auth renew
 The `apply` command allows you to deploy a resource.
 
 ```console
-Usage: kafkactl apply [-hRvV] [--dry-run] [-f=<file>] [-n=<optionalNamespace>]
+Usage: kafkactl apply [-hRv] [--dry-run] [-f=<file>] [-n=<optionalNamespace>]
 
-Description:
-
-Create or update a resource.
+Description: Create or update a resource.
 
 Options:
       --dry-run       Does not persist resources. Validate only.
@@ -287,7 +261,6 @@ Options:
                       Override namespace defined in config or YAML resources.
   -R, --recursive     Search file recursively.
   -v, --verbose       Enable the verbose mode.
-  -V, --version       Print version information and exit.
 ```
 
 Example(s):
@@ -304,18 +277,12 @@ The resources have to be described in YAML manifests.
 The `config` command allows you to manage your Kafka contexts.
 
 ```console
-Usage: kafkactl config [-hvV] [-n=<optionalNamespace>] [COMMAND]
+Usage: kafkactl config [-h] COMMAND
 
-Description:
-
-Manage configuration.
+Description: Manage configuration.
 
 Options:
-  -h, --help      Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or YAML resources.
-  -v, --verbose   Enable the verbose mode.
-  -V, --version   Print version information and exit.
+  -h, --help   Show this help message and exit.
 
 Commands:
   get-contexts     Get all contexts.
@@ -328,18 +295,13 @@ Commands:
 The `current-context` command allows you to check the current context.
 
 ```console
-Usage: kafkactl config current-context [-hvV] [-n=<optionalNamespace>]
+Usage: kafkactl config current-context [-hu]
 
-Description:
-
-Get the current context.
+Description: Get the current context.
 
 Options:
-  -h, --help      Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or YAML resources.
-  -v, --verbose   Enable the verbose mode.
-  -V, --version   Print version information and exit.
+  -h, --help            Show this help message and exit.
+  -u, --unmask-tokens   Unmask tokens.
 ```
 
 Example(s):
@@ -353,18 +315,13 @@ kafkactl config current-context
 The `get-contexts` command allows you to list all the contexts defined in your configuration file.
 
 ```console
-Usage: kafkactl config get-contexts [-hvV] [-n=<optionalNamespace>]
+Usage: kafkactl config get-contexts [-hu]
 
-Description:
-
-Get all contexts.
+Description: Get all contexts.
 
 Options:
-  -h, --help      Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or YAML resources.
-  -v, --verbose   Enable the verbose mode.
-  -V, --version   Print version information and exit.
+  -h, --help            Show this help message and exit.
+  -u, --unmask-tokens   Unmask tokens.
 ```
 
 Example(s):
@@ -378,21 +335,15 @@ kafkactl config get-contexts
 The `use-context` command allows you to switch to a different context.
 
 ```console
-Usage: kafkactl config use-context [-hvV] [-n=<optionalNamespace>] <context>
+Usage: kafkactl config use-context [-h] <context>
 
-Description:
-
-Use a context.
+Description: Use a context.
 
 Parameters:
       <context>   Context to use.
 
 Options:
   -h, --help      Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or YAML resources.
-  -v, --verbose   Enable the verbose mode.
-  -V, --version   Print version information and exit.
 ```
 
 Example(s):
@@ -406,18 +357,12 @@ kafkactl config use-context local
 The `connect-cluster` command allows you to interact with Kafka Connect clusters.
 
 ```console
-Usage: kafkactl connect-cluster [-hvV] [-n=<optionalNamespace>] [COMMAND]
+Usage: kafkactl connect-cluster [-h] [COMMAND]
 
-Description:
-
-Interact with connect clusters.
+Description: Interact with connect clusters.
 
 Options:
-  -h, --help      Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or YAML resources.
-  -v, --verbose   Enable the verbose mode.
-  -V, --version   Print version information and exit.
+  -h, --help   Show this help message and exit.
 
 Commands:
   vault  Vault secrets for a connect cluster.
@@ -428,11 +373,9 @@ Commands:
 The `vault` command allows you to vault sensitive connector configuration.
 
 ```console
-Usage: kafkactl connect-cluster vault [-hvV] [-n=<optionalNamespace>] <connectClusterName> [<secrets>...]
+Usage: kafkactl connect-cluster vault [-hv] [-n=<optionalNamespace>] <connectClusterName> [<secrets>...]
 
-Description:
-
-Vault secrets for a connect cluster.
+Description: Vault secrets for a connect cluster.
 
 Parameters:
       <connectClusterName>   Connect cluster name that will vault the secrets.
@@ -443,7 +386,6 @@ Options:
   -n, --namespace=<optionalNamespace>
                              Override namespace defined in config or YAML resources.
   -v, --verbose              Enable the verbose mode.
-  -V, --version              Print version information and exit.
 ```
 
 - `connectClusterName`: If defined, this option specifies the name of a Connect cluster to use to vault sensitive
@@ -462,11 +404,9 @@ kafkactl connect-cluster vault myConnectCluster someClearText
 The `connector` command allows you to interact with Kafka Connect connectors.
 
 ```console
-Usage: kafkactl connector [-hvV] [-n=<optionalNamespace>] <action> <connectors>...
+Usage: kafkactl connector [-hv] [-n=<optionalNamespace>] <action> <connectors>...
 
-Description:
-
-Interact with connectors.
+Description: Interact with connectors.
 
 Parameters:
       <action>          Action to perform (pause, resume, restart).
@@ -477,7 +417,6 @@ Options:
   -n, --namespace=<optionalNamespace>
                         Override namespace defined in config or YAML resources.
   -v, --verbose         Enable the verbose mode.
-  -V, --version         Print version information and exit.
 ```
 
 - `action`: This option specifies the action to execute, which can be `pause`, `resume`, `restart`
@@ -496,11 +435,9 @@ kafkactl connector restart myConnector
 The `delete-records` command allows you to delete all records within "delete" typed topics.
 
 ```console
-Usage: kafkactl delete-records [-hvV] [--dry-run] [-n=<optionalNamespace>] <topic>
+Usage: kafkactl delete-records [-hv] [--dry-run] [-n=<optionalNamespace>] <topic>
 
-Description:
-
-Delete all records within a topic.
+Description: Delete all records within a topic.
 
 Parameters:
       <topic>     Name of the topic.
@@ -511,7 +448,6 @@ Options:
   -n, --namespace=<optionalNamespace>
                   Override namespace defined in config or YAML resources.
   -v, --verbose   Enable the verbose mode.
-  -V, --version   Print version information and exit.
 ```
 
 Example(s):
@@ -528,8 +464,7 @@ Please note that the resources are deleted instantly and cannot be recovered onc
 with the resource is permanently lost.
 
 ```console
-Usage: kafkactl delete [-hvV] [--dry-run] [-n=<optionalNamespace>] ([<resourceType> <name>] | [[-f=<file>] [-R]])
-
+Usage: kafkactl delete [-hv] [--dry-run] [-n=<optionalNamespace>] ([<resourceType> <name> [-V[=<version>]]] | [[-f=<file>] [-R]])
 Description:
 
 Delete a resource.
@@ -539,14 +474,15 @@ Parameters:
       <name>           Resource name.
 
 Options:
-      --dry-run        Does not persist operation. Validate only.
-  -f, --file=<file>    YAML file or directory containing resources.
+      --dry-run        Does not persist resources. Validate only.
+  -f, --file=<file>    YAML file or directory containing resources to delete.
   -h, --help           Show this help message and exit.
   -n, --namespace=<optionalNamespace>
                        Override namespace defined in config or YAML resources.
   -R, --recursive      Search file recursively.
   -v, --verbose        Enable the verbose mode.
-  -V, --version        Print version information and exit.
+  -V, --version=<version>
+                       Version of the resource to delete (only with <name> parameter).
 ```
 
 Example(s):
@@ -554,6 +490,8 @@ Example(s):
 ```console
 kafkactl delete -f directoryOfResources
 kafkactl delete -f resource.yml
+kafkactl delete myResource
+kafkactl delete mySchema -V latest
 ```
 
 ### Diff
@@ -562,20 +500,17 @@ The `diff` command allows you to compare a new YAML descriptor with the current 
 to easily identify any differences.
 
 ```console
-Usage: kafkactl diff [-hRvV] [-f=<file>] [-n=<optionalNamespace>]
+Usage: kafkactl diff [-hRv] [-f=<file>] [-n=<optionalNamespace>]
 
-Description:
-
-Get differences between a new resource and a old resource.
+Description: Get differences between a new resource and a old resource.
 
 Options:
-  -f, --file=<file>   YAML file or directory containing resources.
+  -f, --file=<file>   YAML file or directory containing resources to compare.
   -h, --help          Show this help message and exit.
   -n, --namespace=<optionalNamespace>
                       Override namespace defined in config or YAML resources.
   -R, --recursive     Search file recursively.
   -v, --verbose       Enable the verbose mode.
-  -V, --version       Print version information and exit.
 ```
 
 Example(s):
@@ -589,11 +524,9 @@ kafkactl diff -f resource.yml
 The `get` command allows you to retrieve information about one or multiple resources.
 
 ```console
-Usage: kafkactl get [-hvV] [-n=<optionalNamespace>] [-o=<output>] <resourceType> [<resourceName>]
+Usage: kafkactl get [-hv] [-n=<optionalNamespace>] [-o=<output>] <resourceType> [<resourceName>]
 
-Description:
-
-Get resources by resource type for the current namespace.
+Description: Get resources by resource type for the current namespace.
 
 Parameters:
       <resourceType>      Resource type or 'all' to display resources of all types.
@@ -605,7 +538,6 @@ Options:
                           Override namespace defined in config or YAML resources.
   -o, --output=<output>   Output format. One of: yaml|table
   -v, --verbose           Enable the verbose mode.
-  -V, --version           Print version information and exit.
 ```
 
 - `resourceType`: This option specifies one of the managed resources: `topic`, `connector`, `acl`, `schema`, `stream`
@@ -626,11 +558,9 @@ The `import` command allows you to import unsynchronized resources between Ns4Ka
 cluster.
 
 ```console
-Usage: kafkactl import [-hvV] [--dry-run] [-n=<optionalNamespace>] <resourceType>
+Usage: kafkactl import [-hv] [--dry-run] [-n=<optionalNamespace>] <resourceType>
 
-Description:
-
-Import non-synchronized resources.
+Description: Import non-synchronized resources.
 
 Parameters:
       <resourceType>   Resource type.
@@ -641,7 +571,6 @@ Options:
   -n, --namespace=<optionalNamespace>
                        Override namespace defined in config or YAML resources.
   -v, --verbose        Enable the verbose mode.
-  -V, --version        Print version information and exit.
 ```
 
 - `resourceType`: This option specifies the type of resource that you want to import, which can be either `topics`
@@ -659,12 +588,10 @@ kafkactl import connects
 The `reset-offsets` command allows you to reset the offsets of consumer groups and topics.
 
 ```console
-Usage: kafkactl reset-offsets [-hvV] [--dry-run] --group=<group> [-n=<optionalNamespace>] (--topic=<topic> | --all-topics) (--to-earliest | --to-latest |
+Usage: kafkactl reset-offsets [-hv] [--dry-run] --group=<group>[-n=<optionalNamespace>] (--topic=<topic> | --all-topics) (--to-earliest | --to-latest |
                         --to-datetime=<datetime> | --shift-by=<shiftBy> | --by-duration=<duration> | --to-offset=<offset>)
 
-Description:
-
-Reset consumer group offsets.
+Description: Reset consumer group offsets.
 
 Options:
       --all-topics           All topics.
@@ -683,7 +610,6 @@ Options:
       --to-offset=<offset>   Set offset to a specific index.
       --topic=<topic>        Topic name or topic:partition.
   -v, --verbose              Enable the verbose mode.
-  -V, --version              Print version information and exit.
 ```
 
 - `--group`: This option specifies one of your consumer group to reset.
@@ -702,11 +628,9 @@ kafkactl reset-offsets --group myConsumerGroup --topic myTopic --to-earliest
 The `reset-password` command allows you to reset the password of a user.
 
 ```console
-Usage: kafkactl reset-password [-hvV] [--execute] [-n=<optionalNamespace>] [-o=<output>] <user>
+Usage: kafkactl reset-password [-hv] [--execute] [-n=<optionalNamespace>] [-o=<output>] <user>
 
-Description:
-
-Reset a Kafka password.
+Description: Reset a Kafka password.
 
 Parameters:
       <user>              The user to reset password.
@@ -718,7 +642,6 @@ Options:
                           Override namespace defined in config or YAML resources.
   -o, --output=<output>   Output format. One of: yaml|table
   -v, --verbose           Enable the verbose mode.
-  -V, --version           Print version information and exit.
 ```
 
 Example(s):
@@ -732,11 +655,9 @@ kafkactl reset-password myUser
 The `schema` command allows you to modify the schema compatibility.
 
 ```console
-Usage: kafkactl schema [-hvV] [-n=<optionalNamespace>] <compatibility> <subjects>...
+Usage: kafkactl schema [-hv] [-n=<optionalNamespace>] <compatibility> <subjects>...
 
-Description:
-
-Interact with schemas.
+Description: Interact with schemas.
 
 Parameters:
       <compatibility>   Compatibility to set (global, backward, backward-transitive, forward, forward-transitive, full, full-transitive, none).
@@ -747,7 +668,6 @@ Options:
   -n, --namespace=<optionalNamespace>
                         Override namespace defined in config or YAML resources.
   -v, --verbose         Enable the verbose mode.
-  -V, --version         Print version information and exit.
 ```
 
 - `compatibility`: This option specifies the compatibility mode to apply.
@@ -784,6 +704,7 @@ spec:
     - tag1
     - tag2
     - tag3
+  description: "myDescription"
 ```
 
 - The `metadata.name` field must be part of your allowed ACLs. Visit your namespace's ACLs to understand which topics

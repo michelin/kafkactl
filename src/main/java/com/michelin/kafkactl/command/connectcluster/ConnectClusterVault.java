@@ -2,7 +2,6 @@ package com.michelin.kafkactl.command.connectcluster;
 
 import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.service.ResourceService;
-import com.michelin.kafkactl.util.VersionProvider;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.util.List;
@@ -21,9 +20,7 @@ import picocli.CommandLine.Parameters;
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
     commandListHeading = "%n@|bold Commands|@:%n",
-    usageHelpAutoWidth = true,
-    versionProvider = VersionProvider.class,
-    mixinStandardHelpOptions = true)
+    usageHelpAutoWidth = true)
 public class ConnectClusterVault extends AuthenticatedHook {
     @Inject
     @ReflectiveAccess

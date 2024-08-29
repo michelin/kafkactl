@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.mixin;
 
-import picocli.CommandLine;
+import picocli.CommandLine.Option;
 
 /**
  * Unmask token mixin.
@@ -8,6 +8,6 @@ import picocli.CommandLine;
 public class UnmaskTokenMixin {
     public static final String MASKED = "[MASKED]";
 
-    @CommandLine.Option(names = {"-u", "--unmask-tokens"}, description = "Unmask tokens.")
+    @Option(names = {"-u", "--unmask-tokens"}, description = "Unmask tokens.")
     public boolean unmaskTokens;
 }

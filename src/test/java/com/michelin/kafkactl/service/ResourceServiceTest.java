@@ -633,7 +633,7 @@ class ResourceServiceTest {
             "latest", false, cmd.getCommandSpec());
 
         assertTrue(actual);
-        assertTrue(sw.toString().contains("Specified version of Topic \"name\" deleted."));
+        assertTrue(sw.toString().contains("Topic \"name\" version latest deleted."));
     }
 
     @Test

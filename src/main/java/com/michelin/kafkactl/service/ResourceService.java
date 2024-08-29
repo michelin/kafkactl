@@ -199,8 +199,8 @@ public class ResourceService {
                 throw new HttpClientResponseException(response.reason(), response);
             }
 
-            commandSpec.commandLine().getOut().println((version != null ? "Specified version of " : "")
-                + formatService.prettifyKind(apiResource.getKind()) + " \"" + resource + "\" deleted.");
+            commandSpec.commandLine().getOut().println(formatService.prettifyKind(apiResource.getKind())
+                + " \"" + resource + "\"" + (version != null ? " version " + version : "") + " deleted.");
 
             return true;
         } catch (HttpClientResponseException exception) {
