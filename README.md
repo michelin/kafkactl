@@ -465,9 +465,7 @@ with the resource is permanently lost.
 
 ```console
 Usage: kafkactl delete [-hv] [--dry-run] [-n=<optionalNamespace>] ([<resourceType> <name> [-V[=<version>]]] | [[-f=<file>] [-R]])
-Description:
-
-Delete a resource.
+Description: Delete a resource.
 
 Parameters:
       <resourceType>   Resource type.
