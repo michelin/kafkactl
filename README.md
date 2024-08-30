@@ -490,8 +490,8 @@ Example(s):
 ```console
 kafkactl delete -f directoryOfResources
 kafkactl delete -f resource.yml
-kafkactl delete myResource
-kafkactl delete mySchema -V latest
+kafkactl delete topic myTopic
+kafkactl delete schema mySchema -V latest
 ```
 
 ### Diff
