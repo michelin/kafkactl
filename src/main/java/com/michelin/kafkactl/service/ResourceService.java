@@ -181,8 +181,8 @@ public class ResourceService {
      * @param apiResource The resource type
      * @param namespace   The namespace
      * @param resource    The resource
-     * @param version     The version of the resource
-     * @param dryRun      Is dry run mode ?
+     * @param version     The version of the resource, for schemas only.
+     * @param dryRun      Is dry run mode?
      * @param commandSpec The command that triggered the action
      * @return true if deletion succeeded, false otherwise
      */

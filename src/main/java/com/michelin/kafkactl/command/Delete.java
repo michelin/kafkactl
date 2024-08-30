@@ -152,7 +152,7 @@ public class Delete extends DryRunHook {
         public String name;
 
         @Option(names = {"-V", "--version"},
-                description = "Version of the resource to delete (only with <name> parameter).", arity = "0..1")
+                description = "Version to delete. Only with schema resource and name parameter.", arity = "0..1")
         public Optional<String> version;
     }
 

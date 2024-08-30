@@ -482,7 +482,7 @@ Options:
   -R, --recursive      Search file recursively.
   -v, --verbose        Enable the verbose mode.
   -V, --version=<version>
-                       Version of the resource to delete (only with <name> parameter).
+                       Version to delete. Only with schema resource and name parameter.
 ```
 
 Example(s):
