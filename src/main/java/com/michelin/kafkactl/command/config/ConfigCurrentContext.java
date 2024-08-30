@@ -10,7 +10,6 @@ import com.michelin.kafkactl.mixin.UnmaskTokenMixin;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FormatService;
-import com.michelin.kafkactl.util.VersionProvider;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.util.StringUtils;
 import jakarta.inject.Inject;
@@ -31,9 +30,7 @@ import picocli.CommandLine.Mixin;
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
     commandListHeading = "%n@|bold Commands|@:%n",
-    usageHelpAutoWidth = true,
-    versionProvider = VersionProvider.class,
-    mixinStandardHelpOptions = true)
+    usageHelpAutoWidth = true)
 public class ConfigCurrentContext extends ValidCurrentContextHook {
     @Inject
     @ReflectiveAccess

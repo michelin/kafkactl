@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.command.auth;
 
-import com.michelin.kafkactl.util.VersionProvider;
+import com.michelin.kafkactl.hook.HelpHook;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
@@ -21,10 +21,8 @@ import picocli.CommandLine.Spec;
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
     commandListHeading = "%n@|bold Commands|@:%n",
-    usageHelpAutoWidth = true,
-    versionProvider = VersionProvider.class,
-    mixinStandardHelpOptions = true)
-public class Auth {
+    usageHelpAutoWidth = true)
+public class Auth extends HelpHook {
     @Spec
     public CommandSpec commandSpec;
 }

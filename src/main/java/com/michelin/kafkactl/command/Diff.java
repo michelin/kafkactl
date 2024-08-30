@@ -8,7 +8,6 @@ import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
-import com.michelin.kafkactl.util.VersionProvider;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
@@ -36,9 +35,7 @@ import picocli.CommandLine.ParameterException;
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
     commandListHeading = "%n@|bold Commands|@:%n",
-    usageHelpAutoWidth = true,
-    versionProvider = VersionProvider.class,
-    mixinStandardHelpOptions = true)
+    usageHelpAutoWidth = true)
 public class Diff extends AuthenticatedHook {
     @Inject
     @ReflectiveAccess
@@ -48,7 +45,7 @@ public class Diff extends AuthenticatedHook {
     @ReflectiveAccess
     private FormatService formatService;
 
-    @Option(names = {"-f", "--file"}, description = "YAML file or directory containing resources.")
+    @Option(names = {"-f", "--file"}, description = "YAML file or directory containing resources to compare.")
     public Optional<File> file;
 
     @Option(names = {"-R", "--recursive"}, description = "Search file recursively.")

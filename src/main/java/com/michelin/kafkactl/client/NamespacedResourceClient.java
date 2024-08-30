@@ -2,6 +2,7 @@ package com.michelin.kafkactl.client;
 
 import com.michelin.kafkactl.client.predicates.RetryTimeoutPredicate;
 import com.michelin.kafkactl.model.Resource;
+import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Delete;
@@ -26,10 +27,11 @@ public interface NamespacedResourceClient {
      * @param kind         The kind of resource
      * @param resourceName The name of the resource
      * @param token        The auth token
+     * @param version      The version of the resource, for schemas only.
      * @param dryrun       is dry-run mode or not ?
      * @return The delete response
      */
-    @Delete("{namespace}/{kind}/{resourceName}{?dryrun}")
+    @Delete("{namespace}/{kind}/{resourceName}{?version}{?dryrun}")
     @Retryable(delay = "${kafkactl.retry.delete.delay}",
         attempts = "${kafkactl.retry.delete.attempt}",
         multiplier = "${kafkactl.retry.delete.multiplier}",
@@ -39,6 +41,7 @@ public interface NamespacedResourceClient {
         String kind,
         String resourceName,
         @Header("Authorization") String token,
+        @Nullable @QueryValue String version,
         @QueryValue boolean dryrun);
 
     /**

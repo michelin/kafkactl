@@ -4,7 +4,6 @@ import com.michelin.kafkactl.hook.DryRunHook;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.ResourceService;
-import com.michelin.kafkactl.util.VersionProvider;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.io.IOException;
@@ -28,9 +27,7 @@ import picocli.CommandLine.Option;
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
     commandListHeading = "%n@|bold Commands|@:%n",
-    usageHelpAutoWidth = true,
-    versionProvider = VersionProvider.class,
-    mixinStandardHelpOptions = true)
+    usageHelpAutoWidth = true)
 public class ResetOffsets extends DryRunHook {
     public static final String RESET_METHOD = "method";
     public static final String OPTIONS = "options";

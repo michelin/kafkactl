@@ -1,8 +1,8 @@
 package com.michelin.kafkactl.command.auth;
 
+import com.michelin.kafkactl.hook.HelpHook;
 import com.michelin.kafkactl.mixin.VerboseMixin;
 import com.michelin.kafkactl.service.LoginService;
-import com.michelin.kafkactl.util.VersionProvider;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.io.IOException;
@@ -23,10 +23,8 @@ import picocli.CommandLine.Spec;
     parameterListHeading = "%n@|bold Parameters|@:%n",
     optionListHeading = "%n@|bold Options|@:%n",
     commandListHeading = "%n@|bold Commands|@:%n",
-    usageHelpAutoWidth = true,
-    versionProvider = VersionProvider.class,
-    mixinStandardHelpOptions = true)
-public class AuthRenew implements Callable<Integer> {
+    usageHelpAutoWidth = true)
+public class AuthRenew extends HelpHook implements Callable<Integer> {
     @Inject
     @ReflectiveAccess
     private LoginService loginService;

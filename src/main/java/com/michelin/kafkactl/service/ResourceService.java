@@ -13,6 +13,7 @@ import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.SchemaCompatibility;
+import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpResponse;
@@ -180,16 +181,17 @@ public class ResourceService {
      * @param apiResource The resource type
      * @param namespace   The namespace
      * @param resource    The resource
-     * @param dryRun      Is dry run mode ?
+     * @param version     The version of the resource, for schemas only.
+     * @param dryRun      Is dry run mode?
      * @param commandSpec The command that triggered the action
      * @return true if deletion succeeded, false otherwise
      */
-    public boolean delete(ApiResource apiResource, String namespace, String resource, boolean dryRun,
-                          CommandSpec commandSpec) {
+    public boolean delete(ApiResource apiResource, String namespace, String resource, @Nullable String version,
+                          boolean dryRun, CommandSpec commandSpec) {
         try {
             HttpResponse<Void> response = apiResource.isNamespaced()
                 ? namespacedClient.delete(namespace, apiResource.getPath(), resource, loginService.getAuthorization(),
-                dryRun)
+                version, dryRun)
                 : nonNamespacedClient.delete(loginService.getAuthorization(), apiResource.getPath(), resource, dryRun);
 
             // Micronaut does not throw exception on 404, so produce a 404 manually
@@ -198,7 +200,7 @@ public class ResourceService {
             }
 
             commandSpec.commandLine().getOut().println(formatService.prettifyKind(apiResource.getKind())
-                + " \"" + resource + "\" deleted.");
+                + " \"" + resource + "\"" + (version != null ? " version " + version : "") + " deleted.");
 
             return true;
         } catch (HttpClientResponseException exception) {
