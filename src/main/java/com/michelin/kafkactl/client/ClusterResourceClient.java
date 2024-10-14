@@ -26,8 +26,8 @@ public interface ClusterResourceClient {
     @Get("/api-resources")
     List<ApiResource> listResourceDefinitions(@Header("Authorization") String token);
 
-    @Delete("/api/{kind}/{resource}{?dryrun}")
-    HttpResponse<Void> delete(@Header("Authorization") String token, String kind, String resource,
+    @Delete("/api/{kind}")
+    HttpResponse<Void> delete(@Header("Authorization") String token, String kind, @QueryValue String resource,
                               @QueryValue boolean dryrun);
 
     @Post("/api/{kind}{?dryrun}")
@@ -35,7 +35,7 @@ public interface ClusterResourceClient {
                                  @QueryValue boolean dryrun);
 
     @Get("/api/{kind}")
-    List<Resource> list(@Header("Authorization") String token, String kind);
+    List<Resource> list(@Header("Authorization") String token, String kind, @QueryValue String resource);
 
     @Get("/api/{kind}/{resource}")
     HttpResponse<Resource> get(@Header("Authorization") String token, String kind, String resource);
