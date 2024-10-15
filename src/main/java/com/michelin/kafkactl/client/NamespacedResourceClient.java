@@ -14,7 +14,6 @@ import io.micronaut.http.client.annotation.Client;
 import io.micronaut.retry.annotation.Retryable;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Namespaced resource client.

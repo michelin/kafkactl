@@ -10,8 +10,6 @@ import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.ApiResource;
-import com.michelin.kafkactl.model.Metadata;
-import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.ApiResourcesService;
 import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.service.FormatService;
