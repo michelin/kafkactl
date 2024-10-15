@@ -165,7 +165,7 @@ class ConnectorTest {
             .thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any()))
             .thenReturn(Optional.of(apiResource));
-        when(resourceService.listResourcesWithType(any(), any()))
+        when(resourceService.listResourcesWithType(any(), any(), any()))
             .thenReturn(Collections.singletonList(resource));
         when(resourceService.changeConnectorState(any(), any(), any(), any()))
             .thenReturn(Optional.of(resource));
@@ -199,7 +199,7 @@ class ConnectorTest {
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
 
-        when(resourceService.listResourcesWithType(any(), any()))
+        when(resourceService.listResourcesWithType(any(), any(), any()))
             .thenThrow(exception);
 
         CommandLine cmd = new CommandLine(connector);
