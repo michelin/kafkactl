@@ -784,9 +784,16 @@ class ResourceServiceTest {
         cmd.setOut(new PrintWriter(sw));
 
         doCallRealMethod().when(formatService).prettifyKind(any());
+
+        Resource deletedResource = Resource.builder()
+            .metadata(Metadata.builder()
+                .name("name")
+                .build())
+            .build();
+
         when(nonNamespacedClient.delete(any(), any(), any(), anyBoolean()))
             .thenReturn(HttpResponse
-                .<Void>ok()
+                .ok(List.of(deletedResource))
                 .header("X-Ns4kafka-Result", "created"));
 
         ApiResource apiResource = ApiResource.builder()
@@ -801,6 +808,46 @@ class ResourceServiceTest {
 
         assertTrue(actual);
         assertTrue(sw.toString().contains("Topic \"name\" deleted."));
+    }
+
+    @Test
+    void shouldDeleteMultipleNonNamespacedResources() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        doCallRealMethod().when(formatService).prettifyKind(any());
+
+        Resource deletedResource1 = Resource.builder()
+            .metadata(Metadata.builder()
+                .name("name1")
+                .build())
+            .build();
+
+        Resource deletedResource2 = Resource.builder()
+            .metadata(Metadata.builder()
+                .name("name2")
+                .build())
+            .build();
+
+        when(nonNamespacedClient.delete(any(), any(), any(), anyBoolean()))
+            .thenReturn(HttpResponse
+                .ok(List.of(deletedResource1, deletedResource2))
+                .header("X-Ns4kafka-Result", "created"));
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(false)
+            .synchronizable(true)
+            .build();
+
+        boolean actual = resourceService.delete(apiResource, "namespace", "name*", null, false, cmd.getCommandSpec());
+
+        assertTrue(actual);
+        assertTrue(sw.toString().contains("Topic \"name1\" deleted."));
+        assertTrue(sw.toString().contains("Topic \"name2\" deleted."));
     }
 
     @Test

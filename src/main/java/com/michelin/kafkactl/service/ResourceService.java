@@ -191,34 +191,21 @@ public class ResourceService {
     public boolean delete(ApiResource apiResource, String namespace, String name, @Nullable String version,
                           boolean dryRun, CommandSpec commandSpec) {
         try {
-            List<String> resourceNames;
-
-            // for namespaced resources deletion, ns4kafka returned the list of deleted resources
-            if (apiResource.isNamespaced()) {
-                HttpResponse<List<Resource>> response =
-                    namespacedClient.delete(namespace, apiResource.getPath(),
-                        loginService.getAuthorization(), name, version, dryRun);
-
-                // Micronaut does not throw exception on 404, so produce a 404 manually
-                if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
-                    throw new HttpClientResponseException(response.reason(), response);
-                }
-
-                resourceNames = response.body()
-                    .stream()
-                    .map(res -> res.getMetadata().getName())
-                    .toList();
-            } else {
-                HttpResponse<Void> response = nonNamespacedClient.delete(loginService.getAuthorization(),
+            HttpResponse<List<Resource>> response = apiResource.isNamespaced()
+                ? namespacedClient.delete(namespace, apiResource.getPath(),
+                    loginService.getAuthorization(), name, version, dryRun)
+                : nonNamespacedClient.delete(loginService.getAuthorization(),
                     apiResource.getPath(), name, dryRun);
 
-                // Micronaut does not throw exception on 404, so produce a 404 manually
-                if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
-                    throw new HttpClientResponseException(response.reason(), response);
-                }
-
-                resourceNames = List.of(name);
+            // Micronaut does not throw exception on 404, so produce a 404 manually
+            if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
+                throw new HttpClientResponseException(response.reason(), response);
             }
+
+            List<String> resourceNames = response.body()
+                .stream()
+                .map(deletionResponse -> deletionResponse.getMetadata().getName())
+                .toList();
 
             resourceNames.forEach(resourceName ->
                 commandSpec.commandLine().getOut().println(formatService.prettifyKind(apiResource.getKind())
