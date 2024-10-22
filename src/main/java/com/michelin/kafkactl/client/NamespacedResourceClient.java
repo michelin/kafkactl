@@ -31,7 +31,7 @@ public interface NamespacedResourceClient {
      * @param dryrun       Is dry-run mode or not?
      * @return The delete response
      */
-    @Delete("{namespace}/{kind}/{?name,version,dryrun}")
+    @Delete("{namespace}/{kind}{?name,version,dryrun}")
     @Retryable(delay = "${kafkactl.retry.delete.delay}",
         attempts = "${kafkactl.retry.delete.attempt}",
         multiplier = "${kafkactl.retry.delete.multiplier}",

@@ -182,13 +182,13 @@ public class ResourceService {
      *
      * @param apiResource The resource type
      * @param namespace   The namespace
-     * @param resource    The resource
+     * @param name        The resource name or wildcard
      * @param version     The version of the resource, for schemas only.
      * @param dryRun      Is dry run mode?
      * @param commandSpec The command that triggered the action
      * @return true if deletion succeeded, false otherwise
      */
-    public boolean delete(ApiResource apiResource, String namespace, String resource, @Nullable String version,
+    public boolean delete(ApiResource apiResource, String namespace, String name, @Nullable String version,
                           boolean dryRun, CommandSpec commandSpec) {
         try {
             List<String> resourceNames;
@@ -196,8 +196,8 @@ public class ResourceService {
             // for namespaced resources deletion, ns4kafka returned the list of deleted resources
             if (apiResource.isNamespaced()) {
                 HttpResponse<List<Resource>> response =
-                    namespacedClient.delete(namespace, apiResource.getPath(), resource,
-                        loginService.getAuthorization(), version, dryRun);
+                    namespacedClient.delete(namespace, apiResource.getPath(),
+                        loginService.getAuthorization(), name, version, dryRun);
 
                 // Micronaut does not throw exception on 404, so produce a 404 manually
                 if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
@@ -210,14 +210,14 @@ public class ResourceService {
                     .toList();
             } else {
                 HttpResponse<Void> response = nonNamespacedClient.delete(loginService.getAuthorization(),
-                    apiResource.getPath(), resource, dryRun);
+                    apiResource.getPath(), name, dryRun);
 
                 // Micronaut does not throw exception on 404, so produce a 404 manually
                 if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
                     throw new HttpClientResponseException(response.reason(), response);
                 }
 
-                resourceNames = List.of(resource);
+                resourceNames = List.of(name);
             }
 
             resourceNames.forEach(resourceName ->
@@ -227,7 +227,7 @@ public class ResourceService {
 
             return true;
         } catch (HttpClientResponseException exception) {
-            formatService.displayError(exception, apiResource.getKind(), resource, commandSpec);
+            formatService.displayError(exception, apiResource.getKind(), name, commandSpec);
             return false;
         }
     }
