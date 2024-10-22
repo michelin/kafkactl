@@ -113,7 +113,7 @@ public class Delete extends DryRunHook {
         // Generate a single resource with minimum details from input
         var builder = Resource.builder()
             .metadata(Metadata.builder()
-                .name(config.nameConfig.name)
+                .name(config.nameConfig.resourceName)
                 .namespace(namespace)
                 .build())
             .kind(optionalApiResource.get().getKind());
@@ -148,8 +148,8 @@ public class Delete extends DryRunHook {
         @Parameters(index = "0", description = "Resource type.", arity = "1")
         public String resourceType;
 
-        @Parameters(index = "1", description = "Resource name.", arity = "1")
-        public String name;
+        @Parameters(index = "1", description = "Resource name or wildcard matching resource names.", arity = "1")
+        public String resourceName;
 
         @Option(names = {"-V", "--version"},
                 description = "Version to delete. Only with schema resource and name parameter.", arity = "0..1")

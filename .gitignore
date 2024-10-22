@@ -6,6 +6,7 @@ target/
 out/
 .micronaut/
 .idea
+.run
 *.iml
 *.ipr
 *.iws

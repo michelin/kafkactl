@@ -68,19 +68,21 @@ public class ResourceService {
      * @param apiResources The resource type
      * @param namespace    The namespace
      * @param commandSpec  The command that triggered the action
+     * @param resourceName The resource name
      * @return A map of resource type and list of resources
      */
-    public int listAll(List<ApiResource> apiResources, String namespace, String output, CommandSpec commandSpec) {
+    public int list(List<ApiResource> apiResources, String namespace, String output,
+                    CommandSpec commandSpec, String resourceName) {
         // Get a single kind of resources
         if (apiResources.size() == 1) {
             try {
-                List<Resource> resources = listResourcesWithType(apiResources.getFirst(), namespace);
+                List<Resource> resources = listResourcesWithType(apiResources.getFirst(), namespace, resourceName);
                 if (!resources.isEmpty()) {
                     formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
                 } else {
                     commandSpec.commandLine().getOut()
                         .println("No " + formatService.prettifyKind(apiResources.getFirst().getKind()).toLowerCase()
-                            + " to display.");
+                            + (resourceName.equals("*") ? " to display." : " matches \"" + resourceName + "\"."));
                 }
                 return 0;
             } catch (HttpClientResponseException exception) {
@@ -94,13 +96,13 @@ public class ResourceService {
             .stream()
             .map(apiResource -> {
                 try {
-                    List<Resource> resources = listResourcesWithType(apiResource, namespace);
+                    List<Resource> resources = listResourcesWithType(apiResource, namespace, resourceName);
                     if (!resources.isEmpty()) {
                         formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
                     }
                     return 0;
                 } catch (HttpClientResponseException exception) {
-                    formatService.displayError(exception, apiResource.getKind(), commandSpec);
+                    formatService.displayError(exception, apiResource.getKind(), resourceName, commandSpec);
                     return 1;
                 }
             })
@@ -117,10 +119,10 @@ public class ResourceService {
      * @param namespace   The namespace
      * @return A list of resources
      */
-    public List<Resource> listResourcesWithType(ApiResource apiResource, String namespace) {
+    public List<Resource> listResourcesWithType(ApiResource apiResource, String namespace, String resourceName) {
         return apiResource.isNamespaced()
-            ? namespacedClient.list(namespace, apiResource.getPath(), loginService.getAuthorization())
-            : nonNamespacedClient.list(loginService.getAuthorization(), apiResource.getPath());
+            ? namespacedClient.list(namespace, apiResource.getPath(), resourceName, loginService.getAuthorization())
+            : nonNamespacedClient.list(loginService.getAuthorization(), apiResource.getPath(), resourceName);
     }
 
     /**
@@ -190,7 +192,7 @@ public class ResourceService {
                           boolean dryRun, CommandSpec commandSpec) {
         try {
             HttpResponse<Void> response = apiResource.isNamespaced()
-                ? namespacedClient.delete(namespace, apiResource.getPath(), resource, loginService.getAuthorization(),
+                ? namespacedClient.delete(namespace, apiResource.getPath(), loginService.getAuthorization(), resource,
                 version, dryRun)
                 : nonNamespacedClient.delete(loginService.getAuthorization(), apiResource.getPath(), resource, dryRun);
 

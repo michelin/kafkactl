@@ -8,7 +8,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Metadata;
@@ -51,9 +50,6 @@ class DeleteTest {
 
     @Mock
     FileService fileService;
-
-    @Mock
-    Kafkactl kafkactl;
 
     @Mock
     ConfigService configService;
