@@ -191,18 +191,39 @@ public class ResourceService {
     public boolean delete(ApiResource apiResource, String namespace, String resource, @Nullable String version,
                           boolean dryRun, CommandSpec commandSpec) {
         try {
-            HttpResponse<Void> response = apiResource.isNamespaced()
-                ? namespacedClient.delete(namespace, apiResource.getPath(), loginService.getAuthorization(), resource,
-                version, dryRun)
-                : nonNamespacedClient.delete(loginService.getAuthorization(), apiResource.getPath(), resource, dryRun);
+            List<String> resourceNames;
 
-            // Micronaut does not throw exception on 404, so produce a 404 manually
-            if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
-                throw new HttpClientResponseException(response.reason(), response);
+            // for namespaced resources deletion, ns4kafka returned the list of deleted resources
+            if (apiResource.isNamespaced()) {
+                HttpResponse<List<Resource>> response =
+                    namespacedClient.delete(namespace, apiResource.getPath(), resource,
+                        loginService.getAuthorization(), version, dryRun);
+
+                // Micronaut does not throw exception on 404, so produce a 404 manually
+                if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
+                    throw new HttpClientResponseException(response.reason(), response);
+                }
+
+                resourceNames = response.body()
+                    .stream()
+                    .map(res -> res.getMetadata().getName())
+                    .toList();
+            } else {
+                HttpResponse<Void> response = nonNamespacedClient.delete(loginService.getAuthorization(),
+                    apiResource.getPath(), resource, dryRun);
+
+                // Micronaut does not throw exception on 404, so produce a 404 manually
+                if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
+                    throw new HttpClientResponseException(response.reason(), response);
+                }
+
+                resourceNames = List.of(resource);
             }
 
-            commandSpec.commandLine().getOut().println(formatService.prettifyKind(apiResource.getKind())
-                + " \"" + resource + "\"" + (version != null ? " version " + version : "") + " deleted.");
+            resourceNames.forEach(resourceName ->
+                commandSpec.commandLine().getOut().println(formatService.prettifyKind(apiResource.getKind())
+                + " \"" + resourceName + "\"" + (version != null ? " version " + version : "") + " deleted.")
+            );
 
             return true;
         } catch (HttpClientResponseException exception) {

@@ -36,7 +36,7 @@ public interface NamespacedResourceClient {
         attempts = "${kafkactl.retry.delete.attempt}",
         multiplier = "${kafkactl.retry.delete.multiplier}",
         predicate = RetryTimeoutPredicate.class)
-    HttpResponse<Void> delete(
+    HttpResponse<List<Resource>> delete(
         String namespace,
         String kind,
         @Header("Authorization") String token,
