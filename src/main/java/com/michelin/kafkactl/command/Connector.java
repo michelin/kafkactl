@@ -65,7 +65,7 @@ public class Connector extends AuthenticatedHook {
                     .orElseThrow(() -> new ParameterException(commandSpec.commandLine(),
                         "The server does not have resource type Connector."));
 
-                connectors = resourceService.listResourcesWithType(connectType, namespace)
+                connectors = resourceService.listResourcesWithType(connectType, namespace, "*")
                     .stream()
                     .map(resource -> resource.getMetadata().getName())
                     .toList();

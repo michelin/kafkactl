@@ -75,42 +75,23 @@ public class FormatService {
      * @param name        The resource name
      * @param commandSpec The command spec used to print the output
      */
-    public void displayError(HttpClientResponseException exception, String kind, String name, CommandSpec commandSpec) {
+    public void displayError(HttpClientResponseException exception, String kind,
+                             String name, CommandSpec commandSpec) {
         Optional<Status> statusOptional = exception.getResponse().getBody(Status.class);
         String prettyKind = prettifyKind(kind);
-        if (statusOptional.isPresent() && statusOptional.get().getDetails() != null
-            && !statusOptional.get().getDetails().getCauses().isEmpty()) {
-            Status status = statusOptional.get();
-            String causes = "\n - " + String.join("\n - ", status.getDetails().getCauses());
-            commandSpec.commandLine().getErr()
-                .printf("%s \"%s\" failed because %s (%s):%s%n", prettyKind, name, status.getMessage().toLowerCase(),
-                    exception.getStatus().getCode(), causes);
-        } else {
-            commandSpec.commandLine().getErr()
-                .printf("%s \"%s\" failed because %s (%s).%n", prettyKind, name, exception.getMessage().toLowerCase(),
-                    exception.getStatus().getCode());
-        }
-    }
+        String prettyName = prettifyName(name);
 
-    /**
-     * Display an error for a given kind of resources.
-     *
-     * @param exception   The HTTP response error
-     * @param kind        The resource kind
-     * @param commandSpec The command spec used to print the output
-     */
-    public void displayError(HttpClientResponseException exception, String kind, CommandSpec commandSpec) {
-        Optional<Status> statusOptional = exception.getResponse().getBody(Status.class);
-        String prettyKind = prettifyKind(kind);
         if (statusOptional.isPresent() && statusOptional.get().getDetails() != null
             && !statusOptional.get().getDetails().getCauses().isEmpty()) {
             Status status = statusOptional.get();
             String causes = "\n - " + String.join("\n - ", status.getDetails().getCauses());
-            commandSpec.commandLine().getErr().printf("%s failed because %s (%s):%s%n", prettyKind,
-                status.getMessage().toLowerCase(), exception.getStatus().getCode(), causes);
+            commandSpec.commandLine().getErr()
+                .printf("%s%s failed because %s (%s):%s%n", prettyKind, prettyName,
+                    status.getMessage().toLowerCase(), exception.getStatus().getCode(), causes);
         } else {
-            commandSpec.commandLine().getErr().printf("%s failed because %s (%s).%n", prettyKind,
-                exception.getMessage().toLowerCase(), exception.getStatus().getCode());
+            commandSpec.commandLine().getErr()
+                .printf("%s%s failed because %s (%s).%n", prettyKind, prettyName,
+                    exception.getMessage().toLowerCase(), exception.getStatus().getCode());
         }
     }
 
@@ -174,6 +155,16 @@ public class FormatService {
      */
     public String prettifyKind(String kind) {
         return kind.substring(0, 1).toUpperCase() + kind.substring(1).replaceAll("(.)([A-Z])", "$1 $2").toLowerCase();
+    }
+
+    /**
+     * Prettify name.
+     *
+     * @param name The name
+     * @return The prettified name
+     */
+    public String prettifyName(String name) {
+        return name.equals("*") ? "" : " \"" + name + "\"";
     }
 
     /**
