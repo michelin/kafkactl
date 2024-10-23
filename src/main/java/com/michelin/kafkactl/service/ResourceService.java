@@ -154,7 +154,7 @@ public class ResourceService {
      * @param apiResource The resource type
      * @param namespace   The namespace
      * @param resource    The resource
-     * @param dryRun      Is dry run mode ?
+     * @param dryRun      Is dry run mode or not?
      * @param commandSpec The command that triggered the action
      * @return An HTTP response
      */
@@ -184,7 +184,7 @@ public class ResourceService {
      * @param namespace   The namespace
      * @param name        The resource name or wildcard
      * @param version     The version of the resource, for schemas only.
-     * @param dryRun      Is dry run mode?
+     * @param dryRun      Is dry run mode or not?
      * @param commandSpec The command that triggered the action
      * @return true if deletion succeeded, false otherwise
      */
@@ -224,7 +224,7 @@ public class ResourceService {
      *
      * @param apiResources The resource types
      * @param namespace    The namespace
-     * @param dryRun       Is dry run mode ?
+     * @param dryRun       Is dry run mode or not?
      * @param commandSpec  The command that triggered the action
      * @return 0 if the command succeed, 1 otherwise
      */
@@ -258,7 +258,7 @@ public class ResourceService {
      *
      * @param namespace   The namespace
      * @param topic       The topic to delete records
-     * @param dryRun      Is dry run mode or not ?
+     * @param dryRun      Is dry run mode or not?
      * @param commandSpec The command that triggered the action
      * @return The deleted records response
      */
@@ -284,7 +284,7 @@ public class ResourceService {
      * @param namespace   The namespace
      * @param group       The consumer group
      * @param resource    The information about how to reset
-     * @param dryRun      Is dry run mode or not ?
+     * @param dryRun      Is dry run mode or not?
      * @param commandSpec The command that triggered the action
      * @return 0 if the command succeeded, 1 otherwise
      */
