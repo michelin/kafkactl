@@ -42,7 +42,10 @@ public class Get extends AuthenticatedHook {
     @Parameters(index = "0", description = "Resource type or 'all' to display resources of all types.", arity = "1")
     public String resourceType;
 
-    @Parameters(index = "1", description = "Resource name or wildcard matching resource names.", arity = "0..1",
+    @Parameters(
+        index = "1",
+        description = "Resource name or wildcard matching resource names.",
+        arity = "0..1",
         defaultValue = "*")
     public String resourceName;
 
@@ -63,7 +66,6 @@ public class Get extends AuthenticatedHook {
         // Validate -o flag
         validateOutput();
 
-        // List resources based on parameters
         try {
             return resourceService.list(apiResources, getNamespace(), output, commandSpec, resourceName);
         } catch (HttpClientResponseException e) {

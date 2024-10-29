@@ -469,7 +469,7 @@ Description: Delete a resource.
 
 Parameters:
       <resourceType>   Resource type.
-      <name>           Resource name or wildcard matching resource names.
+      <resourceName>   Resource name or wildcard matching resource names.
 
 Options:
       --dry-run        Does not persist resources. Validate only.
@@ -554,7 +554,6 @@ kafkactl get topic myTopic-test?
 kafkactl get connector *jdbc-*
 kafkactl get schema mySchema
 kafkactl get schema *-value
-
 ```
 
 ### Import
