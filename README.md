@@ -469,7 +469,7 @@ Description: Delete a resource.
 
 Parameters:
       <resourceType>   Resource type.
-      <name>           Resource name.
+      <resourceName>   Resource name or wildcard matching resource names.
 
 Options:
       --dry-run        Does not persist resources. Validate only.
@@ -489,6 +489,8 @@ Example(s):
 kafkactl delete -f directoryOfResources
 kafkactl delete -f resource.yml
 kafkactl delete topic myTopic
+kafkactl delete topic *-test
+kafkactl delete schema *
 kafkactl delete schema mySchema -V latest
 ```
 
@@ -528,7 +530,7 @@ Description: Get resources by resource type for the current namespace.
 
 Parameters:
       <resourceType>      Resource type or 'all' to display resources of all types.
-      [<resourceName>]    Resource name.
+      [<resourceName>]    Resource name or wildcard matching resource names.
 
 Options:
   -h, --help              Show this help message and exit.
@@ -546,8 +548,12 @@ Example(s):
 
 ```console
 kafkactl get all
-kafkactl get topics
+kafkactl get topic
 kafkactl get topic myTopic
+kafkactl get topic myTopic-test?
+kafkactl get connector *jdbc-*
+kafkactl get schema mySchema
+kafkactl get schema *-value
 ```
 
 ### Import

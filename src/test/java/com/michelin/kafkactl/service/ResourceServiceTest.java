@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -71,7 +72,7 @@ class ResourceServiceTest {
     ResourceService resourceService;
 
     @Test
-    void shouldListAllWhenOneNamespacedApiResource() {
+    void shouldListNamespacedApiResource() {
         ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
@@ -92,11 +93,11 @@ class ResourceServiceTest {
 
         CommandLine cmd = new CommandLine(new Kafkactl());
 
-        when(namespacedClient.list(any(), any(), any()))
+        when(namespacedClient.list(any(), any(), any(), any()))
             .thenReturn(Collections.singletonList(resource));
 
-        int actual = resourceService.listAll(
-            Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec()
+        int actual = resourceService.list(
+            Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "*"
         );
 
         assertEquals(0, actual);
@@ -104,7 +105,7 @@ class ResourceServiceTest {
     }
 
     @Test
-    void shouldListAllWhenOneNonNamespacedApiResource() {
+    void shouldListNonNamespacedApiResource() {
         ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
@@ -125,11 +126,11 @@ class ResourceServiceTest {
 
         CommandLine cmd = new CommandLine(new Kafkactl());
 
-        when(nonNamespacedClient.list(any(), any()))
+        when(nonNamespacedClient.list(any(), any(), any()))
             .thenReturn(Collections.singletonList(resource));
 
-        int actual = resourceService.listAll(
-            Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec()
+        int actual = resourceService.list(
+            Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "*"
         );
 
         assertEquals(0, actual);
@@ -137,14 +138,14 @@ class ResourceServiceTest {
     }
 
     @Test
-    void shouldListAllWhenEmptyResponse() {
+    void shouldNotListApiResourceWhenEmptyResponse() {
         CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
         doCallRealMethod()
             .when(formatService).prettifyKind(any());
-        when(namespacedClient.list(any(), any(), any()))
+        when(namespacedClient.list(any(), any(), any(), any()))
             .thenReturn(Collections.emptyList());
 
         ApiResource apiResource = ApiResource.builder()
@@ -155,8 +156,8 @@ class ResourceServiceTest {
             .synchronizable(true)
             .build();
 
-        int actual = resourceService.listAll(
-            Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec()
+        int actual = resourceService.list(
+            Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "*"
         );
 
         assertEquals(0, actual);
@@ -164,7 +165,7 @@ class ResourceServiceTest {
     }
 
     @Test
-    void shouldNotListAllWhenHttpClientResponseException() {
+    void shouldNotListApiResourceWhenHttpClientResponseException() {
         ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
@@ -178,11 +179,11 @@ class ResourceServiceTest {
         cmd.setErr(new PrintWriter(sw));
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
-        when(namespacedClient.list(any(), any(), any()))
+        when(namespacedClient.list(any(), any(), any(), any()))
             .thenThrow(exception);
 
-        int actual = resourceService.listAll(
-            Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec()
+        int actual = resourceService.list(
+            Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "*"
         );
 
         assertEquals(1, actual);
@@ -190,7 +191,7 @@ class ResourceServiceTest {
     }
 
     @Test
-    void shouldListAllWhenMultipleApiResources() {
+    void shouldListApiResourceWhenMultipleResourceKinds() {
         ApiResource apiResourceOne = ApiResource.builder()
             .kind("Topic")
             .path("topics")
@@ -231,12 +232,13 @@ class ResourceServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(namespacedClient.list(any(), any(), any()))
+        when(namespacedClient.list(any(), any(), any(), any()))
             .thenReturn(Collections.singletonList(topicResource))
             .thenReturn(Collections.singletonList(connectorResource));
 
-        int actual =
-            resourceService.listAll(List.of(apiResourceOne, apiResourceTwo), "namespace", TABLE, cmd.getCommandSpec());
+        int actual = resourceService.list(
+            List.of(apiResourceOne, apiResourceTwo), "namespace", TABLE, cmd.getCommandSpec(), "*"
+        );
 
         assertEquals(0, actual);
         verify(formatService).displayList("Topic", Collections.singletonList(topicResource), TABLE,
@@ -246,7 +248,41 @@ class ResourceServiceTest {
     }
 
     @Test
-    void shouldListAllWhenMultipleApiResourcesAndException() {
+    void shouldListApiResourcesWhenMultipleResourceKindsAndNoResource() {
+        ApiResource apiResourceOne = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        ApiResource apiResourceTwo = ApiResource.builder()
+            .kind("Connector")
+            .namespaced(true)
+            .synchronizable(true)
+            .path("connectors")
+            .names(List.of("connects", "connect", "co"))
+            .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(namespacedClient.list(any(), any(), any(), any()))
+            .thenReturn(List.of())
+            .thenReturn(List.of());
+
+        int actual = resourceService.list(
+            List.of(apiResourceOne, apiResourceTwo), "namespace", TABLE, cmd.getCommandSpec(), "*"
+        );
+
+        assertEquals(0, actual);
+        verify(formatService, never()).displayList(any(), any(), any(), any());
+    }
+
+    @Test
+    void shouldListMultipleApiResourcesWhenException() {
         ApiResource apiResourceOne = ApiResource.builder()
             .kind("Topic")
             .path("topics")
@@ -278,17 +314,68 @@ class ResourceServiceTest {
         cmd.setErr(new PrintWriter(sw));
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
-        when(namespacedClient.list(any(), any(), any()))
+        when(namespacedClient.list(any(), any(), any(), any()))
             .thenReturn(Collections.singletonList(topicResource))
             .thenThrow(exception);
 
-        int actual =
-            resourceService.listAll(List.of(apiResourceOne, apiResourceTwo), "namespace", TABLE, cmd.getCommandSpec());
+        int actual = resourceService.list(
+            List.of(apiResourceOne, apiResourceTwo), "namespace", TABLE, cmd.getCommandSpec(), "*"
+        );
 
         assertEquals(1, actual);
         verify(formatService).displayList("Topic", Collections.singletonList(topicResource), TABLE,
             cmd.getCommandSpec());
-        verify(formatService).displayError(exception, "Connector", cmd.getCommandSpec());
+        verify(formatService).displayError(exception, "Connector", "*", cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldNotListApiResourceWhenNoResourceMatchesName() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        doCallRealMethod().when(formatService).prettifyKind(any());
+        when(namespacedClient.list(any(), any(), any(), any())).thenReturn(List.of());
+
+        int actual = resourceService.list(
+            List.of(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "*-test"
+        );
+
+        assertEquals(0, actual);
+        verify(formatService, never()).displayList(any(), any(), any(), any());
+    }
+
+    @Test
+    void shouldNotListApiResourceWhenResourceNotFound() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        doCallRealMethod().when(formatService).prettifyKind(any());
+        when(namespacedClient.list(any(), any(), any(), any())).thenReturn(List.of());
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        int actual = resourceService.list(
+            List.of(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "*"
+        );
+
+        assertEquals(0, actual);
+        verify(formatService, never()).displayList(any(), any(), any(), any());
     }
 
     @Test
@@ -590,9 +677,16 @@ class ResourceServiceTest {
         cmd.setOut(new PrintWriter(sw));
 
         doCallRealMethod().when(formatService).prettifyKind(any());
+
+        Resource deletedResource = Resource.builder()
+            .metadata(Metadata.builder()
+                .name("name")
+                .build())
+            .build();
+
         when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean()))
             .thenReturn(HttpResponse
-                .<Void>ok()
+                .ok(List.of(deletedResource))
                 .header("X-Ns4kafka-Result", "created"));
 
         ApiResource apiResource = ApiResource.builder()
@@ -610,15 +704,62 @@ class ResourceServiceTest {
     }
 
     @Test
+    void shouldDeleteMultipleNamespacedResources() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        doCallRealMethod().when(formatService).prettifyKind(any());
+
+        Resource deletedResource1 = Resource.builder()
+            .metadata(Metadata.builder()
+                .name("name1")
+                .build())
+            .build();
+
+        Resource deletedResource2 = Resource.builder()
+            .metadata(Metadata.builder()
+                .name("name2")
+                .build())
+            .build();
+
+        when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean()))
+            .thenReturn(HttpResponse
+                .ok(List.of(deletedResource1, deletedResource2))
+                .header("X-Ns4kafka-Result", "created"));
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        boolean actual = resourceService.delete(apiResource, "namespace", "name*", null, false, cmd.getCommandSpec());
+
+        assertTrue(actual);
+        assertTrue(sw.toString().contains("Topic \"name1\" deleted."));
+        assertTrue(sw.toString().contains("Topic \"name2\" deleted."));
+    }
+
+    @Test
     void shouldDeleteNamespacedResourceWithVersion() {
         CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
         doCallRealMethod().when(formatService).prettifyKind(any());
+
+        Resource deletedResource = Resource.builder()
+            .metadata(Metadata.builder()
+                .name("name")
+                .build())
+            .build();
+
         when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean()))
             .thenReturn(HttpResponse
-                .<Void>ok()
+                .ok(List.of(deletedResource))
                 .header("X-Ns4kafka-Result", "created"));
 
         ApiResource apiResource = ApiResource.builder()
@@ -643,9 +784,16 @@ class ResourceServiceTest {
         cmd.setOut(new PrintWriter(sw));
 
         doCallRealMethod().when(formatService).prettifyKind(any());
+
+        Resource deletedResource = Resource.builder()
+            .metadata(Metadata.builder()
+                .name("name")
+                .build())
+            .build();
+
         when(nonNamespacedClient.delete(any(), any(), any(), anyBoolean()))
             .thenReturn(HttpResponse
-                .<Void>ok()
+                .ok(List.of(deletedResource))
                 .header("X-Ns4kafka-Result", "created"));
 
         ApiResource apiResource = ApiResource.builder()
@@ -660,6 +808,46 @@ class ResourceServiceTest {
 
         assertTrue(actual);
         assertTrue(sw.toString().contains("Topic \"name\" deleted."));
+    }
+
+    @Test
+    void shouldDeleteMultipleNonNamespacedResources() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        doCallRealMethod().when(formatService).prettifyKind(any());
+
+        Resource deletedResource1 = Resource.builder()
+            .metadata(Metadata.builder()
+                .name("name1")
+                .build())
+            .build();
+
+        Resource deletedResource2 = Resource.builder()
+            .metadata(Metadata.builder()
+                .name("name2")
+                .build())
+            .build();
+
+        when(nonNamespacedClient.delete(any(), any(), any(), anyBoolean()))
+            .thenReturn(HttpResponse
+                .ok(List.of(deletedResource1, deletedResource2))
+                .header("X-Ns4kafka-Result", "created"));
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(false)
+            .synchronizable(true)
+            .build();
+
+        boolean actual = resourceService.delete(apiResource, "namespace", "name*", null, false, cmd.getCommandSpec());
+
+        assertTrue(actual);
+        assertTrue(sw.toString().contains("Topic \"name1\" deleted."));
+        assertTrue(sw.toString().contains("Topic \"name2\" deleted."));
     }
 
     @Test
@@ -686,7 +874,7 @@ class ResourceServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenDeleteNotFoundResource() {
+    void shouldNotDeleteWhenNamespacedResourceNotFound() {
         ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
@@ -698,6 +886,30 @@ class ResourceServiceTest {
         CommandLine cmd = new CommandLine(new Kafkactl());
 
         when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean()))
+            .thenReturn(HttpResponse.notFound());
+
+        boolean actual = resourceService.delete(apiResource, "namespace", "prefix.topic", null,
+            false, cmd.getCommandSpec());
+
+        assertFalse(actual);
+        verify(formatService).displayError(argThat(exception -> exception.getStatus().equals(HttpStatus.NOT_FOUND)
+                && exception.getMessage().equals("Not Found")), eq("Topic"), eq("prefix.topic"),
+            eq(cmd.getCommandSpec()));
+    }
+
+    @Test
+    void shouldNotDeleteWhenNonNamespacedResourceNotFound() {
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(false)
+            .synchronizable(true)
+            .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+
+        when(nonNamespacedClient.delete(any(), any(), any(), anyBoolean()))
             .thenReturn(HttpResponse.notFound());
 
         boolean actual = resourceService.delete(apiResource, "namespace", "prefix.topic", null,

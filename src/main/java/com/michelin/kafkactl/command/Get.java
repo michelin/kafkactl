@@ -5,7 +5,6 @@ import static com.michelin.kafkactl.service.FormatService.YAML;
 
 import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.model.ApiResource;
-import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
 import io.micronaut.core.annotation.ReflectiveAccess;
@@ -43,8 +42,12 @@ public class Get extends AuthenticatedHook {
     @Parameters(index = "0", description = "Resource type or 'all' to display resources of all types.", arity = "1")
     public String resourceType;
 
-    @Parameters(index = "1", description = "Resource name.", arity = "0..1")
-    public Optional<String> resourceName;
+    @Parameters(
+        index = "1",
+        description = "Resource name or wildcard matching resource names.",
+        arity = "0..1",
+        defaultValue = "*")
+    public String resourceName;
 
     @Option(names = {"-o", "--output"}, description = "Output format. One of: yaml|table", defaultValue = "table")
     public String output;
@@ -60,22 +63,13 @@ public class Get extends AuthenticatedHook {
         // Validate resourceType + custom type ALL
         List<ApiResource> apiResources = validateResourceType();
 
+        // Validate -o flag
         validateOutput();
-        String namespace = getNamespace();
-
-        // List resources based on parameters
-        if (resourceName.isEmpty() || apiResources.size() > 1) {
-            return resourceService.listAll(apiResources, namespace, output, commandSpec);
-        }
 
         try {
-            // Get individual resources for given types (k get topic topic1)
-            Resource singleResource =
-                resourceService.getSingleResourceWithType(apiResources.getFirst(), namespace, resourceName.get(), true);
-            formatService.displaySingle(singleResource, output, commandSpec);
-            return 0;
+            return resourceService.list(apiResources, getNamespace(), output, commandSpec, resourceName);
         } catch (HttpClientResponseException e) {
-            formatService.displayError(e, apiResources.getFirst().getKind(), resourceName.get(), commandSpec);
+            formatService.displayError(e, apiResources.getFirst().getKind(), resourceName, commandSpec);
             return 1;
         }
     }

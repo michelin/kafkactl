@@ -209,6 +209,8 @@ class FormatServiceTest {
                     .causes(List.of("Error 1", "Error 2", "Error 3", "Error 4", "Error 5"))
                     .build())
                 .message("An error occurred")
+                .reason("")
+                .code(500)
                 .build()));
 
         formatService.displayError(exception, "Topic", "myTopic", cmd.getCommandSpec());
@@ -230,6 +232,8 @@ class FormatServiceTest {
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse
             .serverError(Status.builder()
                 .message("An error occurred")
+                .reason("")
+                .code(500)
                 .build()));
 
         formatService.displayError(exception, "Topic", "myTopic", cmd.getCommandSpec());
@@ -263,9 +267,11 @@ class FormatServiceTest {
                     .causes(List.of("Error 1", "Error 2", "Error 3", "Error 4", "Error 5"))
                     .build())
                 .message("An error occurred")
+                .reason("")
+                .code(500)
                 .build()));
 
-        formatService.displayError(exception, "Topic", cmd.getCommandSpec());
+        formatService.displayError(exception, "Topic", "*", cmd.getCommandSpec());
 
         assertTrue(sw.toString().contains("Topic failed because an error occurred (500):"));
         assertTrue(sw.toString().contains(" - Error 1"));
@@ -284,9 +290,11 @@ class FormatServiceTest {
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse
             .serverError(Status.builder()
                 .message("An error occurred")
+                .reason("")
+                .code(500)
                 .build()));
 
-        formatService.displayError(exception, "Topic", cmd.getCommandSpec());
+        formatService.displayError(exception, "Topic", "*", cmd.getCommandSpec());
 
         assertTrue(sw.toString().contains("Topic failed because error (500)."));
     }
@@ -300,7 +308,7 @@ class FormatServiceTest {
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse
             .serverError());
 
-        formatService.displayError(exception, "Topic", cmd.getCommandSpec());
+        formatService.displayError(exception, "Topic", "*", cmd.getCommandSpec());
 
         assertTrue(sw.toString().contains("Topic failed because error (500)."));
     }
@@ -317,6 +325,8 @@ class FormatServiceTest {
                     .causes(List.of("Error 1", "Error 2", "Error 3", "Error 4", "Error 5"))
                     .build())
                 .message("An error occurred")
+                .reason("")
+                .code(500)
                 .build()));
 
         formatService.displayError(exception, cmd.getCommandSpec());
@@ -338,6 +348,8 @@ class FormatServiceTest {
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse
             .serverError(Status.builder()
                 .message("An error occurred")
+                .reason("")
+                .code(500)
                 .build()));
 
         formatService.displayError(exception, cmd.getCommandSpec());

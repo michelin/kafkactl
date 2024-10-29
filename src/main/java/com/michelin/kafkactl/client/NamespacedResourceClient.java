@@ -25,22 +25,22 @@ public interface NamespacedResourceClient {
      *
      * @param namespace    The namespace
      * @param kind         The kind of resource
-     * @param resourceName The name of the resource
+     * @param name         The name of the resource
      * @param token        The auth token
      * @param version      The version of the resource, for schemas only.
-     * @param dryrun       is dry-run mode or not ?
+     * @param dryrun       Is dry-run mode or not?
      * @return The delete response
      */
-    @Delete("{namespace}/{kind}/{resourceName}{?version,dryrun}")
+    @Delete("{namespace}/{kind}{?name,version,dryrun}")
     @Retryable(delay = "${kafkactl.retry.delete.delay}",
         attempts = "${kafkactl.retry.delete.attempt}",
         multiplier = "${kafkactl.retry.delete.multiplier}",
         predicate = RetryTimeoutPredicate.class)
-    HttpResponse<Void> delete(
+    HttpResponse<List<Resource>> delete(
         String namespace,
         String kind,
-        String resourceName,
         @Header("Authorization") String token,
+        @QueryValue String name,
         @Nullable @QueryValue String version,
         @QueryValue boolean dryrun);
 
@@ -51,7 +51,7 @@ public interface NamespacedResourceClient {
      * @param kind      The kind of resource
      * @param token     The auth token
      * @param resource  The resource to apply
-     * @param dryrun    is dry-run mode or not ?
+     * @param dryrun    Is dry-run mode or not?
      * @return The resource
      */
     @Post("{namespace}/{kind}{?dryrun}")
@@ -71,13 +71,15 @@ public interface NamespacedResourceClient {
      *
      * @param namespace The namespace
      * @param kind      The kind of resource
+     * @param name      The name of the resource
      * @param token     The auth token
      * @return The list of resources
      */
-    @Get("{namespace}/{kind}")
+    @Get("{namespace}/{kind}{?name}")
     List<Resource> list(
         String namespace,
         String kind,
+        @Nullable @QueryValue String name,
         @Header("Authorization") String token);
 
     /**
@@ -102,7 +104,7 @@ public interface NamespacedResourceClient {
      * @param namespace The namespace
      * @param kind      The kind of resource
      * @param token     The auth token
-     * @param dryrun    is dry-run mode or not ?
+     * @param dryrun    Is dry-run mode or not?
      * @return The list of imported resources
      */
     @Post("{namespace}/{kind}/_/import{?dryrun}")
@@ -118,7 +120,7 @@ public interface NamespacedResourceClient {
      * @param token     The authentication token
      * @param namespace The namespace
      * @param topic     The topic to delete records
-     * @param dryrun    Is dry run mode or not ?
+     * @param dryrun    Is dry run mode or not?
      * @return The deleted records response
      */
     @Post("{namespace}/topics/{topic}/delete-records{?dryrun}")
@@ -135,7 +137,7 @@ public interface NamespacedResourceClient {
      * @param namespace         The namespace
      * @param consumerGroupName The consumer group
      * @param json              The information about how to reset
-     * @param dryrun            Is dry run mode or not ?
+     * @param dryrun            Is dry run mode or not?
      * @return The reset offsets response
      */
     @Post("{namespace}/consumer-groups/{consumerGroupName}/reset{?dryrun}")

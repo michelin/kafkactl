@@ -97,8 +97,6 @@ kafkactl:
     SchemaCompatibilityState:
       - "SUBJECT:/metadata/name"
       - "CONFIG:/spec/compatibility"
-    SchemaList:
-      - "SUBJECT:/metadata/name"
     Topic:
       - "TOPIC:/metadata/name"
       - "RETENTION:/spec/configs/retention.ms%PERIOD"
