@@ -490,6 +490,25 @@ class DeleteTest {
     @Test
     void shouldNotDeleteByNameWithWildcardWithoutExecute() {
         when(configService.isCurrentContextValid())
+                .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+                .thenReturn(true);
+
+        CommandLine cmd = new CommandLine(delete);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("topics", "*", "-n", "namespace");
+        assertEquals(0, code);
+        assertTrue(sw.toString().contains("You are about to potentially delete multiple resources with wildcard"));
+        assertTrue(sw.toString()
+                .contains("Rerun the command with option --dry-run to see the resources that will be deleted."));
+        assertTrue(sw.toString().contains("Rerun the command with option --execute to execute this operation."));
+        verify(resourceService, never()).delete(any(), any(), any(), any(), anyBoolean(), any());
+    }
+    @Test
+    void shouldNotDeleteByNameWithQuestionMarkWildcardWithoutExecute() {
+        when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
             .thenReturn(true);
@@ -498,7 +517,7 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("topics", "*", "-n", "namespace");
+        int code = cmd.execute("topics", "prefix.topic?", "-n", "namespace");
         assertEquals(0, code);
         assertTrue(sw.toString().contains("You are about to potentially delete multiple resources with wildcard"));
         assertTrue(sw.toString()
