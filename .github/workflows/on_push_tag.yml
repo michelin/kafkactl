@@ -52,6 +52,7 @@ jobs:
         id: build_changelog
         with:
           configuration: "changelog-builder.json"
+          fetchViaCommits: "false"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
