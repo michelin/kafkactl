@@ -57,6 +57,15 @@ public class Delete extends DryRunHook {
      */
     @Override
     public Integer onAuthSuccess() {
+        if (config.nameConfig != null && !config.nameConfig.confirmed && !dryRun
+            && (config.nameConfig.resourceName.contains("*") || config.nameConfig.resourceName.contains("?"))) {
+            commandSpec.commandLine().getOut().println("You are about to potentially delete multiple resources "
+                + "with wildcard \"" + config.nameConfig.resourceName + "\".\n"
+                + "Rerun the command with option --dry-run to see the resources that will be deleted.\n"
+                + "Rerun the command with option --execute to execute this operation.");
+            return 0;
+        }
+
         String namespace = getNamespace();
         List<Resource> resources = parseResources(namespace);
 
@@ -155,6 +164,9 @@ public class Delete extends DryRunHook {
             description = "Version to delete. Only with schema resource and name parameter.",
             arity = "0..1")
         public Optional<String> version;
+
+        @Option(names = {"--execute"}, description = "This option is mandatory to delete resources with wildcard")
+        public boolean confirmed;
     }
 
     /**
