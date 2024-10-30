@@ -52,7 +52,7 @@ jobs:
         id: build_changelog
         with:
           configuration: "changelog-builder.json"
-          fetchViaCommits: "false"
+          mode: "COMMIT"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -108,6 +108,7 @@ jobs:
         id: build_changelog
         with:
           configuration: "changelog-builder.json"
+          mode: "COMMIT"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -157,6 +158,7 @@ jobs:
         id: build_changelog
         with:
           configuration: "changelog-builder.json"
+          mode: "COMMIT"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
