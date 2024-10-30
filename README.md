@@ -481,7 +481,7 @@ Options:
   -v, --verbose        Enable the verbose mode.
   -V, --version=<version>
                        Version to delete. Only with schema resource and name parameter.
-      --execute        This option is mandatory to delete resources with wildcard
+      --execute        This option is mandatory to delete resources with wildcard.
 ```
 
 Example(s):
