@@ -60,6 +60,7 @@ public class ResetPassword extends AuthenticatedHook {
                 + "for the namespace " + namespace + ".\n"
                 + "Active connections will be killed instantly.\n\n"
                 + "To execute this operation, rerun the command with option --execute.");
+            return 0;
         }
 
         return resourceService.resetPassword(namespace, user, output, commandSpec);
