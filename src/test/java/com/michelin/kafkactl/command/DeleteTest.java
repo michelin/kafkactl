@@ -506,6 +506,7 @@ class DeleteTest {
         assertTrue(sw.toString().contains("Rerun the command with option --execute to execute this operation."));
         verify(resourceService, never()).delete(any(), any(), any(), any(), anyBoolean(), any());
     }
+
     @Test
     void shouldNotDeleteByNameWithQuestionMarkWildcardWithoutExecute() {
         when(configService.isCurrentContextValid())
