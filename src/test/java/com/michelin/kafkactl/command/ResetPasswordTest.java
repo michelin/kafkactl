@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -104,6 +105,7 @@ class ResetPasswordTest {
         assertTrue(sw.toString().contains("You are about to change your Kafka password for the namespace namespace."));
         assertTrue(sw.toString().contains("Active connections will be killed instantly."));
         assertTrue(sw.toString().contains("To execute this operation, rerun the command with option --execute."));
+        verify(resourceService, never()).resetPassword(any(), any(), any(), any());
     }
 
     @Test
