@@ -165,7 +165,7 @@ public class Delete extends DryRunHook {
             arity = "0..1")
         public Optional<String> version;
 
-        @Option(names = {"--execute"}, description = "This option is mandatory to delete resources with wildcard")
+        @Option(names = {"--execute"}, description = "This option is mandatory to delete resources with wildcard.")
         public boolean confirmed;
     }
 
