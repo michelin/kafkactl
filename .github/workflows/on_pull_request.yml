@@ -33,7 +33,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Check Style
+      - name: Check style
         run: ./gradlew checkstyleMain checkstyleTest
 
       - name: Build and analyze
