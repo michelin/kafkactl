@@ -2,9 +2,7 @@ name: Pull Request
 
 on:
   pull_request:
-    branches:
-      - main
-      - hotfix/v*
+    branches: [ main, hotfix/* ]
 
 jobs:
   build-jar:
