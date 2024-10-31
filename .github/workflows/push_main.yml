@@ -1,13 +1,20 @@
-name: Pull Request
+name: Push Main
 
 on:
-  pull_request:
-    branches: [ main, hotfix/* ]
+  push:
+    branches:
+      - main
 
 jobs:
   build-jar:
     runs-on: ubuntu-latest
     steps:
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.MICHELIN_DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.MICHELIN_DOCKER_HUB_PASSWD }}
+
       - name: Checkout project
         uses: actions/checkout@v4
         with:
@@ -52,7 +59,7 @@ jobs:
           report_paths: '**/build/test-results/test/TEST-*.xml'
 
       - name: Docker
-        run: ./gradlew dockerBuild
+        run: ./gradlew dockerBuild dockerPush
 
       - name: Upload
         uses: actions/upload-artifact@v4
@@ -63,6 +70,12 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.MICHELIN_DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.MICHELIN_DOCKER_HUB_PASSWD }}
+
       - name: Checkout project
         uses: actions/checkout@v4
         with:
@@ -89,7 +102,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Check Style
+      - name: Check style
         run: ./gradlew checkstyleMain checkstyleTest
 
       - name: Build
@@ -99,7 +112,7 @@ jobs:
           echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
 
       - name: Docker
-        run: ./gradlew dockerBuildNative
+        run: ./gradlew dockerBuildNative dockerPushNative
 
       - name: Upload
         uses: actions/upload-artifact@v4
