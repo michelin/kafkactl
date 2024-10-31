@@ -3,7 +3,7 @@ name: Push Main
 on:
   push:
     branches:
-      - main
+      - 'main'
 
 jobs:
   build-jar:
