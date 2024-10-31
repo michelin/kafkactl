@@ -3,7 +3,7 @@ name: Hotfix Branch
 on:
   workflow_dispatch:
     inputs:
-      tag_name:
+      tag_version:
         description: 'Tag version'
         required: true
 
@@ -19,7 +19,7 @@ jobs:
 
       - name: Create hotfix branch
         run: |
-          START_TAG=v${{ github.event.inputs.tag_name }}
+          START_TAG=v${{ github.event.inputs.tag_version }}
           echo "Start from tag $START_TAG"
           MAJOR_MINOR_DIGIT=$(echo "$START_TAG" | cut -d '.' -f 1-2)
           PATCH_DIGIT=$(echo "$START_TAG" | cut -d '.' -f 3)
