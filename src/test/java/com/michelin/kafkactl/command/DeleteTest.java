@@ -1,10 +1,12 @@
 package com.michelin.kafkactl.command;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -192,7 +194,7 @@ class DeleteTest {
     }
 
     @Test
-    void shouldDeleteAllVersionsByFileSuccess() {
+    void shouldDeleteByFile() {
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -235,7 +237,7 @@ class DeleteTest {
     }
 
     @Test
-    void shouldDeleteOneVersionByFileSuccess() {
+    void shouldDeleteOneVersionByFile() {
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -278,7 +280,7 @@ class DeleteTest {
     }
 
     @Test
-    void shouldDeleteAllVersionsByNameSuccess() {
+    void shouldDeleteByName() {
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -308,7 +310,7 @@ class DeleteTest {
     }
 
     @Test
-    void shouldDeleteOneVersionByNameSuccess() {
+    void shouldDeleteOneVersionByName() {
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -338,7 +340,7 @@ class DeleteTest {
     }
 
     @Test
-    void shouldDeleteByFileDryRunSuccess() {
+    void shouldNotDeleteByFileWhenInDryRunMode() {
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -381,7 +383,7 @@ class DeleteTest {
     }
 
     @Test
-    void shouldDeleteByFileFail() {
+    void shouldNotDeleteByFileWhenFail() {
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -453,5 +455,138 @@ class DeleteTest {
         int code = cmd.execute("-f", "topic", "-n", "namespace");
         assertEquals(1, code);
         verify(formatService).displayError(exception, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldDeleteByNameWithWildcard() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        when(apiResourcesService.getResourceDefinitionByName(any()))
+            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+            .thenReturn(Optional.of(apiResource));
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
+            .thenReturn(true);
+
+        CommandLine cmd = new CommandLine(delete);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("topic", "*", "-n", "namespace", "--execute");
+        assertEquals(0, code);
+    }
+
+    @Test
+    void shouldNotDeleteByNameWithWildcardWithoutExecute() {
+        when(configService.isCurrentContextValid())
+                .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+                .thenReturn(true);
+
+        CommandLine cmd = new CommandLine(delete);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("topics", "*", "-n", "namespace");
+        assertEquals(0, code);
+        assertTrue(sw.toString().contains("You are about to potentially delete multiple resources with wildcard"));
+        assertTrue(sw.toString()
+                .contains("Rerun the command with option --dry-run to see the resources that will be deleted."));
+        assertTrue(sw.toString().contains("Rerun the command with option --execute to execute this operation."));
+        verify(resourceService, never()).delete(any(), any(), any(), any(), anyBoolean(), any());
+    }
+
+    @Test
+    void shouldNotDeleteByNameWithQuestionMarkWildcardWithoutExecute() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
+        CommandLine cmd = new CommandLine(delete);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("topics", "prefix.topic?", "-n", "namespace");
+        assertEquals(0, code);
+        assertTrue(sw.toString().contains("You are about to potentially delete multiple resources with wildcard"));
+        assertTrue(sw.toString()
+            .contains("Rerun the command with option --dry-run to see the resources that will be deleted."));
+        assertTrue(sw.toString().contains("Rerun the command with option --execute to execute this operation."));
+        verify(resourceService, never()).delete(any(), any(), any(), any(), anyBoolean(), any());
+    }
+
+    @Test
+    void shouldNotDeleteByNameWithWildcardInDryRunMode() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        when(apiResourcesService.getResourceDefinitionByName(any()))
+            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+            .thenReturn(Optional.of(apiResource));
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
+            .thenReturn(true);
+
+        CommandLine cmd = new CommandLine(delete);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("topics", "*", "--dry-run", "-n", "namespace");
+        assertEquals(0, code);
+        assertTrue(sw.toString().contains("Dry run execution."));
+    }
+
+    @Test
+    void shouldNotDeleteByNameWithWildcardWithExecuteInDryRunMode() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        when(apiResourcesService.getResourceDefinitionByName(any()))
+            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any()))
+            .thenReturn(Optional.of(apiResource));
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
+            .thenReturn(true);
+
+        CommandLine cmd = new CommandLine(delete);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("topics", "prefix.topi?", "--execute", "--dry-run", "-n", "namespace");
+        assertEquals(0, code);
+        assertTrue(sw.toString().contains("Dry run execution."));
+        assertFalse(sw.toString().contains("You are about to potentially delete multiple resources with wildcard"));
     }
 }
