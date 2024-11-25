@@ -29,6 +29,18 @@
       "labels": [
         "dependencies"
       ]
+    },
+    {
+      "title": "## :test_tube: Tests",
+      "labels": [
+        "test"
+      ]
+    },
+    {
+      "title": "## :green_heart: CI/CD",
+      "labels": [
+        "ci/cd"
+      ]
     }
   ],
   "template": "${{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n${{UNCATEGORIZED}}\n</details>",
