@@ -161,6 +161,8 @@ jobs:
 
       - name: Configure Pagefile
         uses: al-cheb/configure-pagefile-action@v1.4
+        with:
+          disk-root: "C:"
 
       - name: Build
         run: |
