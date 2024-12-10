@@ -64,7 +64,7 @@ You can download Kafkactl from the [GitHub releases page](https://github.com/mic
 - Windows
 - Linux
 
-Alternatively, you can use the Docker images available on [Docker Hub](https://hub.docker.com/repository/docker/michelin/kafkactl);
+Alternatively, you can use the Docker images available on [Docker Hub](https://hub.docker.com/repository/docker/michelin/kafkactl):
 
 - The `kafkactl:<version>` images contains Kafkactl as a JAR application.
 - The `kafkactl:<version>-native` images contains Kafkactl as a native binary.
