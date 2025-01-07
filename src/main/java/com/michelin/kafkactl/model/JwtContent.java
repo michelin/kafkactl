@@ -33,7 +33,7 @@ public class JwtContent {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class RoleBinding {
-        private String namespace;
+        private List<String> namespaces;
         private List<Verb> verbs;
         private List<String> resourceTypes;
 
