@@ -11,6 +11,7 @@ import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -75,6 +76,8 @@ public class AuthInfo extends HelpHook implements Callable<Integer> {
                             ))
                         .build())
                     )
+                    .sorted(Comparator.comparing(roleBinding -> (String) roleBinding.getSpec().get("namespace"),
+                        Comparator.naturalOrder()))
                     .toList();
 
                 formatService.displayList(AUTH_INFO, roleBindings, output, commandSpec);
