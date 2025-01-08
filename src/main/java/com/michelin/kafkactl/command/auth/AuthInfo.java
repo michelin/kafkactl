@@ -74,7 +74,8 @@ public class AuthInfo extends HelpHook implements Callable<Integer> {
                                 "verbs", roleBinding.getVerbs(),
                                 "resources", roleBinding.getResourceTypes()
                             ))
-                        .build())
+                            .build()
+                        )
                     )
                     .sorted(Comparator.comparing(roleBinding -> (String) roleBinding.getSpec().get("namespace"),
                         Comparator.naturalOrder()))
