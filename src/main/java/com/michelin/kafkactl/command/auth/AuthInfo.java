@@ -56,7 +56,11 @@ public class AuthInfo extends HelpHook implements Callable<Integer> {
             JwtContent jwtContent = loginService.readJwtFile();
 
             boolean isAdmin = !jwtContent.getRoles().isEmpty() && jwtContent.getRoles().contains("isAdmin()");
-            commandSpec.commandLine().getOut().println((isAdmin ? "Admin " : "User ") + jwtContent.getSub() + " authenticated.");
+            commandSpec.commandLine().getOut().println(
+                (isAdmin ? "Admin " : "User ")
+                + jwtContent.getSub()
+                + " authenticated."
+            );
 
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(jwtContent.getExp() * 1000);
