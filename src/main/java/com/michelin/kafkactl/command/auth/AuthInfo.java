@@ -55,9 +55,8 @@ public class AuthInfo extends HelpHook implements Callable<Integer> {
         } else {
             JwtContent jwtContent = loginService.readJwtFile();
 
-            boolean isAdmin = (!jwtContent.getRoles().isEmpty() && jwtContent.getRoles().contains("isAdmin()"));
-            commandSpec.commandLine().getOut().println((isAdmin ? "Admin " : "User ")
-                + jwtContent.getSub() + " authenticated.");
+            boolean isAdmin = !jwtContent.getRoles().isEmpty() && jwtContent.getRoles().contains("isAdmin()");
+            commandSpec.commandLine().getOut().println((isAdmin ? "Admin " : "User ") + jwtContent.getSub() + " authenticated.");
 
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(jwtContent.getExp() * 1000);
@@ -77,8 +76,10 @@ public class AuthInfo extends HelpHook implements Callable<Integer> {
                             .build()
                         )
                     )
-                    .sorted(Comparator.comparing(roleBinding -> (String) roleBinding.getSpec().get("namespace"),
-                        Comparator.naturalOrder()))
+                    .sorted(Comparator.comparing(
+                        roleBinding -> (String) roleBinding.getSpec().get("namespace"),
+                        Comparator.naturalOrder())
+                    )
                     .toList();
 
                 formatService.displayList(AUTH_INFO, roleBindings, output, commandSpec);
