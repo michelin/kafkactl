@@ -213,7 +213,6 @@ Description: Get the JWT token information.
 Options:
   -h, --help              Show this help message and exit.
   -o, --output=<output>   Output format. One of: yaml|table
-
 ```
 
 Example(s):

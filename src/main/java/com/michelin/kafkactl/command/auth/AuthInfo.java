@@ -11,6 +11,7 @@ import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -54,14 +55,12 @@ public class AuthInfo extends HelpHook implements Callable<Integer> {
         } else {
             JwtContent jwtContent = loginService.readJwtFile();
 
-            StringBuilder stringBuilder = new StringBuilder();
-            if (!jwtContent.getRoles().isEmpty() && jwtContent.getRoles().contains("isAdmin()")) {
-                stringBuilder.append("Admin ");
-            } else {
-                stringBuilder.append("User ");
-            }
-            stringBuilder.append(jwtContent.getSub()).append(" authenticated.");
-            commandSpec.commandLine().getOut().println(stringBuilder);
+            boolean isAdmin = !jwtContent.getRoles().isEmpty() && jwtContent.getRoles().contains("isAdmin()");
+            commandSpec.commandLine().getOut().println(
+                (isAdmin ? "Admin " : "User ")
+                + jwtContent.getSub()
+                + " authenticated."
+            );
 
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(jwtContent.getExp() * 1000);
@@ -70,13 +69,21 @@ public class AuthInfo extends HelpHook implements Callable<Integer> {
             if (!jwtContent.getRoleBindings().isEmpty()) {
                 List<Resource> roleBindings = jwtContent.getRoleBindings()
                     .stream()
-                    .map(roleBinding -> Resource.builder()
-                        .spec(Map.of(
-                            "namespace", roleBinding.getNamespace(),
-                            "verbs", roleBinding.getVerbs(),
-                            "resources", roleBinding.getResourceTypes()
-                        ))
-                        .build())
+                    .flatMap(roleBinding -> roleBinding.getNamespaces()
+                        .stream()
+                        .map(namespace -> Resource.builder()
+                            .spec(Map.of(
+                                "namespace", namespace,
+                                "verbs", roleBinding.getVerbs(),
+                                "resources", roleBinding.getResourceTypes()
+                            ))
+                            .build()
+                        )
+                    )
+                    .sorted(Comparator.comparing(
+                        roleBinding -> (String) roleBinding.getSpec().get("namespace"),
+                        Comparator.naturalOrder())
+                    )
                     .toList();
 
                 formatService.displayList(AUTH_INFO, roleBindings, output, commandSpec);

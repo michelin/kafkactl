@@ -309,11 +309,11 @@ class LoginServiceTest {
 
         assertIterableEquals(List.of("isAdmin()"), actual.getRoles());
 
-        assertEquals("anotherNamespace", actual.getRoleBindings().getFirst().getNamespace());
-        assertIterableEquals(List.of(GET), actual.getRoleBindings().get(0).getVerbs());
-        assertIterableEquals(List.of("quota"), actual.getRoleBindings().get(0).getResourceTypes());
+        assertIterableEquals(List.of("anotherNamespace"), actual.getRoleBindings().getFirst().getNamespaces());
+        assertIterableEquals(List.of(GET), actual.getRoleBindings().getFirst().getVerbs());
+        assertIterableEquals(List.of("quota"), actual.getRoleBindings().getFirst().getResourceTypes());
 
-        assertEquals("anotherNamespace", actual.getRoleBindings().get(1).getNamespace());
+        assertIterableEquals(List.of("anotherNamespace"), actual.getRoleBindings().get(1).getNamespaces());
         assertIterableEquals(List.of(GET, POST, PUT, DELETE), actual.getRoleBindings().get(1).getVerbs());
         assertIterableEquals(List.of("schemas", "schemas/config", "topics", "topics/import", "topics/delete-records",
             "connectors", "connectors/import", "connectors/change-state", "connect-clusters", "connect-clusters/vaults",
