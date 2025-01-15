@@ -7,6 +7,7 @@ on:
 
 jobs:
   build-jar:
+    name: Release JAR
     runs-on: ubuntu-latest
     steps:
       - name: Docker login
@@ -60,7 +61,7 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v5
         id: build_changelog
         with:
-          configuration: "changelog-builder.json"
+          configuration: 'changelog-builder.json'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -74,10 +75,25 @@ jobs:
           prerelease: true
           allowUpdates: true
 
-  build-linux:
-    runs-on: ubuntu-latest
+  release-native:
+    name: Release Native Image ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
+        include:
+          - os: 'ubuntu-latest'
+            platform: 'linux-amd64'
+            extension: ''
+          - os: 'macos-latest'
+            platform: 'darwin-arm64'
+            extension: ''
+          - os: 'windows-latest'
+            platform: 'windows-amd64'
+            extension: '.exe'
     steps:
       - name: Docker login
+        if: matrix.os == 'ubuntu-latest'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.MICHELIN_DOCKER_HUB_USERNAME }}
@@ -109,13 +125,14 @@ jobs:
           echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
 
       - name: Docker
+        if: matrix.os == 'ubuntu-latest'
         run: |
           LATEST_VERSION=$(git tag -l --sort=-version:refname | head -1 | cut -d 'v' -f 2)
-          if [ "$LATEST_VERSION" == "${{ steps.build_jar.outputs.current_version }}" ]; then 
-             echo "Latest version is $LATEST_VERSION. Current version is ${{ steps.build_jar.outputs.current_version }}. Pushing latest tag."
+          if [ "$LATEST_VERSION" == "${{ steps.build_native.outputs.current_version }}" ]; then 
+             echo "Latest version is $LATEST_VERSION. Current version is ${{ steps.build_native.outputs.current_version }}. Pushing latest tag."
             ./gradlew dockerBuildNative dockerPushNative -PreleaseLatest
           else 
-             echo "Latest version is $LATEST_VERSION. Current version is ${{ steps.build_jar.outputs.current_version }}. Not pushing latest tag."
+             echo "Latest version is $LATEST_VERSION. Current version is ${{ steps.build_native.outputs.current_version }}. Not pushing latest tag."
             ./gradlew dockerBuildNative dockerPushNative
           fi
 
@@ -123,65 +140,19 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v5
         id: build_changelog
         with:
-          configuration: "changelog-builder.json"
+          configuration: 'changelog-builder.json'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rename file
+        run: mv ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}${{ matrix.extension }} ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ matrix.platform }}${{ matrix.extension }}
 
       - name: Update release
         uses: ncipollo/release-action@v1.15.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}
-          draft: true
-          prerelease: true
-          allowUpdates: true
-
-  build-windows:
-    runs-on: windows-latest
-    steps:
-      - name: Checkout project
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up GraalVM
-        uses: graalvm/setup-graalvm@v1
-        with:
-          distribution: 'graalvm'
-          java-version: '21'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle
-
-      - name: Configure Pagefile
-        uses: al-cheb/configure-pagefile-action@v1.4
-
-      - name: Build
-        run: |
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          gradlew.bat nativeCompile
-        shell: cmd
-
-      - name: Generate release changelog
-        uses: mikepenz/release-changelog-builder-action@v5
-        id: build_changelog
-        with:
-          configuration: "changelog-builder.json"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update release
-        uses: ncipollo/release-action@v1.15.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-*.exe
+          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ matrix.platform }}${{ matrix.extension }}
           draft: true
           prerelease: true
           allowUpdates: true

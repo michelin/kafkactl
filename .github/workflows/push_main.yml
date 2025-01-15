@@ -7,6 +7,7 @@ on:
 
 jobs:
   build-jar:
+    name: Build JAR
     runs-on: ubuntu-latest
     steps:
       - name: Docker login
@@ -58,8 +59,8 @@ jobs:
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'
 
-      - name: Docker
-        run: ./gradlew dockerBuild dockerPush
+      - name: Rename file
+        run: mv ${{ github.workspace }}/build/libs/kafkactl-${{ steps.build_jar.outputs.current_version }}.jar ${{ github.workspace }}/build/libs/kafkactl.jar
 
       - name: Upload
         uses: actions/upload-artifact@v4
@@ -67,10 +68,28 @@ jobs:
           name: kafkactl-jar
           path: ${{ github.workspace }}/build/libs/kafkactl-${{ steps.build_jar.outputs.current_version }}.jar
 
-  build-linux:
-    runs-on: ubuntu-latest
+      - name: Docker
+        run: ./gradlew dockerBuild dockerPush
+
+  build-native:
+    name: Build Native Image ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
+        include:
+          - os: 'ubuntu-latest'
+            platform: 'linux-amd64'
+            extension: ''
+          - os: 'macos-latest'
+            platform: 'darwin-arm64'
+            extension: ''
+          - os: 'windows-latest'
+            platform: 'windows-amd64'
+            extension: '.exe'
     steps:
       - name: Docker login
+        if: matrix.os == 'ubuntu-latest'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.MICHELIN_DOCKER_HUB_USERNAME }}
@@ -111,51 +130,15 @@ jobs:
           ./gradlew nativeCompile
           echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
 
+      - name: Rename file
+        run: mv ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}${{ matrix.extension }} ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ matrix.platform }}${{ matrix.extension }}
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: kafkactl-${{ matrix.platform }}
+          path: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}${{ matrix.extension }}
+
       - name: Docker
+        if: matrix.os == 'ubuntu-latest'
         run: ./gradlew dockerBuildNative dockerPushNative
-
-      - name: Upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: kafkactl-linux
-          path: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}
-
-  build-windows:
-    runs-on: windows-latest
-    steps:
-      - name: Checkout project
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up GraalVM
-        uses: graalvm/setup-graalvm@v1
-        with:
-          distribution: 'graalvm'
-          java-version: '21'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle
-
-      - name: Configure Pagefile
-        uses: al-cheb/configure-pagefile-action@v1.4
-
-      - name: Check Style
-        run: ./gradlew checkstyleMain checkstyleTest
-
-      - name: Build
-        run: |
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          gradlew.bat nativeCompile
-        shell: cmd
-
-      - name: Upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: kafkactl-windows
-          path: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-*.exe
