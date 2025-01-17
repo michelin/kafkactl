@@ -114,7 +114,7 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
 
       - name: Build
-        id: build_native
+        id: build_native_linux_macos
         run: |
           ./gradlew nativeCompile
           echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
@@ -123,11 +123,11 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           LATEST_VERSION=$(git tag -l --sort=-version:refname | head -1 | cut -d 'v' -f 2)
-          if [ "$LATEST_VERSION" == "${{ steps.build_native.outputs.current_version }}" ]; then 
-             echo "Latest version is $LATEST_VERSION. Current version is ${{ steps.build_native.outputs.current_version }}. Pushing latest tag."
+          if [ "$LATEST_VERSION" == "${{ steps.build_native_linux_macos.outputs.current_version }}" ]; then 
+             echo "Latest version is $LATEST_VERSION. Current version is ${{ steps.build_native_linux_macos.outputs.current_version }}. Pushing latest tag."
             ./gradlew dockerBuildNative dockerPushNative -PreleaseLatest
           else 
-             echo "Latest version is $LATEST_VERSION. Current version is ${{ steps.build_native.outputs.current_version }}. Not pushing latest tag."
+             echo "Latest version is $LATEST_VERSION. Current version is ${{ steps.build_native_linux_macos.outputs.current_version }}. Not pushing latest tag."
             ./gradlew dockerBuildNative dockerPushNative
           fi
 
@@ -140,14 +140,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Rename file
-        run: mv ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }} ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}-${{ matrix.platform }}
+        run: mv ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_linux_macos.outputs.current_version }} ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_linux_macos.outputs.current_version }}-${{ matrix.platform }}
 
       - name: Update release
         uses: ncipollo/release-action@v1.15.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ matrix.platform }}${{ matrix.extension }}
+          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_linux_macos.outputs.current_version }}-${{ matrix.platform }}
           draft: true
           prerelease: true
           allowUpdates: true
@@ -191,14 +191,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Rename file
-        run: Rename-Item -Path ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}.exe -NewName kafkactl-${{ steps.build_native.outputs.current_version }}-windows-amd64.exe
+        run: Rename-Item -Path ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_windows.outputs.current_version }}.exe -NewName kafkactl-${{ steps.build_native_windows.outputs.current_version }}-windows-amd64.exe
 
       - name: Update release
         uses: ncipollo/release-action@v1.15.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}-windows-amd64.exe
+          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_windows.outputs.current_version }}-windows-amd64.exe
           draft: true
           prerelease: true
           allowUpdates: true

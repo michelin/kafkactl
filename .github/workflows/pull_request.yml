@@ -146,8 +146,11 @@ jobs:
           $version=(& .\gradlew.bat properties --no-daemon --console=plain -q | Select-String "^version:" | ForEach-Object { ($_ -split ":")[1].Trim() })
           "current_version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
+      - name: Rename file
+        run: Rename-Item -Path ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_windows.outputs.current_version }}.exe -NewName kafkactl-${{ steps.build_native_windows.outputs.current_version }}-windows-amd64.exe
+
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: kafkactl-windows-amd64
-          path: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_windows.outputs.current_version }}.exe
+          path: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_windows.outputs.current_version }}-windows-amd64.exe
