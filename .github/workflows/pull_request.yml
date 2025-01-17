@@ -72,10 +72,8 @@ jobs:
         include:
           - os: 'ubuntu-latest'
             platform: 'linux-amd64'
-            extension: ''
           - os: 'macos-latest'
             platform: 'darwin-arm64'
-            extension: ''
     steps:
       - name: Checkout project
         uses: actions/checkout@v4

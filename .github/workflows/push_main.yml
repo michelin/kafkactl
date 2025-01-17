@@ -59,9 +59,6 @@ jobs:
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'
 
-      - name: Rename file
-        run: mv ${{ github.workspace }}/build/libs/kafkactl-${{ steps.build_jar.outputs.current_version }}.jar ${{ github.workspace }}/build/libs/kafkactl.jar
-
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
@@ -71,22 +68,17 @@ jobs:
       - name: Docker
         run: ./gradlew dockerBuild dockerPush
 
-  build-native:
+  build-native-linux-macos:
     name: Build Native Image ${{ matrix.platform }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
+        os: [ 'ubuntu-latest', 'macos-latest' ]
         include:
           - os: 'ubuntu-latest'
             platform: 'linux-amd64'
-            extension: ''
           - os: 'macos-latest'
             platform: 'darwin-arm64'
-            extension: ''
-          - os: 'windows-latest'
-            platform: 'windows-amd64'
-            extension: '.exe'
     steps:
       - name: Docker login
         if: matrix.os == 'ubuntu-latest'
@@ -107,13 +99,6 @@ jobs:
           java-version: '21'
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
       - name: Cache Gradle packages
         uses: actions/cache@v4
         with:
@@ -125,20 +110,56 @@ jobs:
         run: ./gradlew checkstyleMain checkstyleTest
 
       - name: Build
-        id: build_native
+        id: build_native_linux_macos
         run: |
           ./gradlew nativeCompile
           echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
-
-      - name: Rename file
-        run: mv ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}${{ matrix.extension }} ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ matrix.platform }}${{ matrix.extension }}
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: kafkactl-${{ matrix.platform }}
-          path: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}${{ matrix.extension }}
+          path: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}
 
       - name: Docker
         if: matrix.os == 'ubuntu-latest'
         run: ./gradlew dockerBuildNative dockerPushNative
+
+  build-native-windows:
+    name: Build Native Image windows-amd64
+    runs-on: windows-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: 'graalvm'
+          java-version: '21'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+
+      - name: Check Style
+        run: .\gradlew.bat checkstyleMain checkstyleTest
+
+      - name: Build
+        id: build_native_windows
+        run: |
+          .\gradlew.bat nativeCompile
+          $version=(& .\gradlew.bat properties --no-daemon --console=plain -q | Select-String "^version:" | ForEach-Object { ($_ -split ":")[1].Trim() })
+          "current_version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: kafkactl-windows-amd64
+          path: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_windows.outputs.current_version }}.exe

@@ -75,22 +75,17 @@ jobs:
           prerelease: true
           allowUpdates: true
 
-  release-native:
+  release-native-linux-macos:
     name: Release Native Image ${{ matrix.platform }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
+        os: [ 'ubuntu-latest', 'macos-latest' ]
         include:
           - os: 'ubuntu-latest'
             platform: 'linux-amd64'
-            extension: ''
           - os: 'macos-latest'
             platform: 'darwin-arm64'
-            extension: ''
-          - os: 'windows-latest'
-            platform: 'windows-amd64'
-            extension: '.exe'
     steps:
       - name: Docker login
         if: matrix.os == 'ubuntu-latest'
@@ -145,7 +140,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Rename file
-        run: mv ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}${{ matrix.extension }} ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ matrix.platform }}${{ matrix.extension }}
+        run: mv ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }} ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}-${{ matrix.platform }}
 
       - name: Update release
         uses: ncipollo/release-action@v1.15.0
@@ -153,6 +148,57 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
           artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ matrix.platform }}${{ matrix.extension }}
+          draft: true
+          prerelease: true
+          allowUpdates: true
+
+  release-native-windows:
+    name: Build Native Image windows-amd64
+    runs-on: windows-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: 'graalvm'
+          java-version: '21'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+
+      - name: Build
+        id: build_native_windows
+        run: |
+          .\gradlew.bat nativeCompile
+          $version=(& .\gradlew.bat properties --no-daemon --console=plain -q | Select-String "^version:" | ForEach-Object { ($_ -split ":")[1].Trim() })
+          "current_version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Generate release changelog
+        uses: mikepenz/release-changelog-builder-action@v5
+        id: build_changelog
+        with:
+          configuration: 'changelog-builder.json'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rename file
+        run: Rename-Item -Path ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}.exe -NewName kafkactl-${{ steps.build_native.outputs.current_version }}-windows-amd64.exe
+
+      - name: Update release
+        uses: ncipollo/release-action@v1.15.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: ${{ steps.build_changelog.outputs.changelog }}
+          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native.outputs.current_version }}-windows-amd64.exe
           draft: true
           prerelease: true
           allowUpdates: true
