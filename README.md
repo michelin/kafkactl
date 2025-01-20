@@ -15,7 +15,7 @@
 
 [Download](#download) • [Configuration](#configuration) • [Ns4Kafka](https://github.com/michelin/ns4kafka)
 
-Command-line Interface for Ns4Kafka.
+Command-line interface for Ns4Kafka.
 
 Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descriptors.
 
