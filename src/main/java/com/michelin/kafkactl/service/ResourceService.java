@@ -30,6 +30,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;
 
@@ -39,8 +40,6 @@ import picocli.CommandLine.ParameterException;
 @Singleton
 public class ResourceService {
     public static final String SCHEMA_FILE = "schemaFile";
-
-    private final Pattern searchPattern = Pattern.compile("(,?[a-zA-Z]*=[\\w\\-\\.]*)+");
 
     private final Pattern keyValuePattern = Pattern.compile(",?(?<key>[a-zA-Z]*)=(?<value>[\\w\\-\\.]*)");
 
@@ -99,10 +98,8 @@ public class ResourceService {
                     commandSpec.commandLine().getOut()
                         .println("No " + formatService.prettifyKind(apiResources.getFirst().getKind()).toLowerCase()
                             + (searchParam.isEmpty() ? " to display."
-                                : ":\n" + String.join("", searchParam.keySet()
-                                    .stream()
-                                    .map(key -> "- has " + key + " \"" + searchParam.get(key) + "\".\n")
-                                    .toList())));
+                                : " matches name \"" + resourceName + "\""
+                                    + (search.map(s -> " and search \"" + s + "\".").orElse("."))));
                 }
                 return 0;
             } catch (HttpClientResponseException exception) {
@@ -538,20 +535,18 @@ public class ResourceService {
      * @return A key value mapping of query parameters and query values
      */
     public Map<String, String> parseSearchOption(String search) throws HttpClientResponseException {
-        if (!search.isEmpty() && !searchPattern.matcher(search).matches()) {
-            throw new HttpClientResponseException("\"search\" format should be: "
-                + "\"param1:value1,param2:value2\"", HttpResponse.badRequest());
-        }
+        return Stream.of(search.split("[,;]"))
+            .filter(s -> !s.isEmpty())
+            .map(keyValue -> {
+                Matcher matcher = keyValuePattern.matcher(keyValue);
 
-        return searchPattern.matcher(search)
-            .results()
-            .map(result -> {
-                Matcher matcher = keyValuePattern.matcher(result.group(1));
-                return matcher.matches() ? List.of(matcher.group("key"), matcher.group("value")) : List.of();
+                if (!matcher.matches()) {
+                    throw new HttpClientResponseException("\"search\" format should be: "
+                + "\"param:value\" separated by commas", HttpResponse.badRequest());
+                }
+
+                return List.of(matcher.group("key"), matcher.group("value"));
             })
-            .filter(keyValueList -> !keyValueList.isEmpty())
-            .collect(Collectors.toMap(
-                keyValueList -> (String) keyValueList.getFirst(),
-                keyValueList -> (String) keyValueList.get(1)));
+            .collect(Collectors.toMap(List::getFirst, List::getLast));
     }
 }
