@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;
@@ -37,6 +39,10 @@ import picocli.CommandLine.ParameterException;
 @Singleton
 public class ResourceService {
     public static final String SCHEMA_FILE = "schemaFile";
+
+    private final Pattern searchPattern = Pattern.compile("(,?[a-zA-Z]*=[\\w\\-\\.]*)+");
+
+    private final Pattern keyValuePattern = Pattern.compile(",?(?<key>[a-zA-Z]*)=(?<value>[\\w\\-\\.]*)");
 
     @Inject
     @ReflectiveAccess
@@ -67,22 +73,36 @@ public class ResourceService {
      *
      * @param apiResources The resource type
      * @param namespace    The namespace
-     * @param commandSpec  The command that triggered the action
+     * @param search       The search param to filter resources
      * @param resourceName The resource name
+     * @param output       The output format
+     * @param commandSpec  The command that triggered the action
      * @return A map of resource type and list of resources
      */
-    public int list(List<ApiResource> apiResources, String namespace, String output,
-                    CommandSpec commandSpec, String resourceName) {
+    public int list(List<ApiResource> apiResources,
+                    String namespace,
+                    String resourceName,
+                    Optional<String> search,
+                    String output,
+                    CommandSpec commandSpec) {
         // Get a single kind of resources
         if (apiResources.size() == 1) {
             try {
-                List<Resource> resources = listResourcesWithType(apiResources.getFirst(), namespace, resourceName);
+                // Parse the search option
+                Map<String, String> searchParam = parseSearchOption(search.orElse(""));
+
+                List<Resource> resources = listResourcesWithType(apiResources.getFirst(),
+                    namespace, resourceName, searchParam);
                 if (!resources.isEmpty()) {
                     formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
                 } else {
                     commandSpec.commandLine().getOut()
                         .println("No " + formatService.prettifyKind(apiResources.getFirst().getKind()).toLowerCase()
-                            + (resourceName.equals("*") ? " to display." : " matches \"" + resourceName + "\"."));
+                            + (searchParam.isEmpty() ? " to display."
+                                : ":\n" + String.join("", searchParam.keySet()
+                                    .stream()
+                                    .map(key -> "- has " + key + " \"" + searchParam.get(key) + "\".\n")
+                                    .toList())));
                 }
                 return 0;
             } catch (HttpClientResponseException exception) {
@@ -96,7 +116,7 @@ public class ResourceService {
             .stream()
             .map(apiResource -> {
                 try {
-                    List<Resource> resources = listResourcesWithType(apiResource, namespace, resourceName);
+                    List<Resource> resources = listResourcesWithType(apiResource, namespace, resourceName, null);
                     if (!resources.isEmpty()) {
                         formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
                     }
@@ -115,14 +135,23 @@ public class ResourceService {
     /**
      * List all resources of given type.
      *
-     * @param apiResource The resource type
-     * @param namespace   The namespace
+     * @param apiResource  The resource type
+     * @param namespace    The namespace
+     * @param resourceName The resource name
+     * @param search       The resource search parameters mapping
      * @return A list of resources
      */
-    public List<Resource> listResourcesWithType(ApiResource apiResource, String namespace, String resourceName) {
+    public List<Resource> listResourcesWithType(ApiResource apiResource,
+                                                String namespace,
+                                                String resourceName,
+                                                Map<String, String> search) {
+        if (search != null && !resourceName.equals("*")) {
+            search.put("name", resourceName);
+        }
+
         return apiResource.isNamespaced()
             ? namespacedClient.list(namespace, apiResource.getPath(), resourceName, loginService.getAuthorization())
-            : nonNamespacedClient.list(loginService.getAuthorization(), apiResource.getPath(), resourceName);
+            : nonNamespacedClient.list(loginService.getAuthorization(), apiResource.getPath(), search);
     }
 
     /**
@@ -183,7 +212,7 @@ public class ResourceService {
      * @param apiResource The resource type
      * @param namespace   The namespace
      * @param name        The resource name or wildcard
-     * @param version     The version of the resource, for schemas only.
+     * @param version     The version of the resource, for schemas only
      * @param dryRun      Is dry run mode or not?
      * @param commandSpec The command that triggered the action
      * @return true if deletion succeeded, false otherwise
@@ -500,5 +529,29 @@ public class ResourceService {
                             + ". Schema path must be relative to the CLI.");
                 }
             });
+    }
+
+    /**
+     * Create a mapping from the command line search option.
+     *
+     * @param search The string containing pairs of query parameters and query values
+     * @return A key value mapping of query parameters and query values
+     */
+    public Map<String, String> parseSearchOption(String search) throws HttpClientResponseException {
+        if (!search.isEmpty() && !searchPattern.matcher(search).matches()) {
+            throw new HttpClientResponseException("\"search\" format should be: "
+                + "\"param1:value1,param2:value2\"", HttpResponse.badRequest());
+        }
+
+        return searchPattern.matcher(search)
+            .results()
+            .map(result -> {
+                Matcher matcher = keyValuePattern.matcher(result.group(1));
+                return matcher.matches() ? List.of(matcher.group("key"), matcher.group("value")) : List.of();
+            })
+            .filter(keyValueList -> !keyValueList.isEmpty())
+            .collect(Collectors.toMap(
+                keyValueList -> (String) keyValueList.getFirst(),
+                keyValueList -> (String) keyValueList.get(1)));
     }
 }

@@ -49,6 +49,11 @@ public class Get extends AuthenticatedHook {
         defaultValue = "*")
     public String resourceName;
 
+    @Option(names = {"--search"},
+            description = "Search resources based on parameters.",
+            arity = "0..1")
+    public Optional<String> search;
+
     @Option(names = {"-o", "--output"}, description = "Output format. One of: yaml|table", defaultValue = "table")
     public String output;
 
@@ -67,7 +72,7 @@ public class Get extends AuthenticatedHook {
         validateOutput();
 
         try {
-            return resourceService.list(apiResources, getNamespace(), output, commandSpec, resourceName);
+            return resourceService.list(apiResources, getNamespace(), resourceName, search, output, commandSpec);
         } catch (HttpClientResponseException e) {
             formatService.displayError(e, apiResources.getFirst().getKind(), resourceName, commandSpec);
             return 1;

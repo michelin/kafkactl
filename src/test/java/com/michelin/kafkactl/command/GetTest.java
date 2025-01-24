@@ -144,7 +144,7 @@ class GetTest {
         when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
         HttpClientResponseException e = new HttpClientResponseException("error", HttpResponse.serverError());
-        when(resourceService.list(any(), any(), any(), any(), any()))
+        when(resourceService.list(any(), any(), any(), any(), any(), any()))
             .thenThrow(e);
 
         CommandLine cmd = new CommandLine(get);
@@ -172,7 +172,7 @@ class GetTest {
         when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
 
-        when(resourceService.list(any(), any(), any(), any(), any()))
+        when(resourceService.list(any(), any(), any(), any(), any(), any()))
             .thenReturn(0);
 
         CommandLine cmd = new CommandLine(get);
@@ -182,11 +182,12 @@ class GetTest {
         int code = cmd.execute("topics", "myTopic", "-n", "namespace");
         assertEquals(0, code);
         verify(resourceService)
-            .list(Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "myTopic");
+            .list(Collections.singletonList(apiResource), "namespace",
+                "myTopic", Optional.empty(), TABLE, cmd.getCommandSpec());
     }
 
     @Test
-    void shouldGetAllTopicsSuccess() {
+    void shouldGetAllTopics() {
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -202,7 +203,7 @@ class GetTest {
 
         when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
-        when(resourceService.list(any(), any(), any(), any(), any()))
+        when(resourceService.list(any(), any(), any(), any(), any(), any()))
             .thenReturn(0);
 
         CommandLine cmd = new CommandLine(get);
@@ -212,7 +213,8 @@ class GetTest {
         int code = cmd.execute("topics", "-n", "namespace");
         assertEquals(0, code);
         verify(resourceService)
-            .list(Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "*");
+            .list(Collections.singletonList(apiResource), "namespace",
+                "*", Optional.empty(), TABLE, cmd.getCommandSpec());
     }
 
     @Test
@@ -242,7 +244,7 @@ class GetTest {
 
         when(apiResourcesService.listResourceDefinitions())
             .thenReturn(List.of(apiResource, nonNamespacedApiResource));
-        when(resourceService.list(any(), any(), any(), any(), any()))
+        when(resourceService.list(any(), any(), any(), any(), any(), any()))
             .thenReturn(0);
 
         CommandLine cmd = new CommandLine(get);
@@ -250,6 +252,7 @@ class GetTest {
         int code = cmd.execute("all");
         assertEquals(0, code);
         verify(resourceService)
-            .list(Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "*");
+            .list(Collections.singletonList(apiResource), "namespace",
+                "*", Optional.empty(), TABLE, cmd.getCommandSpec());
     }
 }

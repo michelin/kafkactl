@@ -11,6 +11,7 @@ import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.http.client.annotation.Client;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Cluster resource client.
@@ -31,11 +32,15 @@ public interface ClusterResourceClient {
                               @QueryValue boolean dryrun);
 
     @Post("/api/{kind}{?dryrun}")
-    HttpResponse<Resource> apply(@Header("Authorization") String token, String kind, @Body Resource json,
+    HttpResponse<Resource> apply(@Header("Authorization") String token,
+                                 String kind,
+                                 @Body Resource json,
                                  @QueryValue boolean dryrun);
 
-    @Get("/api/{kind}{?name}")
-    List<Resource> list(@Header("Authorization") String token, String kind, @QueryValue String name);
+    @Get("/api/{kind}{?search*}")
+    List<Resource> list(@Header("Authorization") String token,
+                        String kind,
+                        @QueryValue Map<String, String> search);
 
     @Get("/api/{kind}/{resource}")
     HttpResponse<Resource> get(@Header("Authorization") String token, String kind, String resource);

@@ -75,7 +75,7 @@ public interface NamespacedResourceClient {
      * @param token     The auth token
      * @return The list of resources
      */
-    @Get("{namespace}/{kind}{?name}")
+    @Get("{namespace}/{kind}{?name,topic}")
     List<Resource> list(
         String namespace,
         String kind,
