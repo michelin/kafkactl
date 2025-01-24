@@ -39,7 +39,10 @@ public class Get extends AuthenticatedHook {
     @ReflectiveAccess
     private FormatService formatService;
 
-    @Parameters(index = "0", description = "Resource type or 'all' to display resources of all types.", arity = "1")
+    @Parameters(
+        index = "0",
+        description = "Resource type or 'all' to display resources of all types.",
+        arity = "1")
     public String resourceType;
 
     @Parameters(
@@ -49,12 +52,16 @@ public class Get extends AuthenticatedHook {
         defaultValue = "*")
     public String resourceName;
 
-    @Option(names = {"--search"},
-            description = "Search resources based on parameters.",
-            arity = "0..1")
+    @Option(
+        names = {"--search"},
+        description = "Search resources based on parameters.",
+        arity = "0..1")
     public Optional<String> search;
 
-    @Option(names = {"-o", "--output"}, description = "Output format. One of: yaml|table", defaultValue = "table")
+    @Option(
+        names = {"-o", "--output"},
+        description = "Output format. One of: yaml|table",
+        defaultValue = "table")
     public String output;
 
     /**
