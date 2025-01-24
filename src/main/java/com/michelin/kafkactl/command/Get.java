@@ -54,7 +54,7 @@ public class Get extends AuthenticatedHook {
 
     @Option(
         names = {"--search"},
-        description = "Search resources based on parameters.",
+        description = "Search resources based on parameters. Format: \"param:value\" separated by commas",
         arity = "0..1")
     public Optional<String> search;
 
