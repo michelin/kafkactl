@@ -916,6 +916,7 @@ metadata:
     contacts: namespace.owner@example.com
 spec:
   kafkaUser: kafkaServiceAccount
+  protectionEnabled: false
   connectClusters:
     - myConnectCluster
   topicValidator:
@@ -972,8 +973,11 @@ spec:
   configuration.
 - `spec.kafkaUser` is the Kafka principal. It should refer to an Account ID. It will be used to create ACLs on this
   service account.
+- `spec.protectionEnabled` is a boolean defining if the namespace is protected. Protected namespaces are not able to grant public ACL
+ or to grant ACL to public namespaces. Only protected namespaces can consume or produce records in protected namespaces
+ resources. The field is optional and by default, the namespace is public.
 - `spec.connectClusters` is a list of Kafka Connect clusters. It should refer to a Kafka Connect cluster declared in the
-  Ns4Kafka configuration.
+ Ns4Kafka configuration.
 - `spec.topicValidator` is a list of constraints for topics.
 - `spec.connectValidator` is a list of constraints for connectors.
 
