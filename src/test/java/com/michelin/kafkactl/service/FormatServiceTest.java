@@ -187,7 +187,7 @@ class FormatServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        formatService.displayNoResource(List.of(apiResource), Map.of(), "*", cmd.getCommandSpec());
+        formatService.displayNoResource(List.of(apiResource), null, "*", cmd.getCommandSpec());
 
         assertTrue(sw.toString().contains("No topic to display"));
     }

@@ -145,16 +145,26 @@ public class FormatService {
                                   Map<String, String> search,
                                   String resourceName,
                                   CommandSpec commandSpec) {
-        commandSpec.commandLine().getOut()
-            .println("No " + prettifyKind(apiResources.getFirst().getKind()).toLowerCase()
-                + (search == null || search.isEmpty()
-                    ? (resourceName.equals("*")
-                        ? " to display."
-                        : " matches name \"" + resourceName + "\".")
-                    : (resourceName.equals("*")
-                        ? " matches search \"" + formatMapToString(search) + "\"."
-                        : " matches name \"" + resourceName
-                            + "\" and search \"" + formatMapToString(search) + "\".")));
+        String resource = prettifyKind(apiResources.getFirst().getKind()).toLowerCase();
+
+        if (search == null || search.isEmpty()) {
+            if (resourceName.equals("*")) {
+                commandSpec.commandLine().getOut()
+                    .println("No " + resource + " to display.");
+            } else {
+                commandSpec.commandLine().getOut()
+                    .println("No " + resource + " matches name \"" + resourceName + "\".");
+            }
+        } else {
+            if (resourceName.equals("*")) {
+                commandSpec.commandLine().getOut()
+                    .println("No " + resource + " matches search \"" + formatMapToString(search) + "\".");
+            } else {
+                commandSpec.commandLine().getOut()
+                    .println("No " + resource + " matches name \"" + resourceName
+                        + "\" and search \"" + formatMapToString(search) + "\".");
+            }
+        }
     }
 
     /**
