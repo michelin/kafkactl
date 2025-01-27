@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;
