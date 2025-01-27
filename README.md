@@ -540,7 +540,7 @@ Options:
                               resources.
   -o, --output=<output>     Output format. One of: yaml|table
       --search[=<search>]   Search resources based on parameters. Format:
-                              "param:value" separated by commas
+                              "param=value" separated by commas
   -v, --verbose             Enable the verbose mode.
 ```
 
