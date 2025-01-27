@@ -143,11 +143,6 @@ class ResourceServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        doCallRealMethod()
-            .when(formatService).prettifyKind(any());
-        when(namespacedClient.list(any(), any(), any(), any()))
-            .thenReturn(Collections.emptyList());
-
         ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
@@ -156,12 +151,17 @@ class ResourceServiceTest {
             .synchronizable(true)
             .build();
 
+        when(namespacedClient.list(any(), any(), any(), any()))
+            .thenReturn(Collections.emptyList());
+
         int actual = resourceService.list(
             Collections.singletonList(apiResource), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
-        assertTrue(sw.toString().contains("No topic to display."));
+
+        verify(formatService).displayNoResource(List.of(apiResource), Map.of(), "*", cmd.getCommandSpec());
+        verify(formatService, never()).displayList(any(), any(), any(), any());
     }
 
     @Test
@@ -342,7 +342,6 @@ class ResourceServiceTest {
             .synchronizable(true)
             .build();
 
-        doCallRealMethod().when(formatService).prettifyKind(any());
         when(namespacedClient.list(any(), any(), any(), any())).thenReturn(List.of());
 
         int actual = resourceService.list(
@@ -350,6 +349,7 @@ class ResourceServiceTest {
         );
 
         assertEquals(0, actual);
+        verify(formatService).displayNoResource(List.of(apiResource), Map.of(), "*-test", cmd.getCommandSpec());
         verify(formatService, never()).displayList(any(), any(), any(), any());
     }
 
@@ -359,9 +359,6 @@ class ResourceServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        doCallRealMethod().when(formatService).prettifyKind(any());
-        when(namespacedClient.list(any(), any(), any(), any())).thenReturn(List.of());
-
         ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
@@ -370,11 +367,14 @@ class ResourceServiceTest {
             .synchronizable(true)
             .build();
 
+        when(namespacedClient.list(any(), any(), any(), any())).thenReturn(List.of());
+
         int actual = resourceService.list(
             List.of(apiResource), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
+        verify(formatService).displayNoResource(List.of(apiResource), Map.of(), "*", cmd.getCommandSpec());
         verify(formatService, never()).displayList(any(), any(), any(), any());
     }
 
@@ -392,14 +392,16 @@ class ResourceServiceTest {
             .synchronizable(true)
             .build();
 
-        doCallRealMethod().when(formatService).prettifyKind(any());
+        Map<String, String> search = Map.of("param", "value");
+
         when(namespacedClient.list(any(), any(), any(), any())).thenReturn(List.of());
 
         int actual = resourceService.list(
-            List.of(apiResource), "namespace", "*", Map.of("param", "value"), TABLE, cmd.getCommandSpec()
+            List.of(apiResource), "namespace", "*", search, TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
+        verify(formatService).displayNoResource(List.of(apiResource), search, "*", cmd.getCommandSpec());
         verify(formatService, never()).displayList(any(), any(), any(), any());
     }
 
@@ -417,7 +419,6 @@ class ResourceServiceTest {
             .synchronizable(true)
             .build();
 
-        doCallRealMethod().when(formatService).prettifyKind(any());
         when(namespacedClient.list(any(), any(), any(), any())).thenReturn(List.of());
 
         int actual = resourceService.list(

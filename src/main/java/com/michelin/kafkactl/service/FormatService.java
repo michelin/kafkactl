@@ -3,6 +3,7 @@ package com.michelin.kafkactl.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.Status;
 import com.michelin.kafkactl.model.format.AgoFormat;
@@ -133,6 +134,30 @@ public class FormatService {
     }
 
     /**
+     * Format the display error message based on the search option and the resource name.
+     *
+     * @param apiResources The API resources list
+     * @param search       The search map
+     * @param resourceName The resource name
+     * @param commandSpec The command spec used to print the output
+     */
+    public void displayNoResource(List<ApiResource> apiResources,
+                                  Map<String, String> search,
+                                  String resourceName,
+                                  CommandSpec commandSpec) {
+        commandSpec.commandLine().getOut()
+            .println("No " + prettifyKind(apiResources.getFirst().getKind()).toLowerCase()
+                + (search == null || search.isEmpty()
+                    ? (resourceName.equals("*")
+                        ? " to display."
+                        : " matches name \"" + resourceName + "\".")
+                    : (resourceName.equals("*")
+                        ? " matches search \"" + formatMapToString(search) + "\"."
+                        : " matches name \"" + resourceName
+                            + "\" and search \"" + formatMapToString(search) + "\".")));
+    }
+
+    /**
      * Print the list of resources to table format.
      *
      * @param kind        The kind of resources
@@ -170,14 +195,7 @@ public class FormatService {
      * @return The prettified kind
      */
     public String prettifyKind(String kind) {
-
-
-        String t = kind.substring(0, 1).toUpperCase();
-
-        String t2 = kind.substring(1).replaceAll("(.)([A-Z])", "$1 $2");
-        String t3 = t2.toLowerCase();
-
-        return t + t3;
+        return kind.substring(0, 1).toUpperCase() + kind.substring(1).replaceAll("(.)([A-Z])", "$1 $2").toLowerCase();
     }
 
     /**

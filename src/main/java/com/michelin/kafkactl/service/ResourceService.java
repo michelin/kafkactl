@@ -89,16 +89,7 @@ public class ResourceService {
                 if (!resources.isEmpty()) {
                     formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
                 } else {
-                    commandSpec.commandLine().getOut()
-                        .println("No " + formatService.prettifyKind(apiResources.getFirst().getKind()).toLowerCase()
-                            + (search == null || search.isEmpty()
-                                ? (resourceName.equals("*")
-                                    ? " to display."
-                                    : " matches name \"" + resourceName + "\".")
-                                : (resourceName.equals("*")
-                                    ? " matches search \"" + formatService.formatMapToString(search) + "\"."
-                                    : " matches name \"" + resourceName
-                                        + "\" and search \"" + formatService.formatMapToString(search) + "\".")));
+                    formatService.displayNoResource(apiResources, search, resourceName, commandSpec);
                 }
                 return 0;
             } catch (HttpClientResponseException exception) {
