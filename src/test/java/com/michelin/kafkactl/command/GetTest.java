@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -155,6 +156,18 @@ class GetTest {
     }
 
     @Test
+    void shouldNotGetWhenBadSearchFormat() {
+        CommandLine cmd = new CommandLine(get);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        int code = cmd.execute("topics", "myTopic", "--search=badFormat");
+        assertEquals(2, code);
+        assertTrue(sw.toString().contains("Value for option option '--search' (<String=String>)"
+            + " should be in KEY=VALUE format but was badFormat"));
+    }
+
+    @Test
     void shouldGetOneResource() {
         when(configService.isCurrentContextValid())
             .thenReturn(true);
@@ -183,7 +196,7 @@ class GetTest {
         assertEquals(0, code);
         verify(resourceService)
             .list(Collections.singletonList(apiResource), "namespace",
-                "myTopic", Optional.empty(), TABLE, cmd.getCommandSpec());
+                "myTopic", null, TABLE, cmd.getCommandSpec());
     }
 
     @Test
@@ -214,7 +227,7 @@ class GetTest {
         assertEquals(0, code);
         verify(resourceService)
             .list(Collections.singletonList(apiResource), "namespace",
-                "*", Optional.empty(), TABLE, cmd.getCommandSpec());
+                "*", null, TABLE, cmd.getCommandSpec());
     }
 
     @Test
@@ -253,6 +266,6 @@ class GetTest {
         assertEquals(0, code);
         verify(resourceService)
             .list(Collections.singletonList(apiResource), "namespace",
-                "*", Optional.empty(), TABLE, cmd.getCommandSpec());
+                "*", null, TABLE, cmd.getCommandSpec());
     }
 }

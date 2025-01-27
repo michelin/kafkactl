@@ -97,7 +97,7 @@ class ResourceServiceTest {
             .thenReturn(Collections.singletonList(resource));
 
         int actual = resourceService.list(
-            Collections.singletonList(apiResource), "namespace", "*", Optional.empty(), TABLE, cmd.getCommandSpec()
+            Collections.singletonList(apiResource), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
@@ -130,7 +130,7 @@ class ResourceServiceTest {
             .thenReturn(Collections.singletonList(resource));
 
         int actual = resourceService.list(
-            Collections.singletonList(apiResource), "namespace", "*", Optional.empty(), TABLE, cmd.getCommandSpec()
+            Collections.singletonList(apiResource), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
@@ -157,7 +157,7 @@ class ResourceServiceTest {
             .build();
 
         int actual = resourceService.list(
-            Collections.singletonList(apiResource), "namespace", "*", Optional.empty(), TABLE, cmd.getCommandSpec()
+            Collections.singletonList(apiResource), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
@@ -183,7 +183,7 @@ class ResourceServiceTest {
             .thenThrow(exception);
 
         int actual = resourceService.list(
-            Collections.singletonList(apiResource), "namespace", "*", Optional.empty(), TABLE, cmd.getCommandSpec()
+            Collections.singletonList(apiResource), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(1, actual);
@@ -237,7 +237,7 @@ class ResourceServiceTest {
             .thenReturn(Collections.singletonList(connectorResource));
 
         int actual = resourceService.list(
-            List.of(apiResourceOne, apiResourceTwo), "namespace", "*", Optional.empty(), TABLE, cmd.getCommandSpec()
+            List.of(apiResourceOne, apiResourceTwo), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
@@ -274,7 +274,7 @@ class ResourceServiceTest {
             .thenReturn(List.of());
 
         int actual = resourceService.list(
-            List.of(apiResourceOne, apiResourceTwo), "namespace", TABLE, Optional.empty(), "*", cmd.getCommandSpec()
+            List.of(apiResourceOne, apiResourceTwo), "namespace", TABLE, Map.of(), "*", cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
@@ -319,7 +319,7 @@ class ResourceServiceTest {
             .thenThrow(exception);
 
         int actual = resourceService.list(
-            List.of(apiResourceOne, apiResourceTwo), "namespace", "*", Optional.empty(), TABLE, cmd.getCommandSpec()
+            List.of(apiResourceOne, apiResourceTwo), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(1, actual);
@@ -346,7 +346,7 @@ class ResourceServiceTest {
         when(namespacedClient.list(any(), any(), any(), any())).thenReturn(List.of());
 
         int actual = resourceService.list(
-            List.of(apiResource), "namespace", "*-test", Optional.empty(), TABLE, cmd.getCommandSpec()
+            List.of(apiResource), "namespace", "*-test", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
@@ -371,7 +371,7 @@ class ResourceServiceTest {
             .build();
 
         int actual = resourceService.list(
-            List.of(apiResource), "namespace", "*", Optional.empty(), TABLE, cmd.getCommandSpec()
+            List.of(apiResource), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
@@ -396,7 +396,7 @@ class ResourceServiceTest {
         when(namespacedClient.list(any(), any(), any(), any())).thenReturn(List.of());
 
         int actual = resourceService.list(
-            List.of(apiResource), "namespace", "*", Optional.of("param=value"), TABLE, cmd.getCommandSpec()
+            List.of(apiResource), "namespace", "*", Map.of("param", "value"), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
@@ -404,7 +404,7 @@ class ResourceServiceTest {
     }
 
     @Test
-    void shouldNotListApiResourceWhenBadSearchOptionFormat() {
+    void shouldNotListApiResourceWhenNoSearchOption() {
         CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
@@ -417,11 +417,14 @@ class ResourceServiceTest {
             .synchronizable(true)
             .build();
 
+        doCallRealMethod().when(formatService).prettifyKind(any());
+        when(namespacedClient.list(any(), any(), any(), any())).thenReturn(List.of());
+
         int actual = resourceService.list(
-            List.of(apiResource), "namespace", "*", Optional.of("badFormat"), TABLE, cmd.getCommandSpec()
+            List.of(apiResource), "namespace", "*", null, TABLE, cmd.getCommandSpec()
         );
 
-        assertEquals(1, actual);
+        assertEquals(0, actual);
         verify(formatService, never()).displayList(any(), any(), any(), any());
     }
 

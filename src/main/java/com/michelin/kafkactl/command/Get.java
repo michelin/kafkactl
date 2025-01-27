@@ -12,6 +12,7 @@ import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -54,9 +55,9 @@ public class Get extends AuthenticatedHook {
 
     @Option(
         names = {"--search"},
-        description = "Search resources based on parameters. Format: \"param:value\" separated by commas",
+        description = "Search resources based on parameters. Format: \"parameter=value\" separated by commas",
         arity = "0..1")
-    public Optional<String> search;
+    public Map<String, String> search;
 
     @Option(
         names = {"-o", "--output"},

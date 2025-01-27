@@ -23,14 +23,13 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.io.File;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;
 
@@ -40,8 +39,6 @@ import picocli.CommandLine.ParameterException;
 @Singleton
 public class ResourceService {
     public static final String SCHEMA_FILE = "schemaFile";
-
-    private final Pattern keyValuePattern = Pattern.compile(",?(?<key>[a-zA-Z]*)=(?<value>[\\w\\-\\.]*)");
 
     @Inject
     @ReflectiveAccess
@@ -81,25 +78,27 @@ public class ResourceService {
     public int list(List<ApiResource> apiResources,
                     String namespace,
                     String resourceName,
-                    Optional<String> search,
+                    Map<String, String> search,
                     String output,
                     CommandSpec commandSpec) {
         // Get a single kind of resources
         if (apiResources.size() == 1) {
             try {
-                // Parse the search option
-                Map<String, String> searchParam = parseSearchOption(search.orElse(""));
-
                 List<Resource> resources = listResourcesWithType(apiResources.getFirst(),
-                    namespace, resourceName, searchParam);
+                    namespace, resourceName, search);
                 if (!resources.isEmpty()) {
                     formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
                 } else {
                     commandSpec.commandLine().getOut()
                         .println("No " + formatService.prettifyKind(apiResources.getFirst().getKind()).toLowerCase()
-                            + (searchParam.isEmpty() ? " to display."
-                                : " matches name \"" + resourceName + "\""
-                                    + (search.map(s -> " and search \"" + s + "\".").orElse("."))));
+                            + (search == null || search.isEmpty()
+                                ? (resourceName.equals("*")
+                                    ? " to display."
+                                    : " matches name \"" + resourceName + "\".")
+                                : (resourceName.equals("*")
+                                    ? " matches search \"" + formatService.formatMapToString(search) + "\"."
+                                    : " matches name \"" + resourceName
+                                        + "\" and search \"" + formatService.formatMapToString(search) + "\".")));
                 }
                 return 0;
             } catch (HttpClientResponseException exception) {
@@ -142,13 +141,15 @@ public class ResourceService {
                                                 String namespace,
                                                 String resourceName,
                                                 Map<String, String> search) {
-        if (search != null && !resourceName.equals("*")) {
-            search.put("name", resourceName);
+        Map<String, String> queryParam = new HashMap<>();
+        if (search != null) {
+            queryParam.putAll(search);
         }
+        queryParam.put("name", resourceName);
 
         return apiResource.isNamespaced()
             ? namespacedClient.list(namespace, apiResource.getPath(), resourceName, loginService.getAuthorization())
-            : nonNamespacedClient.list(loginService.getAuthorization(), apiResource.getPath(), search);
+            : nonNamespacedClient.list(loginService.getAuthorization(), apiResource.getPath(), queryParam);
     }
 
     /**
@@ -526,27 +527,5 @@ public class ResourceService {
                             + ". Schema path must be relative to the CLI.");
                 }
             });
-    }
-
-    /**
-     * Create a mapping from the command line search option.
-     *
-     * @param search The string containing pairs of query parameters and query values
-     * @return A key value mapping of query parameters and query values
-     */
-    public Map<String, String> parseSearchOption(String search) throws HttpClientResponseException {
-        return Stream.of(search.split("[,;]"))
-            .filter(s -> !s.isEmpty())
-            .map(keyValue -> {
-                Matcher matcher = keyValuePattern.matcher(keyValue);
-
-                if (!matcher.matches()) {
-                    throw new HttpClientResponseException("\"search\" format should be: "
-                + "\"param:value\" separated by commas", HttpResponse.badRequest());
-                }
-
-                return List.of(matcher.group("key"), matcher.group("value"));
-            })
-            .collect(Collectors.toMap(List::getFirst, List::getLast));
     }
 }

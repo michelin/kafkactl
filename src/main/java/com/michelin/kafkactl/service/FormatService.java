@@ -17,7 +17,9 @@ import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
@@ -117,6 +119,20 @@ public class FormatService {
     }
 
     /**
+     * Format a map to string.
+     *
+     * @param map   The map to format
+     * @return The map formatted string
+     */
+    public String formatMapToString(Map<String, String> map) {
+        return map
+            .entrySet()
+            .stream()
+            .map(entry -> entry.getKey() + "=" + entry.getValue())
+            .collect(Collectors.joining());
+    }
+
+    /**
      * Print the list of resources to table format.
      *
      * @param kind        The kind of resources
@@ -154,7 +170,14 @@ public class FormatService {
      * @return The prettified kind
      */
     public String prettifyKind(String kind) {
-        return kind.substring(0, 1).toUpperCase() + kind.substring(1).replaceAll("(.)([A-Z])", "$1 $2").toLowerCase();
+
+
+        String t = kind.substring(0, 1).toUpperCase();
+
+        String t2 = kind.substring(1).replaceAll("(.)([A-Z])", "$1 $2");
+        String t3 = t2.toLowerCase();
+
+        return t + t3;
     }
 
     /**
