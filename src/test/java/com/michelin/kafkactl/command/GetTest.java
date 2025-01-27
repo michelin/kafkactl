@@ -85,14 +85,6 @@ class GetTest {
 
     @Test
     void shouldNotGetWhenUnknownOutput() {
-        ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
-
         CommandLine cmd = new CommandLine(get);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));

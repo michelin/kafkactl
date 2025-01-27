@@ -7,11 +7,8 @@ import com.michelin.kafkactl.service.ResourceService;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Stream;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 
 /**
