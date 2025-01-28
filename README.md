@@ -9,7 +9,7 @@
 [![GitHub Stars](https://img.shields.io/github/stars/michelin/kafkactl?logo=github&style=for-the-badge)](https://github.com/michelin/kafkactl)
 [![Docker Pulls](https://img.shields.io/docker/pulls/michelin/kafkactl?label=Pulls&logo=docker&style=for-the-badge)](https://hub.docker.com/r/michelin/kafkactl/tags)
 [![SonarCloud Coverage](https://img.shields.io/sonar/coverage/michelin_kafkactl?logo=sonarcloud&server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge)](https://sonarcloud.io/component_measures?id=michelin_kafkactl&metric=coverage&view=list)
-[![SonarCloud Tests](https://img.shields.io/sonar/tests/michelin_kafkactl/main?server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge&logo=sonarcloud)](https://sonarcloud.io/component_measures?metric=tests&view=list&id=michelin_kstreamplify)
+[![SonarCloud Tests](https://img.shields.io/sonar/tests/michelin_kafkactl/main?server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge&logo=sonarcloud)](https://sonarcloud.io/component_measures?metric=tests&view=list&id=michelin_kafkactl)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?logo=apache&style=for-the-badge)](https://opensource.org/licenses/Apache-2.0)
 
 [Download](#download) • [Configuration](#configuration) • [Ns4Kafka](https://github.com/michelin/ns4kafka)
