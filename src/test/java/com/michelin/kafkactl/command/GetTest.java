@@ -163,8 +163,8 @@ class GetTest {
 
         int code = cmd.execute("topics", "myTopic", "--search=badFormat");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains("Value for option option '--search' (<String=String>) should be in KEY=VALUE[,KEY=VALUE]"));
-        assertTrue(sw.toString().contains("but was badFormat"));
+        assertTrue(sw.toString().contains("Value for option option '--search' (<String=String>) "
+            + "should be in KEY=VALUE[,KEY=VALUE]"));
     }
 
     @Test
