@@ -539,8 +539,8 @@ Options:
                             Override namespace defined in config or YAML
                               resources.
   -o, --output=<output>     Output format. One of: yaml|table
-      --search[=<search>]   Search resources based on parameters. Format:
-                              "param=value" separated by commas
+      --search[=<String=String>[,<String=String>...]]
+                          Search resources based on parameters.
   -v, --verbose             Enable the verbose mode.
 ```
 
