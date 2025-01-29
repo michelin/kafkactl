@@ -20,6 +20,7 @@ import java.io.StringWriter;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -255,7 +256,7 @@ class FormatServiceTest {
 
     @Test
     void shouldDisplayNoResourceMatchingNameAndMultipleSearch() {
-        ApiResource apiResource = ApiResource.builder()
+        final ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
             .names(List.of("topics", "topic", "to"))
@@ -263,14 +264,17 @@ class FormatServiceTest {
             .synchronizable(true)
             .build();
 
+        Map<String, String> search = new HashMap<>();
+        search.put("key1", "value1");
+        search.put("key2", "value2");
+
         CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        formatService.displayNoResource(List.of(apiResource), Map.of("key", "value", "key2", "value2"),
-                "test", cmd.getCommandSpec());
+        formatService.displayNoResource(List.of(apiResource), search, "test", cmd.getCommandSpec());
 
-        assertTrue(sw.toString().contains("No topic matches name \"test\" and search \"key=value,key2=value2\""));
+        assertTrue(sw.toString().contains("No topic matches name \"test\" and search \"key1=value1,key2=value2\""));
     }
 
     @Test

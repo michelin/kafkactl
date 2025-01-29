@@ -125,11 +125,7 @@ public class FormatService {
      * @return The map formatted string
      */
     public String formatMapToString(Map<String, String> map) {
-        return map
-            .entrySet()
-            .stream()
-            .map(entry -> entry.getKey() + "=" + entry.getValue())
-            .collect(Collectors.joining(","));
+        return map.toString().replaceAll("[{}\\s]", "");
     }
 
     /**
