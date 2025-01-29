@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
@@ -125,11 +124,7 @@ public class FormatService {
      * @return The map formatted string
      */
     public String formatMapToString(Map<String, String> map) {
-        return map
-            .entrySet()
-            .stream()
-            .map(entry -> entry.getKey() + "=" + entry.getValue())
-            .collect(Collectors.joining(","));
+        return map.toString().replaceAll("[{}\\s]", "");
     }
 
     /**
