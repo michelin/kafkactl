@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.michelin.kafkactl.Kafkactl;
+import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.Status;
@@ -170,6 +171,102 @@ class FormatServiceTest {
 
         assertTrue(sw.toString().contains("ROLE_BINDING  GROUP  VERBS                RESOURCES"));
         assertTrue(sw.toString().contains("roleBinding   GROUP  GET,POST,PUT,DELETE  topics,acls,connectors"));
+    }
+
+    @Test
+    void shouldDisplayNoResource() {
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        formatService.displayNoResource(List.of(apiResource), null, "*", cmd.getCommandSpec());
+
+        assertTrue(sw.toString().contains("No topic to display"));
+    }
+
+    @Test
+    void shouldDisplayNoResourceMatchingName() {
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        formatService.displayNoResource(List.of(apiResource), Map.of(), "myTopic", cmd.getCommandSpec());
+
+        assertTrue(sw.toString().contains("No topic matches name \"myTopic\""));
+    }
+
+    @Test
+    void shouldDisplayNoResourceMatchingSearch() {
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        formatService.displayNoResource(List.of(apiResource), Map.of("param", "value"), "*", cmd.getCommandSpec());
+
+        assertTrue(sw.toString().contains("No topic matches search \"param=value\""));
+    }
+
+    @Test
+    void shouldDisplayNoResourceMatchingNameAndSearch() {
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        formatService.displayNoResource(List.of(apiResource), Map.of("param", "value"), "test", cmd.getCommandSpec());
+
+        assertTrue(sw.toString().contains("No topic matches name \"test\" and search \"param=value\""));
+    }
+
+    @Test
+    void shouldDisplayNoResourceMatchingNameAndMultipleSearch() {
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        formatService.displayNoResource(List.of(apiResource), Map.of("key", "value", "key2", "value2"),
+                "test", cmd.getCommandSpec());
+
+        assertTrue(sw.toString().contains("No topic matches name \"test\" and search \"key=value,key2=value2\""));
     }
 
     @Test

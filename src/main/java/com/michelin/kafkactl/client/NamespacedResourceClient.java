@@ -189,7 +189,10 @@ public interface NamespacedResourceClient {
      * @return The reset password response
      */
     @Post("{namespace}/users/{user}/reset-password")
-    HttpResponse<Resource> resetPassword(String namespace, String user, @Header("Authorization") String token);
+    HttpResponse<Resource> resetPassword(
+        String namespace,
+        String user,
+        @Header("Authorization") String token);
 
     /**
      * List all available connect clusters for vaulting.

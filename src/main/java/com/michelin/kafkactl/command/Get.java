@@ -12,6 +12,7 @@ import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -39,7 +40,10 @@ public class Get extends AuthenticatedHook {
     @ReflectiveAccess
     private FormatService formatService;
 
-    @Parameters(index = "0", description = "Resource type or 'all' to display resources of all types.", arity = "1")
+    @Parameters(
+        index = "0",
+        description = "Resource type or 'all' to display resources of all types.",
+        arity = "1")
     public String resourceType;
 
     @Parameters(
@@ -49,7 +53,17 @@ public class Get extends AuthenticatedHook {
         defaultValue = "*")
     public String resourceName;
 
-    @Option(names = {"-o", "--output"}, description = "Output format. One of: yaml|table", defaultValue = "table")
+    @Option(
+        names = {"--search"},
+        description = "Search resources based on parameters.",
+        arity = "0..1",
+        split = ",")
+    public Map<String, String> search;
+
+    @Option(
+        names = {"-o", "--output"},
+        description = "Output format. One of: yaml|table",
+        defaultValue = "table")
     public String output;
 
     /**
@@ -67,7 +81,7 @@ public class Get extends AuthenticatedHook {
         validateOutput();
 
         try {
-            return resourceService.list(apiResources, getNamespace(), output, commandSpec, resourceName);
+            return resourceService.list(apiResources, getNamespace(), resourceName, search, output, commandSpec);
         } catch (HttpClientResponseException e) {
             formatService.displayError(e, apiResources.getFirst().getKind(), resourceName, commandSpec);
             return 1;

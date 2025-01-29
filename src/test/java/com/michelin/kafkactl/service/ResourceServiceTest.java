@@ -97,7 +97,7 @@ class ResourceServiceTest {
             .thenReturn(Collections.singletonList(resource));
 
         int actual = resourceService.list(
-            Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "*"
+            Collections.singletonList(apiResource), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
@@ -130,7 +130,7 @@ class ResourceServiceTest {
             .thenReturn(Collections.singletonList(resource));
 
         int actual = resourceService.list(
-            Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "*"
+            Collections.singletonList(apiResource), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
@@ -143,11 +143,6 @@ class ResourceServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        doCallRealMethod()
-            .when(formatService).prettifyKind(any());
-        when(namespacedClient.list(any(), any(), any(), any()))
-            .thenReturn(Collections.emptyList());
-
         ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
             .path("topics")
@@ -156,12 +151,17 @@ class ResourceServiceTest {
             .synchronizable(true)
             .build();
 
+        when(namespacedClient.list(any(), any(), any(), any()))
+            .thenReturn(Collections.emptyList());
+
         int actual = resourceService.list(
-            Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "*"
+            Collections.singletonList(apiResource), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
-        assertTrue(sw.toString().contains("No topic to display."));
+
+        verify(formatService).displayNoResource(List.of(apiResource), Map.of(), "*", cmd.getCommandSpec());
+        verify(formatService, never()).displayList(any(), any(), any(), any());
     }
 
     @Test
@@ -183,7 +183,7 @@ class ResourceServiceTest {
             .thenThrow(exception);
 
         int actual = resourceService.list(
-            Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "*"
+            Collections.singletonList(apiResource), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(1, actual);
@@ -237,7 +237,7 @@ class ResourceServiceTest {
             .thenReturn(Collections.singletonList(connectorResource));
 
         int actual = resourceService.list(
-            List.of(apiResourceOne, apiResourceTwo), "namespace", TABLE, cmd.getCommandSpec(), "*"
+            List.of(apiResourceOne, apiResourceTwo), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
@@ -274,7 +274,7 @@ class ResourceServiceTest {
             .thenReturn(List.of());
 
         int actual = resourceService.list(
-            List.of(apiResourceOne, apiResourceTwo), "namespace", TABLE, cmd.getCommandSpec(), "*"
+            List.of(apiResourceOne, apiResourceTwo), "namespace", TABLE, Map.of(), "*", cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
@@ -319,7 +319,7 @@ class ResourceServiceTest {
             .thenThrow(exception);
 
         int actual = resourceService.list(
-            List.of(apiResourceOne, apiResourceTwo), "namespace", TABLE, cmd.getCommandSpec(), "*"
+            List.of(apiResourceOne, apiResourceTwo), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(1, actual);
@@ -342,14 +342,14 @@ class ResourceServiceTest {
             .synchronizable(true)
             .build();
 
-        doCallRealMethod().when(formatService).prettifyKind(any());
         when(namespacedClient.list(any(), any(), any(), any())).thenReturn(List.of());
 
         int actual = resourceService.list(
-            List.of(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "*-test"
+            List.of(apiResource), "namespace", "*-test", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
+        verify(formatService).displayNoResource(List.of(apiResource), Map.of(), "*-test", cmd.getCommandSpec());
         verify(formatService, never()).displayList(any(), any(), any(), any());
     }
 
@@ -359,8 +359,30 @@ class ResourceServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        doCallRealMethod().when(formatService).prettifyKind(any());
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
         when(namespacedClient.list(any(), any(), any(), any())).thenReturn(List.of());
+
+        int actual = resourceService.list(
+            List.of(apiResource), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
+        );
+
+        assertEquals(0, actual);
+        verify(formatService).displayNoResource(List.of(apiResource), Map.of(), "*", cmd.getCommandSpec());
+        verify(formatService, never()).displayList(any(), any(), any(), any());
+    }
+
+    @Test
+    void shouldNotListApiResourceWhenNoResourceMatchesSearch() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
 
         ApiResource apiResource = ApiResource.builder()
             .kind("Topic")
@@ -370,8 +392,37 @@ class ResourceServiceTest {
             .synchronizable(true)
             .build();
 
+        Map<String, String> search = Map.of("param", "value");
+
+        when(namespacedClient.list(any(), any(), any(), any())).thenReturn(List.of());
+
         int actual = resourceService.list(
-            List.of(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "*"
+            List.of(apiResource), "namespace", "*", search, TABLE, cmd.getCommandSpec()
+        );
+
+        assertEquals(0, actual);
+        verify(formatService).displayNoResource(List.of(apiResource), search, "*", cmd.getCommandSpec());
+        verify(formatService, never()).displayList(any(), any(), any(), any());
+    }
+
+    @Test
+    void shouldNotListApiResourceWhenNoSearchOption() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        when(namespacedClient.list(any(), any(), any(), any())).thenReturn(List.of());
+
+        int actual = resourceService.list(
+            List.of(apiResource), "namespace", "*", null, TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);

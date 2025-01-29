@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -144,7 +145,7 @@ class GetTest {
         when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
         HttpClientResponseException e = new HttpClientResponseException("error", HttpResponse.serverError());
-        when(resourceService.list(any(), any(), any(), any(), any()))
+        when(resourceService.list(any(), any(), any(), any(), any(), any()))
             .thenThrow(e);
 
         CommandLine cmd = new CommandLine(get);
@@ -152,6 +153,18 @@ class GetTest {
         int code = cmd.execute("topics", "myTopic", "-n", "namespace");
         assertEquals(1, code);
         verify(formatService).displayError(e, "Topic", "myTopic", cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldNotGetWhenBadSearchFormat() {
+        CommandLine cmd = new CommandLine(get);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        int code = cmd.execute("topics", "myTopic", "--search=badFormat");
+        assertEquals(2, code);
+        assertTrue(sw.toString().contains("Value for option option '--search' (<String=String>) "
+            + "should be in KEY=VALUE[,KEY=VALUE]"));
     }
 
     @Test
@@ -172,7 +185,7 @@ class GetTest {
         when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
 
-        when(resourceService.list(any(), any(), any(), any(), any()))
+        when(resourceService.list(any(), any(), any(), any(), any(), any()))
             .thenReturn(0);
 
         CommandLine cmd = new CommandLine(get);
@@ -182,11 +195,12 @@ class GetTest {
         int code = cmd.execute("topics", "myTopic", "-n", "namespace");
         assertEquals(0, code);
         verify(resourceService)
-            .list(Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "myTopic");
+            .list(Collections.singletonList(apiResource), "namespace",
+                "myTopic", null, TABLE, cmd.getCommandSpec());
     }
 
     @Test
-    void shouldGetAllTopicsSuccess() {
+    void shouldGetAllTopics() {
         when(configService.isCurrentContextValid())
             .thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean()))
@@ -202,7 +216,7 @@ class GetTest {
 
         when(apiResourcesService.getResourceDefinitionByName(any()))
             .thenReturn(Optional.of(apiResource));
-        when(resourceService.list(any(), any(), any(), any(), any()))
+        when(resourceService.list(any(), any(), any(), any(), any(), any()))
             .thenReturn(0);
 
         CommandLine cmd = new CommandLine(get);
@@ -212,7 +226,8 @@ class GetTest {
         int code = cmd.execute("topics", "-n", "namespace");
         assertEquals(0, code);
         verify(resourceService)
-            .list(Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "*");
+            .list(Collections.singletonList(apiResource), "namespace",
+                "*", null, TABLE, cmd.getCommandSpec());
     }
 
     @Test
@@ -242,7 +257,7 @@ class GetTest {
 
         when(apiResourcesService.listResourceDefinitions())
             .thenReturn(List.of(apiResource, nonNamespacedApiResource));
-        when(resourceService.list(any(), any(), any(), any(), any()))
+        when(resourceService.list(any(), any(), any(), any(), any(), any()))
             .thenReturn(0);
 
         CommandLine cmd = new CommandLine(get);
@@ -250,6 +265,72 @@ class GetTest {
         int code = cmd.execute("all");
         assertEquals(0, code);
         verify(resourceService)
-            .list(Collections.singletonList(apiResource), "namespace", TABLE, cmd.getCommandSpec(), "*");
+            .list(Collections.singletonList(apiResource), "namespace",
+                "*", null, TABLE, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldGetWithSearch() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        when(apiResourcesService.getResourceDefinitionByName(any()))
+            .thenReturn(Optional.of(apiResource));
+
+        when(resourceService.list(any(), any(), any(), any(), any(), any()))
+            .thenReturn(0);
+
+        CommandLine cmd = new CommandLine(get);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("topics", "myTopic", "--search", "tag=test,policy=compact", "-n", "namespace");
+        assertEquals(0, code);
+        verify(resourceService)
+            .list(Collections.singletonList(apiResource), "namespace",
+                "myTopic", Map.of("tag", "test", "policy", "compact"), TABLE, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldGetWithMultipleSearch() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        when(apiResourcesService.getResourceDefinitionByName(any()))
+            .thenReturn(Optional.of(apiResource));
+
+        when(resourceService.list(any(), any(), any(), any(), any(), any()))
+            .thenReturn(0);
+
+        CommandLine cmd = new CommandLine(get);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("topics", "myTopic", "--search", "tag=test", "--search", "policy=compact",
+            "--search", "policy=compact,partition=3", "-n", "namespace");
+        assertEquals(0, code);
+        verify(resourceService)
+            .list(Collections.singletonList(apiResource), "namespace",
+                "myTopic", Map.of("tag", "test", "policy", "compact", "partition", "3"), TABLE, cmd.getCommandSpec());
     }
 }

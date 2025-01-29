@@ -23,6 +23,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.io.File;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -67,22 +68,27 @@ public class ResourceService {
      *
      * @param apiResources The resource type
      * @param namespace    The namespace
-     * @param commandSpec  The command that triggered the action
+     * @param search       The search param to filter resources
      * @param resourceName The resource name
+     * @param output       The output format
+     * @param commandSpec  The command that triggered the action
      * @return A map of resource type and list of resources
      */
-    public int list(List<ApiResource> apiResources, String namespace, String output,
-                    CommandSpec commandSpec, String resourceName) {
+    public int list(List<ApiResource> apiResources,
+                    String namespace,
+                    String resourceName,
+                    Map<String, String> search,
+                    String output,
+                    CommandSpec commandSpec) {
         // Get a single kind of resources
         if (apiResources.size() == 1) {
             try {
-                List<Resource> resources = listResourcesWithType(apiResources.getFirst(), namespace, resourceName);
+                List<Resource> resources = listResourcesWithType(apiResources.getFirst(),
+                    namespace, resourceName, search);
                 if (!resources.isEmpty()) {
                     formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
                 } else {
-                    commandSpec.commandLine().getOut()
-                        .println("No " + formatService.prettifyKind(apiResources.getFirst().getKind()).toLowerCase()
-                            + (resourceName.equals("*") ? " to display." : " matches \"" + resourceName + "\"."));
+                    formatService.displayNoResource(apiResources, search, resourceName, commandSpec);
                 }
                 return 0;
             } catch (HttpClientResponseException exception) {
@@ -96,7 +102,7 @@ public class ResourceService {
             .stream()
             .map(apiResource -> {
                 try {
-                    List<Resource> resources = listResourcesWithType(apiResource, namespace, resourceName);
+                    List<Resource> resources = listResourcesWithType(apiResource, namespace, resourceName, null);
                     if (!resources.isEmpty()) {
                         formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
                     }
@@ -115,14 +121,25 @@ public class ResourceService {
     /**
      * List all resources of given type.
      *
-     * @param apiResource The resource type
-     * @param namespace   The namespace
+     * @param apiResource  The resource type
+     * @param namespace    The namespace
+     * @param resourceName The resource name
+     * @param search       The resource search parameters mapping
      * @return A list of resources
      */
-    public List<Resource> listResourcesWithType(ApiResource apiResource, String namespace, String resourceName) {
+    public List<Resource> listResourcesWithType(ApiResource apiResource,
+                                                String namespace,
+                                                String resourceName,
+                                                Map<String, String> search) {
+        Map<String, String> queryParam = new HashMap<>();
+        if (search != null) {
+            queryParam.putAll(search);
+        }
+        queryParam.put("name", resourceName);
+
         return apiResource.isNamespaced()
             ? namespacedClient.list(namespace, apiResource.getPath(), resourceName, loginService.getAuthorization())
-            : nonNamespacedClient.list(loginService.getAuthorization(), apiResource.getPath(), resourceName);
+            : nonNamespacedClient.list(loginService.getAuthorization(), apiResource.getPath(), queryParam);
     }
 
     /**
@@ -183,7 +200,7 @@ public class ResourceService {
      * @param apiResource The resource type
      * @param namespace   The namespace
      * @param name        The resource name or wildcard
-     * @param version     The version of the resource, for schemas only.
+     * @param version     The version of the resource, for schemas only
      * @param dryRun      Is dry run mode or not?
      * @param commandSpec The command that triggered the action
      * @return true if deletion succeeded, false otherwise

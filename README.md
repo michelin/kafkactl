@@ -537,11 +537,14 @@ Parameters:
       [<resourceName>]    Resource name or wildcard matching resource names.
 
 Options:
-  -h, --help              Show this help message and exit.
+  -h, --help                Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                          Override namespace defined in config or YAML resources.
-  -o, --output=<output>   Output format. One of: yaml|table
-  -v, --verbose           Enable the verbose mode.
+                            Override namespace defined in config or YAML
+                              resources.
+  -o, --output=<output>     Output format. One of: yaml|table
+      --search[=<String=String>[,<String=String>...]]
+                          Search resources based on parameters.
+  -v, --verbose             Enable the verbose mode.
 ```
 
 - `resourceType`: This option specifies one of the managed resources: `topic`, `connector`, `acl`, `schema`, `stream`

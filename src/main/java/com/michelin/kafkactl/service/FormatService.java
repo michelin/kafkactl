@@ -3,6 +3,7 @@ package com.michelin.kafkactl.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.Status;
 import com.michelin.kafkactl.model.format.AgoFormat;
@@ -17,7 +18,9 @@ import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
@@ -113,6 +116,54 @@ public class FormatService {
         } else {
             commandSpec.commandLine().getErr().printf("Failed because %s (%s).%n", exception.getMessage().toLowerCase(),
                 exception.getStatus().getCode());
+        }
+    }
+
+    /**
+     * Format a map to string.
+     *
+     * @param map   The map to format
+     * @return The map formatted string
+     */
+    public String formatMapToString(Map<String, String> map) {
+        return map
+            .entrySet()
+            .stream()
+            .map(entry -> entry.getKey() + "=" + entry.getValue())
+            .collect(Collectors.joining(","));
+    }
+
+    /**
+     * Format the display error message based on the search option and the resource name.
+     *
+     * @param apiResources The API resources list
+     * @param search       The search map
+     * @param resourceName The resource name
+     * @param commandSpec The command spec used to print the output
+     */
+    public void displayNoResource(List<ApiResource> apiResources,
+                                  Map<String, String> search,
+                                  String resourceName,
+                                  CommandSpec commandSpec) {
+        String resource = prettifyKind(apiResources.getFirst().getKind()).toLowerCase();
+
+        if (search == null || search.isEmpty()) {
+            if (resourceName.equals("*")) {
+                commandSpec.commandLine().getOut()
+                    .println("No " + resource + " to display.");
+            } else {
+                commandSpec.commandLine().getOut()
+                    .println("No " + resource + " matches name \"" + resourceName + "\".");
+            }
+        } else {
+            if (resourceName.equals("*")) {
+                commandSpec.commandLine().getOut()
+                    .println("No " + resource + " matches search \"" + formatMapToString(search) + "\".");
+            } else {
+                commandSpec.commandLine().getOut()
+                    .println("No " + resource + " matches name \"" + resourceName
+                        + "\" and search \"" + formatMapToString(search) + "\".");
+            }
         }
     }
 
