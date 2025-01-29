@@ -298,7 +298,6 @@ class FormatServiceTest {
             .matcher(sw.toString()).find());
         assertTrue(Pattern.compile("prefix.topic\\s+1m\\s+delete")
             .matcher(sw.toString()).find());
-
     }
 
     @Test
