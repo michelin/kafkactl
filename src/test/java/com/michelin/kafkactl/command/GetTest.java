@@ -300,4 +300,37 @@ class GetTest {
             .list(Collections.singletonList(apiResource), "namespace",
                 "myTopic", Map.of("tag", "test", "policy", "compact"), TABLE, cmd.getCommandSpec());
     }
+
+    @Test
+    void shouldGetWithMultipleSearch() {
+        when(configService.isCurrentContextValid())
+            .thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean()))
+            .thenReturn(true);
+
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        when(apiResourcesService.getResourceDefinitionByName(any()))
+            .thenReturn(Optional.of(apiResource));
+
+        when(resourceService.list(any(), any(), any(), any(), any(), any()))
+            .thenReturn(0);
+
+        CommandLine cmd = new CommandLine(get);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("topics", "myTopic", "--search", "tag=test", "--search", "policy=compact",
+            "--search", "policy=compact,partition=3", "-n", "namespace");
+        assertEquals(0, code);
+        verify(resourceService)
+            .list(Collections.singletonList(apiResource), "namespace",
+                "myTopic", Map.of("tag", "test", "policy", "compact", "partition", "3"), TABLE, cmd.getCommandSpec());
+    }
 }

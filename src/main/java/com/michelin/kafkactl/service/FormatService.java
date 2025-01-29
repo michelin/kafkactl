@@ -130,7 +130,7 @@ public class FormatService {
             .entrySet()
             .stream()
             .map(entry -> entry.getKey() + "=" + entry.getValue())
-            .collect(Collectors.joining());
+            .collect(Collectors.joining(","));
     }
 
     /**

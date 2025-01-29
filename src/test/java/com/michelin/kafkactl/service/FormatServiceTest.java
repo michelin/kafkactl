@@ -250,6 +250,26 @@ class FormatServiceTest {
     }
 
     @Test
+    void shouldDisplayNoResourceMatchingNameAndMultipleSearch() {
+        ApiResource apiResource = ApiResource.builder()
+            .kind("Topic")
+            .path("topics")
+            .names(List.of("topics", "topic", "to"))
+            .namespaced(true)
+            .synchronizable(true)
+            .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        formatService.displayNoResource(List.of(apiResource), Map.of("key", "value", "key2", "value2"),
+                "test", cmd.getCommandSpec());
+
+        assertTrue(sw.toString().contains("No topic matches name \"test\" and search \"key=value,key2=value2\""));
+    }
+
+    @Test
     void shouldDisplaySingle() {
         Resource resource = Resource.builder()
             .kind("Topic")
