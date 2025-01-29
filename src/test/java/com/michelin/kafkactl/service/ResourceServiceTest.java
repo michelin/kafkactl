@@ -274,7 +274,7 @@ class ResourceServiceTest {
             .thenReturn(List.of());
 
         int actual = resourceService.list(
-            List.of(apiResourceOne, apiResourceTwo), "namespace", TABLE, Map.of(), "*", cmd.getCommandSpec()
+            List.of(apiResourceOne, apiResourceTwo), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);
