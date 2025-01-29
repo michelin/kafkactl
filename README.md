@@ -218,7 +218,7 @@ Description: Get the JWT token information.
 
 Options:
   -h, --help              Show this help message and exit.
-  -o, --output=<output>   Output format. One of: yaml|table
+  -o, --output=<output>   Output format (yaml, yml, table).
 ```
 
 Example(s):
@@ -541,7 +541,7 @@ Options:
   -n, --namespace=<optionalNamespace>
                             Override namespace defined in config or YAML
                               resources.
-  -o, --output=<output>     Output format. One of: yaml|table
+  -o, --output=<output>   Output format (yaml, yml, table).
       --search[=<String=String>[,<String=String>...]]
                           Search resources based on parameters.
   -v, --verbose             Enable the verbose mode.
@@ -651,7 +651,7 @@ Options:
   -h, --help              Show this help message and exit.
   -n, --namespace=<optionalNamespace>
                           Override namespace defined in config or YAML resources.
-  -o, --output=<output>   Output format. One of: yaml|table
+  -o, --output=<output>   Output format (yaml, yml, table).
   -v, --verbose           Enable the verbose mode.
 ```
 

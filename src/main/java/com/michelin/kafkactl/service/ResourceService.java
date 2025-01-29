@@ -1,7 +1,6 @@
 package com.michelin.kafkactl.service;
 
-import static com.michelin.kafkactl.service.FormatService.Output;
-import static com.michelin.kafkactl.service.FormatService.Output.TABLE;
+import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECT_CLUSTER;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONSUMER_GROUP_RESET_OFFSET_RESPONSE;
@@ -12,6 +11,7 @@ import static com.michelin.kafkactl.util.constant.ResourceKind.VAULT_RESPONSE;
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.model.ApiResource;
+import com.michelin.kafkactl.model.Output;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.SchemaCompatibility;
 import io.micronaut.core.annotation.Nullable;

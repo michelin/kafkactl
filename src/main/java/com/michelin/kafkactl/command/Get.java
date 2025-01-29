@@ -1,9 +1,8 @@
 package com.michelin.kafkactl.command;
 
-import static com.michelin.kafkactl.service.FormatService.Output;
-
 import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.model.ApiResource;
+import com.michelin.kafkactl.model.Output;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
 import io.micronaut.core.annotation.ReflectiveAccess;
@@ -61,7 +60,7 @@ public class Get extends AuthenticatedHook {
 
     @Option(
         names = {"-o", "--output"},
-        description = "Output format. One of: yml|yaml|table",
+        description = "Output format (${COMPLETION-CANDIDATES}).",
         defaultValue = "table")
     public Output output;
 

@@ -1,10 +1,10 @@
 package com.michelin.kafkactl.command.auth;
 
-import static com.michelin.kafkactl.service.FormatService.Output;
 import static com.michelin.kafkactl.util.constant.ResourceKind.AUTH_INFO;
 
 import com.michelin.kafkactl.hook.HelpHook;
 import com.michelin.kafkactl.model.JwtContent;
+import com.michelin.kafkactl.model.Output;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.LoginService;
@@ -47,7 +47,7 @@ public class AuthInfo extends HelpHook implements Callable<Integer> {
 
     @Option(
         names = {"-o", "--output"},
-        description = "Output format. One of: yml|yaml|table",
+        description = "Output format (${COMPLETION-CANDIDATES}).",
         defaultValue = "table")
     public Output output;
 

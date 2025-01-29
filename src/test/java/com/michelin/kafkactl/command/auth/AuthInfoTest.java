@@ -1,7 +1,7 @@
 package com.michelin.kafkactl.command.auth;
 
 import static com.michelin.kafkactl.model.JwtContent.RoleBinding.Verb.GET;
-import static com.michelin.kafkactl.service.FormatService.Output.TABLE;
+import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.AUTH_INFO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
