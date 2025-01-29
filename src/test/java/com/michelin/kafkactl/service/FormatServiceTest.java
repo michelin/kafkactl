@@ -268,8 +268,10 @@ class FormatServiceTest {
         cmd.setOut(new PrintWriter(sw));
 
         formatService.displayNoResource(List.of(apiResource), Map.of("key", "value", "key2", "value2"),
-                "test", cmd.getCommandSpec());
+            "test", cmd.getCommandSpec());
 
+        System.out.println(sw.toString());
+        
         assertTrue(sw.toString().contains("No topic matches name \"test\" and search \"key=value,key2=value2\""));
     }
 
