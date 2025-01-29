@@ -1,7 +1,8 @@
 package com.michelin.kafkactl.service;
 
-import static com.michelin.kafkactl.service.FormatService.TABLE;
-import static com.michelin.kafkactl.service.FormatService.YAML;
+import static com.michelin.kafkactl.model.Output.TABLE;
+import static com.michelin.kafkactl.model.Output.YAML;
+import static com.michelin.kafkactl.model.Output.YML;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -21,6 +22,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
@@ -119,7 +121,7 @@ class FormatServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        formatService.displayList("Topic", Collections.singletonList(resource), YAML, cmd.getCommandSpec());
+        formatService.displayList("Topic", Collections.singletonList(resource), YML, cmd.getCommandSpec());
 
         assertTrue(sw.toString().contains("  name: prefix.topic"));
         assertTrue(sw.toString().contains("    retention.ms: '60000'"));
@@ -169,8 +171,10 @@ class FormatServiceTest {
 
         formatService.displayList("RoleBinding", Collections.singletonList(resource), TABLE, cmd.getCommandSpec());
 
-        assertTrue(sw.toString().contains("ROLE_BINDING  GROUP  VERBS                RESOURCES"));
-        assertTrue(sw.toString().contains("roleBinding   GROUP  GET,POST,PUT,DELETE  topics,acls,connectors"));
+        assertTrue(Pattern.compile("ROLE_BINDING\\s+GROUP\\s+VERBS\\s+RESOURCES")
+            .matcher(sw.toString()).find());
+        assertTrue(Pattern.compile("roleBinding\\s+GROUP\\s+GET,POST,PUT,DELETE\\s+topics,acls,connectors")
+            .matcher(sw.toString()).find());
     }
 
     @Test
@@ -290,8 +294,10 @@ class FormatServiceTest {
 
         formatService.displaySingle(resource, TABLE, cmd.getCommandSpec());
 
-        assertTrue(sw.toString().contains("TOPIC         RETENTION  POLICY  AGE"));
-        assertTrue(sw.toString().contains("prefix.topic  1m         delete"));
+        assertTrue(Pattern.compile("TOPIC\\s+RETENTION\\s+POLICY\\s+AGE")
+            .matcher(sw.toString()).find());
+        assertTrue(Pattern.compile("prefix.topic\\s+1m\\s+delete")
+            .matcher(sw.toString()).find());
     }
 
     @Test

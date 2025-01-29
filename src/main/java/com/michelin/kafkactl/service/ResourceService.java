@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.service;
 
-import static com.michelin.kafkactl.service.FormatService.TABLE;
+import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECT_CLUSTER;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONSUMER_GROUP_RESET_OFFSET_RESPONSE;
@@ -11,6 +11,7 @@ import static com.michelin.kafkactl.util.constant.ResourceKind.VAULT_RESPONSE;
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.model.ApiResource;
+import com.michelin.kafkactl.model.Output;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.SchemaCompatibility;
 import io.micronaut.core.annotation.Nullable;
@@ -78,7 +79,7 @@ public class ResourceService {
                     String namespace,
                     String resourceName,
                     Map<String, String> search,
-                    String output,
+                    Output output,
                     CommandSpec commandSpec) {
         // Get a single kind of resources
         if (apiResources.size() == 1) {
@@ -386,7 +387,7 @@ public class ResourceService {
      * @param commandSpec The command that triggered the action
      * @return 0 if the command succeeded, 1 otherwise
      */
-    public int resetPassword(String namespace, String user, String output, CommandSpec commandSpec) {
+    public int resetPassword(String namespace, String user, Output output, CommandSpec commandSpec) {
         try {
             HttpResponse<Resource> response =
                 namespacedClient.resetPassword(namespace, user, loginService.getAuthorization());

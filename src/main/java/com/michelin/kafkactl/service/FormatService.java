@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.ApiResource;
+import com.michelin.kafkactl.model.Output;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.Status;
 import com.michelin.kafkactl.model.format.AgoFormat;
@@ -33,8 +34,6 @@ import picocli.CommandLine.Model.CommandSpec;
  */
 @Singleton
 public class FormatService {
-    public static final String YAML = "yaml";
-    public static final String TABLE = "table";
     private final List<String> defaults =
         List.of("KIND:/kind", "NAME:/metadata/name", "AGE:/metadata/creationTimestamp%AGO");
 
@@ -50,10 +49,10 @@ public class FormatService {
      * @param output      The type of display
      * @param commandSpec The command spec used to print the output
      */
-    public void displayList(String kind, List<Resource> resources, String output, CommandSpec commandSpec) {
-        if (output.equals(TABLE)) {
+    public void displayList(String kind, List<Resource> resources, Output output, CommandSpec commandSpec) {
+        if (output.equals(Output.TABLE)) {
             printTable(kind, resources, commandSpec);
-        } else if (output.equals(YAML)) {
+        } else if (List.of(Output.YAML, Output.YML).contains(output)) {
             printYaml(resources, commandSpec);
         }
     }
@@ -65,7 +64,7 @@ public class FormatService {
      * @param output      The type of display
      * @param commandSpec The command spec used to print the output
      */
-    public void displaySingle(Resource resource, String output, CommandSpec commandSpec) {
+    public void displaySingle(Resource resource, Output output, CommandSpec commandSpec) {
         displayList(resource.getKind(), List.of(resource), output, commandSpec);
     }
 

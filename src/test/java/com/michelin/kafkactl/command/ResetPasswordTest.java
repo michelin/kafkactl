@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.command;
 
-import static com.michelin.kafkactl.service.FormatService.TABLE;
+import static com.michelin.kafkactl.model.Output.TABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -73,18 +73,13 @@ class ResetPasswordTest {
 
     @Test
     void shouldNotUpdateUserWhenUnknownOutput() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
-
         CommandLine cmd = new CommandLine(resetPassword);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("user", "-o", "unknownOutputFormat");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains("Invalid value unknownOutputFormat for option -o."));
+        assertTrue(sw.toString().contains("Invalid value for option '--output'"));
     }
 
     @Test

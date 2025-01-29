@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.service;
 
-import static com.michelin.kafkactl.service.FormatService.TABLE;
+import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CHANGE_CONNECTOR_STATE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECT_CLUSTER;
@@ -274,7 +274,7 @@ class ResourceServiceTest {
             .thenReturn(List.of());
 
         int actual = resourceService.list(
-            List.of(apiResourceOne, apiResourceTwo), "namespace", TABLE, Map.of(), "*", cmd.getCommandSpec()
+            List.of(apiResourceOne, apiResourceTwo), "namespace", "*", Map.of(), TABLE, cmd.getCommandSpec()
         );
 
         assertEquals(0, actual);

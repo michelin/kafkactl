@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.command;
 
-import static com.michelin.kafkactl.service.FormatService.TABLE;
+import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.SCHEMA_COMPATIBILITY_STATE;
 
 import com.michelin.kafkactl.hook.AuthenticatedHook;
@@ -37,10 +37,16 @@ public class Schema extends AuthenticatedHook {
     @ReflectiveAccess
     private FormatService formatService;
 
-    @Parameters(index = "0", description = "Compatibility to set (${COMPLETION-CANDIDATES}).", arity = "1")
+    @Parameters(
+        index = "0",
+        description = "Compatibility to set (${COMPLETION-CANDIDATES}).",
+        arity = "1")
     public SchemaCompatibility compatibility;
 
-    @Parameters(index = "1..*", description = "Subject names separated by space.", arity = "1..*")
+    @Parameters(
+        index = "1..*",
+        description = "Subject names separated by space.",
+        arity = "1..*")
     public List<String> subjects;
 
     /**

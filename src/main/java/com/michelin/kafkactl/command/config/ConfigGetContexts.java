@@ -1,7 +1,7 @@
 package com.michelin.kafkactl.command.config;
 
 import static com.michelin.kafkactl.mixin.UnmaskTokenMixin.MASKED;
-import static com.michelin.kafkactl.service.FormatService.TABLE;
+import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONTEXT;
 
 import com.michelin.kafkactl.config.KafkactlConfig;
