@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.command;
 
-import static com.michelin.kafkactl.service.FormatService.TABLE;
+import static com.michelin.kafkactl.service.FormatService.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CHANGE_CONNECTOR_STATE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR;
 
@@ -43,11 +43,16 @@ public class Connector extends AuthenticatedHook {
     @ReflectiveAccess
     private FormatService formatService;
 
-    @Parameters(index = "0", description = "Action to perform (${COMPLETION-CANDIDATES}).", arity = "1")
+    @Parameters(
+        index = "0",
+        description = "Action to perform (${COMPLETION-CANDIDATES}).",
+        arity = "1")
     public ConnectorAction action;
 
-    @Parameters(index = "1..*",
-        description = "Connector names separated by space or \"all\" for all connectors.", arity = "1..*")
+    @Parameters(
+        index = "1..*",
+        description = "Connector names separated by space or \"all\" for all connectors.",
+        arity = "1..*")
     public List<String> connectors;
 
     /**

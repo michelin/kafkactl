@@ -1,7 +1,6 @@
 package com.michelin.kafkactl.command;
 
-import static com.michelin.kafkactl.service.FormatService.TABLE;
-import static com.michelin.kafkactl.service.FormatService.YAML;
+import static com.michelin.kafkactl.service.FormatService.Output;
 
 import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.model.ApiResource;
@@ -62,9 +61,9 @@ public class Get extends AuthenticatedHook {
 
     @Option(
         names = {"-o", "--output"},
-        description = "Output format. One of: yaml|table",
+        description = "Output format. One of: yml|yaml|table",
         defaultValue = "table")
-    public String output;
+    public Output output;
 
     /**
      * Run the "get" command.
@@ -77,24 +76,11 @@ public class Get extends AuthenticatedHook {
         // Validate resourceType + custom type ALL
         List<ApiResource> apiResources = validateResourceType();
 
-        // Validate -o flag
-        validateOutput();
-
         try {
             return resourceService.list(apiResources, getNamespace(), resourceName, search, output, commandSpec);
         } catch (HttpClientResponseException e) {
             formatService.displayError(e, apiResources.getFirst().getKind(), resourceName, commandSpec);
             return 1;
-        }
-    }
-
-    /**
-     * Validate required output format.
-     */
-    private void validateOutput() {
-        if (!List.of(TABLE, YAML).contains(output)) {
-            throw new ParameterException(commandSpec.commandLine(),
-                "Invalid value " + output + " for option -o.");
         }
     }
 

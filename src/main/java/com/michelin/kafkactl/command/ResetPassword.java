@@ -1,7 +1,6 @@
 package com.michelin.kafkactl.command;
 
-import static com.michelin.kafkactl.service.FormatService.TABLE;
-import static com.michelin.kafkactl.service.FormatService.YAML;
+import static com.michelin.kafkactl.service.FormatService.Output;
 
 import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.service.ResourceService;
@@ -9,6 +8,7 @@ import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Stream;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
@@ -31,15 +31,21 @@ public class ResetPassword extends AuthenticatedHook {
     @ReflectiveAccess
     private ResourceService resourceService;
 
-    @Parameters(description = "The user to reset password.", arity = "1")
+    @Parameters(
+        description = "The user to reset password.",
+        arity = "1")
     public String user;
 
-    @Option(names = {"--execute"}, description = "This option is mandatory to change the password")
+    @Option(
+        names = {"--execute"},
+        description = "This option is mandatory to change the password")
     public boolean confirmed;
 
-    @Option(names = {"-o",
-        "--output"}, description = "Output format. One of: yaml|table", defaultValue = "table")
-    public String output;
+    @Option(
+        names = {"-o", "--output"},
+        description = "Output format. One of: yml|yaml|table",
+        defaultValue = "table")
+    public Output output;
 
     /**
      * Run the "users" command.
@@ -49,11 +55,6 @@ public class ResetPassword extends AuthenticatedHook {
      */
     @Override
     public Integer onAuthSuccess() throws IOException {
-        if (!List.of(TABLE, YAML).contains(output)) {
-            throw new ParameterException(commandSpec.commandLine(),
-                "Invalid value " + output + " for option -o.");
-        }
-
         String namespace = getNamespace();
         if (!confirmed) {
             commandSpec.commandLine().getOut().println("You are about to change your Kafka password "

@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.service;
 
-import static com.michelin.kafkactl.service.FormatService.TABLE;
+import static com.michelin.kafkactl.service.FormatService.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CHANGE_CONNECTOR_STATE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECT_CLUSTER;

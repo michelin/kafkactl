@@ -1,6 +1,6 @@
 package com.michelin.kafkactl.command;
 
-import static com.michelin.kafkactl.service.FormatService.TABLE;
+import static com.michelin.kafkactl.service.FormatService.Output.TABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -93,20 +93,13 @@ class GetTest {
             .synchronizable(true)
             .build();
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.of(apiResource));
-
         CommandLine cmd = new CommandLine(get);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("topics", "-o", "unknownOutputFormat");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains("Invalid value unknownOutputFormat for option -o."));
+        assertTrue(sw.toString().contains("Invalid value for option '--output'"));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.michelin.kafkactl.command.auth;
 
+import static com.michelin.kafkactl.service.FormatService.Output;
 import static com.michelin.kafkactl.util.constant.ResourceKind.AUTH_INFO;
 
 import com.michelin.kafkactl.hook.HelpHook;
@@ -44,9 +45,11 @@ public class AuthInfo extends HelpHook implements Callable<Integer> {
     @Spec
     public CommandSpec commandSpec;
 
-    @Option(names = {"-o",
-        "--output"}, description = "Output format. One of: yaml|table", defaultValue = "table")
-    public String output;
+    @Option(
+        names = {"-o", "--output"},
+        description = "Output format. One of: yml|yaml|table",
+        defaultValue = "table")
+    public Output output;
 
     @Override
     public Integer call() throws IOException {
