@@ -1,119 +1,4 @@
-micronaut:
-  application:
-    name: kafkactl
-  http:
-    client:
-      read-timeout: 30s
-      ssl:
-        insecure-trust-all-certificates: true
-
-logger:
-  levels:
-    ROOT: OFF
-    io.micronaut.http.client.netty.DefaultHttpClient: OFF # See HTTP requests and responses
-    io.micronaut.http.client.netty.ssl.NettyClientSslBuilder: OFF # Disable warns about trust all certificates
-
 kafkactl:
-  version: @version@
-  table-format:
-    AccessControlEntry:
-      - "ACL:/metadata/name"
-      - "GRANTED_BY:/metadata/namespace"
-      - "GRANTED_TO:/spec/grantedTo"
-      - "TYPE:/spec/resourceType"
-      - "RESOURCE:/spec/resource"
-      - "PATTERN:/spec/resourcePatternType"
-      - "PERMISSION:/spec/permission"
-      - "AGE:/metadata/creationTimestamp%AGO"
-    AuthInfo:
-      - "NAMESPACE:/spec/namespace"
-      - "VERBS:/spec/verbs"
-      - "RESOURCES:/spec/resources"
-    ChangeConnectorState:
-      - "CONNECTOR:/metadata/name"
-      - "STATUS:/status/code"
-      - "ERROR_MSG:/status/errorMessage"
-    ConnectCluster:
-      - "CONNECT CLUSTER:/metadata/name"
-      - "URL:/spec/url"
-      - "STATUS:/spec/status"
-      - "ERROR_MSG:/spec/statusMessage"
-    Connector:
-      - "CONNECTOR:/metadata/name"
-      - "WORKERS:/spec/connectCluster"
-      - "CLASS:/spec/config/connector.class"
-      - "TOPICS:/spec/config/topics"
-      - "AGE:/metadata/creationTimestamp%AGO"
-    ConsumerGroupResetOffsetsResponse:
-      - "CONSUMER_GROUP:/spec/consumerGroup"
-      - "TOPIC:/spec/topic"
-      - "PARTITION:/spec/partition"
-      - "OFFSET:/spec/offset"
-    Context:
-      - "NAME:/metadata/name"
-      - "NAMESPACE:/spec/namespace"
-      - "API:/spec/api"
-      - "TOKEN:/spec/token"
-    DeleteRecordsResponse:
-      - "TOPIC:/spec/topic"
-      - "PARTITION:/spec/partition"
-      - "OFFSET:/spec/offset"
-    KafkaUserResetPassword:
-      - "NAMESPACE:/metadata/namespace"
-      - "CLUSTER:/metadata/cluster"
-      - "USER:/metadata/name"
-      - "PASSWORD:/spec/newPassword"
-    Namespace:
-      - "NAMESPACE:/metadata/name"
-      - "CLUSTER:/metadata/cluster"
-      - "USER:/spec/kafkaUser"
-      - "CONNECTS:/spec/connectClusters"
-      - "LDAP:/metadata/labels/support-group"
-      - "CONTACTS:/metadata/labels/contacts"
-    ResourceDefinition:
-      - "KIND:/metadata/name"
-      - "NAMES:/spec/names"
-      - "NAMESPACED:/spec/namespaced"
-      - "SYNCHRONIZABLE:/spec/synchronizable"
-    ResourceQuotaResponse:
-      - "QUOTA:/metadata/name"
-      - "COUNT/TOPICS:/spec/countTopic"
-      - "COUNT/PARTITIONS:/spec/countPartition"
-      - "DISK/TOPICS:/spec/diskTopic"
-      - "COUNT/CONNECTORS:/spec/countConnector"
-      - "USER/CONSUMER_BYTE_RATE:/spec/consumerByteRate"
-      - "USER/PRODUCER_BYTE_RATE:/spec/producerByteRate"
-    RoleBinding:
-      - "ROLE_BINDING:/metadata/name"
-      - "GROUP:/spec/subject/subjectName"
-      - "VERBS:/spec/role/verbs"
-      - "RESOURCES:/spec/role/resourceTypes"
-    Schema:
-      - "SUBJECT:/metadata/name"
-      - "ID:/spec/id"
-      - "VERSION:/spec/version"
-      - "CONFIG:/spec/compatibility"
-      - "TYPE:/spec/schemaType"
-    SchemaCompatibilityState:
-      - "SUBJECT:/metadata/name"
-      - "CONFIG:/spec/compatibility"
-    Topic:
-      - "TOPIC:/metadata/name"
-      - "RETENTION:/spec/configs/retention.ms%PERIOD"
-      - "POLICY:/spec/configs/cleanup.policy"
-      - "AGE:/metadata/creationTimestamp%AGO"
-    VaultResponse:
-      - "CLEAR_TEXT:/spec/clearText"
-      - "ENCRYPTED_TEXT:/spec/encrypted"
-  retry:
-    apply:
-      delay: "2s"
-      attempt: "10"
-      multiplier: "1.0"
-    delete:
-      delay: "2s"
-      attempt: "10"
-      multiplier: "1.0"
   contexts:
     - #  current-namespace: namespace
       #  api: http://localhost:8080
@@ -128,4 +13,117 @@ kafkactl:
       #        user-token: token
       #        namespace: namespace
       #        api: https://dev-ns4kafka.com
-    #      name: dev
+      #      name: dev
+  retry:
+    apply:
+      attempt: '10'
+      delay: '2s'
+      multiplier: '1.0'
+    delete:
+      attempt: '10'
+      delay: '2s'
+      multiplier: '1.0'
+  table-format:
+    AccessControlEntry:
+      - 'ACL:/metadata/name'
+      - 'AGE:/metadata/creationTimestamp%AGO'
+      - 'GRANTED_BY:/metadata/namespace'
+      - 'GRANTED_TO:/spec/grantedTo'
+      - 'PATTERN:/spec/resourcePatternType'
+      - 'PERMISSION:/spec/permission'
+      - 'RESOURCE:/spec/resource'
+      - 'TYPE:/spec/resourceType'
+    AuthInfo:
+      - 'NAMESPACE:/spec/namespace'
+      - 'RESOURCES:/spec/resources'
+      - 'VERBS:/spec/verbs'
+    ChangeConnectorState:
+      - 'CONNECTOR:/metadata/name'
+      - 'ERROR_MSG:/status/errorMessage'
+      - 'STATUS:/status/code'
+    ConnectCluster:
+      - 'CONNECT CLUSTER:/metadata/name'
+      - 'ERROR_MSG:/spec/statusMessage'
+      - 'STATUS:/spec/status'
+      - 'URL:/spec/url'
+    Connector:
+      - 'AGE:/metadata/creationTimestamp%AGO'
+      - 'CLASS:/spec/config/connector.class'
+      - 'CONNECTOR:/metadata/name'
+      - 'TOPICS:/spec/config/topics'
+      - 'WORKERS:/spec/connectCluster'
+    ConsumerGroupResetOffsetsResponse:
+      - 'CONSUMER_GROUP:/spec/consumerGroup'
+      - 'OFFSET:/spec/offset'
+      - 'PARTITION:/spec/partition'
+      - 'TOPIC:/spec/topic'
+    Context:
+      - 'API:/spec/api'
+      - 'NAME:/metadata/name'
+      - 'NAMESPACE:/spec/namespace'
+      - 'TOKEN:/spec/token'
+    DeleteRecordsResponse:
+      - 'OFFSET:/spec/offset'
+      - 'PARTITION:/spec/partition'
+      - 'TOPIC:/spec/topic'
+    KafkaUserResetPassword:
+      - 'CLUSTER:/metadata/cluster'
+      - 'NAMESPACE:/metadata/namespace'
+      - 'PASSWORD:/spec/newPassword'
+      - 'USER:/metadata/name'
+    Namespace:
+      - 'CLUSTER:/metadata/cluster'
+      - 'CONNECTS:/spec/connectClusters'
+      - 'CONTACTS:/metadata/labels/contacts'
+      - 'LDAP:/metadata/labels/support-group'
+      - 'NAMESPACE:/metadata/name'
+      - 'USER:/spec/kafkaUser'
+    ResourceDefinition:
+      - 'KIND:/metadata/name'
+      - 'NAMES:/spec/names'
+      - 'NAMESPACED:/spec/namespaced'
+      - 'SYNCHRONIZABLE:/spec/synchronizable'
+    ResourceQuotaResponse:
+      - 'COUNT/CONNECTORS:/spec/countConnector'
+      - 'COUNT/PARTITIONS:/spec/countPartition'
+      - 'COUNT/TOPICS:/spec/countTopic'
+      - 'DISK/TOPICS:/spec/diskTopic'
+      - 'QUOTA:/metadata/name'
+      - 'USER/CONSUMER_BYTE_RATE:/spec/consumerByteRate'
+      - 'USER/PRODUCER_BYTE_RATE:/spec/producerByteRate'
+    RoleBinding:
+      - 'GROUP:/spec/subject/subjectName'
+      - 'RESOURCES:/spec/role/resourceTypes'
+      - 'ROLE_BINDING:/metadata/name'
+      - 'VERBS:/spec/role/verbs'
+    Schema:
+      - 'CONFIG:/spec/compatibility'
+      - 'ID:/spec/id'
+      - 'SUBJECT:/metadata/name'
+      - 'TYPE:/spec/schemaType'
+      - 'VERSION:/spec/version'
+    SchemaCompatibilityState:
+      - 'CONFIG:/spec/compatibility'
+      - 'SUBJECT:/metadata/name'
+    Topic:
+      - 'AGE:/metadata/creationTimestamp%AGO'
+      - 'POLICY:/spec/configs/cleanup.policy'
+      - 'RETENTION:/spec/configs/retention.ms%PERIOD'
+      - 'TOPIC:/metadata/name'
+    VaultResponse:
+      - 'CLEAR_TEXT:/spec/clearText'
+      - 'ENCRYPTED_TEXT:/spec/encrypted'
+  version: @version@
+logger:
+  levels:
+    ROOT: 'OFF'
+    io.micronaut.http.client.netty.DefaultHttpClient: 'OFF'
+    io.micronaut.http.client.netty.ssl.NettyClientSslBuilder: 'OFF'
+micronaut:
+  application:
+    name: 'kafkactl'
+  http:
+    client:
+      read-timeout: '30s'
+      ssl:
+        insecure-trust-all-certificates: true
