@@ -64,13 +64,15 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
 
 ## Download
 
-You can download Kafkactl from the [GitHub releases page](https://github.com/michelin/kafkactl/releases) which offers three different formats:
+You can download Kafkactl from the [GitHub releases page](https://github.com/michelin/kafkactl/releases) which offers
+three different formats:
 
 - JAR (requires Java 21)
 - Windows
 - Linux
 
-Alternatively, you can use the Docker images available on [Docker Hub](https://hub.docker.com/repository/docker/michelin/kafkactl):
+Alternatively, you can use the Docker images available
+on [Docker Hub](https://hub.docker.com/repository/docker/michelin/kafkactl):
 
 - The `kafkactl:<version>` images contains Kafkactl as a JAR application.
 - The `kafkactl:<version>-native` images contains Kafkactl as a native binary.
@@ -136,9 +138,15 @@ kafkactl config current-context
 
 ## Authentication
 
-Kafkactl only supports GitLab authentication.
-It uses the GitLab token from the configuration file to authenticate with Ns4Kafka.
-After a successful authentication, a JWT token signed by Ns4Kafka is written to the `~/.kafkactl` directory.
+Kafkactl supports only Bearer JWT authentication. It requires a token to be set in the `user-token` field of the context
+within the `config.yml` file.
+
+- [GitLab](https://github.com/michelin/ns4kafka?tab=readme-ov-file#gitlab): A personal access token can be used.
+- [Local Users](https://github.com/michelin/ns4kafka?tab=readme-ov-file#local-users): The local user's password must be
+  used as the token. The username should be set to `gitlab` in the
+  Ns4Kafka configuration.
+
+Upon successful authentication, a JWT token signed by Ns4Kafka is stored in the `~/.kafkactl` directory.
 
 ## Usage
 
@@ -975,13 +983,17 @@ spec:
   configuration.
 - `spec.kafkaUser` is the Kafka principal. It should refer to an Account ID. It will be used to create ACLs on this
   service account.
-- `spec.protectionEnabled` is a boolean defining if the namespace is protected. Protected namespaces are not able to grant public ACL
- or to grant ACL to public namespaces. Only protected namespaces can consume or produce records in protected namespaces
- resources. The field is optional and by default, the namespace is public.
+- `spec.protectionEnabled` is a boolean defining if the namespace is protected. Protected namespaces are not able to
+  grant public ACL
+  or to grant ACL to public namespaces. Only protected namespaces can consume or produce records in protected namespaces
+  resources. The field is optional and by default, the namespace is public.
 - `spec.connectClusters` is a list of Kafka Connect clusters. It should refer to a Kafka Connect cluster declared in the
- Ns4Kafka configuration.
+  Ns4Kafka configuration.
 - `spec.topicValidator` is a list of constraints for topics.
 - `spec.connectValidator` is a list of constraints for connectors.
+
+A `validationConstraints` field can be made optional by setting the `optional` attribute to `true`.
+If the field is present, it will be validated; otherwise, it can be omitted without causing an error.
 
 #### ACL Owner
 
