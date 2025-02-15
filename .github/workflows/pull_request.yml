@@ -39,13 +39,10 @@ jobs:
       - name: Check style
         run: ./gradlew checkstyleMain checkstyleTest
 
-      - name: Build and analyze
+      - name: Build
         id: build_jar
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./gradlew build jacocoTestReport sonar --info
+          ./gradlew build
           echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
 
       - name: Publish test report
@@ -59,6 +56,13 @@ jobs:
         with:
           name: kafkactl-jar
           path: ${{ github.workspace }}/build/libs/kafkactl-${{ steps.build_jar.outputs.current_version }}.jar
+
+      - name: Sonar
+        if: env.SONAR_TOKEN != ''
+        run: ./gradlew jacocoTestReport sonar --info
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Docker
         run: ./gradlew dockerBuild
