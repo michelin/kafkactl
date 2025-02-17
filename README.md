@@ -571,7 +571,7 @@ kafkactl get schema mySchema
 kafkactl get schema *-value
 ```
 
-Namespace resources can be filtered using the `--search` option, which searches based on namespace topics.
+Administrators can filter namespace resources using the `--search` option, which currently only supports search on namespace topics.
 
 Example(s):
 
