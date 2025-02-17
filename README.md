@@ -577,7 +577,6 @@ Example(s):
 
 ```console
 kafkactl get namespace --search topic=myTopic
-kafkactl get namespace --search topic=*-changelog
 ```
 
 ### Import
