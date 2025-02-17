@@ -571,6 +571,14 @@ kafkactl get schema mySchema
 kafkactl get schema *-value
 ```
 
+Administrators can filter namespace resources using the `--search` option, which currently only supports search on namespace topics.
+
+Example(s):
+
+```console
+kafkactl get namespace --search topic=myTopic
+```
+
 ### Import
 
 The `import` command allows you to import unsynchronized resources between Ns4Kafka and the Kafka broker/Kafka Connect
