@@ -1023,13 +1023,13 @@ For connectors, the following constraints are available:
 - `sinkValidationConstraints` applies to sink connectors.
 - `classValidationConstraints` applies to connectors of a specific class.
 
-The validation constraints contains the list of properties to validate against a set of rules defined by the
-`validation-type`. They can be made optional by setting the `optional` attribute to `true`.
+Validation constraints define a list of properties that must adhere to specific rules set by the `validation-type`.
+Constraints can be made optional by setting the `optional` attribute to `true`.
 If the field is present, it will be validated; otherwise, it can be omitted without causing an error.
 
 ###### Range
 
-Checks the property must be within the specified range defined by `min` and `max`.
+Ensures that the property falls within the specified range, defined by `min` and `max`.
 
 ```yml
 topicValidator:
@@ -1042,7 +1042,8 @@ topicValidator:
 
 ###### ValidList
 
-Checks the property is a list of strings separated by a comma. Each string must be part of the `validStrings` list.
+Ensures that the property is a comma-separated list of strings, where each string must be part of the predefined
+`validStrings` list.
 
 ```yml
 topicValidator:
@@ -1056,7 +1057,7 @@ topicValidator:
 
 ###### ValidString
 
-Checks the property is a string that must be part of the `validStrings` list.
+Ensures that the property is a string that matches one of the values specified in the `validStrings` list.
 
 ```yml
 connectValidator:
@@ -1070,7 +1071,7 @@ connectValidator:
 
 ###### NonEmptyString
 
-Checks the property is a non-empty string.
+Ensures that the property is a non-empty string.
 
 ```yml
 connectValidator:
@@ -1081,7 +1082,8 @@ connectValidator:
 
 ###### CompositeValidator
 
-Checks the property against a list of validators. The property is valid if it is valid against all validators.
+Ensures that the property satisfies multiple validation rules. The property is valid only if it meets all specified
+validators.
 
 ```yml
 connectValidator:
