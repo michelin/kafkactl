@@ -56,6 +56,12 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
         * [Schema](#schema-2)
     * [Administrator](#administrator)
         * [Namespace](#namespace)
+            * [Validation Constraints](#validation-constraints)
+                * [Range](#range)
+                * [ValidList](#validlist)
+                * [ValidString](#validstring)
+                * [NonEmptyString](#nonemptystring)
+                * [CompositeValidator](#compositevalidator)
         * [ACL Owner](#acl-owner)
         * [Role Binding](#role-binding)
         * [Quota](#quota)
@@ -571,7 +577,8 @@ kafkactl get schema mySchema
 kafkactl get schema *-value
 ```
 
-Administrators can filter namespace resources using the `--search` option, which currently only supports search on namespace topics.
+Administrators can filter namespace resources using the `--search` option, which currently only supports search on
+namespace topics.
 
 Example(s):
 
@@ -1000,8 +1007,94 @@ spec:
 - `spec.topicValidator` is a list of constraints for topics.
 - `spec.connectValidator` is a list of constraints for connectors.
 
-A `validationConstraints` field can be made optional by setting the `optional` attribute to `true`.
+##### Validation Constraints
+
+Validations constraints enforce rules on the configuration of topics using `topicValidator` and connectors using
+`connectValidator`.
+
+For topics, the following constraints are available:
+
+- `validationConstraints` applies to all topics.
+
+For connectors, the following constraints are available:
+
+- `validationConstraints` applies to all connectors.
+- `sourceValidationConstraints` applies to source connectors.
+- `sinkValidationConstraints` applies to sink connectors.
+- `classValidationConstraints` applies to connectors of a specific class.
+
+The validation constraints contains the list of properties to validate against a set of rules defined by the
+`validation-type`. They can be made optional by setting the `optional` attribute to `true`.
 If the field is present, it will be validated; otherwise, it can be omitted without causing an error.
+
+###### Range
+
+Checks the property must be within the specified range defined by `min` and `max`.
+
+```yml
+topicValidator:
+  validationConstraints:
+    partitions:
+      validation-type: Range
+      min: 1
+      max: 6
+```
+
+###### ValidList
+
+Checks the property is a list of strings separated by a comma. Each string must be part of the `validStrings` list.
+
+```yml
+topicValidator:
+  validationConstraints:
+    cleanup.policy:
+      validation-type: ValidList
+      validStrings:
+        - delete
+        - compact
+```
+
+###### ValidString
+
+Checks the property is a string that must be part of the `validStrings` list.
+
+```yml
+connectValidator:
+  validationConstraints:
+    connector.class:
+      validation-type: ValidString
+      validStrings:
+        - io.confluent.connect.jdbc.JdbcSinkConnector
+        - io.confluent.connect.jdbc.JdbcSourceConnector
+```
+
+###### NonEmptyString
+
+Checks the property is a non-empty string.
+
+```yml
+connectValidator:
+  validationConstraints:
+    key.converter:
+      validation-type: NonEmptyString
+```
+
+###### CompositeValidator
+
+Checks the property against a list of validators. The property is valid if it is valid against all validators.
+
+```yml
+connectValidator:
+  validationConstraints:
+    connector.class:
+      validation-type: CompositeValidator
+      validators:
+        - validation-type: NonEmptyString
+        - validation-type: ValidString
+          validStrings:
+            - io.confluent.connect.jdbc.JdbcSinkConnector
+            - io.confluent.connect.jdbc.JdbcSourceConnector
+```
 
 #### ACL Owner
 
