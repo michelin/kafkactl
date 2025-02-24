@@ -66,7 +66,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update release
-        uses: ncipollo/release-action@v1.15.0
+        uses: ncipollo/release-action@v1.16.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
@@ -143,7 +143,7 @@ jobs:
         run: mv ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_linux_macos.outputs.current_version }} ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_linux_macos.outputs.current_version }}-${{ matrix.platform }}
 
       - name: Update release
-        uses: ncipollo/release-action@v1.15.0
+        uses: ncipollo/release-action@v1.16.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
@@ -194,7 +194,7 @@ jobs:
         run: Rename-Item -Path ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_windows.outputs.current_version }}.exe -NewName kafkactl-${{ steps.build_native_windows.outputs.current_version }}-windows-amd64.exe
 
       - name: Update release
-        uses: ncipollo/release-action@v1.15.0
+        uses: ncipollo/release-action@v1.16.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
