@@ -1029,7 +1029,7 @@ If the field is present, it will be validated; otherwise, it can be omitted with
 
 ###### Range
 
-Ensures that the property falls within the specified range, defined by `min` and `max`.
+Ensures that the property falls within the specified range, defined by optional `min` and `max` limits.
 
 ```yml
 topicValidator:
