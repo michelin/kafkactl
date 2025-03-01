@@ -71,6 +71,8 @@ graalvmNative {
     binaries {
         main {
             imageName.set("kafkactl-" + version)
+            buildArgs.add("--static")
+            buildArgs.add("--libc=musl") // Static linking
             buildArgs.add("-H:Class=com.michelin.kafkactl.KafkactlCommand")
             buildArgs.add("-H:IncludeResourceBundles=org.ocpsoft.prettytime.i18n.Resources")
             buildArgs.add("-H:+ReportUnsupportedElementsAtRuntime")
