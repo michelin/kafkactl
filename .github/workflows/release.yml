@@ -106,6 +106,17 @@ jobs:
           java-version: '21'
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      # Install musl cross-compiler for Linux build
+      - name: Install musl cross-compiler
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd /tmp
+          wget https://more.musl.cc/10.2.1/x86_64-linux-musl/x86_64-linux-musl-native.tgz
+          sudo mkdir -p /usr/local/musl
+          sudo tar -xvzf x86_64-linux-musl-native.tgz -C /usr/local/musl
+          sudo ln -s /usr/local/musl/x86_64-linux-musl-native/bin/x86_64-linux-musl-gcc /usr/local/bin/musl-gcc
+          echo "PATH=/usr/local/musl/x86_64-linux-musl-native/bin:$PATH" >> $GITHUB_ENV
+
       - name: Cache Gradle packages
         uses: actions/cache@v4
         with:
@@ -116,7 +127,13 @@ jobs:
       - name: Build
         id: build_native_linux_macos
         run: |
-          ./gradlew nativeCompile
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            export CC=/usr/local/musl/x86_64-linux-musl-native/bin/x86_64-linux-musl-gcc
+            export PATH=/usr/local/musl/x86_64-linux-musl-native/bin:$PATH
+            ./gradlew nativeCompile -PnativeArgs="--static --libc=musl --gcc-toolchain=/usr/local/musl/x86_64-linux-musl-native"
+          else
+            ./gradlew nativeCompile
+          fi
           echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
 
       - name: Docker
