@@ -50,7 +50,7 @@ application {
 }
 
 java {
-	sourceCompatibility = JavaVersion.toVersion('21')
+	sourceCompatibility = JavaVersion.toVersion("21")
 	targetCompatibility = JavaVersion.toVersion('21')
 }
 
@@ -63,7 +63,7 @@ micronaut {
 }
 
 shadowJar {
-	archiveClassifier.set('')
+	archiveClassifier.set("")
 	dependsOn(distTar, distZip)
 }
 
@@ -88,27 +88,37 @@ dockerfile {
 dockerfileNative {
 	baseImage("ubuntu:22.04")
 	editDockerfile {
-		after('COPY --link --from=graalvm /home/app/application /app/application') {
-			insert('RUN ln -s /app/application /usr/bin/kafkactl && chmod 777 /usr/bin/kafkactl')
+		after("COPY --link --from=graalvm /home/app/application /app/application") {
+			insert("RUN ln -s /app/application /usr/bin/kafkactl && chmod 777 /usr/bin/kafkactl")
 		}
 	}
 }
 
 if (project.hasProperty("releaseLatest")) {
 	dockerBuild {
-		images.set(["michelin/kafkactl:" + version, "michelin/kafkactl:latest"])
+		images.set([
+			"michelin/kafkactl:" + version,
+			"michelin/kafkactl:latest"
+		])
 	}
 
 	dockerBuildNative {
-		images.set(["michelin/kafkactl:" + version + "-native", "michelin/kafkactl:latest-native"])
+		images.set([
+			"michelin/kafkactl:" + version + "-native",
+			"michelin/kafkactl:latest-native"
+		])
 	}
 } else {
 	dockerBuild {
-		images.set(["michelin/kafkactl:" + version])
+		images.set([
+			"michelin/kafkactl:" + version
+		])
 	}
 
 	dockerBuildNative {
-		images.set(["michelin/kafkactl:" + version + "-native"])
+		images.set([
+			"michelin/kafkactl:" + version + "-native"
+		])
 	}
 }
 
@@ -136,19 +146,20 @@ test {
 
 spotless {
 	java {
-		target 'src/main/java/**/*.java', 'src/test/java/**/*.java'
-		palantirJavaFormat('2.58.0').style('PALANTIR').formatJavadoc(true)
+		target "src/main/java/**/*.java", "src/test/java/**/*.java"
+		palantirJavaFormat("2.58.0").style("PALANTIR").formatJavadoc(true)
 		removeUnusedImports()
 		formatAnnotations()
 		importOrder()
 		trimTrailingWhitespace()
 		endWithNewline()
 		licenseHeaderFile {
-			file '.spotless/HEADER'
+			file ".spotless/HEADER"
 		}
 	}
 	groovyGradle {
-		target '*.gradle'
+		target "*.gradle"
+		greclipse()
 		importOrder()
 		removeSemicolons()
 	}
