@@ -4,7 +4,7 @@ plugins {
     id("jacoco")
     id("org.sonarqube") version "6.0.1.5171"
     id("pl.allegro.tech.build.axion-release") version "1.18.17"
-    id("checkstyle")
+    id("com.diffplug.spotless") version "7.0.2"
 }
 
 version = scmVersion.version
@@ -134,12 +134,24 @@ test {
     }
 }
 
-checkstyle {
-    toolVersion = '10.12.3'
-    configFile = file(".checkstyle/checkstyle.xml")
-    ignoreFailures = false
-    maxErrors = 0
-    maxWarnings = 0
+spotless {
+    java {
+        target 'src/main/java/**/*.java', 'src/test/java/**/*.java'
+        palantirJavaFormat('2.58.0').style('PALANTIR').formatJavadoc(true)
+        removeUnusedImports()
+        formatAnnotations()
+        importOrder()
+        trimTrailingWhitespace()
+        endWithNewline()
+        licenseHeaderFile {
+            file '.spotless/HEADER'
+        }
+    }
+    groovyGradle {
+        target '*.gradle'
+        importOrder()
+        removeSemicolons()
+    }
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens

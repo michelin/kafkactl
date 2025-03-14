@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.service;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -19,9 +37,7 @@ import java.util.Calendar;
 import java.util.Date;
 import picocli.CommandLine.Model.CommandSpec;
 
-/**
- * Login service.
- */
+/** Login service. */
 @Singleton
 public class LoginService {
     private static final String UNEXPECTED_ERROR = "Unexpected error occurred:";
@@ -33,7 +49,7 @@ public class LoginService {
     /**
      * Constructor.
      *
-     * @param kafkactlConfig        The Kafkactl config
+     * @param kafkactlConfig The Kafkactl config
      * @param clusterResourceClient The client for resources
      */
     public LoginService(KafkactlConfig kafkactlConfig, ClusterResourceClient clusterResourceClient) {
@@ -59,19 +75,19 @@ public class LoginService {
     /**
      * Check if the user is authenticated, or authenticate him otherwise.
      *
-     * @param verbose     Is verbose mode activated or not
+     * @param verbose Is verbose mode activated or not
      * @param commandSpec The command spec used to print the output
      * @return true if the user is authenticated, false otherwise
      */
     public boolean doAuthenticate(CommandSpec commandSpec, boolean verbose) {
         return isAuthenticated(commandSpec, verbose)
-            || login(commandSpec, "gitlab", kafkactlConfig.getUserToken(), verbose);
+                || login(commandSpec, "gitlab", kafkactlConfig.getUserToken(), verbose);
     }
 
     /**
      * Is the user authenticated already.
      *
-     * @param verbose     Is verbose mode activated or not
+     * @param verbose Is verbose mode activated or not
      * @param commandSpec The command spec used to print the output
      * @return true if he is, false otherwise
      */
@@ -86,20 +102,25 @@ public class LoginService {
             UserInfoResponse userInfo = clusterResourceClient.tokenInfo("Bearer " + token.getAccessToken());
             if (verbose) {
                 Date expiry = new Date(userInfo.getExp() * 1000);
-                commandSpec.commandLine().getOut()
-                    .println("Authentication reused. Welcome " + userInfo.getUsername() + "!");
+                commandSpec
+                        .commandLine()
+                        .getOut()
+                        .println("Authentication reused. Welcome " + userInfo.getUsername() + "!");
                 commandSpec.commandLine().getOut().println("Your session is valid until " + expiry + ".");
             }
 
             accessToken = token.getAccessToken();
             return userInfo.isActive();
         } catch (IOException e) {
-            commandSpec.commandLine().getErr().println(String.format("%s %s.",
-                UNEXPECTED_ERROR, e.getMessage()));
+            commandSpec.commandLine().getErr().println(String.format("%s %s.", UNEXPECTED_ERROR, e.getMessage()));
         } catch (HttpClientResponseException e) {
             if (e.getStatus() != HttpStatus.UNAUTHORIZED) {
-                commandSpec.commandLine().getErr().println(String.format("%s %s (%s).",
-                    UNEXPECTED_ERROR, e.getMessage(), e.getStatus().getCode()));
+                commandSpec
+                        .commandLine()
+                        .getErr()
+                        .println(String.format(
+                                "%s %s (%s).",
+                                UNEXPECTED_ERROR, e.getMessage(), e.getStatus().getCode()));
             }
         }
 
@@ -109,9 +130,9 @@ public class LoginService {
     /**
      * Authenticate the user.
      *
-     * @param user        The user
-     * @param password    The password
-     * @param verbose     Is verbose mode activated or not
+     * @param user The user
+     * @param password The password
+     * @param verbose Is verbose mode activated or not
      * @param commandSpec The command spec used to print the output
      * @return true if he is authenticated, false otherwise
      */
@@ -121,19 +142,20 @@ public class LoginService {
                 commandSpec.commandLine().getOut().println("Authenticating...");
             }
 
-            BearerAccessRefreshToken tokenResponse = clusterResourceClient.login(UsernameAndPasswordRequest
-                .builder()
-                .username(user)
-                .password(password)
-                .build());
+            BearerAccessRefreshToken tokenResponse = clusterResourceClient.login(UsernameAndPasswordRequest.builder()
+                    .username(user)
+                    .password(password)
+                    .build());
 
             accessToken = tokenResponse.getAccessToken();
 
             if (verbose) {
                 Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.SECOND, tokenResponse.getExpiresIn());
-                commandSpec.commandLine().getOut()
-                    .println("Authentication successful. Welcome " + tokenResponse.getUsername() + "!");
+                commandSpec
+                        .commandLine()
+                        .getOut()
+                        .println("Authentication successful. Welcome " + tokenResponse.getUsername() + "!");
                 commandSpec.commandLine().getOut().println("Your session is valid until " + calendar.getTime() + ".");
             }
 
@@ -141,14 +163,15 @@ public class LoginService {
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.writeValue(jwtFile, tokenResponse);
             } catch (IOException e) {
-                commandSpec.commandLine().getErr().println(String.format("%s %s.",
-                    UNEXPECTED_ERROR, e.getMessage()));
+                commandSpec.commandLine().getErr().println(String.format("%s %s.", UNEXPECTED_ERROR, e.getMessage()));
             }
 
             return true;
         } catch (HttpClientResponseException e) {
-            commandSpec.commandLine().getErr()
-                .println("Authentication failed because " + e.getMessage().toLowerCase() + ".");
+            commandSpec
+                    .commandLine()
+                    .getErr()
+                    .println("Authentication failed because " + e.getMessage().toLowerCase() + ".");
         }
 
         return false;
@@ -161,17 +184,17 @@ public class LoginService {
      * @throws IOException Any exception during the run
      */
     public JwtContent readJwtFile() throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ObjectMapper objectMapper =
+                new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         BearerAccessRefreshToken authInfo = objectMapper.readValue(jwtFile, BearerAccessRefreshToken.class);
-        return objectMapper.readValue(new String(Base64.getUrlDecoder()
-            .decode(authInfo.getAccessToken().split("\\.")[1])), JwtContent.class);
+        return objectMapper.readValue(
+                new String(
+                        Base64.getUrlDecoder().decode(authInfo.getAccessToken().split("\\.")[1])),
+                JwtContent.class);
     }
 
-    /**
-     * If exists, delete JWT file.
-     */
+    /** If exists, delete JWT file. */
     public void deleteJwtFile() throws IOException {
         if (jwtFile.exists()) {
             Files.delete(jwtFile.toPath());

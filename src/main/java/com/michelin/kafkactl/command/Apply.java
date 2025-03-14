@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.command;
 
 import com.michelin.kafkactl.hook.DryRunHook;
@@ -16,18 +34,17 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 
-/**
- * Apply subcommand.
- */
-@Command(name = "apply",
-    headerHeading = "@|bold Usage|@:",
-    synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@: ",
-    description = "Create or update a resource.",
-    parameterListHeading = "%n@|bold Parameters|@:%n",
-    optionListHeading = "%n@|bold Options|@:%n",
-    commandListHeading = "%n@|bold Commands|@:%n",
-    usageHelpAutoWidth = true)
+/** Apply subcommand. */
+@Command(
+        name = "apply",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@: ",
+        description = "Create or update a resource.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true)
 public class Apply extends DryRunHook {
     @Inject
     @ReflectiveAccess
@@ -37,10 +54,14 @@ public class Apply extends DryRunHook {
     @ReflectiveAccess
     private ResourceService resourceService;
 
-    @Option(names = {"-f", "--file"}, description = "YAML file or directory containing resources to apply.")
+    @Option(
+            names = {"-f", "--file"},
+            description = "YAML file or directory containing resources to apply.")
     public Optional<File> file;
 
-    @Option(names = {"-R", "--recursive"}, description = "Search file recursively.")
+    @Option(
+            names = {"-R", "--recursive"},
+            description = "Search file recursively.")
     public boolean recursive;
 
     /**
@@ -65,13 +86,14 @@ public class Apply extends DryRunHook {
             resourceService.enrichSchemaContent(resources, commandSpec);
 
             int errors = resources.stream()
-                .map(resource -> {
-                    ApiResource apiResource =
-                        apiResourcesService.getResourceDefinitionByKind(resource.getKind()).orElseThrow();
-                    return resourceService.apply(apiResource, getNamespace(), resource, dryRun, commandSpec);
-                })
-                .mapToInt(value -> value != null ? 0 : 1)
-                .sum();
+                    .map(resource -> {
+                        ApiResource apiResource = apiResourcesService
+                                .getResourceDefinitionByKind(resource.getKind())
+                                .orElseThrow();
+                        return resourceService.apply(apiResource, getNamespace(), resource, dryRun, commandSpec);
+                    })
+                    .mapToInt(value -> value != null ? 0 : 1)
+                    .sum();
 
             return errors > 0 ? 1 : 0;
         } catch (HttpClientResponseException e) {

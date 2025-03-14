@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.command;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,12 +59,16 @@ import picocli.CommandLine.ParameterException;
 class DeleteTest {
     @Mock
     FormatService formatService;
+
     @Mock
     KafkactlConfig kafkactlConfig;
+
     @Mock
     ResourceService resourceService;
+
     @Mock
     LoginService loginService;
+
     @Mock
     ApiResourcesService apiResourcesService;
 
@@ -65,21 +87,19 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(false);
+        when(configService.isCurrentContextValid()).thenReturn(false);
 
         int code = cmd.execute("topic", "myTopic");
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("No valid current context found. "
-            + "Use \"kafkactl config use-context\" to set a valid context."));
+        assertTrue(sw.toString()
+                .contains("No valid current context found. "
+                        + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
     @Test
     void shouldNotDeleteByNameWhenNotAuthenticated() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(false);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(delete);
         StringWriter sw = new StringWriter();
@@ -91,14 +111,10 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByFileWhenYmlFileNotFound() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
-        when(kafkactlConfig.getCurrentNamespace())
-            .thenReturn("namespace");
-        when(fileService.computeYamlFileList(any(), anyBoolean()))
-            .thenReturn(Collections.emptyList());
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(fileService.computeYamlFileList(any(), anyBoolean())).thenReturn(Collections.emptyList());
 
         CommandLine cmd = new CommandLine(delete);
         StringWriter sw = new StringWriter();
@@ -115,28 +131,26 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
-            .thenReturn(Collections.singletonList(new File("path")));
+                .thenReturn(Collections.singletonList(new File("path")));
 
         Resource resource = Resource.builder()
-            .kind("Topic")
-            .apiVersion("v1")
-            .metadata(Metadata.builder()
-                .name("prefix.topic")
-                .namespace("namespace")
-                .build())
-            .spec(Collections.emptyMap())
-            .build();
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Collections.emptyMap())
+                .build();
 
-        when(fileService.parseResourceListFromFiles(any()))
-            .thenReturn(Collections.singletonList(resource));
-        doThrow(new ParameterException(cmd.getCommandSpec().commandLine(),
-            "The server does not have resource type(s) Topic."))
-            .when(resourceService).validateAllowedResources(any(), any());
+        when(fileService.parseResourceListFromFiles(any())).thenReturn(Collections.singletonList(resource));
+        doThrow(new ParameterException(
+                        cmd.getCommandSpec().commandLine(), "The server does not have resource type(s) Topic."))
+                .when(resourceService)
+                .validateAllowedResources(any(), any());
 
         int code = cmd.execute("-f", "topic", "-n", "namespace");
         assertEquals(2, code);
@@ -145,12 +159,9 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByNameWhenInvalidResources() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.empty());
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.empty());
 
         CommandLine cmd = new CommandLine(delete);
         StringWriter sw = new StringWriter();
@@ -163,25 +174,22 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByFileWhenNamespaceMismatch() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
-            .thenReturn(Collections.singletonList(new File("path")));
+                .thenReturn(Collections.singletonList(new File("path")));
 
         Resource resource = Resource.builder()
-            .kind("Topic")
-            .apiVersion("v1")
-            .metadata(Metadata.builder()
-                .name("prefix.topic")
-                .namespace("namespace")
-                .build())
-            .spec(Collections.emptyMap())
-            .build();
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Collections.emptyMap())
+                .build();
 
-        when(fileService.parseResourceListFromFiles(any()))
-            .thenReturn(Collections.singletonList(resource));
+        when(fileService.parseResourceListFromFiles(any())).thenReturn(Collections.singletonList(resource));
 
         CommandLine cmd = new CommandLine(delete);
         StringWriter sw = new StringWriter();
@@ -189,44 +197,41 @@ class DeleteTest {
 
         int code = cmd.execute("-f", "topic", "-n", "namespaceMismatch");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains("Namespace mismatch between Kafkactl configuration and YAML resource(s): "
-            + "\"Topic/prefix.topic\"."));
+        assertTrue(sw.toString()
+                .contains("Namespace mismatch between Kafkactl configuration and YAML resource(s): "
+                        + "\"Topic/prefix.topic\"."));
     }
 
     @Test
     void shouldDeleteByFile() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
-            .thenReturn(Collections.singletonList(new File("path")));
+                .thenReturn(Collections.singletonList(new File("path")));
 
         Resource resource = Resource.builder()
-            .kind("Topic")
-            .apiVersion("v1")
-            .metadata(Metadata.builder()
-                .name("prefix.topic")
-                .namespace("namespace")
-                .build())
-            .spec(Collections.emptyMap())
-            .build();
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Collections.emptyMap())
+                .build();
 
-        when(fileService.parseResourceListFromFiles(any()))
-            .thenReturn(Collections.singletonList(resource));
+        when(fileService.parseResourceListFromFiles(any())).thenReturn(Collections.singletonList(resource));
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
-            .thenReturn(true);
+                .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
         StringWriter sw = new StringWriter();
@@ -238,38 +243,34 @@ class DeleteTest {
 
     @Test
     void shouldDeleteOneVersionByFile() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
-            .thenReturn(Collections.singletonList(new File("path")));
+                .thenReturn(Collections.singletonList(new File("path")));
 
         Resource resource = Resource.builder()
-            .kind("Topic")
-            .apiVersion("v1")
-            .metadata(Metadata.builder()
-                .name("prefix.topic")
-                .namespace("namespace")
-                .build())
-            .spec(Map.of("version", "1"))
-            .build();
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Map.of("version", "1"))
+                .build();
 
-        when(fileService.parseResourceListFromFiles(any()))
-            .thenReturn(Collections.singletonList(resource));
+        when(fileService.parseResourceListFromFiles(any())).thenReturn(Collections.singletonList(resource));
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
-            .thenReturn(true);
+                .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
         StringWriter sw = new StringWriter();
@@ -281,25 +282,21 @@ class DeleteTest {
 
     @Test
     void shouldDeleteByName() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.of(apiResource));
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
-            .thenReturn(true);
+                .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
         StringWriter sw = new StringWriter();
@@ -311,25 +308,21 @@ class DeleteTest {
 
     @Test
     void shouldDeleteOneVersionByName() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.of(apiResource));
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
-            .thenReturn(true);
+                .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
         StringWriter sw = new StringWriter();
@@ -341,37 +334,31 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByFileWhenInDryRunMode() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
-            .thenReturn(Collections.singletonList(new File("path")));
+                .thenReturn(Collections.singletonList(new File("path")));
 
         Resource resource = Resource.builder()
-            .kind("Topic")
-            .apiVersion("v1")
-            .metadata(Metadata.builder()
-                .name("prefix.topic")
-                .build())
-            .spec(Collections.emptyMap())
-            .build();
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder().name("prefix.topic").build())
+                .spec(Collections.emptyMap())
+                .build();
 
-        when(fileService.parseResourceListFromFiles(any()))
-            .thenReturn(Collections.singletonList(resource));
+        when(fileService.parseResourceListFromFiles(any())).thenReturn(Collections.singletonList(resource));
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
-            .thenReturn(true);
+                .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
         StringWriter sw = new StringWriter();
@@ -384,38 +371,34 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByFileWhenFail() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
-            .thenReturn(Collections.singletonList(new File("path")));
+                .thenReturn(Collections.singletonList(new File("path")));
 
         Resource resource = Resource.builder()
-            .kind("Topic")
-            .apiVersion("v1")
-            .metadata(Metadata.builder()
-                .name("prefix.topic")
-                .namespace("namespace")
-                .build())
-            .spec(Collections.emptyMap())
-            .build();
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Collections.emptyMap())
+                .build();
 
-        when(fileService.parseResourceListFromFiles(any()))
-            .thenReturn(Collections.singletonList(resource));
+        when(fileService.parseResourceListFromFiles(any())).thenReturn(Collections.singletonList(resource));
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
-            .thenReturn(false);
+                .thenReturn(false);
 
         CommandLine cmd = new CommandLine(delete);
 
@@ -425,30 +408,26 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByFileWhenHttpClientResponseException() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
-            .thenReturn(Collections.singletonList(new File("path")));
+                .thenReturn(Collections.singletonList(new File("path")));
 
         Resource resource = Resource.builder()
-            .kind("Topic")
-            .apiVersion("v1")
-            .metadata(Metadata.builder()
-                .name("prefix.topic")
-                .namespace("namespace")
-                .build())
-            .spec(Collections.emptyMap())
-            .build();
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Collections.emptyMap())
+                .build();
 
-        when(fileService.parseResourceListFromFiles(any()))
-            .thenReturn(Collections.singletonList(resource));
+        when(fileService.parseResourceListFromFiles(any())).thenReturn(Collections.singletonList(resource));
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
 
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenThrow(exception);
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenThrow(exception);
 
         CommandLine cmd = new CommandLine(delete);
 
@@ -459,25 +438,21 @@ class DeleteTest {
 
     @Test
     void shouldDeleteByNameWithWildcard() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.of(apiResource));
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
-            .thenReturn(true);
+                .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
         StringWriter sw = new StringWriter();
@@ -489,10 +464,8 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByNameWithWildcardWithoutExecute() {
-        when(configService.isCurrentContextValid())
-                .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-                .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
         StringWriter sw = new StringWriter();
@@ -509,10 +482,8 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByNameWithQuestionMarkWildcardWithoutExecute() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
         StringWriter sw = new StringWriter();
@@ -522,32 +493,28 @@ class DeleteTest {
         assertEquals(0, code);
         assertTrue(sw.toString().contains("You are about to potentially delete multiple resources with wildcard"));
         assertTrue(sw.toString()
-            .contains("Rerun the command with option --dry-run to see the resources that will be deleted."));
+                .contains("Rerun the command with option --dry-run to see the resources that will be deleted."));
         assertTrue(sw.toString().contains("Rerun the command with option --execute to execute this operation."));
         verify(resourceService, never()).delete(any(), any(), any(), any(), anyBoolean(), any());
     }
 
     @Test
     void shouldNotDeleteByNameWithWildcardInDryRunMode() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.of(apiResource));
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
-            .thenReturn(true);
+                .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
         StringWriter sw = new StringWriter();
@@ -560,25 +527,21 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByNameWithWildcardWithExecuteInDryRunMode() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.of(apiResource));
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any()))
-            .thenReturn(true);
+                .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
         StringWriter sw = new StringWriter();

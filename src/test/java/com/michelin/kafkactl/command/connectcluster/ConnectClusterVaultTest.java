@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.command.connectcluster;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,13 +66,13 @@ class ConnectClusterVaultTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(false);
+        when(configService.isCurrentContextValid()).thenReturn(false);
 
         int code = cmd.execute();
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("No valid current context found. "
-            + "Use \"kafkactl config use-context\" to set a valid context."));
+        assertTrue(sw.toString()
+                .contains("No valid current context found. "
+                        + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
     @Test
@@ -63,10 +81,8 @@ class ConnectClusterVaultTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(false);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         int code = cmd.execute();
         assertEquals(1, code);
@@ -74,14 +90,11 @@ class ConnectClusterVaultTest {
 
     @Test
     void shouldListAvailableVaultsClustersSuccess() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
-        when(resourceService.listAvailableVaultsConnectClusters(any(), any()))
-            .thenReturn(0);
+        when(resourceService.listAvailableVaultsConnectClusters(any(), any())).thenReturn(0);
 
         CommandLine cmd = new CommandLine(subcommand);
 
@@ -92,14 +105,11 @@ class ConnectClusterVaultTest {
 
     @Test
     void shouldListAvailableVaultsClustersFail() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
-        when(resourceService.listAvailableVaultsConnectClusters(any(), any()))
-            .thenReturn(1);
+        when(resourceService.listAvailableVaultsConnectClusters(any(), any())).thenReturn(1);
 
         CommandLine cmd = new CommandLine(subcommand);
 
@@ -110,8 +120,7 @@ class ConnectClusterVaultTest {
 
     @Test
     void shouldDisplayErrorMessageWhenNoSecretsPassed() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
@@ -127,20 +136,20 @@ class ConnectClusterVaultTest {
 
     @Test
     void shouldVaultSuccess() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
 
         when(resourceService.vaultsOnConnectClusters(any(), any(), any(), any()))
-            .thenReturn(0);
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(subcommand);
 
         int code = cmd.execute("connectCluster", "secret1", "secret2");
         assertEquals(0, code);
-        verify(resourceService).vaultsOnConnectClusters("namespace", "connectCluster", List.of("secret1", "secret2"),
-            cmd.getCommandSpec());
+        verify(resourceService)
+                .vaultsOnConnectClusters(
+                        "namespace", "connectCluster", List.of("secret1", "secret2"), cmd.getCommandSpec());
     }
 }

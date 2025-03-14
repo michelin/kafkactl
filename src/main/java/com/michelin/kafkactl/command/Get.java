@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.command;
 
 import com.michelin.kafkactl.hook.AuthenticatedHook;
@@ -17,18 +35,17 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 
-/**
- * Get subcommand.
- */
-@Command(name = "get",
-    headerHeading = "@|bold Usage|@:",
-    synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@: ",
-    description = "Get resources by resource type for the current namespace.",
-    parameterListHeading = "%n@|bold Parameters|@:%n",
-    optionListHeading = "%n@|bold Options|@:%n",
-    commandListHeading = "%n@|bold Commands|@:%n",
-    usageHelpAutoWidth = true)
+/** Get subcommand. */
+@Command(
+        name = "get",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@: ",
+        description = "Get resources by resource type for the current namespace.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true)
 public class Get extends AuthenticatedHook {
     @Inject
     @ReflectiveAccess
@@ -38,30 +55,27 @@ public class Get extends AuthenticatedHook {
     @ReflectiveAccess
     private FormatService formatService;
 
-    @Parameters(
-        index = "0",
-        description = "Resource type or 'all' to display resources of all types.",
-        arity = "1")
+    @Parameters(index = "0", description = "Resource type or 'all' to display resources of all types.", arity = "1")
     public String resourceType;
 
     @Parameters(
-        index = "1",
-        description = "Resource name or wildcard matching resource names.",
-        arity = "0..1",
-        defaultValue = "*")
+            index = "1",
+            description = "Resource name or wildcard matching resource names.",
+            arity = "0..1",
+            defaultValue = "*")
     public String resourceName;
 
     @Option(
-        names = {"--search"},
-        description = "Search resources based on parameters.",
-        arity = "0..1",
-        split = ",")
+            names = {"--search"},
+            description = "Search resources based on parameters.",
+            arity = "0..1",
+            split = ",")
     public Map<String, String> search;
 
     @Option(
-        names = {"-o", "--output"},
-        description = "Output format (${COMPLETION-CANDIDATES}).",
-        defaultValue = "table")
+            names = {"-o", "--output"},
+            description = "Output format (${COMPLETION-CANDIDATES}).",
+            defaultValue = "table")
     public Output output;
 
     /**
@@ -91,20 +105,18 @@ public class Get extends AuthenticatedHook {
     private List<ApiResource> validateResourceType() {
         // Specific case ALL
         if (resourceType.equalsIgnoreCase("ALL")) {
-            return apiResourcesService.listResourceDefinitions()
-                .stream()
-                .filter(ApiResource::isNamespaced)
-                .toList();
+            return apiResourcesService.listResourceDefinitions().stream()
+                    .filter(ApiResource::isNamespaced)
+                    .toList();
         }
 
         // Otherwise, check resource exists
-        Optional<ApiResource> optionalApiResource =
-            apiResourcesService.getResourceDefinitionByName(resourceType);
+        Optional<ApiResource> optionalApiResource = apiResourcesService.getResourceDefinitionByName(resourceType);
         if (optionalApiResource.isPresent()) {
             return List.of(optionalApiResource.get());
         }
 
-        throw new ParameterException(commandSpec.commandLine(),
-            "The server does not have resource type " + resourceType + ".");
+        throw new ParameterException(
+                commandSpec.commandLine(), "The server does not have resource type " + resourceType + ".");
     }
 }

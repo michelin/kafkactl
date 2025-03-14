@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.command.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,9 +36,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
 
-/**
- * Config use context subcommand test.
- */
+/** Config use context subcommand test. */
 @ExtendWith(MockitoExtension.class)
 class ConfigUseContextTest {
     @Mock
@@ -34,8 +50,7 @@ class ConfigUseContextTest {
 
     @Test
     void shouldGetEmptyContexts() {
-        when(kafkactlConfig.getContexts())
-            .thenReturn(Collections.emptyList());
+        when(kafkactlConfig.getContexts()).thenReturn(Collections.emptyList());
 
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();
@@ -49,18 +64,16 @@ class ConfigUseContextTest {
     @Test
     void shouldUseContextNotFound() {
         KafkactlConfig.Context context = KafkactlConfig.Context.builder()
-            .name("name")
-            .definition(KafkactlConfig.Context.ApiContext.builder()
-                .api("api")
-                .namespace("namespace")
-                .userToken("userToken")
-                .build())
-            .build();
+                .name("name")
+                .definition(KafkactlConfig.Context.ApiContext.builder()
+                        .api("api")
+                        .namespace("namespace")
+                        .userToken("userToken")
+                        .build())
+                .build();
 
-        when(kafkactlConfig.getContexts())
-            .thenReturn(Collections.singletonList(context));
-        when(configService.getContextByName(any()))
-            .thenReturn(Optional.empty());
+        when(kafkactlConfig.getContexts()).thenReturn(Collections.singletonList(context));
+        when(configService.getContextByName(any())).thenReturn(Optional.empty());
 
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();
@@ -74,18 +87,16 @@ class ConfigUseContextTest {
     @Test
     void shouldUseContext() {
         KafkactlConfig.Context context = KafkactlConfig.Context.builder()
-            .name("name")
-            .definition(KafkactlConfig.Context.ApiContext.builder()
-                .api("api")
-                .namespace("namespace")
-                .userToken("userToken")
-                .build())
-            .build();
+                .name("name")
+                .definition(KafkactlConfig.Context.ApiContext.builder()
+                        .api("api")
+                        .namespace("namespace")
+                        .userToken("userToken")
+                        .build())
+                .build();
 
-        when(kafkactlConfig.getContexts())
-            .thenReturn(Collections.singletonList(context));
-        when(configService.getContextByName(any()))
-            .thenReturn(Optional.of(context));
+        when(kafkactlConfig.getContexts()).thenReturn(Collections.singletonList(context));
+        when(configService.getContextByName(any())).thenReturn(Optional.of(context));
 
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();

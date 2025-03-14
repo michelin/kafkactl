@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.command;
 
 import static com.michelin.kafkactl.model.Output.TABLE;
@@ -59,21 +77,19 @@ class GetTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(false);
+        when(configService.isCurrentContextValid()).thenReturn(false);
 
         int code = cmd.execute("topics");
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("No valid current context found. "
-            + "Use \"kafkactl config use-context\" to set a valid context."));
+        assertTrue(sw.toString()
+                .contains("No valid current context found. "
+                        + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
     @Test
     void shouldNotGetWhenNotAuthenticated() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(false);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(get);
         StringWriter sw = new StringWriter();
@@ -96,12 +112,9 @@ class GetTest {
 
     @Test
     void shouldNotGetWhenServerNotHaveResourceType() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.empty());
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.empty());
 
         CommandLine cmd = new CommandLine(get);
         StringWriter sw = new StringWriter();
@@ -114,24 +127,20 @@ class GetTest {
 
     @Test
     void shouldNotGetWhenHttpClientThrowException() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
         HttpClientResponseException e = new HttpClientResponseException("error", HttpResponse.serverError());
-        when(resourceService.list(any(), any(), any(), any(), any(), any()))
-            .thenThrow(e);
+        when(resourceService.list(any(), any(), any(), any(), any(), any())).thenThrow(e);
 
         CommandLine cmd = new CommandLine(get);
 
@@ -148,30 +157,27 @@ class GetTest {
 
         int code = cmd.execute("topics", "myTopic", "--search=badFormat");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains("Value for option option '--search' (<String=String>) "
-            + "should be in KEY=VALUE[,KEY=VALUE]"));
+        assertTrue(sw.toString()
+                .contains("Value for option option '--search' (<String=String>) "
+                        + "should be in KEY=VALUE[,KEY=VALUE]"));
     }
 
     @Test
     void shouldGetOneResource() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
 
-        when(resourceService.list(any(), any(), any(), any(), any(), any()))
-            .thenReturn(0);
+        when(resourceService.list(any(), any(), any(), any(), any(), any())).thenReturn(0);
 
         CommandLine cmd = new CommandLine(get);
         StringWriter sw = new StringWriter();
@@ -180,29 +186,30 @@ class GetTest {
         int code = cmd.execute("topics", "myTopic", "-n", "namespace");
         assertEquals(0, code);
         verify(resourceService)
-            .list(Collections.singletonList(apiResource), "namespace",
-                "myTopic", null, TABLE, cmd.getCommandSpec());
+                .list(
+                        Collections.singletonList(apiResource),
+                        "namespace",
+                        "myTopic",
+                        null,
+                        TABLE,
+                        cmd.getCommandSpec());
     }
 
     @Test
     void shouldGetAllTopics() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.of(apiResource));
-        when(resourceService.list(any(), any(), any(), any(), any(), any()))
-            .thenReturn(0);
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
+        when(resourceService.list(any(), any(), any(), any(), any(), any())).thenReturn(0);
 
         CommandLine cmd = new CommandLine(get);
         StringWriter sw = new StringWriter();
@@ -211,69 +218,58 @@ class GetTest {
         int code = cmd.execute("topics", "-n", "namespace");
         assertEquals(0, code);
         verify(resourceService)
-            .list(Collections.singletonList(apiResource), "namespace",
-                "*", null, TABLE, cmd.getCommandSpec());
+                .list(Collections.singletonList(apiResource), "namespace", "*", null, TABLE, cmd.getCommandSpec());
     }
 
     @Test
     void shouldGetAll() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
-        when(kafkactlConfig.getCurrentNamespace())
-            .thenReturn("namespace");
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
 
         ApiResource nonNamespacedApiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(false)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(false)
+                .synchronizable(true)
+                .build();
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.listResourceDefinitions())
-            .thenReturn(List.of(apiResource, nonNamespacedApiResource));
-        when(resourceService.list(any(), any(), any(), any(), any(), any()))
-            .thenReturn(0);
+        when(apiResourcesService.listResourceDefinitions()).thenReturn(List.of(apiResource, nonNamespacedApiResource));
+        when(resourceService.list(any(), any(), any(), any(), any(), any())).thenReturn(0);
 
         CommandLine cmd = new CommandLine(get);
 
         int code = cmd.execute("all");
         assertEquals(0, code);
         verify(resourceService)
-            .list(Collections.singletonList(apiResource), "namespace",
-                "*", null, TABLE, cmd.getCommandSpec());
+                .list(Collections.singletonList(apiResource), "namespace", "*", null, TABLE, cmd.getCommandSpec());
     }
 
     @Test
     void shouldGetWithSearch() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
 
-        when(resourceService.list(any(), any(), any(), any(), any(), any()))
-            .thenReturn(0);
+        when(resourceService.list(any(), any(), any(), any(), any(), any())).thenReturn(0);
 
         CommandLine cmd = new CommandLine(get);
         StringWriter sw = new StringWriter();
@@ -282,40 +278,55 @@ class GetTest {
         int code = cmd.execute("topics", "myTopic", "--search", "tag=test,policy=compact", "-n", "namespace");
         assertEquals(0, code);
         verify(resourceService)
-            .list(Collections.singletonList(apiResource), "namespace",
-                "myTopic", Map.of("tag", "test", "policy", "compact"), TABLE, cmd.getCommandSpec());
+                .list(
+                        Collections.singletonList(apiResource),
+                        "namespace",
+                        "myTopic",
+                        Map.of("tag", "test", "policy", "compact"),
+                        TABLE,
+                        cmd.getCommandSpec());
     }
 
     @Test
     void shouldGetWithMultipleSearch() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
 
-        when(resourceService.list(any(), any(), any(), any(), any(), any()))
-            .thenReturn(0);
+        when(resourceService.list(any(), any(), any(), any(), any(), any())).thenReturn(0);
 
         CommandLine cmd = new CommandLine(get);
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("topics", "myTopic", "--search", "tag=test", "--search", "policy=compact",
-            "--search", "policy=compact,partition=3", "-n", "namespace");
+        int code = cmd.execute(
+                "topics",
+                "myTopic",
+                "--search",
+                "tag=test",
+                "--search",
+                "policy=compact",
+                "--search",
+                "policy=compact,partition=3",
+                "-n",
+                "namespace");
         assertEquals(0, code);
         verify(resourceService)
-            .list(Collections.singletonList(apiResource), "namespace",
-                "myTopic", Map.of("tag", "test", "policy", "compact", "partition", "3"), TABLE, cmd.getCommandSpec());
+                .list(
+                        Collections.singletonList(apiResource),
+                        "namespace",
+                        "myTopic",
+                        Map.of("tag", "test", "policy", "compact", "partition", "3"),
+                        TABLE,
+                        cmd.getCommandSpec());
     }
 }
