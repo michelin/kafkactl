@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.command;
 
 import static com.michelin.kafkactl.service.ResourceService.SCHEMA_FILE;
@@ -70,13 +88,13 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(false);
+        when(configService.isCurrentContextValid()).thenReturn(false);
 
         int code = cmd.execute();
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("No valid current context found. "
-            + "Use \"kafkactl config use-context\" to set a valid context."));
+        assertTrue(sw.toString()
+                .contains("No valid current context found. "
+                        + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
     @Test
@@ -85,10 +103,8 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(false);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         int code = cmd.execute();
         assertEquals(1, code);
@@ -100,10 +116,8 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         int code = cmd.execute();
         assertEquals(2, code);
@@ -116,13 +130,11 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-            .thenThrow(new ParameterException(cmd.getCommandSpec().commandLine(),
-                "Could not find YAML or YML files in topic directory."));
+                .thenThrow(new ParameterException(
+                        cmd.getCommandSpec().commandLine(), "Could not find YAML or YML files in topic directory."));
 
         int code = cmd.execute("-f", "topic");
         assertEquals(2, code);
@@ -135,25 +147,22 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
-            .kind("Topic")
-            .apiVersion("v1")
-            .metadata(Metadata.builder()
-                .name("prefix.topic")
-                .build())
-            .spec(Collections.emptyMap())
-            .build();
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder().name("prefix.topic").build())
+                .spec(Collections.emptyMap())
+                .build();
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-            .thenReturn(Collections.singletonList(resource));
-        doThrow(new ParameterException(cmd.getCommandSpec().commandLine(),
-            "The server does not have resource type(s) Topic."))
-            .when(resourceService).validateAllowedResources(any(), any());
+                .thenReturn(Collections.singletonList(resource));
+        doThrow(new ParameterException(
+                        cmd.getCommandSpec().commandLine(), "The server does not have resource type(s) Topic."))
+                .when(resourceService)
+                .validateAllowedResources(any(), any());
 
         int code = cmd.execute("-f", "topic.yml");
         assertEquals(2, code);
@@ -162,23 +171,21 @@ class ApplyTest {
 
     @Test
     void shouldNotApplyWhenNamespaceMismatch() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
-            .kind("Topic")
-            .apiVersion("v1")
-            .metadata(Metadata.builder()
-                .name("prefix.topic")
-                .namespace("namespace")
-                .build())
-            .spec(Collections.emptyMap())
-            .build();
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Collections.emptyMap())
+                .build();
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-            .thenReturn(Collections.singletonList(resource));
+                .thenReturn(Collections.singletonList(resource));
 
         CommandLine cmd = new CommandLine(apply);
         StringWriter sw = new StringWriter();
@@ -186,35 +193,32 @@ class ApplyTest {
 
         int code = cmd.execute("-f", "topic.yml", "-n", "namespaceMismatch");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains("Namespace mismatch between Kafkactl configuration and YAML resource(s): "
-            + "\"Topic/prefix.topic\"."));
+        assertTrue(sw.toString()
+                .contains("Namespace mismatch between Kafkactl configuration and YAML resource(s): "
+                        + "\"Topic/prefix.topic\"."));
     }
 
     @Test
     void shouldNotApplyWhenHttpClientResponseException() {
         Resource resource = Resource.builder()
-            .kind("Topic")
-            .apiVersion("v1")
-            .metadata(Metadata.builder()
-                .name("prefix.topic")
-                .namespace("namespace")
-                .build())
-            .spec(Collections.emptyMap())
-            .build();
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Collections.emptyMap())
+                .build();
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-            .thenReturn(Collections.singletonList(resource));
-        when(kafkactlConfig.getCurrentNamespace())
-            .thenReturn("namespace");
+                .thenReturn(Collections.singletonList(resource));
+        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
 
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenThrow(exception);
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenThrow(exception);
 
         CommandLine cmd = new CommandLine(apply);
 
@@ -225,40 +229,34 @@ class ApplyTest {
 
     @Test
     void shouldApply() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
-            .kind("Topic")
-            .apiVersion("v1")
-            .metadata(Metadata.builder()
-                .name("prefix.topic")
-                .namespace("namespace")
-                .build())
-            .spec(Collections.emptyMap())
-            .build();
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Collections.emptyMap())
+                .build();
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-            .thenReturn(Collections.singletonList(resource));
-        when(kafkactlConfig.getCurrentNamespace())
-            .thenReturn("namespace");
+                .thenReturn(Collections.singletonList(resource));
+        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
-            .thenReturn(HttpResponse
-                .ok(resource)
-                .header("X-Ns4kafka-Result", "Created"));
+                .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
 
         CommandLine cmd = new CommandLine(apply);
         StringWriter sw = new StringWriter();
@@ -271,39 +269,31 @@ class ApplyTest {
 
     @Test
     void shouldApplyDryRun() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
-            .kind("Topic")
-            .apiVersion("v1")
-            .metadata(Metadata.builder()
-                .name("prefix.topic")
-                .build())
-            .spec(Collections.emptyMap())
-            .build();
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder().name("prefix.topic").build())
+                .spec(Collections.emptyMap())
+                .build();
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-            .thenReturn(Collections.singletonList(resource));
-        when(kafkactlConfig.getCurrentNamespace())
-            .thenReturn("namespace");
+                .thenReturn(Collections.singletonList(resource));
+        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
-            .thenReturn(HttpResponse
-                .ok(resource)
-                .header("X-Ns4kafka-Result", "Created"));
+                .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
 
         CommandLine cmd = new CommandLine(apply);
         StringWriter sw = new StringWriter();
@@ -320,41 +310,35 @@ class ApplyTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE, "src/test/resources/person.avsc");
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
-            .kind("Schema")
-            .apiVersion("v1")
-            .metadata(Metadata.builder()
-                .name("prefix.schema")
-                .namespace("namespace")
-                .build())
-            .spec(specs)
-            .build();
+                .kind("Schema")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.schema")
+                        .namespace("namespace")
+                        .build())
+                .spec(specs)
+                .build();
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-            .thenReturn(Collections.singletonList(resource));
-        when(kafkactlConfig.getCurrentNamespace())
-            .thenReturn("namespace");
+                .thenReturn(Collections.singletonList(resource));
+        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
         doCallRealMethod().when(resourceService).enrichSchemaContent(any(), any());
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Schema")
-            .namespaced(true)
-            .synchronizable(false)
-            .path("schemas")
-            .names(List.of("schemas", "schema", "sc"))
-            .build();
+                .kind("Schema")
+                .namespaced(true)
+                .synchronizable(false)
+                .path("schemas")
+                .names(List.of("schemas", "schema", "sc"))
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
-            .thenReturn(HttpResponse
-                .ok(resource)
-                .header("X-Ns4kafka-Result", "Created"));
+                .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
 
         CommandLine cmd = new CommandLine(apply);
         StringWriter sw = new StringWriter();
@@ -371,39 +355,33 @@ class ApplyTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put("schema", "{schema}");
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
-            .kind("Schema")
-            .apiVersion("v1")
-            .metadata(Metadata.builder()
-                .name("prefix.schema")
-                .namespace("namespace")
-                .build())
-            .spec(specs)
-            .build();
+                .kind("Schema")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.schema")
+                        .namespace("namespace")
+                        .build())
+                .spec(specs)
+                .build();
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-            .thenReturn(Collections.singletonList(resource));
-        when(kafkactlConfig.getCurrentNamespace())
-            .thenReturn("namespace");
+                .thenReturn(Collections.singletonList(resource));
+        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Schema")
-            .namespaced(true)
-            .synchronizable(false)
-            .path("schemas")
-            .names(List.of("schemas", "schema", "sc"))
-            .build();
+                .kind("Schema")
+                .namespaced(true)
+                .synchronizable(false)
+                .path("schemas")
+                .names(List.of("schemas", "schema", "sc"))
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByKind(any()))
-            .thenReturn(Optional.of(apiResource));
-        when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
-            .thenReturn(HttpResponse
-                .ok(resource));
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
+        when(resourceService.apply(any(), any(), any(), anyBoolean(), any())).thenReturn(HttpResponse.ok(resource));
 
         CommandLine cmd = new CommandLine(apply);
         StringWriter sw = new StringWriter();
@@ -419,25 +397,22 @@ class ApplyTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE, "src/test/resources/not-exist.avsc");
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
-            .kind("Schema")
-            .apiVersion("v1")
-            .metadata(Metadata.builder()
-                .name("prefix.schema")
-                .namespace("namespace")
-                .build())
-            .spec(specs)
-            .build();
+                .kind("Schema")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.schema")
+                        .namespace("namespace")
+                        .build())
+                .spec(specs)
+                .build();
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
-            .thenReturn(Collections.singletonList(resource));
-        when(kafkactlConfig.getCurrentNamespace())
-            .thenReturn("namespace");
+                .thenReturn(Collections.singletonList(resource));
+        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
         doCallRealMethod().when(resourceService).enrichSchemaContent(any(), any());
 
         CommandLine cmd = new CommandLine(apply);
@@ -446,7 +421,9 @@ class ApplyTest {
 
         int code = cmd.execute("-f", "topic.yml");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains(
-            "Cannot open schema file src/test/resources/not-exist.avsc. Schema path must be relative to the CLI."));
+        assertTrue(
+                sw.toString()
+                        .contains(
+                                "Cannot open schema file src/test/resources/not-exist.avsc. Schema path must be relative to the CLI."));
     }
 }

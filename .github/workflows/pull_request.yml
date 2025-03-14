@@ -36,8 +36,8 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Check style
-        run: ./gradlew checkstyleMain checkstyleTest
+      - name: Lint
+        run: ./gradlew spotlessCheck
 
       - name: Build
         id: build_jar
@@ -98,8 +98,8 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Check Style
-        run: ./gradlew checkstyleMain checkstyleTest
+      - name: Lint
+        run: ./gradlew spotlessCheck
 
       - name: Build
         id: build_native_linux_macos
@@ -140,8 +140,8 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Check Style
-        run: .\gradlew.bat checkstyleMain checkstyleTest
+      - name: Lint
+        run: .\gradlew.bat spotlessCheck
 
       - name: Build
         id: build_native_windows

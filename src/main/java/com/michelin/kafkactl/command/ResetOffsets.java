@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.command;
 
 import com.michelin.kafkactl.hook.DryRunHook;
@@ -16,18 +34,17 @@ import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-/**
- * Reset offsets subcommand.
- */
-@Command(name = "reset-offsets",
-    headerHeading = "@|bold Usage|@:",
-    synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@: ",
-    description = "Reset consumer group offsets.",
-    parameterListHeading = "%n@|bold Parameters|@:%n",
-    optionListHeading = "%n@|bold Options|@:%n",
-    commandListHeading = "%n@|bold Commands|@:%n",
-    usageHelpAutoWidth = true)
+/** Reset offsets subcommand. */
+@Command(
+        name = "reset-offsets",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@: ",
+        description = "Reset consumer group offsets.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true)
 public class ResetOffsets extends DryRunHook {
     public static final String RESET_METHOD = "method";
     public static final String OPTIONS = "options";
@@ -36,7 +53,10 @@ public class ResetOffsets extends DryRunHook {
     @ReflectiveAccess
     private ResourceService resourceService;
 
-    @Option(names = {"--group"}, required = true, description = "Consumer group name.")
+    @Option(
+            names = {"--group"},
+            required = true,
+            description = "Consumer group name.")
     public String group;
 
     @ArgGroup(multiplicity = "1")
@@ -77,54 +97,66 @@ public class ResetOffsets extends DryRunHook {
         }
 
         Resource consumerGroupResetOffset = Resource.builder()
-            .apiVersion("v1")
-            .kind("ConsumerGroupResetOffsets")
-            .metadata(Metadata.builder()
-                .namespace(namespace)
-                .name(group)
-                .build())
-            .spec(consumerGroupResetOffsetSpec)
-            .build();
+                .apiVersion("v1")
+                .kind("ConsumerGroupResetOffsets")
+                .metadata(Metadata.builder().namespace(namespace).name(group).build())
+                .spec(consumerGroupResetOffsetSpec)
+                .build();
 
         return resourceService.resetOffsets(namespace, group, consumerGroupResetOffset, dryRun, commandSpec);
     }
 
-    /**
-     * Topic arguments.
-     */
+    /** Topic arguments. */
     public static class TopicArgs {
-        @Option(names = {"--topic"}, required = true, description = "Topic name or topic:partition.")
+        @Option(
+                names = {"--topic"},
+                required = true,
+                description = "Topic name or topic:partition.")
         public String topic;
 
-        @Option(names = {"--all-topics"}, required = true, description = "All topics.")
+        @Option(
+                names = {"--all-topics"},
+                required = true,
+                description = "All topics.")
         public boolean allTopics;
     }
 
-    /**
-     * Reset method arguments.
-     */
+    /** Reset method arguments. */
     public static class ResetMethod {
-        @Option(names = {"--to-earliest"}, description = "Set offset to its earliest value (reprocess all).",
-            required = true)
+        @Option(
+                names = {"--to-earliest"},
+                description = "Set offset to its earliest value (reprocess all).",
+                required = true)
         public boolean earliest;
 
-        @Option(names = {"--to-latest"}, description = "Set offset to its latest value (skip all).",
-            required = true)
+        @Option(
+                names = {"--to-latest"},
+                description = "Set offset to its latest value (skip all).",
+                required = true)
         public boolean latest;
 
-        @Option(names = {"--to-datetime"}, description = "Set offset to a specific ISO8601 date time "
-            + "with time zone (yyyy-MM-ddTHH:mm:ssZ).", required = true)
+        @Option(
+                names = {"--to-datetime"},
+                description = "Set offset to a specific ISO8601 date time " + "with time zone (yyyy-MM-ddTHH:mm:ssZ).",
+                required = true)
         public OffsetDateTime datetime;
 
-        @Option(names = {"--shift-by"}, description = "Shift offset by a number. "
-            + "Negative to reprocess or positive to skip.", required = true)
+        @Option(
+                names = {"--shift-by"},
+                description = "Shift offset by a number. " + "Negative to reprocess or positive to skip.",
+                required = true)
         public Integer shiftBy;
 
-        @Option(names = {
-            "--by-duration"}, description = "Shift offset by a duration format (PnDTnHnMnS).", required = true)
+        @Option(
+                names = {"--by-duration"},
+                description = "Shift offset by a duration format (PnDTnHnMnS).",
+                required = true)
         public Duration duration;
 
-        @Option(names = {"--to-offset"}, description = "Set offset to a specific index.", required = true)
+        @Option(
+                names = {"--to-offset"},
+                description = "Set offset to a specific index.",
+                required = true)
         public Integer offset;
     }
 }

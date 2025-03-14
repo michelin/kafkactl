@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.command;
 
 import com.michelin.kafkactl.hook.DryRunHook;
@@ -20,18 +38,17 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 
-/**
- * Delete subcommand.
- */
-@Command(name = "delete",
-    headerHeading = "@|bold Usage|@:",
-    synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@: ",
-    description = "Delete a resource.",
-    parameterListHeading = "%n@|bold Parameters|@:%n",
-    optionListHeading = "%n@|bold Options|@:%n",
-    commandListHeading = "%n@|bold Commands|@:%n",
-    usageHelpAutoWidth = true)
+/** Delete subcommand. */
+@Command(
+        name = "delete",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@: ",
+        description = "Delete a resource.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true)
 public class Delete extends DryRunHook {
     public static final String VERSION = "version";
 
@@ -57,12 +74,17 @@ public class Delete extends DryRunHook {
      */
     @Override
     public Integer onAuthSuccess() {
-        if (config.nameConfig != null && !config.nameConfig.confirmed && !dryRun
-            && (config.nameConfig.resourceName.contains("*") || config.nameConfig.resourceName.contains("?"))) {
-            commandSpec.commandLine().getOut().println("You are about to potentially delete multiple resources "
-                + "with wildcard \"" + config.nameConfig.resourceName + "\".\n"
-                + "Rerun the command with option --dry-run to see the resources that will be deleted.\n"
-                + "Rerun the command with option --execute to execute this operation.");
+        if (config.nameConfig != null
+                && !config.nameConfig.confirmed
+                && !dryRun
+                && (config.nameConfig.resourceName.contains("*") || config.nameConfig.resourceName.contains("?"))) {
+            commandSpec
+                    .commandLine()
+                    .getOut()
+                    .println("You are about to potentially delete multiple resources "
+                            + "with wildcard \"" + config.nameConfig.resourceName + "\".\n"
+                            + "Rerun the command with option --dry-run to see the resources that will be deleted.\n"
+                            + "Rerun the command with option --execute to execute this operation.");
             return 0;
         }
 
@@ -75,16 +97,23 @@ public class Delete extends DryRunHook {
 
             // Process each document individually, return 0 when all succeed
             int errors = resources.stream()
-                .map(resource -> {
-                    ApiResource apiResource =
-                        apiResourcesService.getResourceDefinitionByKind(resource.getKind()).orElseThrow();
-                    Map<String, Object> spec = resource.getSpec();
-                    return resourceService.delete(apiResource, namespace, resource.getMetadata().getName(),
-                        (spec != null && spec.containsKey(VERSION) ? spec.get(VERSION).toString() : null),
-                        dryRun, commandSpec);
-                })
-                .mapToInt(value -> Boolean.TRUE.equals(value) ? 0 : 1)
-                .sum();
+                    .map(resource -> {
+                        ApiResource apiResource = apiResourcesService
+                                .getResourceDefinitionByKind(resource.getKind())
+                                .orElseThrow();
+                        Map<String, Object> spec = resource.getSpec();
+                        return resourceService.delete(
+                                apiResource,
+                                namespace,
+                                resource.getMetadata().getName(),
+                                (spec != null && spec.containsKey(VERSION)
+                                        ? spec.get(VERSION).toString()
+                                        : null),
+                                dryRun,
+                                commandSpec);
+                    })
+                    .mapToInt(value -> Boolean.TRUE.equals(value) ? 0 : 1)
+                    .sum();
 
             return errors > 0 ? 1 : 0;
         } catch (HttpClientResponseException e) {
@@ -103,29 +132,32 @@ public class Delete extends DryRunHook {
         if (config.fileConfig != null && config.fileConfig.file.isPresent()) {
             // List all files to process
             List<File> yamlFiles =
-                fileService.computeYamlFileList(config.fileConfig.file.get(), config.fileConfig.recursive);
+                    fileService.computeYamlFileList(config.fileConfig.file.get(), config.fileConfig.recursive);
             if (yamlFiles.isEmpty()) {
-                throw new ParameterException(commandSpec.commandLine(),
-                    "Could not find YAML or YML files in " + config.fileConfig.file.get().getName() + " directory.");
+                throw new ParameterException(
+                        commandSpec.commandLine(),
+                        "Could not find YAML or YML files in "
+                                + config.fileConfig.file.get().getName() + " directory.");
             }
             // Load each files
             return fileService.parseResourceListFromFiles(yamlFiles);
         }
 
         Optional<ApiResource> optionalApiResource =
-            apiResourcesService.getResourceDefinitionByName(config.nameConfig.resourceType);
+                apiResourcesService.getResourceDefinitionByName(config.nameConfig.resourceType);
         if (optionalApiResource.isEmpty()) {
-            throw new ParameterException(commandSpec.commandLine(),
-                "The server does not have resource type(s) " + config.nameConfig.resourceType + ".");
+            throw new ParameterException(
+                    commandSpec.commandLine(),
+                    "The server does not have resource type(s) " + config.nameConfig.resourceType + ".");
         }
 
         // Generate a single resource with minimum details from input
         var builder = Resource.builder()
-            .metadata(Metadata.builder()
-                .name(config.nameConfig.resourceName)
-                .namespace(namespace)
-                .build())
-            .kind(optionalApiResource.get().getKind());
+                .metadata(Metadata.builder()
+                        .name(config.nameConfig.resourceName)
+                        .namespace(namespace)
+                        .build())
+                .kind(optionalApiResource.get().getKind());
 
         if (config.nameConfig.version.isPresent()) {
             builder = builder.spec(Map.of(VERSION, config.nameConfig.version.get()));
@@ -133,26 +165,18 @@ public class Delete extends DryRunHook {
         return List.of(builder.build());
     }
 
-    /**
-     * By-name of by-file deletion config.
-     */
+    /** By-name of by-file deletion config. */
     public static class EitherOf {
-        /**
-         * Configuration for deletion by name.
-         */
+        /** Configuration for deletion by name. */
         @ArgGroup(exclusive = false)
         public ByName nameConfig;
 
-        /**
-         * Configuration for deletion by file.
-         */
+        /** Configuration for deletion by file. */
         @ArgGroup(exclusive = false)
         public ByFile fileConfig;
     }
 
-    /**
-     * By-name deletion config.
-     */
+    /** By-name deletion config. */
     public static class ByName {
         @Parameters(index = "0", description = "Resource type.", arity = "1")
         public String resourceType;
@@ -160,23 +184,28 @@ public class Delete extends DryRunHook {
         @Parameters(index = "1", description = "Resource name or wildcard matching resource names.", arity = "1")
         public String resourceName;
 
-        @Option(names = {"-V", "--version"},
-            description = "Version to delete. Only with schema resource and name parameter.",
-            arity = "0..1")
+        @Option(
+                names = {"-V", "--version"},
+                description = "Version to delete. Only with schema resource and name parameter.",
+                arity = "0..1")
         public Optional<String> version;
 
-        @Option(names = {"--execute"}, description = "This option is mandatory to delete resources with wildcard.")
+        @Option(
+                names = {"--execute"},
+                description = "This option is mandatory to delete resources with wildcard.")
         public boolean confirmed;
     }
 
-    /**
-     * By-file deletion config.
-     */
+    /** By-file deletion config. */
     public static class ByFile {
-        @Option(names = {"-f", "--file"}, description = "YAML file or directory containing resources to delete.")
+        @Option(
+                names = {"-f", "--file"},
+                description = "YAML file or directory containing resources to delete.")
         public Optional<File> file;
 
-        @Option(names = {"-R", "--recursive"}, description = "Search file recursively.")
+        @Option(
+                names = {"-R", "--recursive"},
+                description = "Search file recursively.")
         public boolean recursive;
     }
 }

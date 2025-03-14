@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,15 +51,14 @@ class ApiResourcesServiceTest {
     @Test
     void shouldListResourceDefinitions() {
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(resourceClient.listResourceDefinitions(any()))
-            .thenReturn(Collections.singletonList(apiResource));
+        when(resourceClient.listResourceDefinitions(any())).thenReturn(Collections.singletonList(apiResource));
 
         List<ApiResource> actual = apiResourcesService.listResourceDefinitions();
 
@@ -51,23 +68,22 @@ class ApiResourcesServiceTest {
     @Test
     void shouldGetResourceDefinitionByKindFound() {
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
         ApiResource otherApiResource = ApiResource.builder()
-            .kind("OtherKind")
-            .path("others")
-            .names(List.of("others", "other", "ot"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("OtherKind")
+                .path("others")
+                .names(List.of("others", "other", "ot"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(resourceClient.listResourceDefinitions(any()))
-            .thenReturn(List.of(apiResource, otherApiResource));
+        when(resourceClient.listResourceDefinitions(any())).thenReturn(List.of(apiResource, otherApiResource));
 
         Optional<ApiResource> actual = apiResourcesService.getResourceDefinitionByKind("Topic");
 
@@ -78,23 +94,22 @@ class ApiResourcesServiceTest {
     @Test
     void shouldGetResourceDefinitionByKindNotFound() {
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
         ApiResource otherApiResource = ApiResource.builder()
-            .kind("OtherKind")
-            .path("others")
-            .names(List.of("others", "other", "ot"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("OtherKind")
+                .path("others")
+                .names(List.of("others", "other", "ot"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(resourceClient.listResourceDefinitions(any()))
-            .thenReturn(List.of(apiResource, otherApiResource));
+        when(resourceClient.listResourceDefinitions(any())).thenReturn(List.of(apiResource, otherApiResource));
 
         Optional<ApiResource> actual = apiResourcesService.getResourceDefinitionByKind("notFound");
 
@@ -104,23 +119,22 @@ class ApiResourcesServiceTest {
     @Test
     void shouldGetResourceDefinitionByCommandNameFound() {
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
         ApiResource otherApiResource = ApiResource.builder()
-            .kind("OtherKind")
-            .path("others")
-            .names(List.of("others", "other", "ot"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("OtherKind")
+                .path("others")
+                .names(List.of("others", "other", "ot"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(resourceClient.listResourceDefinitions(any()))
-            .thenReturn(List.of(apiResource, otherApiResource));
+        when(resourceClient.listResourceDefinitions(any())).thenReturn(List.of(apiResource, otherApiResource));
 
         Optional<ApiResource> actual = apiResourcesService.getResourceDefinitionByName("topics");
 
@@ -131,23 +145,22 @@ class ApiResourcesServiceTest {
     @Test
     void shouldGetResourceDefinitionByCommandNameNotFound() {
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
         ApiResource otherApiResource = ApiResource.builder()
-            .kind("OtherKind")
-            .path("others")
-            .names(List.of("others", "other", "ot"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("OtherKind")
+                .path("others")
+                .names(List.of("others", "other", "ot"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(resourceClient.listResourceDefinitions(any()))
-            .thenReturn(List.of(apiResource, otherApiResource));
+        when(resourceClient.listResourceDefinitions(any())).thenReturn(List.of(apiResource, otherApiResource));
 
         Optional<ApiResource> actual = apiResourcesService.getResourceDefinitionByName("notFound");
 
@@ -157,33 +170,32 @@ class ApiResourcesServiceTest {
     @Test
     void shouldValidateResourceTypesValid() {
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
         ApiResource otherApiResource = ApiResource.builder()
-            .kind("OtherKind")
-            .path("others")
-            .names(List.of("others", "other", "ot"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("OtherKind")
+                .path("others")
+                .names(List.of("others", "other", "ot"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
         Resource resource = Resource.builder()
-            .kind("Topic")
-            .apiVersion("v1")
-            .metadata(Metadata.builder()
-                .name("prefix.topic")
-                .namespace("namespace")
-                .build())
-            .spec(Collections.emptyMap())
-            .build();
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Collections.emptyMap())
+                .build();
 
-        when(resourceClient.listResourceDefinitions(any()))
-            .thenReturn(List.of(apiResource, otherApiResource));
+        when(resourceClient.listResourceDefinitions(any())).thenReturn(List.of(apiResource, otherApiResource));
 
         List<Resource> actual = apiResourcesService.filterNotAllowedResourceTypes(Collections.singletonList(resource));
 
@@ -193,27 +205,24 @@ class ApiResourcesServiceTest {
     @Test
     void shouldValidateResourceTypesInvalid() {
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
         ApiResource otherApiResource = ApiResource.builder()
-            .kind("OtherKind")
-            .path("others")
-            .names(List.of("others", "other", "ot"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("OtherKind")
+                .path("others")
+                .names(List.of("others", "other", "ot"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        Resource resource = Resource.builder()
-            .kind("Invalid")
-            .build();
+        Resource resource = Resource.builder().kind("Invalid").build();
 
-        when(resourceClient.listResourceDefinitions(any()))
-            .thenReturn(List.of(apiResource, otherApiResource));
+        when(resourceClient.listResourceDefinitions(any())).thenReturn(List.of(apiResource, otherApiResource));
 
         List<Resource> actual = apiResourcesService.filterNotAllowedResourceTypes(Collections.singletonList(resource));
 
