@@ -39,17 +39,17 @@ To contribute to Kafkactl:
 
 ### Code Style
 
-We maintain a consistent code style using [Spotless](https://github.com/diffplug/spotless/tree/main/plugin-maven).
+We maintain a consistent code style using [Spotless](https://github.com/diffplug/spotless/tree/main/plugin-gradle).
 For Java code, we follow the [Palantir](https://github.com/palantir/palantir-java-format) style.
 
 To check for formatting issues, run:
 
 ```bash
-mvn spotless:check
+./gradlew spotlessCheck
 ```
 
 To automatically fix formatting issues and add missing file headers, run:
 
 ```bash
-mvn spotless:apply
+./gradlew spotlessApply
 ```
