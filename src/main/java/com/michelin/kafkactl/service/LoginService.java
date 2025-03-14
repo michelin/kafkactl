@@ -189,9 +189,7 @@ public class LoginService {
 
         BearerAccessRefreshToken authInfo = objectMapper.readValue(jwtFile, BearerAccessRefreshToken.class);
         return objectMapper.readValue(
-                new String(
-                        Base64.getUrlDecoder().decode(authInfo.getAccessToken().split("\\.")[1])),
-                JwtContent.class);
+                Base64.getUrlDecoder().decode(authInfo.getAccessToken().split("\\.")[1]), JwtContent.class);
     }
 
     /** If exists, delete JWT file. */
