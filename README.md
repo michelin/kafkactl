@@ -71,11 +71,12 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
 ## Download
 
 You can download Kafkactl from the [GitHub releases page](https://github.com/michelin/kafkactl/releases) which offers
-three different formats:
+four different formats:
 
 - JAR (requires Java 21)
 - Windows
 - Linux
+- MacOS
 
 Alternatively, you can use the Docker images available
 on [Docker Hub](https://hub.docker.com/repository/docker/michelin/kafkactl):
