@@ -1,173 +1,174 @@
 plugins {
-	id("com.github.johnrengelman.shadow") version "8.1.1"
-	id("io.micronaut.application") version "4.5.0"
-	id("jacoco")
-	id("org.sonarqube") version "6.0.1.5171"
-	id("pl.allegro.tech.build.axion-release") version "1.18.18"
-	id("com.diffplug.spotless") version "7.0.2"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("io.micronaut.application") version "4.5.0"
+    id("jacoco")
+    id("org.sonarqube") version "6.0.1.5171"
+    id("pl.allegro.tech.build.axion-release") version "1.18.18"
+    id("com.diffplug.spotless") version "7.0.2"
 }
 
 version = scmVersion.version
 group = "com.michelin.kafkactl"
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	annotationProcessor("org.projectlombok:lombok")
-	annotationProcessor("info.picocli:picocli-codegen")
-	annotationProcessor("io.micronaut.validation:micronaut-validation-processor")
+    annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("info.picocli:picocli-codegen")
+    annotationProcessor("io.micronaut.validation:micronaut-validation-processor")
 
-	implementation("info.picocli:picocli")
-	implementation("io.micronaut:micronaut-http-client")
-	implementation("io.micronaut:micronaut-jackson-databind")
-	implementation("io.micronaut.picocli:micronaut-picocli")
-	implementation("io.micronaut.validation:micronaut-validation")
-	implementation("jakarta.annotation:jakarta.annotation-api")
-	implementation("jakarta.validation:jakarta.validation-api")
-	implementation("org.ocpsoft.prettytime:prettytime:5.0.9.Final")
-	implementation("io.github.java-diff-utils:java-diff-utils:4.15")
-	implementation("io.micronaut:micronaut-retry")
-	implementation("org.yaml:snakeyaml")
+    implementation("info.picocli:picocli")
+    implementation("io.micronaut:micronaut-http-client")
+    implementation("io.micronaut:micronaut-jackson-databind")
+    implementation("io.micronaut.picocli:micronaut-picocli")
+    implementation("io.micronaut.validation:micronaut-validation")
+    implementation("jakarta.annotation:jakarta.annotation-api")
+    implementation("jakarta.validation:jakarta.validation-api")
+    implementation("org.ocpsoft.prettytime:prettytime:5.0.9.Final")
+    implementation("io.github.java-diff-utils:java-diff-utils:4.15")
+    implementation("io.micronaut:micronaut-retry")
+    implementation("org.yaml:snakeyaml")
 
-	compileOnly("org.graalvm.nativeimage:svm")
-	compileOnly("org.projectlombok:lombok")
+    compileOnly("org.graalvm.nativeimage:svm")
+    compileOnly("org.projectlombok:lombok")
 
-	runtimeOnly("ch.qos.logback:logback-classic")
+    runtimeOnly("ch.qos.logback:logback-classic")
 
-	testImplementation("io.micronaut:micronaut-http-client")
-	testImplementation("org.mockito:mockito-junit-jupiter:5.16.1")
-	testImplementation("org.junit.jupiter:junit-jupiter-params:5.12.1")
-	testImplementation("org.mockito:mockito-core")
+    testImplementation("io.micronaut:micronaut-http-client")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.16.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.12.1")
+    testImplementation("org.mockito:mockito-core")
 
-	testAnnotationProcessor("org.projectlombok:lombok")
-	testCompileOnly("org.projectlombok:lombok")
+    testAnnotationProcessor("org.projectlombok:lombok")
+    testCompileOnly("org.projectlombok:lombok")
 }
 
 application {
-	mainClass.set("com.michelin.kafkactl.Kafkactl")
+    mainClass.set("com.michelin.kafkactl.Kafkactl")
 }
 
 java {
-	sourceCompatibility = JavaVersion.toVersion("21")
-	targetCompatibility = JavaVersion.toVersion('21')
+    sourceCompatibility = JavaVersion.toVersion("21")
+    targetCompatibility = JavaVersion.toVersion('21')
 }
 
 micronaut {
-	testRuntime("junit5")
-	processing {
-		incremental(true)
-		annotations("com.michelin.kafkactl.*")
-	}
+    testRuntime("junit5")
+    processing {
+        incremental(true)
+        annotations("com.michelin.kafkactl.*")
+    }
 }
 
 shadowJar {
-	archiveClassifier.set("")
-	dependsOn(distTar, distZip)
+    archiveClassifier.set("")
+    dependsOn(distTar, distZip)
 }
 
 graalvmNative {
-	binaries {
-		main {
-			imageName.set("kafkactl-" + version)
-			buildArgs.add("-H:Class=com.michelin.kafkactl.KafkactlCommand")
-			buildArgs.add("-H:IncludeResourceBundles=org.ocpsoft.prettytime.i18n.Resources")
-			buildArgs.add("-H:+ReportUnsupportedElementsAtRuntime")
-			buildArgs.add("-H:+ReportExceptionStackTraces")
-			buildArgs.add("-H:+TraceNativeToolUsage")
-			buildArgs.add("-H:Log=*ShimDLL:3,link:3,copy:3")
-		}
-	}
+    binaries {
+        main {
+            imageName.set("kafkactl-" + version)
+            buildArgs.add("-H:Class=com.michelin.kafkactl.KafkactlCommand")
+            buildArgs.add("-H:IncludeResourceBundles=org.ocpsoft.prettytime.i18n.Resources")
+            buildArgs.add("-H:+ReportUnsupportedElementsAtRuntime")
+            buildArgs.add("-H:+ReportExceptionStackTraces")
+            buildArgs.add("-H:+TraceNativeToolUsage")
+            buildArgs.add("-H:Log=*ShimDLL:3,link:3,copy:3")
+        }
+    }
 }
 
 dockerfile {
-	baseImage = "eclipse-temurin:21-jre-alpine"
+    baseImage = "eclipse-temurin:21-jre-alpine"
 }
 
 dockerfileNative {
-	baseImage("ubuntu:22.04")
-	editDockerfile {
-		after("COPY --link --from=graalvm /home/app/application /app/application") {
-			insert("RUN ln -s /app/application /usr/bin/kafkactl && chmod 777 /usr/bin/kafkactl")
-		}
-	}
+    baseImage("ubuntu:22.04")
+    editDockerfile {
+        after("COPY --link --from=graalvm /home/app/application /app/application") {
+            insert("RUN ln -s /app/application /usr/bin/kafkactl && chmod 777 /usr/bin/kafkactl")
+        }
+    }
 }
 
 if (project.hasProperty("releaseLatest")) {
-	dockerBuild {
-		images.set([
-			"michelin/kafkactl:" + version,
-			"michelin/kafkactl:latest"
-		])
-	}
+    dockerBuild {
+        images.set([
+                "michelin/kafkactl:" + version,
+                "michelin/kafkactl:latest"
+        ])
+    }
 
-	dockerBuildNative {
-		images.set([
-			"michelin/kafkactl:" + version + "-native",
-			"michelin/kafkactl:latest-native"
-		])
-	}
+    dockerBuildNative {
+        images.set([
+                "michelin/kafkactl:" + version + "-native",
+                "michelin/kafkactl:latest-native"
+        ])
+    }
 } else {
-	dockerBuild {
-		images.set([
-			"michelin/kafkactl:" + version
-		])
-	}
+    dockerBuild {
+        images.set([
+                "michelin/kafkactl:" + version
+        ])
+    }
 
-	dockerBuildNative {
-		images.set([
-			"michelin/kafkactl:" + version + "-native"
-		])
-	}
+    dockerBuildNative {
+        images.set([
+                "michelin/kafkactl:" + version + "-native"
+        ])
+    }
 }
 
 sonarqube {
-	properties {
-		property "sonar.projectKey", "michelin_kafkactl"
-		property "sonar.organization", "michelin"
-		property "sonar.host.url", "https://sonarcloud.io"
-	}
+    properties {
+        property "sonar.projectKey", "michelin_kafkactl"
+        property "sonar.organization", "michelin"
+        property "sonar.host.url", "https://sonarcloud.io"
+    }
 }
 
 jacocoTestReport {
-	dependsOn test
-	reports {
-		html.required = true
-		xml.required = true
-	}
+    dependsOn test
+    reports {
+        html.required = true
+        xml.required = true
+    }
 }
 
 test {
-	reports {
-		html.required = false
-	}
+    reports {
+        html.required = false
+    }
 }
 
 spotless {
-	java {
-		target "src/main/java/**/*.java", "src/test/java/**/*.java"
-		palantirJavaFormat("2.58.0").style("PALANTIR").formatJavadoc(true)
-		removeUnusedImports()
-		formatAnnotations()
-		importOrder()
-		trimTrailingWhitespace()
-		endWithNewline()
-		licenseHeaderFile {
-			file ".spotless/HEADER"
-		}
-	}
-	groovyGradle {
-		target "*.gradle"
-		importOrder()
-		removeSemicolons()
-	}
+    java {
+        target "src/main/java/**/*.java", "src/test/java/**/*.java"
+        palantirJavaFormat("2.58.0").style("PALANTIR").formatJavadoc(true)
+        removeUnusedImports()
+        formatAnnotations()
+        importOrder()
+        trimTrailingWhitespace()
+        endWithNewline()
+        licenseHeaderFile {
+            file ".spotless/HEADER"
+        }
+    }
+    groovyGradle {
+        target "*.gradle"
+        importOrder()
+        removeSemicolons()
+        leadingTabsToSpaces()
+    }
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
 
 processResources {
-	filesMatching("application.yml") {
-		filter(ReplaceTokens, tokens: [version: project.version])
-	}
+    filesMatching("application.yml") {
+        filter(ReplaceTokens, tokens: [version: project.version])
+    }
 }
