@@ -96,29 +96,19 @@ dockerfileNative {
 
 if (project.hasProperty("releaseLatest")) {
     dockerBuild {
-        images.set([
-                "michelin/kafkactl:" + version,
-                "michelin/kafkactl:latest"
-        ])
+        images.set(["michelin/kafkactl:" + version, "michelin/kafkactl:latest"])
     }
 
     dockerBuildNative {
-        images.set([
-                "michelin/kafkactl:" + version + "-native",
-                "michelin/kafkactl:latest-native"
-        ])
+        images.set(["michelin/kafkactl:" + version + "-native", "michelin/kafkactl:latest-native"])
     }
 } else {
     dockerBuild {
-        images.set([
-                "michelin/kafkactl:" + version
-        ])
+        images.set(["michelin/kafkactl:" + version])
     }
 
     dockerBuildNative {
-        images.set([
-                "michelin/kafkactl:" + version + "-native"
-        ])
+        images.set(["michelin/kafkactl:" + version + "-native"])
     }
 }
 
