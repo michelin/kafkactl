@@ -106,7 +106,7 @@ jobs:
         id: build_native_linux_macos
         run: |
           if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            ./gradlew nativeCompile -PnativeArgs="--static --libc=musl"
+            ./gradlew nativeCompile --static --libc=musl
           else
             ./gradlew nativeCompile
           fi
