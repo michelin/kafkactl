@@ -76,8 +76,10 @@ jobs:
         include:
           - os: 'ubuntu-latest'
             platform: 'linux-amd64'
+            native-image-musl: true
           - os: 'macos-latest'
             platform: 'darwin-arm64'
+            native-image-musl: false
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
@@ -89,7 +91,7 @@ jobs:
         with:
           distribution: 'graalvm'
           java-version: '21'
-          native-image-musl: true
+          native-image-musl: ${{ matrix.native-image-musl }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache Gradle packages
