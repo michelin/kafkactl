@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.service;
 
 import static com.michelin.kafkactl.model.Output.TABLE;
@@ -33,9 +51,7 @@ import java.util.stream.Collectors;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;
 
-/**
- * Resource service.
- */
+/** Resource service. */
 @Singleton
 public class ResourceService {
     public static final String SCHEMA_FILE = "schemaFile";
@@ -68,24 +84,25 @@ public class ResourceService {
      * List all resources of the given types.
      *
      * @param apiResources The resource type
-     * @param namespace    The namespace
-     * @param search       The search param to filter resources
+     * @param namespace The namespace
+     * @param search The search param to filter resources
      * @param resourceName The resource name
-     * @param output       The output format
-     * @param commandSpec  The command that triggered the action
+     * @param output The output format
+     * @param commandSpec The command that triggered the action
      * @return A map of resource type and list of resources
      */
-    public int list(List<ApiResource> apiResources,
-                    String namespace,
-                    String resourceName,
-                    Map<String, String> search,
-                    Output output,
-                    CommandSpec commandSpec) {
+    public int list(
+            List<ApiResource> apiResources,
+            String namespace,
+            String resourceName,
+            Map<String, String> search,
+            Output output,
+            CommandSpec commandSpec) {
         // Get a single kind of resources
         if (apiResources.size() == 1) {
             try {
-                List<Resource> resources = listResourcesWithType(apiResources.getFirst(),
-                    namespace, resourceName, search);
+                List<Resource> resources =
+                        listResourcesWithType(apiResources.getFirst(), namespace, resourceName, search);
                 if (!resources.isEmpty()) {
                     formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
                 } else {
@@ -99,22 +116,21 @@ public class ResourceService {
         }
 
         // Get all
-        int errors = apiResources
-            .stream()
-            .map(apiResource -> {
-                try {
-                    List<Resource> resources = listResourcesWithType(apiResource, namespace, resourceName, null);
-                    if (!resources.isEmpty()) {
-                        formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
+        int errors = apiResources.stream()
+                .map(apiResource -> {
+                    try {
+                        List<Resource> resources = listResourcesWithType(apiResource, namespace, resourceName, null);
+                        if (!resources.isEmpty()) {
+                            formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
+                        }
+                        return 0;
+                    } catch (HttpClientResponseException exception) {
+                        formatService.displayError(exception, apiResource.getKind(), resourceName, commandSpec);
+                        return 1;
                     }
-                    return 0;
-                } catch (HttpClientResponseException exception) {
-                    formatService.displayError(exception, apiResource.getKind(), resourceName, commandSpec);
-                    return 1;
-                }
-            })
-            .mapToInt(value -> value)
-            .sum();
+                })
+                .mapToInt(value -> value)
+                .sum();
 
         return errors > 0 ? 1 : 0;
     }
@@ -122,16 +138,14 @@ public class ResourceService {
     /**
      * List all resources of given type.
      *
-     * @param apiResource  The resource type
-     * @param namespace    The namespace
+     * @param apiResource The resource type
+     * @param namespace The namespace
      * @param resourceName The resource name
-     * @param search       The resource search parameters mapping
+     * @param search The resource search parameters mapping
      * @return A list of resources
      */
-    public List<Resource> listResourcesWithType(ApiResource apiResource,
-                                                String namespace,
-                                                String resourceName,
-                                                Map<String, String> search) {
+    public List<Resource> listResourcesWithType(
+            ApiResource apiResource, String namespace, String resourceName, Map<String, String> search) {
         Map<String, String> queryParam = new HashMap<>();
         if (search != null) {
             queryParam.putAll(search);
@@ -139,24 +153,24 @@ public class ResourceService {
         queryParam.put("name", resourceName);
 
         return apiResource.isNamespaced()
-            ? namespacedClient.list(namespace, apiResource.getPath(), resourceName, loginService.getAuthorization())
-            : nonNamespacedClient.list(loginService.getAuthorization(), apiResource.getPath(), queryParam);
+                ? namespacedClient.list(namespace, apiResource.getPath(), resourceName, loginService.getAuthorization())
+                : nonNamespacedClient.list(loginService.getAuthorization(), apiResource.getPath(), queryParam);
     }
 
     /**
      * Get a resource by type and name.
      *
-     * @param apiResource  The resource type
-     * @param namespace    The namespace
+     * @param apiResource The resource type
+     * @param namespace The namespace
      * @param resourceName The resource name
-     * @param throwError   true if error should be thrown
+     * @param throwError true if error should be thrown
      * @return A resource
      */
-    public Resource getSingleResourceWithType(ApiResource apiResource, String namespace, String resourceName,
-                                              boolean throwError) {
+    public Resource getSingleResourceWithType(
+            ApiResource apiResource, String namespace, String resourceName, boolean throwError) {
         HttpResponse<Resource> response = apiResource.isNamespaced()
-            ? namespacedClient.get(namespace, apiResource.getPath(), resourceName, loginService.getAuthorization())
-            : nonNamespacedClient.get(loginService.getAuthorization(), apiResource.getPath(), resourceName);
+                ? namespacedClient.get(namespace, apiResource.getPath(), resourceName, loginService.getAuthorization())
+                : nonNamespacedClient.get(loginService.getAuthorization(), apiResource.getPath(), resourceName);
 
         // Micronaut does not throw exception on 404, so produce a 404 manually
         if (response.getStatus().equals(HttpStatus.NOT_FOUND) && throwError) {
@@ -170,27 +184,34 @@ public class ResourceService {
      * Apply a given resource.
      *
      * @param apiResource The resource type
-     * @param namespace   The namespace
-     * @param resource    The resource
-     * @param dryRun      Is dry run mode or not?
+     * @param namespace The namespace
+     * @param resource The resource
+     * @param dryRun Is dry run mode or not?
      * @param commandSpec The command that triggered the action
      * @return An HTTP response
      */
-    public HttpResponse<Resource> apply(ApiResource apiResource, String namespace, Resource resource, boolean dryRun,
-                                        CommandSpec commandSpec) {
+    public HttpResponse<Resource> apply(
+            ApiResource apiResource, String namespace, Resource resource, boolean dryRun, CommandSpec commandSpec) {
         try {
             HttpResponse<Resource> response = apiResource.isNamespaced()
-                ? namespacedClient.apply(namespace, apiResource.getPath(), loginService.getAuthorization(), resource,
-                dryRun)
-                : nonNamespacedClient.apply(loginService.getAuthorization(), apiResource.getPath(), resource, dryRun);
+                    ? namespacedClient.apply(
+                            namespace, apiResource.getPath(), loginService.getAuthorization(), resource, dryRun)
+                    : nonNamespacedClient.apply(
+                            loginService.getAuthorization(), apiResource.getPath(), resource, dryRun);
 
-            commandSpec.commandLine().getOut().println(formatService.prettifyKind(response.body().getKind())
-                + " \"" + response.body().getMetadata().getName() + "\""
-                + (response.header("X-Ns4kafka-Result") != null ? " " + response.header("X-Ns4kafka-Result") : "")
-                + ".");
+            commandSpec
+                    .commandLine()
+                    .getOut()
+                    .println(formatService.prettifyKind(response.body().getKind())
+                            + " \"" + response.body().getMetadata().getName() + "\""
+                            + (response.header("X-Ns4kafka-Result") != null
+                                    ? " " + response.header("X-Ns4kafka-Result")
+                                    : "")
+                            + ".");
             return response;
         } catch (HttpClientResponseException e) {
-            formatService.displayError(e, resource.getKind(), resource.getMetadata().getName(), commandSpec);
+            formatService.displayError(
+                    e, resource.getKind(), resource.getMetadata().getName(), commandSpec);
             return null;
         }
     }
@@ -199,36 +220,40 @@ public class ResourceService {
      * Delete a given resource.
      *
      * @param apiResource The resource type
-     * @param namespace   The namespace
-     * @param name        The resource name or wildcard
-     * @param version     The version of the resource, for schemas only
-     * @param dryRun      Is dry run mode or not?
+     * @param namespace The namespace
+     * @param name The resource name or wildcard
+     * @param version The version of the resource, for schemas only
+     * @param dryRun Is dry run mode or not?
      * @param commandSpec The command that triggered the action
      * @return true if deletion succeeded, false otherwise
      */
-    public boolean delete(ApiResource apiResource, String namespace, String name, @Nullable String version,
-                          boolean dryRun, CommandSpec commandSpec) {
+    public boolean delete(
+            ApiResource apiResource,
+            String namespace,
+            String name,
+            @Nullable String version,
+            boolean dryRun,
+            CommandSpec commandSpec) {
         try {
             HttpResponse<List<Resource>> response = apiResource.isNamespaced()
-                ? namespacedClient.delete(namespace, apiResource.getPath(),
-                    loginService.getAuthorization(), name, version, dryRun)
-                : nonNamespacedClient.delete(loginService.getAuthorization(),
-                    apiResource.getPath(), name, dryRun);
+                    ? namespacedClient.delete(
+                            namespace, apiResource.getPath(), loginService.getAuthorization(), name, version, dryRun)
+                    : nonNamespacedClient.delete(loginService.getAuthorization(), apiResource.getPath(), name, dryRun);
 
             // Micronaut does not throw exception on 404, so produce a 404 manually
             if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
                 throw new HttpClientResponseException(response.reason(), response);
             }
 
-            List<String> resourceNames = response.body()
-                .stream()
-                .map(deletionResponse -> deletionResponse.getMetadata().getName())
-                .toList();
+            List<String> resourceNames = response.body().stream()
+                    .map(deletionResponse -> deletionResponse.getMetadata().getName())
+                    .toList();
 
-            resourceNames.forEach(resourceName ->
-                commandSpec.commandLine().getOut().println(formatService.prettifyKind(apiResource.getKind())
-                + " \"" + resourceName + "\"" + (version != null ? " version " + version : "") + " deleted.")
-            );
+            resourceNames.forEach(resourceName -> commandSpec
+                    .commandLine()
+                    .getOut()
+                    .println(formatService.prettifyKind(apiResource.getKind()) + " \"" + resourceName + "\""
+                            + (version != null ? " version " + version : "") + " deleted."));
 
             return true;
         } catch (HttpClientResponseException exception) {
@@ -241,32 +266,33 @@ public class ResourceService {
      * Import all resources of given types.
      *
      * @param apiResources The resource types
-     * @param namespace    The namespace
-     * @param dryRun       Is dry run mode or not?
-     * @param commandSpec  The command that triggered the action
+     * @param namespace The namespace
+     * @param dryRun Is dry run mode or not?
+     * @param commandSpec The command that triggered the action
      * @return 0 if the command succeed, 1 otherwise
      */
     public int importAll(List<ApiResource> apiResources, String namespace, boolean dryRun, CommandSpec commandSpec) {
-        int errors = apiResources
-            .stream()
-            .map(apiResource -> {
-                try {
-                    List<Resource> resources = namespacedClient.importResources(namespace, apiResource.getPath(),
-                        loginService.getAuthorization(), dryRun);
-                    if (!resources.isEmpty()) {
-                        formatService.displayList(apiResource.getKind(), resources, TABLE, commandSpec);
-                    } else {
-                        commandSpec.commandLine().getOut()
-                            .println("No " + apiResource.getKind().toLowerCase() + " to import.");
+        int errors = apiResources.stream()
+                .map(apiResource -> {
+                    try {
+                        List<Resource> resources = namespacedClient.importResources(
+                                namespace, apiResource.getPath(), loginService.getAuthorization(), dryRun);
+                        if (!resources.isEmpty()) {
+                            formatService.displayList(apiResource.getKind(), resources, TABLE, commandSpec);
+                        } else {
+                            commandSpec
+                                    .commandLine()
+                                    .getOut()
+                                    .println("No " + apiResource.getKind().toLowerCase() + " to import.");
+                        }
+                        return 0;
+                    } catch (HttpClientResponseException e) {
+                        formatService.displayError(e, commandSpec);
+                        return 1;
                     }
-                    return 0;
-                } catch (HttpClientResponseException e) {
-                    formatService.displayError(e, commandSpec);
-                    return 1;
-                }
-            })
-            .mapToInt(value -> value)
-            .sum();
+                })
+                .mapToInt(value -> value)
+                .sum();
 
         return errors > 0 ? 1 : 0;
     }
@@ -274,16 +300,16 @@ public class ResourceService {
     /**
      * Delete records for a given topic.
      *
-     * @param namespace   The namespace
-     * @param topic       The topic to delete records
-     * @param dryRun      Is dry run mode or not?
+     * @param namespace The namespace
+     * @param topic The topic to delete records
+     * @param dryRun Is dry run mode or not?
      * @param commandSpec The command that triggered the action
      * @return The deleted records response
      */
     public int deleteRecords(String namespace, String topic, boolean dryRun, CommandSpec commandSpec) {
         try {
             List<Resource> resources =
-                namespacedClient.deleteRecords(loginService.getAuthorization(), namespace, topic, dryRun);
+                    namespacedClient.deleteRecords(loginService.getAuthorization(), namespace, topic, dryRun);
             if (!resources.isEmpty()) {
                 formatService.displayList(DELETE_RECORDS_RESPONSE, resources, TABLE, commandSpec);
             } else {
@@ -299,18 +325,18 @@ public class ResourceService {
     /**
      * Reset offsets for a given topic and consumer group.
      *
-     * @param namespace   The namespace
-     * @param group       The consumer group
-     * @param resource    The information about how to reset
-     * @param dryRun      Is dry run mode or not?
+     * @param namespace The namespace
+     * @param group The consumer group
+     * @param resource The information about how to reset
+     * @param dryRun Is dry run mode or not?
      * @param commandSpec The command that triggered the action
      * @return 0 if the command succeeded, 1 otherwise
      */
-    public int resetOffsets(String namespace, String group, Resource resource, boolean dryRun,
-                            CommandSpec commandSpec) {
+    public int resetOffsets(
+            String namespace, String group, Resource resource, boolean dryRun, CommandSpec commandSpec) {
         try {
             List<Resource> resources =
-                namespacedClient.resetOffsets(loginService.getAuthorization(), namespace, group, resource, dryRun);
+                    namespacedClient.resetOffsets(loginService.getAuthorization(), namespace, group, resource, dryRun);
             if (!resources.isEmpty()) {
                 formatService.displayList(CONSUMER_GROUP_RESET_OFFSET_RESPONSE, resources, TABLE, commandSpec);
             } else {
@@ -326,18 +352,17 @@ public class ResourceService {
     /**
      * Change the state of a given connector.
      *
-     * @param namespace            The namespace
-     * @param connector            The connector name
+     * @param namespace The namespace
+     * @param connector The connector name
      * @param changeConnectorState The state
-     * @param commandSpec          The command that triggered the action
+     * @param commandSpec The command that triggered the action
      * @return The resource
      */
-    public Optional<Resource> changeConnectorState(String namespace, String connector, Resource changeConnectorState,
-                                                   CommandSpec commandSpec) {
+    public Optional<Resource> changeConnectorState(
+            String namespace, String connector, Resource changeConnectorState, CommandSpec commandSpec) {
         try {
-            HttpResponse<Resource> response =
-                namespacedClient.changeConnectorState(namespace, connector, changeConnectorState,
-                    loginService.getAuthorization());
+            HttpResponse<Resource> response = namespacedClient.changeConnectorState(
+                    namespace, connector, changeConnectorState, loginService.getAuthorization());
 
             // Micronaut does not throw exception on 404, so produce a 404 manually
             if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
@@ -353,18 +378,17 @@ public class ResourceService {
     /**
      * Change the compatibility of a given schema.
      *
-     * @param namespace     The namespace
-     * @param subject       The schema subject
+     * @param namespace The namespace
+     * @param subject The schema subject
      * @param compatibility The compatibility to apply
-     * @param commandSpec   The command that triggered the action
+     * @param commandSpec The command that triggered the action
      * @return The resource
      */
-    public Optional<Resource> changeSchemaCompatibility(String namespace, String subject,
-                                                        SchemaCompatibility compatibility,
-                                                        CommandSpec commandSpec) {
+    public Optional<Resource> changeSchemaCompatibility(
+            String namespace, String subject, SchemaCompatibility compatibility, CommandSpec commandSpec) {
         try {
-            HttpResponse<Resource> response = namespacedClient.changeSchemaCompatibility(namespace, subject,
-                Map.of("compatibility", compatibility.name()), loginService.getAuthorization());
+            HttpResponse<Resource> response = namespacedClient.changeSchemaCompatibility(
+                    namespace, subject, Map.of("compatibility", compatibility.name()), loginService.getAuthorization());
 
             // Micronaut does not throw exception on 404, so produce a 404 manually
             if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
@@ -381,16 +405,16 @@ public class ResourceService {
     /**
      * Reset user password.
      *
-     * @param namespace   The namespace
-     * @param user        The user
-     * @param output      The output format
+     * @param namespace The namespace
+     * @param user The user
+     * @param output The output format
      * @param commandSpec The command that triggered the action
      * @return 0 if the command succeeded, 1 otherwise
      */
     public int resetPassword(String namespace, String user, Output output, CommandSpec commandSpec) {
         try {
             HttpResponse<Resource> response =
-                namespacedClient.resetPassword(namespace, user, loginService.getAuthorization());
+                    namespacedClient.resetPassword(namespace, user, loginService.getAuthorization());
 
             // Micronaut does not throw exception on 404, so produce a 404 manually
             if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
@@ -408,14 +432,14 @@ public class ResourceService {
     /**
      * List all available connect clusters for vaulting.
      *
-     * @param namespace   The namespace
+     * @param namespace The namespace
      * @param commandSpec The command that triggered the action
      * @return 0 if the command succeeded, 1 otherwise
      */
     public int listAvailableVaultsConnectClusters(String namespace, CommandSpec commandSpec) {
         try {
             List<Resource> availableConnectClusters =
-                namespacedClient.listAvailableVaultsConnectClusters(namespace, loginService.getAuthorization());
+                    namespacedClient.listAvailableVaultsConnectClusters(namespace, loginService.getAuthorization());
             if (!availableConnectClusters.isEmpty()) {
                 formatService.displayList(CONNECT_CLUSTER, availableConnectClusters, TABLE, commandSpec);
             } else {
@@ -432,17 +456,20 @@ public class ResourceService {
     /**
      * Vault a list of passwords for a specific Kafka Connect Cluster.
      *
-     * @param namespace      The namespace
+     * @param namespace The namespace
      * @param connectCluster The Kafka connect cluster to use for vaulting secret.
-     * @param passwords      The list of passwords to encrypt.
-     * @param commandSpec    The command that triggered the action
+     * @param passwords The list of passwords to encrypt.
+     * @param commandSpec The command that triggered the action
      * @return 0 if the command succeeded, 1 otherwise
      */
-    public int vaultsOnConnectClusters(final String namespace, final String connectCluster,
-                                       final List<String> passwords, CommandSpec commandSpec) {
+    public int vaultsOnConnectClusters(
+            final String namespace,
+            final String connectCluster,
+            final List<String> passwords,
+            CommandSpec commandSpec) {
         try {
-            List<Resource> results = namespacedClient.vaultsOnConnectClusters(namespace, connectCluster, passwords,
-                loginService.getAuthorization());
+            List<Resource> results = namespacedClient.vaultsOnConnectClusters(
+                    namespace, connectCluster, passwords, loginService.getAuthorization());
             formatService.displayList(VAULT_RESPONSE, results, TABLE, commandSpec);
             return 0;
         } catch (HttpClientResponseException exception) {
@@ -454,8 +481,8 @@ public class ResourceService {
     /**
      * Parse resources in given directory/file.
      *
-     * @param file        The directory/file to parse
-     * @param recursive   Explore given directory recursively or not ?
+     * @param file The directory/file to parse
+     * @param recursive Explore given directory recursively or not ?
      * @param commandSpec The command that triggered the action
      * @return The list of resources
      */
@@ -464,8 +491,9 @@ public class ResourceService {
             // List all files to process
             List<File> yamlFiles = fileService.computeYamlFileList(file.get(), recursive);
             if (yamlFiles.isEmpty()) {
-                throw new ParameterException(commandSpec.commandLine(),
-                    "Could not find YAML or YML files in " + file.get().getName() + " directory.");
+                throw new ParameterException(
+                        commandSpec.commandLine(),
+                        "Could not find YAML or YML files in " + file.get().getName() + " directory.");
             }
             // Load each files
             return fileService.parseResourceListFromFiles(yamlFiles);
@@ -477,46 +505,49 @@ public class ResourceService {
     }
 
     /**
-     * Validate if the resources are allowed on the server
-     * for the current user.
-     * If not, throw an exception.
+     * Validate if the resources are allowed on the server for the current user. If not, throw an exception.
      *
-     * @param resources   The resources to validate
+     * @param resources The resources to validate
      * @param commandSpec The command that triggered the action
      */
     public void validateAllowedResources(List<Resource> resources, CommandSpec commandSpec) {
         List<Resource> notAllowedResourceTypes = apiResourcesService.filterNotAllowedResourceTypes(resources);
         if (!notAllowedResourceTypes.isEmpty()) {
-            String kinds = notAllowedResourceTypes
-                .stream()
-                .map(Resource::getKind)
-                .distinct()
-                .collect(Collectors.joining(", "));
-            throw new ParameterException(commandSpec.commandLine(),
-                "The server does not have resource type(s) " + kinds + ".");
+            String kinds = notAllowedResourceTypes.stream()
+                    .map(Resource::getKind)
+                    .distinct()
+                    .collect(Collectors.joining(", "));
+            throw new ParameterException(
+                    commandSpec.commandLine(), "The server does not have resource type(s) " + kinds + ".");
         }
     }
 
     /**
      * Enrich the schema file with the content of the schema.
      *
-     * @param resources   The resources to enrich
+     * @param resources The resources to enrich
      * @param commandSpec The command that triggered the action
      */
     public void enrichSchemaContent(List<Resource> resources, CommandSpec commandSpec) {
-        resources
-            .stream()
-            .filter(resource -> resource.getKind().equals("Schema")
-                && StringUtils.isNotEmpty((CharSequence) resource.getSpec().get(SCHEMA_FILE)))
-            .forEach(resource -> {
-                try {
-                    resource.getSpec().put("schema",
-                        Files.readString(new File(resource.getSpec().get(SCHEMA_FILE).toString()).toPath()));
-                } catch (Exception e) {
-                    throw new ParameterException(commandSpec.commandLine(),
-                        "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE)
-                            + ". Schema path must be relative to the CLI.");
-                }
-            });
+        resources.stream()
+                .filter(resource -> resource.getKind().equals("Schema")
+                        && StringUtils.isNotEmpty(
+                                (CharSequence) resource.getSpec().get(SCHEMA_FILE)))
+                .forEach(resource -> {
+                    try {
+                        resource.getSpec()
+                                .put(
+                                        "schema",
+                                        Files.readString(new File(resource.getSpec()
+                                                        .get(SCHEMA_FILE)
+                                                        .toString())
+                                                .toPath()));
+                    } catch (Exception e) {
+                        throw new ParameterException(
+                                commandSpec.commandLine(),
+                                "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE)
+                                        + ". Schema path must be relative to the CLI.");
+                    }
+                });
     }
 }

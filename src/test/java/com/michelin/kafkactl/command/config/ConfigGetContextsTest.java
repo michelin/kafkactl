@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.command.config;
 
 import static com.michelin.kafkactl.model.Output.TABLE;
@@ -20,9 +38,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
 
-/**
- * Config get contexts subcommand test.
- */
+/** Config get contexts subcommand test. */
 @ExtendWith(MockitoExtension.class)
 class ConfigGetContextsTest {
     @Mock
@@ -36,8 +52,7 @@ class ConfigGetContextsTest {
 
     @Test
     void shouldGetEmptyContexts() {
-        when(kafkactlConfig.getContexts())
-            .thenReturn(Collections.emptyList());
+        when(kafkactlConfig.getContexts()).thenReturn(Collections.emptyList());
 
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();
@@ -51,16 +66,15 @@ class ConfigGetContextsTest {
     @Test
     void shouldGetContextsWithMaskedTokens() {
         KafkactlConfig.Context context = KafkactlConfig.Context.builder()
-            .name("name")
-            .definition(KafkactlConfig.Context.ApiContext.builder()
-                .api("api")
-                .namespace("namespace")
-                .userToken("userToken")
-                .build())
-            .build();
+                .name("name")
+                .definition(KafkactlConfig.Context.ApiContext.builder()
+                        .api("api")
+                        .namespace("namespace")
+                        .userToken("userToken")
+                        .build())
+                .build();
 
-        when(kafkactlConfig.getContexts())
-            .thenReturn(Collections.singletonList(context));
+        when(kafkactlConfig.getContexts()).thenReturn(Collections.singletonList(context));
 
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();
@@ -68,25 +82,35 @@ class ConfigGetContextsTest {
 
         int code = cmd.execute();
         assertEquals(0, code);
-        verify(formatService).displayList(eq("Context"),
-            argThat(currentContext -> currentContext.getFirst().getMetadata().getName().equals("name")
-                && currentContext.getFirst().getSpec().get("token").equals("[MASKED]")),
-            eq(TABLE), eq(cmd.getCommandSpec()));
+        verify(formatService)
+                .displayList(
+                        eq("Context"),
+                        argThat(currentContext -> currentContext
+                                        .getFirst()
+                                        .getMetadata()
+                                        .getName()
+                                        .equals("name")
+                                && currentContext
+                                        .getFirst()
+                                        .getSpec()
+                                        .get("token")
+                                        .equals("[MASKED]")),
+                        eq(TABLE),
+                        eq(cmd.getCommandSpec()));
     }
 
     @Test
     void shouldGetContextsWithUnmaskedTokens() {
         KafkactlConfig.Context context = KafkactlConfig.Context.builder()
-            .name("name")
-            .definition(KafkactlConfig.Context.ApiContext.builder()
-                .api("api")
-                .namespace("namespace")
-                .userToken("userToken")
-                .build())
-            .build();
+                .name("name")
+                .definition(KafkactlConfig.Context.ApiContext.builder()
+                        .api("api")
+                        .namespace("namespace")
+                        .userToken("userToken")
+                        .build())
+                .build();
 
-        when(kafkactlConfig.getContexts())
-            .thenReturn(Collections.singletonList(context));
+        when(kafkactlConfig.getContexts()).thenReturn(Collections.singletonList(context));
 
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();
@@ -94,9 +118,20 @@ class ConfigGetContextsTest {
 
         int code = cmd.execute("-u");
         assertEquals(0, code);
-        verify(formatService).displayList(eq("Context"),
-            argThat(currentContext -> currentContext.getFirst().getMetadata().getName().equals("name")
-                && currentContext.getFirst().getSpec().get("token").equals("userToken")),
-            eq(TABLE), eq(cmd.getCommandSpec()));
+        verify(formatService)
+                .displayList(
+                        eq("Context"),
+                        argThat(currentContext -> currentContext
+                                        .getFirst()
+                                        .getMetadata()
+                                        .getName()
+                                        .equals("name")
+                                && currentContext
+                                        .getFirst()
+                                        .getSpec()
+                                        .get("token")
+                                        .equals("userToken")),
+                        eq(TABLE),
+                        eq(cmd.getCommandSpec()));
     }
 }

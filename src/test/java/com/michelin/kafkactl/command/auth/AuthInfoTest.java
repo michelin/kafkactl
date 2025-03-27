@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.command.auth;
 
 import static com.michelin.kafkactl.model.JwtContent.RoleBinding.Verb.GET;
@@ -24,9 +42,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
 
-/**
- * Auth subcommand test.
- */
+/** Auth subcommand test. */
 @ExtendWith(MockitoExtension.class)
 class AuthInfoTest {
     @Mock
@@ -40,8 +56,7 @@ class AuthInfoTest {
 
     @Test
     void shouldDoNothingIfJwtNotExist() {
-        when(loginService.jwtFileExists())
-            .thenReturn(false);
+        when(loginService.jwtFileExists()).thenReturn(false);
 
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();
@@ -54,17 +69,15 @@ class AuthInfoTest {
 
     @Test
     void shouldDisplayInfoFromJwtAdmin() throws IOException {
-        when(loginService.jwtFileExists())
-            .thenReturn(true);
+        when(loginService.jwtFileExists()).thenReturn(true);
 
         JwtContent jwtContent = JwtContent.builder()
-            .sub("admin")
-            .exp(1711241399L)
-            .roles(List.of("isAdmin()"))
-            .build();
+                .sub("admin")
+                .exp(1711241399L)
+                .roles(List.of("isAdmin()"))
+                .build();
 
-        when(loginService.readJwtFile())
-            .thenReturn(jwtContent);
+        when(loginService.readJwtFile()).thenReturn(jwtContent);
 
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();
@@ -78,16 +91,12 @@ class AuthInfoTest {
 
     @Test
     void shouldDisplayInfoFromJwtUser() throws IOException {
-        when(loginService.jwtFileExists())
-            .thenReturn(true);
+        when(loginService.jwtFileExists()).thenReturn(true);
 
-        JwtContent jwtContent = JwtContent.builder()
-            .sub("user")
-            .exp(1711241399L)
-            .build();
+        JwtContent jwtContent =
+                JwtContent.builder().sub("user").exp(1711241399L).build();
 
-        when(loginService.readJwtFile())
-            .thenReturn(jwtContent);
+        when(loginService.readJwtFile()).thenReturn(jwtContent);
 
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();
@@ -101,21 +110,19 @@ class AuthInfoTest {
 
     @Test
     void shouldDisplayInfoFromJwtUserAndRoleBindings() throws IOException {
-        when(loginService.jwtFileExists())
-            .thenReturn(true);
+        when(loginService.jwtFileExists()).thenReturn(true);
 
         JwtContent jwtContent = JwtContent.builder()
-            .sub("user")
-            .exp(1711241399L)
-            .roleBindings(List.of(JwtContent.RoleBinding.builder()
-                .namespaces(List.of("namespace"))
-                .verbs(List.of(GET))
-                .resourceTypes(List.of("resource"))
-                .build()))
-            .build();
+                .sub("user")
+                .exp(1711241399L)
+                .roleBindings(List.of(JwtContent.RoleBinding.builder()
+                        .namespaces(List.of("namespace"))
+                        .verbs(List.of(GET))
+                        .resourceTypes(List.of("resource"))
+                        .build()))
+                .build();
 
-        when(loginService.readJwtFile())
-            .thenReturn(jwtContent);
+        when(loginService.readJwtFile()).thenReturn(jwtContent);
 
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();
@@ -125,12 +132,16 @@ class AuthInfoTest {
         assertEquals(0, code);
         assertTrue(sw.toString().contains("User user authenticated."));
         assertTrue(sw.toString().contains("Session valid until Sun Mar 24"));
-        verify(formatService).displayList(AUTH_INFO, List.of(Resource.builder()
-            .spec(Map.of(
-                "namespace", "namespace",
-                "verbs", List.of(GET),
-                "resources", List.of("resource")
-            ))
-            .build()), TABLE, cmd.getCommandSpec());
+        verify(formatService)
+                .displayList(
+                        AUTH_INFO,
+                        List.of(Resource.builder()
+                                .spec(Map.of(
+                                        "namespace", "namespace",
+                                        "verbs", List.of(GET),
+                                        "resources", List.of("resource")))
+                                .build()),
+                        TABLE,
+                        cmd.getCommandSpec());
     }
 }

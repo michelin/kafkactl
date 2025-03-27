@@ -1,10 +1,10 @@
 plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("io.micronaut.application") version "4.4.5"
+    id("io.micronaut.application") version "4.5.0"
     id("jacoco")
     id("org.sonarqube") version "6.0.1.5171"
-    id("pl.allegro.tech.build.axion-release") version "1.18.16"
-    id("checkstyle")
+    id("pl.allegro.tech.build.axion-release") version "1.18.18"
+    id("com.diffplug.spotless") version "7.0.2"
 }
 
 version = scmVersion.version
@@ -37,8 +37,8 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
 
     testImplementation("io.micronaut:micronaut-http-client")
-    testImplementation("org.mockito:mockito-junit-jupiter:5.15.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.12.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.16.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.12.1")
     testImplementation("org.mockito:mockito-core")
 
     testAnnotationProcessor("org.projectlombok:lombok")
@@ -50,7 +50,7 @@ application {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion('21')
+    sourceCompatibility = JavaVersion.toVersion("21")
     targetCompatibility = JavaVersion.toVersion('21')
 }
 
@@ -63,7 +63,7 @@ micronaut {
 }
 
 shadowJar {
-    archiveClassifier.set('')
+    archiveClassifier.set("")
     dependsOn(distTar, distZip)
 }
 
@@ -93,8 +93,8 @@ dockerfile {
 dockerfileNative {
     baseImage("ubuntu:22.04")
     editDockerfile {
-        after('COPY --link --from=graalvm /home/app/application /app/application') {
-            insert('RUN ln -s /app/application /usr/bin/kafkactl && chmod 777 /usr/bin/kafkactl')
+        after("COPY --link --from=graalvm /home/app/application /app/application") {
+            insert("RUN ln -s /app/application /usr/bin/kafkactl && chmod 777 /usr/bin/kafkactl")
         }
     }
 }
@@ -139,12 +139,25 @@ test {
     }
 }
 
-checkstyle {
-    toolVersion = '10.12.3'
-    configFile = file(".checkstyle/checkstyle.xml")
-    ignoreFailures = false
-    maxErrors = 0
-    maxWarnings = 0
+spotless {
+    java {
+        target "src/main/java/**/*.java", "src/test/java/**/*.java"
+        palantirJavaFormat("2.58.0").style("PALANTIR").formatJavadoc(true)
+        removeUnusedImports()
+        formatAnnotations()
+        importOrder()
+        trimTrailingWhitespace()
+        endWithNewline()
+        licenseHeaderFile {
+            file ".spotless/HEADER"
+        }
+    }
+    groovyGradle {
+        target "*.gradle"
+        importOrder()
+        removeSemicolons()
+        leadingTabsToSpaces()
+    }
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens

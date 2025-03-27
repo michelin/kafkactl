@@ -32,6 +32,85 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+
+      - name: Build
+        id: build_jar
+        run: |
+          ./gradlew build --info
+          echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
+
+      - name: Publish test report
+        if: always()
+        uses: mikepenz/action-junit-report@v5
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'
+
+      - name: Docker
+        run: |
+          LATEST_VERSION=$(git tag -l --sort=-version:refname | head -1 | cut -d 'v' -f 2)
+          if [ "$LATEST_VERSION" == "${{ steps.build_jar.outputs.current_version }}" ]; then
+            echo "Latest version is $LATEST_VERSION. Current version is ${{ steps.build_jar.outputs.current_version }}. Pushing latest tag."
+            ./gradlew dockerBuild dockerPush -PreleaseLatest
+          else 
+            echo "Latest version is $LATEST_VERSION. Current version is ${{ steps.build_jar.outputs.current_version }}. Not pushing latest tag."
+            ./gradlew dockerBuild dockerPush
+          fi
+
+      - name: Generate release changelog
+        uses: mikepenz/release-changelog-builder-action@v5
+        id: build_changelog
+        with:
+          configuration: 'changelog-builder.json'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update release
+        uses: ncipollo/release-action@v1.16.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: ${{ steps.build_changelog.outputs.changelog }}
+          artifacts: ${{ github.workspace }}/build/libs/kafkactl-${{ steps.build_jar.outputs.current_version }}.jar
+          draft: true
+          prerelease: true
+          allowUpdates: true
+
+  release-native-linux-macos:
+    name: Release Native Image ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ 'ubuntu-latest', 'macos-latest' ]
+        include:
+          - os: 'ubuntu-latest'
+            platform: 'linux-amd64'
+          - os: 'macos-latest'
+            platform: 'darwin-arm64'
+    steps:
+      - name: Docker login
+        if: matrix.os == 'ubuntu-latest'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.MICHELIN_DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.MICHELIN_DOCKER_HUB_PASSWD }}
+
+      - name: Checkout project
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: 'graalvm'
+          java-version: '21'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Tag
         run: |
           git tag v${{ github.event.inputs.release_version }} -s -m "Create tag v${{ github.event.inputs.release_version }}"

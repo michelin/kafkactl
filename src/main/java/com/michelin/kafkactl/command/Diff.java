@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.command;
 
 import com.github.difflib.DiffUtils;
@@ -24,18 +42,17 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 
-/**
- * Diff subcommand.
- */
-@Command(name = "diff",
-    headerHeading = "@|bold Usage|@:",
-    synopsisHeading = " ",
-    descriptionHeading = "%n@|bold Description|@: ",
-    description = "Get differences between a new resource and a old resource.",
-    parameterListHeading = "%n@|bold Parameters|@:%n",
-    optionListHeading = "%n@|bold Options|@:%n",
-    commandListHeading = "%n@|bold Commands|@:%n",
-    usageHelpAutoWidth = true)
+/** Diff subcommand. */
+@Command(
+        name = "diff",
+        headerHeading = "@|bold Usage|@:",
+        synopsisHeading = " ",
+        descriptionHeading = "%n@|bold Description|@: ",
+        description = "Get differences between a new resource and a old resource.",
+        parameterListHeading = "%n@|bold Parameters|@:%n",
+        optionListHeading = "%n@|bold Options|@:%n",
+        commandListHeading = "%n@|bold Commands|@:%n",
+        usageHelpAutoWidth = true)
 public class Diff extends AuthenticatedHook {
     @Inject
     @ReflectiveAccess
@@ -45,10 +62,14 @@ public class Diff extends AuthenticatedHook {
     @ReflectiveAccess
     private FormatService formatService;
 
-    @Option(names = {"-f", "--file"}, description = "YAML file or directory containing resources to compare.")
+    @Option(
+            names = {"-f", "--file"},
+            description = "YAML file or directory containing resources to compare.")
     public Optional<File> file;
 
-    @Option(names = {"-R", "--recursive"}, description = "Search file recursively.")
+    @Option(
+            names = {"-R", "--recursive"},
+            description = "Search file recursively.")
     public boolean recursive;
 
     /**
@@ -74,22 +95,24 @@ public class Diff extends AuthenticatedHook {
             // Process each document individually, return 0 when all succeed
             String namespace = getNamespace();
             int errors = resources.stream()
-                .map(resource -> {
-                    ApiResource apiResource =
-                        apiResourcesService.getResourceDefinitionByKind(resource.getKind()).orElseThrow();
-                    Resource live = resourceService.getSingleResourceWithType(apiResource, namespace,
-                        resource.getMetadata().getName(), false);
-                    HttpResponse<Resource> merged =
-                        resourceService.apply(apiResource, namespace, resource, true, commandSpec);
-                    if (merged != null && merged.getBody().isPresent()) {
-                        List<String> unifiedDiff = unifiedDiff(live, merged.body());
-                        unifiedDiff.forEach(diff -> commandSpec.commandLine().getOut().println(diff));
-                        return 0;
-                    }
-                    return 1;
-                })
-                .mapToInt(value -> value)
-                .sum();
+                    .map(resource -> {
+                        ApiResource apiResource = apiResourcesService
+                                .getResourceDefinitionByKind(resource.getKind())
+                                .orElseThrow();
+                        Resource live = resourceService.getSingleResourceWithType(
+                                apiResource, namespace, resource.getMetadata().getName(), false);
+                        HttpResponse<Resource> merged =
+                                resourceService.apply(apiResource, namespace, resource, true, commandSpec);
+                        if (merged != null && merged.getBody().isPresent()) {
+                            List<String> unifiedDiff = unifiedDiff(live, merged.body());
+                            unifiedDiff.forEach(
+                                    diff -> commandSpec.commandLine().getOut().println(diff));
+                            return 0;
+                        }
+                        return 1;
+                    })
+                    .mapToInt(value -> value)
+                    .sum();
 
             return errors > 0 ? 1 : 0;
         } catch (HttpClientResponseException e) {
@@ -101,7 +124,7 @@ public class Diff extends AuthenticatedHook {
     /**
      * Compute the difference between current resource and applied resource.
      *
-     * @param live   The current resource
+     * @param live The current resource
      * @param merged The applied new resource
      * @return The differences
      */
@@ -125,8 +148,12 @@ public class Diff extends AuthenticatedHook {
         List<String> newResourceStr = yaml.dump(merged).lines().toList();
         Patch<String> diff = DiffUtils.diff(oldResourceStr, newResourceStr);
         return UnifiedDiffUtils.generateUnifiedDiff(
-            String.format("%s/%s-LIVE", merged.getKind(), merged.getMetadata().getName()),
-            String.format("%s/%s-MERGED", merged.getKind(), merged.getMetadata().getName()),
-            oldResourceStr, diff, 3);
+                String.format(
+                        "%s/%s-LIVE", merged.getKind(), merged.getMetadata().getName()),
+                String.format(
+                        "%s/%s-MERGED", merged.getKind(), merged.getMetadata().getName()),
+                oldResourceStr,
+                diff,
+                3);
     }
 }

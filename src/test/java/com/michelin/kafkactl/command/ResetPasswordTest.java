@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.command;
 
 import static com.michelin.kafkactl.model.Output.TABLE;
@@ -49,21 +67,19 @@ class ResetPasswordTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(false);
+        when(configService.isCurrentContextValid()).thenReturn(false);
 
         int code = cmd.execute("user");
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("No valid current context found. "
-            + "Use \"kafkactl config use-context\" to set a valid context."));
+        assertTrue(sw.toString()
+                .contains("No valid current context found. "
+                        + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
     @Test
     void shouldNotUpdateUserWhenNotAuthenticated() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(false);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(resetPassword);
 
@@ -84,12 +100,9 @@ class ResetPasswordTest {
 
     @Test
     void shouldNotUpdateUserWhenNotConfirmed() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
-        when(kafkactlConfig.getCurrentNamespace())
-            .thenReturn("namespace");
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
 
         CommandLine cmd = new CommandLine(resetPassword);
         StringWriter sw = new StringWriter();
@@ -105,14 +118,10 @@ class ResetPasswordTest {
 
     @Test
     void shouldUpdateUser() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
-        when(kafkactlConfig.getCurrentNamespace())
-            .thenReturn("namespace");
-        when(resourceService.resetPassword(any(), any(), any(), any()))
-            .thenReturn(0);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(resourceService.resetPassword(any(), any(), any(), any())).thenReturn(0);
 
         CommandLine cmd = new CommandLine(resetPassword);
 

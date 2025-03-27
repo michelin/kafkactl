@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.command;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,21 +73,19 @@ class ImportTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(false);
+        when(configService.isCurrentContextValid()).thenReturn(false);
 
         int code = cmd.execute("topic");
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("No valid current context found. "
-            + "Use \"kafkactl config use-context\" to set a valid context."));
+        assertTrue(sw.toString()
+                .contains("No valid current context found. "
+                        + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
     @Test
     void shouldNotImportWhenNotAuthenticated() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(false);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(importCmd);
         StringWriter sw = new StringWriter();
@@ -81,12 +97,9 @@ class ImportTest {
 
     @Test
     void shouldNotImportWhenServerNotHaveResourceType() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.empty());
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.empty());
 
         CommandLine cmd = new CommandLine(importCmd);
         StringWriter sw = new StringWriter();
@@ -100,19 +113,16 @@ class ImportTest {
     @Test
     void shouldNotImportWhenResourceNotSynchronizable() {
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(false)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(false)
+                .build();
 
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.of(apiResource));
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
 
         CommandLine cmd = new CommandLine(importCmd);
         StringWriter sw = new StringWriter();
@@ -125,51 +135,43 @@ class ImportTest {
 
     @Test
     void shouldImportTopicResources() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.of(apiResource));
-        when(resourceService.importAll(any(), any(), anyBoolean(), any()))
-            .thenReturn(0);
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
+        when(resourceService.importAll(any(), any(), anyBoolean(), any())).thenReturn(0);
 
         CommandLine cmd = new CommandLine(importCmd);
 
         int code = cmd.execute("topic", "-n", "namespace");
         assertEquals(0, code);
-        verify(resourceService).importAll(Collections.singletonList(apiResource), "namespace", false,
-            cmd.getCommandSpec());
+        verify(resourceService)
+                .importAll(Collections.singletonList(apiResource), "namespace", false, cmd.getCommandSpec());
     }
 
     @Test
     void shouldImportTopicResourcesDryRun() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-            .thenReturn(Optional.of(apiResource));
-        when(resourceService.importAll(any(), any(), anyBoolean(), any()))
-            .thenReturn(0);
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
+        when(resourceService.importAll(any(), any(), anyBoolean(), any())).thenReturn(0);
 
         CommandLine cmd = new CommandLine(importCmd);
         StringWriter sw = new StringWriter();
@@ -178,53 +180,49 @@ class ImportTest {
         int code = cmd.execute("topic", "--dry-run", "-n", "namespace");
         assertEquals(0, code);
         assertTrue(sw.toString().contains("Dry run execution."));
-        verify(resourceService).importAll(Collections.singletonList(apiResource), "namespace", true,
-            cmd.getCommandSpec());
+        verify(resourceService)
+                .importAll(Collections.singletonList(apiResource), "namespace", true, cmd.getCommandSpec());
     }
 
     @Test
     void shouldImportAllResources() {
-        when(configService.isCurrentContextValid())
-            .thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean()))
-            .thenReturn(true);
-        when(kafkactlConfig.getCurrentNamespace())
-            .thenReturn("namespace");
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
 
         ApiResource nonSyncApiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(false)
-            .synchronizable(false)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(false)
+                .synchronizable(false)
+                .build();
 
         ApiResource nonNamespacedApiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(false)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(false)
+                .synchronizable(true)
+                .build();
 
         ApiResource apiResource = ApiResource.builder()
-            .kind("Topic")
-            .path("topics")
-            .names(List.of("topics", "topic", "to"))
-            .namespaced(true)
-            .synchronizable(true)
-            .build();
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
 
         when(apiResourcesService.listResourceDefinitions())
-            .thenReturn(List.of(apiResource, nonNamespacedApiResource, nonSyncApiResource));
-        when(resourceService.importAll(any(), any(), anyBoolean(), any()))
-            .thenReturn(0);
+                .thenReturn(List.of(apiResource, nonNamespacedApiResource, nonSyncApiResource));
+        when(resourceService.importAll(any(), any(), anyBoolean(), any())).thenReturn(0);
 
         CommandLine cmd = new CommandLine(importCmd);
 
         int code = cmd.execute("all");
         assertEquals(0, code);
-        verify(resourceService).importAll(List.of(apiResource, nonNamespacedApiResource), "namespace", false,
-            cmd.getCommandSpec());
+        verify(resourceService)
+                .importAll(List.of(apiResource, nonNamespacedApiResource), "namespace", false, cmd.getCommandSpec());
     }
 }

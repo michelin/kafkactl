@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.config;
 
 import static com.michelin.kafkactl.config.KafkactlConfig.KAFKACTL_CONFIG;
@@ -5,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.service.SystemService;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -16,10 +33,9 @@ class KafkactlConfigTest {
     @Test
     void shouldGetConfigDirectoryFromUserHome() {
         try (MockedStatic<SystemService> mocked = mockStatic(SystemService.class)) {
-            mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG))
-                .thenReturn("");
+            mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG)).thenReturn("");
             mocked.when(() -> SystemService.getProperty(any()))
-                .thenAnswer(answer -> System.getProperty(answer.getArgument(0)));
+                    .thenAnswer(answer -> System.getProperty(answer.getArgument(0)));
 
             String actual = kafkactlConfig.getConfigDirectory();
             assertEquals(System.getProperty("user.home") + "/.kafkactl", actual);
@@ -29,21 +45,20 @@ class KafkactlConfigTest {
     @Test
     void shouldGetConfigDirectoryFromKafkactlConfig() {
         try (MockedStatic<SystemService> mocked = mockStatic(SystemService.class)) {
-            mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG))
-                .thenReturn("src/main/resources/config.yml");
+            mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG)).thenReturn("src/main/resources/config.yml");
 
             String actual = kafkactlConfig.getConfigDirectory();
-            assertEquals("src" + System.getProperty("file.separator") + "main" + System.getProperty("file.separator")
-                    + "resources",
-                actual);
+            assertEquals(
+                    "src" + System.getProperty("file.separator") + "main" + System.getProperty("file.separator")
+                            + "resources",
+                    actual);
         }
     }
 
     @Test
     void shouldGetConfigDirectoryFromKafkactlConfigNoParent() {
         try (MockedStatic<SystemService> mocked = mockStatic(SystemService.class)) {
-            mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG))
-                .thenReturn("config.yml");
+            mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG)).thenReturn("config.yml");
 
             String actual = kafkactlConfig.getConfigDirectory();
             assertEquals(".", actual);
@@ -53,8 +68,7 @@ class KafkactlConfigTest {
     @Test
     void shouldGetConfigDirectoryFromKafkactlConfigParentIsCurrent() {
         try (MockedStatic<SystemService> mocked = mockStatic(SystemService.class)) {
-            mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG))
-                .thenReturn("./config.yml");
+            mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG)).thenReturn("./config.yml");
 
             String actual = kafkactlConfig.getConfigDirectory();
             assertEquals(".", actual);
@@ -64,10 +78,9 @@ class KafkactlConfigTest {
     @Test
     void shouldGetConfigPathFromUserHome() {
         try (MockedStatic<SystemService> mocked = mockStatic(SystemService.class)) {
-            mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG))
-                .thenReturn("");
+            mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG)).thenReturn("");
             mocked.when(() -> SystemService.getProperty(any()))
-                .thenAnswer(answer -> System.getProperty(answer.getArgument(0)));
+                    .thenAnswer(answer -> System.getProperty(answer.getArgument(0)));
 
             String actual = kafkactlConfig.getConfigPath();
             assertEquals(System.getProperty("user.home") + "/.kafkactl/config.yml", actual);
@@ -77,8 +90,7 @@ class KafkactlConfigTest {
     @Test
     void shouldGetConfigPathFromKafkactlConfig() {
         try (MockedStatic<SystemService> mocked = mockStatic(SystemService.class)) {
-            mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG))
-                .thenReturn("src/main/resources/config.yml");
+            mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG)).thenReturn("src/main/resources/config.yml");
 
             String actual = kafkactlConfig.getConfigPath();
             assertEquals("src/main/resources/config.yml", actual);
@@ -88,8 +100,7 @@ class KafkactlConfigTest {
     @Test
     void shouldGetConfigPathFromKafkactlConfigNoParent() {
         try (MockedStatic<SystemService> mocked = mockStatic(SystemService.class)) {
-            mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG))
-                .thenReturn("config.yml");
+            mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG)).thenReturn("config.yml");
 
             String actual = kafkactlConfig.getConfigPath();
             assertEquals("config.yml", actual);
@@ -99,8 +110,7 @@ class KafkactlConfigTest {
     @Test
     void shouldGetConfigPathFromKafkactlConfigParentIsCurrent() {
         try (MockedStatic<SystemService> mocked = mockStatic(SystemService.class)) {
-            mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG))
-                .thenReturn("./config.yml");
+            mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG)).thenReturn("./config.yml");
 
             String actual = kafkactlConfig.getConfigPath();
             assertEquals("./config.yml", actual);

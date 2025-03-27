@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.michelin.kafkactl.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,13 +46,11 @@ import org.yaml.snakeyaml.representer.Representer;
 import picocli.CommandLine.Help;
 import picocli.CommandLine.Model.CommandSpec;
 
-/**
- * Format service.
- */
+/** Format service. */
 @Singleton
 public class FormatService {
     private final List<String> defaults =
-        List.of("KIND:/kind", "NAME:/metadata/name", "AGE:/metadata/creationTimestamp%AGO");
+            List.of("KIND:/kind", "NAME:/metadata/name", "AGE:/metadata/creationTimestamp%AGO");
 
     @Inject
     @ReflectiveAccess
@@ -43,9 +59,9 @@ public class FormatService {
     /**
      * Display a list of resources.
      *
-     * @param kind        The kind of resource
-     * @param resources   The list of resources
-     * @param output      The type of display
+     * @param kind The kind of resource
+     * @param resources The list of resources
+     * @param output The type of display
      * @param commandSpec The command spec used to print the output
      */
     public void displayList(String kind, List<Resource> resources, Output output, CommandSpec commandSpec) {
@@ -59,8 +75,8 @@ public class FormatService {
     /**
      * Display a single resource.
      *
-     * @param resource    The resource
-     * @param output      The type of display
+     * @param resource The resource
+     * @param output The type of display
      * @param commandSpec The command spec used to print the output
      */
     public void displaySingle(Resource resource, Output output, CommandSpec commandSpec) {
@@ -68,59 +84,82 @@ public class FormatService {
     }
 
     /**
-     * Display an error for a given particular resource kind
-     * E.g., apply, delete, get
+     * Display an error for a given particular resource kind E.g., apply, delete, get
      *
-     * @param exception   The HTTP response error
-     * @param kind        The resource kind
-     * @param name        The resource name
+     * @param exception The HTTP response error
+     * @param kind The resource kind
+     * @param name The resource name
      * @param commandSpec The command spec used to print the output
      */
-    public void displayError(HttpClientResponseException exception, String kind,
-                             String name, CommandSpec commandSpec) {
+    public void displayError(HttpClientResponseException exception, String kind, String name, CommandSpec commandSpec) {
         Optional<Status> statusOptional = exception.getResponse().getBody(Status.class);
         String prettyKind = prettifyKind(kind);
         String prettyName = prettifyName(name);
 
-        if (statusOptional.isPresent() && statusOptional.get().getDetails() != null
-            && !statusOptional.get().getDetails().getCauses().isEmpty()) {
+        if (statusOptional.isPresent()
+                && statusOptional.get().getDetails() != null
+                && !statusOptional.get().getDetails().getCauses().isEmpty()) {
             Status status = statusOptional.get();
             String causes = "\n - " + String.join("\n - ", status.getDetails().getCauses());
-            commandSpec.commandLine().getErr()
-                .printf("%s%s failed because %s (%s):%s%n", prettyKind, prettyName,
-                    status.getMessage().toLowerCase(), exception.getStatus().getCode(), causes);
+            commandSpec
+                    .commandLine()
+                    .getErr()
+                    .printf(
+                            "%s%s failed because %s (%s):%s%n",
+                            prettyKind,
+                            prettyName,
+                            status.getMessage().toLowerCase(),
+                            exception.getStatus().getCode(),
+                            causes);
         } else {
-            commandSpec.commandLine().getErr()
-                .printf("%s%s failed because %s (%s).%n", prettyKind, prettyName,
-                    exception.getMessage().toLowerCase(), exception.getStatus().getCode());
+            commandSpec
+                    .commandLine()
+                    .getErr()
+                    .printf(
+                            "%s%s failed because %s (%s).%n",
+                            prettyKind,
+                            prettyName,
+                            exception.getMessage().toLowerCase(),
+                            exception.getStatus().getCode());
         }
     }
 
     /**
      * Display a generic error.
      *
-     * @param exception   The HTTP client exception
+     * @param exception The HTTP client exception
      * @param commandSpec The command spec used to print the output
      */
     public void displayError(HttpClientResponseException exception, CommandSpec commandSpec) {
         Optional<Status> statusOptional = exception.getResponse().getBody(Status.class);
-        if (statusOptional.isPresent() && statusOptional.get().getDetails() != null
-            && !statusOptional.get().getDetails().getCauses().isEmpty()) {
+        if (statusOptional.isPresent()
+                && statusOptional.get().getDetails() != null
+                && !statusOptional.get().getDetails().getCauses().isEmpty()) {
             Status status = statusOptional.get();
             String causes = "\n - " + String.join("\n - ", status.getDetails().getCauses());
-            commandSpec.commandLine().getErr().printf("Failed because %s (%s):%s%n", status.getMessage().toLowerCase(),
-                exception.getStatus().getCode(),
-                causes);
+            commandSpec
+                    .commandLine()
+                    .getErr()
+                    .printf(
+                            "Failed because %s (%s):%s%n",
+                            status.getMessage().toLowerCase(),
+                            exception.getStatus().getCode(),
+                            causes);
         } else {
-            commandSpec.commandLine().getErr().printf("Failed because %s (%s).%n", exception.getMessage().toLowerCase(),
-                exception.getStatus().getCode());
+            commandSpec
+                    .commandLine()
+                    .getErr()
+                    .printf(
+                            "Failed because %s (%s).%n",
+                            exception.getMessage().toLowerCase(),
+                            exception.getStatus().getCode());
         }
     }
 
     /**
      * Format a map to string.
      *
-     * @param map   The map to format
+     * @param map The map to format
      * @return The map formatted string
      */
     public String formatMapToString(Map<String, String> map) {
@@ -131,32 +170,35 @@ public class FormatService {
      * Format the display error message based on the search option and the resource name.
      *
      * @param apiResources The API resources list
-     * @param search       The search map
+     * @param search The search map
      * @param resourceName The resource name
      * @param commandSpec The command spec used to print the output
      */
-    public void displayNoResource(List<ApiResource> apiResources,
-                                  Map<String, String> search,
-                                  String resourceName,
-                                  CommandSpec commandSpec) {
+    public void displayNoResource(
+            List<ApiResource> apiResources, Map<String, String> search, String resourceName, CommandSpec commandSpec) {
         String resource = prettifyKind(apiResources.getFirst().getKind()).toLowerCase();
 
         if (search == null || search.isEmpty()) {
             if (resourceName.equals("*")) {
-                commandSpec.commandLine().getOut()
-                    .println("No " + resource + " to display.");
+                commandSpec.commandLine().getOut().println("No " + resource + " to display.");
             } else {
-                commandSpec.commandLine().getOut()
-                    .println("No " + resource + " matches name \"" + resourceName + "\".");
+                commandSpec
+                        .commandLine()
+                        .getOut()
+                        .println("No " + resource + " matches name \"" + resourceName + "\".");
             }
         } else {
             if (resourceName.equals("*")) {
-                commandSpec.commandLine().getOut()
-                    .println("No " + resource + " matches search \"" + formatMapToString(search) + "\".");
+                commandSpec
+                        .commandLine()
+                        .getOut()
+                        .println("No " + resource + " matches search \"" + formatMapToString(search) + "\".");
             } else {
-                commandSpec.commandLine().getOut()
-                    .println("No " + resource + " matches name \"" + resourceName
-                        + "\" and search \"" + formatMapToString(search) + "\".");
+                commandSpec
+                        .commandLine()
+                        .getOut()
+                        .println("No " + resource + " matches name \"" + resourceName + "\" and search \""
+                                + formatMapToString(search) + "\".");
             }
         }
     }
@@ -164,8 +206,8 @@ public class FormatService {
     /**
      * Print the list of resources to table format.
      *
-     * @param kind        The kind of resources
-     * @param resources   The list of resources
+     * @param kind The kind of resources
+     * @param resources The list of resources
      * @param commandSpec The command spec used to print the output
      */
     private void printTable(String kind, List<Resource> resources, CommandSpec commandSpec) {
@@ -179,7 +221,7 @@ public class FormatService {
     /**
      * Print the list of resources to yaml format.
      *
-     * @param resources   The list of resources
+     * @param resources The list of resources
      * @param commandSpec The command spec used to print the output
      */
     private void printYaml(List<Resource> resources, CommandSpec commandSpec) {
@@ -199,7 +241,8 @@ public class FormatService {
      * @return The prettified kind
      */
     public String prettifyKind(String kind) {
-        return kind.substring(0, 1).toUpperCase() + kind.substring(1).replaceAll("(.)([A-Z])", "$1 $2").toLowerCase();
+        return kind.substring(0, 1).toUpperCase()
+                + kind.substring(1).replaceAll("(.)([A-Z])", "$1 $2").toLowerCase();
     }
 
     /**
@@ -212,9 +255,7 @@ public class FormatService {
         return name.equals("*") ? "" : " \"" + name + "\"";
     }
 
-    /**
-     * Pretty text table.
-     */
+    /** Pretty text table. */
     public static class PrettyTextTable {
         private final List<PrettyTextTableColumn> columns = new ArrayList<>();
         private final List<String[]> rows = new ArrayList<>();
@@ -222,7 +263,7 @@ public class FormatService {
         /**
          * Constructor.
          *
-         * @param formats   The list of formats
+         * @param formats The list of formats
          * @param resources The list of resources
          */
         public PrettyTextTable(List<String> formats, List<Resource> resources) {
@@ -230,8 +271,7 @@ public class FormatService {
             formats.forEach(item -> {
                 String[] elements = item.split(":");
                 if (elements.length != 2) {
-                    throw new IllegalStateException(
-                        "Expected line with format 'NAME:JSONPOINTER[%TRANSFORM]', but got "
+                    throw new IllegalStateException("Expected line with format 'NAME:JSONPOINTER[%TRANSFORM]', but got "
                             + Arrays.toString(elements) + " instead.");
                 }
                 columns.add(new PrettyTextTableColumn(columns.isEmpty() ? 0 : 2, elements));
@@ -241,19 +281,15 @@ public class FormatService {
             ObjectMapper mapper = new ObjectMapper();
             resources.forEach(resource -> {
                 JsonNode node = mapper.valueToTree(resource);
-                rows.add(columns.stream()
-                    .map(column -> column.transform(node))
-                    .toArray(String[]::new)
-                );
+                rows.add(columns.stream().map(column -> column.transform(node)).toArray(String[]::new));
             });
         }
 
         @Override
         public String toString() {
-            Help.Column[] sizedColumns = this.columns
-                .stream()
-                .map(column -> new Help.Column(column.size, column.indent, Help.Column.Overflow.SPAN))
-                .toArray(Help.Column[]::new);
+            Help.Column[] sizedColumns = this.columns.stream()
+                    .map(column -> new Help.Column(column.size, column.indent, Help.Column.Overflow.SPAN))
+                    .toArray(Help.Column[]::new);
 
             Help.TextTable tt = Help.TextTable.forColumns(Help.defaultColorScheme(Help.Ansi.AUTO), sizedColumns);
 
