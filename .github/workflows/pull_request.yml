@@ -36,8 +36,8 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Check style
-        run: ./gradlew checkstyleMain checkstyleTest
+      - name: Lint
+        run: ./gradlew spotlessCheck
 
       - name: Build
         id: build_jar
@@ -76,8 +76,10 @@ jobs:
         include:
           - os: 'ubuntu-latest'
             platform: 'linux-amd64'
+            native-image-musl: true
           - os: 'macos-latest'
             platform: 'darwin-arm64'
+            native-image-musl: false
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
@@ -89,6 +91,7 @@ jobs:
         with:
           distribution: 'graalvm'
           java-version: '21'
+          native-image-musl: ${{ matrix.native-image-musl }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache Gradle packages
@@ -98,27 +101,14 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Check Style
-        run: ./gradlew checkstyleMain checkstyleTest
-
-      # Install musl cross-compiler for Linux build
-      - name: Install musl cross-compiler
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          cd /tmp
-          wget https://more.musl.cc/10.2.1/x86_64-linux-musl/x86_64-linux-musl-native.tgz
-          sudo mkdir -p /usr/local/musl
-          sudo tar -xvzf x86_64-linux-musl-native.tgz -C /usr/local/musl
-          sudo ln -s /usr/local/musl/x86_64-linux-musl-native/bin/x86_64-linux-musl-gcc /usr/local/bin/musl-gcc
-          echo "PATH=/usr/local/musl/x86_64-linux-musl-native/bin:$PATH" >> $GITHUB_ENV
+      - name: Lint
+        run: ./gradlew spotlessCheck
 
       - name: Build
         id: build_native_linux_macos
         run: |
           if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            export CC=/usr/local/musl/x86_64-linux-musl-native/bin/x86_64-linux-musl-gcc
-            export PATH=/usr/local/musl/x86_64-linux-musl-native/bin:$PATH
-            ./gradlew nativeCompile -PnativeArgs="--static --libc=musl --gcc-toolchain=/usr/local/musl/x86_64-linux-musl-native"
+            ./gradlew nativeCompile -Pmusl
           else
             ./gradlew nativeCompile
           fi
@@ -157,8 +147,8 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Check Style
-        run: .\gradlew.bat checkstyleMain checkstyleTest
+      - name: Lint
+        run: .\gradlew.bat spotlessCheck
 
       - name: Build
         id: build_native_windows
