@@ -158,12 +158,10 @@ jobs:
 
       - name: Build
         run: ./gradlew nativeCompile ${{ matrix.os == 'ubuntu-latest' && '-Pmusl' || '' }}
-        shell: bash
 
       - name: Metadata
         id: metadata
         run: echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
-        shell: bash
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
