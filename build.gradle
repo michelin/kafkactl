@@ -91,7 +91,8 @@ dockerfile {
 }
 
 dockerfileNative {
-    baseImage("ubuntu:22.04")
+    baseImage("ubuntu:24.04")
+    runCommand("apt-get update && apt-get upgrade -y")
     editDockerfile {
         after("COPY --link --from=graalvm /home/app/application /app/application") {
             insert("RUN ln -s /app/application /usr/bin/kafkactl && chmod 777 /usr/bin/kafkactl")
