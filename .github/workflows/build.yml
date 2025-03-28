@@ -171,9 +171,9 @@ jobs:
           name: kafkactl-${{ matrix.platform }}
           path: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}${{ matrix.extension }}
 
-      - name: Docker push
+      - name: Docker build
         if: matrix.os == 'ubuntu-latest'
-        run: ./gradlew dockerBuildNative dockerPushNative
+        run: ./gradlew dockerBuildNative
 
       - name: Grype Docker image
         if: matrix.os == 'ubuntu-latest'
