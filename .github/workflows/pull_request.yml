@@ -76,8 +76,10 @@ jobs:
         include:
           - os: 'ubuntu-latest'
             platform: 'linux-amd64'
+            native-image-musl: true
           - os: 'macos-latest'
             platform: 'darwin-arm64'
+            native-image-musl: false
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
@@ -89,6 +91,7 @@ jobs:
         with:
           distribution: 'graalvm'
           java-version: '21'
+          native-image-musl: ${{ matrix.native-image-musl }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache Gradle packages
@@ -104,7 +107,11 @@ jobs:
       - name: Build
         id: build_native_linux_macos
         run: |
-          ./gradlew nativeCompile
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            ./gradlew nativeCompile -Pmusl
+          else
+            ./gradlew nativeCompile
+          fi
           echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
 
       - name: Upload
