@@ -10,12 +10,6 @@ jobs:
     name: Release JAR
     runs-on: ubuntu-latest
     steps:
-      - name: Docker login
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.MICHELIN_DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.MICHELIN_DOCKER_HUB_PASSWD }}
-
       - name: Checkout project
         uses: actions/checkout@v4
         with:
@@ -35,25 +29,27 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
 
       - name: Build
-        id: build_jar
-        run: |
-          ./gradlew build --info
-          echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
+        run: ./gradlew build -x test --info
 
-      - name: Publish test report
-        if: always()
-        uses: mikepenz/action-junit-report@v5
+      - name: Metadata
+        id: metadata
+        run: |
+          CURRENT_VERSION=$(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')
+          LATEST_VERSION=$(git tag -l --sort=-version:refname | head -1 | cut -d 'v' -f 2)
+          echo current_version=$(echo $CURRENT_VERSION) >> $GITHUB_OUTPUT
+          echo is_latest_version=$(echo $(test "$LATEST_VERSION" == "$CURRENT_VERSION" && echo true || echo false)) >> $GITHUB_OUTPUT
+
+      - name: Docker login
+        uses: docker/login-action@v3
         with:
-          report_paths: '**/build/test-results/test/TEST-*.xml'
+          username: ${{ secrets.MICHELIN_DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.MICHELIN_DOCKER_HUB_PASSWD }}
 
       - name: Docker
         run: |
-          LATEST_VERSION=$(git tag -l --sort=-version:refname | head -1 | cut -d 'v' -f 2)
-          if [ "$LATEST_VERSION" == "${{ steps.build_jar.outputs.current_version }}" ]; then
-            echo "Latest version is $LATEST_VERSION. Current version is ${{ steps.build_jar.outputs.current_version }}. Pushing latest tag."
+          if [ "${{ steps.metadata.outputs.is_latest_version }}" == "true" ]; then
             ./gradlew dockerBuild dockerPush -PreleaseLatest
           else 
-            echo "Latest version is $LATEST_VERSION. Current version is ${{ steps.build_jar.outputs.current_version }}. Not pushing latest tag."
             ./gradlew dockerBuild dockerPush
           fi
 
@@ -75,25 +71,23 @@ jobs:
           prerelease: true
           allowUpdates: true
 
-  release-native-linux-macos:
+  release-native:
     name: Release Native Image ${{ matrix.platform }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ 'ubuntu-latest', 'macos-latest' ]
+        os: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
         include:
           - os: 'ubuntu-latest'
             platform: 'linux-amd64'
+            extension: ''
           - os: 'macos-latest'
             platform: 'darwin-arm64'
+            extension: ''
+          - os: 'windows-latest'
+            platform: 'windows-amd64'
+            extension: '.exe'
     steps:
-      - name: Docker login
-        if: matrix.os == 'ubuntu-latest'
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.MICHELIN_DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.MICHELIN_DOCKER_HUB_PASSWD }}
-
       - name: Checkout project
         uses: actions/checkout@v4
         with:
@@ -104,6 +98,7 @@ jobs:
         with:
           distribution: 'graalvm'
           java-version: '21'
+          native-image-musl: ${{ matrix.os == 'ubuntu-latest' }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache Gradle packages
@@ -114,20 +109,23 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
 
       - name: Build
-        id: build_native_linux_macos
+        run: ./gradlew nativeCompile ${{ matrix.os == 'ubuntu-latest' && '-Pmusl' || '' }}
+
+      - name: Metadata
+        id: metadata
         run: |
-          ./gradlew nativeCompile
-          echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
+          CURRENT_VERSION=$(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')
+          LATEST_VERSION=$(git tag -l --sort=-version:refname | head -1 | cut -d 'v' -f 2)
+          echo current_version=$(echo $CURRENT_VERSION) >> $GITHUB_OUTPUT
+          echo is_latest_version=$(echo $(test "$LATEST_VERSION" == "$CURRENT_VERSION" && echo true || echo false)) >> $GITHUB_OUTPUT
+        shell: bash
 
       - name: Docker
         if: matrix.os == 'ubuntu-latest'
         run: |
-          LATEST_VERSION=$(git tag -l --sort=-version:refname | head -1 | cut -d 'v' -f 2)
-          if [ "$LATEST_VERSION" == "${{ steps.build_native_linux_macos.outputs.current_version }}" ]; then 
-             echo "Latest version is $LATEST_VERSION. Current version is ${{ steps.build_native_linux_macos.outputs.current_version }}. Pushing latest tag."
+          if [ "${{ steps.metadata.outputs.is_latest_version }}" == "true" ]; then
             ./gradlew dockerBuildNative dockerPushNative -PreleaseLatest
           else 
-             echo "Latest version is $LATEST_VERSION. Current version is ${{ steps.build_native_linux_macos.outputs.current_version }}. Not pushing latest tag."
             ./gradlew dockerBuildNative dockerPushNative
           fi
 
@@ -140,65 +138,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Rename file
-        run: mv ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_linux_macos.outputs.current_version }} ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_linux_macos.outputs.current_version }}-${{ matrix.platform }}
+        run: mv ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}${{ matrix.extension }} ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
 
       - name: Update release
         uses: ncipollo/release-action@v1.16.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_linux_macos.outputs.current_version }}-${{ matrix.platform }}
-          draft: true
-          prerelease: true
-          allowUpdates: true
-
-  release-native-windows:
-    name: Build Native Image windows-amd64
-    runs-on: windows-latest
-    steps:
-      - name: Checkout project
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up GraalVM
-        uses: graalvm/setup-graalvm@v1
-        with:
-          distribution: 'graalvm'
-          java-version: '21'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle
-
-      - name: Build
-        id: build_native_windows
-        run: |
-          .\gradlew.bat nativeCompile
-          $version=(& .\gradlew.bat properties --no-daemon --console=plain -q | Select-String "^version:" | ForEach-Object { ($_ -split ":")[1].Trim() })
-          "current_version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-
-      - name: Generate release changelog
-        uses: mikepenz/release-changelog-builder-action@v5
-        id: build_changelog
-        with:
-          configuration: 'changelog-builder.json'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Rename file
-        run: Rename-Item -Path ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_windows.outputs.current_version }}.exe -NewName kafkactl-${{ steps.build_native_windows.outputs.current_version }}-windows-amd64.exe
-
-      - name: Update release
-        uses: ncipollo/release-action@v1.16.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.build_native_windows.outputs.current_version }}-windows-amd64.exe
+          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
           draft: true
           prerelease: true
           allowUpdates: true
