@@ -162,7 +162,7 @@ jobs:
       - name: Metadata
         id: metadata
         run: echo current_version=$(echo $(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')) >> $GITHUB_OUTPUT
-        shell: cmd
+        shell: bash
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
