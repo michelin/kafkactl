@@ -1079,6 +1079,20 @@ connectValidator:
       validation-type: NonEmptyString
 ```
 
+###### ContainsList
+
+Ensures that the property is a comma-separated list of strings that contains all the items defined in the `mandatoryStrings` list.
+
+```yml
+connectValidator:
+  validationConstraints:
+    topic.blacklist:
+      validation-type: ContainsList
+      mandatoryStrings:
+        - ns1.topic1
+        - ns1.topic2
+```
+
 ###### CompositeValidator
 
 Ensures that the property satisfies multiple validation rules. The property is valid only if it meets all specified
