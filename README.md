@@ -61,6 +61,7 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
                 * [ValidList](#validlist)
                 * [ValidString](#validstring)
                 * [NonEmptyString](#nonemptystring)
+                * [ContainsList](#containslist)
                 * [CompositeValidator](#compositevalidator)
         * [ACL Owner](#acl-owner)
         * [Role Binding](#role-binding)
