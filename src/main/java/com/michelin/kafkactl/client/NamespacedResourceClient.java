@@ -18,7 +18,6 @@
  */
 package com.michelin.kafkactl.client;
 
-import com.michelin.kafkactl.client.predicates.RetryTimeoutPredicate;
 import com.michelin.kafkactl.model.Resource;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.HttpResponse;
@@ -29,6 +28,7 @@ import io.micronaut.http.annotation.Header;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.http.client.annotation.Client;
+import io.micronaut.http.client.exceptions.ReadTimeoutException;
 import io.micronaut.retry.annotation.Retryable;
 import java.util.List;
 import java.util.Map;
@@ -49,10 +49,10 @@ public interface NamespacedResourceClient {
      */
     @Delete("{namespace}/{kind}{?name,version,dryrun}")
     @Retryable(
-            delay = "${kafkactl.retry.delete.delay}",
-            attempts = "${kafkactl.retry.delete.attempt}",
-            multiplier = "${kafkactl.retry.delete.multiplier}",
-            predicate = RetryTimeoutPredicate.class)
+            delay = "${kafkactl.retry.delay}",
+            attempts = "${kafkactl.retry.attempt}",
+            multiplier = "${kafkactl.retry.multiplier}",
+            includes = ReadTimeoutException.class)
     HttpResponse<List<Resource>> delete(
             String namespace,
             String kind,
@@ -73,10 +73,10 @@ public interface NamespacedResourceClient {
      */
     @Post("{namespace}/{kind}{?dryrun}")
     @Retryable(
-            delay = "${kafkactl.retry.apply.delay}",
-            attempts = "${kafkactl.retry.apply.attempt}",
-            multiplier = "${kafkactl.retry.apply.multiplier}",
-            predicate = RetryTimeoutPredicate.class)
+            delay = "${kafkactl.retry.delay}",
+            attempts = "${kafkactl.retry.attempt}",
+            multiplier = "${kafkactl.retry.multiplier}",
+            includes = ReadTimeoutException.class)
     HttpResponse<Resource> apply(
             String namespace,
             String kind,

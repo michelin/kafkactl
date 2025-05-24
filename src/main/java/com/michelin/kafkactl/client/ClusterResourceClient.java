@@ -28,6 +28,8 @@ import io.micronaut.http.annotation.Header;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.http.client.annotation.Client;
+import io.micronaut.http.client.exceptions.ReadTimeoutException;
+import io.micronaut.retry.annotation.Retryable;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +43,11 @@ public interface ClusterResourceClient {
      * @return The JWT token
      */
     @Post("/login")
+    @Retryable(
+            delay = "${kafkactl.retry.delay}",
+            attempts = "${kafkactl.retry.attempt}",
+            multiplier = "${kafkactl.retry.multiplier}",
+            includes = ReadTimeoutException.class)
     BearerAccessRefreshToken login(@Body UsernameAndPasswordRequest request);
 
     /**

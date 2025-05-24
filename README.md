@@ -24,7 +24,11 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
 
 * [Download](#download)
 * [Configuration](#configuration)
-* [Authentication](#authentication)
+  * [Contexts](#contexts)
+  * [Authentication](#authentication)
+  * [HTTP Client](#http-client)
+    * [Timeout](#timeout)
+    * [Retry](#retry)
 * [Usage](#usage)
     * [Api Resources](#api-resources)
     * [Apply](#apply)
@@ -85,15 +89,15 @@ Additionally, Docker images are available on [Docker Hub](https://hub.docker.com
 
 ## Configuration
 
+### Contexts
+
 To use Kafkactl, you need to define three variables:
 
 - The URL of Ns4Kafka
 - Your namespace
 - Your security token (e.g., a GitLab token)
 
-These variables can be defined in a dedicated configuration file.
-
-Create a `.kafkactl/config.yml` file in your home directory:
+These variables can be defined in a dedicated configuration file `.kafkactl/config.yml`.
 
 - Windows: `C:\Users\Name\.kafkactl\config.yml`
 - Linux: `~/.kafkactl/config.yml`
@@ -142,7 +146,7 @@ To check your current context, use the following command:
 kafkactl config current-context
 ```
 
-## Authentication
+### Authentication
 
 Kafkactl supports only Bearer JWT authentication. It requires a token to be set in the `user-token` field of the context
 within the `config.yml` file.
@@ -153,6 +157,37 @@ within the `config.yml` file.
   Ns4Kafka configuration.
 
 Upon successful authentication, a JWT token signed by Ns4Kafka is stored in the `~/.kafkactl` directory.
+
+### HTTP Client
+
+Kafkactl uses an HTTP client to communicate with the Ns4Kafka API.
+
+##### Timeout
+
+HTTP client timeouts can be configured using the following properties:
+
+```yaml
+micronaut:
+  http:
+    client:
+      connect-timeout: '180s'
+      read-idle-timeout: '180s'
+      read-timeout: '180s'
+```
+
+Timeouts are set to 180 seconds by default, which is suitable to allow the Ns4Kafka server to perform retries if needed.
+
+##### Retry
+
+The Kafkactl HTTP client is configured to retry requests in case of errors. The retry behavior is controlled by the following properties:
+
+```yaml
+kafkactl:
+  retry:
+    attempt: '4'
+    delay: '2s'
+    multiplier: '2.0'
+```
 
 ## Usage
 
