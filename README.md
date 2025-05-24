@@ -170,9 +170,9 @@ HTTP client timeouts can be configured using the following properties:
 micronaut:
   http:
     client:
-      connect-timeout: '180s'
-      read-idle-timeout: '180s'
-      read-timeout: '180s'
+      connect-timeout: '60s'
+      read-idle-timeout: '60s'
+      read-timeout: '60s'
 ```
 
 ##### Retry
@@ -182,9 +182,9 @@ The Kafkactl HTTP client is configured to retry requests in case of errors. The 
 ```yaml
 kafkactl:
   retry:
-    attempt: '10'
+    attempt: '3'
     delay: '2s'
-    multiplier: '1.0'
+    multiplier: '2.0'
 ```
 
 ## Usage

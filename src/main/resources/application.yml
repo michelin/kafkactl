@@ -9,9 +9,9 @@ kafkactl:
   current-namespace: namespace
   user-token: token
   retry:
-    attempt: '10'
+    attempt: '3'
     delay: '2s'
-    multiplier: '1.0'
+    multiplier: '2.0'
   table-format:
     AccessControlEntry:
       - 'ACL:/metadata/name'
@@ -113,8 +113,8 @@ micronaut:
     name: 'kafkactl'
   http:
     client:
-      connect-timeout: '180s'
-      read-idle-timeout: '180s'
-      read-timeout: '180s'
+      connect-timeout: '60s'
+      read-idle-timeout: '60s'
+      read-timeout: '60s'
       ssl:
         insecure-trust-all-certificates: true
