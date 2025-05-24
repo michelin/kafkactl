@@ -44,10 +44,10 @@ public interface ClusterResourceClient {
      */
     @Post("/login")
     @Retryable(
-        delay = "${kafkactl.retry.delay}",
-        attempts = "${kafkactl.retry.attempt}",
-        multiplier = "${kafkactl.retry.multiplier}",
-        includes = ReadTimeoutException.class)
+            delay = "${kafkactl.retry.delay}",
+            attempts = "${kafkactl.retry.attempt}",
+            multiplier = "${kafkactl.retry.multiplier}",
+            includes = ReadTimeoutException.class)
     BearerAccessRefreshToken login(@Body UsernameAndPasswordRequest request);
 
     /**
