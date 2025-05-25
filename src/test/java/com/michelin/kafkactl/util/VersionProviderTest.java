@@ -21,7 +21,9 @@ package com.michelin.kafkactl.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.client.ClusterResourceClient;
+import com.michelin.kafkactl.model.ServerInfo;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,17 +33,33 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class VersionProviderTest {
     @Mock
-    KafkactlConfig kafkactlConfig;
+    KafkactlProperties kafkactlProperties;
+
+    @Mock
+    ClusterResourceClient clusterResourceClient;
 
     @InjectMocks
     VersionProvider versionProvider;
 
     @Test
     void shouldGetVersion() {
-        when(kafkactlConfig.getVersion()).thenReturn("1.0.0");
+        when(kafkactlProperties.getVersion()).thenReturn("1.0.0");
+        when(clusterResourceClient.serverInfo()).thenReturn(new ServerInfo("1.0.0"));
 
         String[] actual = versionProvider.getVersion();
 
-        assertEquals("Version 1.0.0", actual[0]);
+        assertEquals("Client Version: v1.0.0", actual[0]);
+        assertEquals("Server Version: v1.0.0", actual[1]);
+    }
+
+    @Test
+    void shouldGetVersionWhenServerDoesNotRespond() {
+        when(kafkactlProperties.getVersion()).thenReturn("1.0.0");
+        when(clusterResourceClient.serverInfo()).thenThrow(new RuntimeException("Server not reachable"));
+
+        String[] actual = versionProvider.getVersion();
+
+        assertEquals("Client Version: v1.0.0", actual[0]);
+        assertEquals("Server Version: Server not reachable", actual[1]);
     }
 }

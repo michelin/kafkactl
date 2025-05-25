@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.Kafkactl;
-import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.service.LoginService;
 import com.michelin.kafkactl.service.ResourceService;
@@ -57,7 +57,7 @@ class ResetOffsetsTest {
     ConfigService configService;
 
     @Mock
-    KafkactlConfig kafkactlConfig;
+    KafkactlProperties kafkactlProperties;
 
     @Mock
     Kafkactl kafkactl;
@@ -168,7 +168,7 @@ class ResetOffsetsTest {
     void shouldResetOffsetsToOffset() {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(0);
 

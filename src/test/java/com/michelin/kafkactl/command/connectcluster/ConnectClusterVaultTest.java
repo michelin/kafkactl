@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.Kafkactl;
-import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.service.LoginService;
 import com.michelin.kafkactl.service.ResourceService;
@@ -43,7 +43,7 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class ConnectClusterVaultTest {
     @Mock
-    KafkactlConfig kafkactlConfig;
+    KafkactlProperties kafkactlProperties;
 
     @Mock
     ResourceService resourceService;
@@ -93,7 +93,7 @@ class ConnectClusterVaultTest {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(resourceService.listAvailableVaultsConnectClusters(any(), any())).thenReturn(0);
 
         CommandLine cmd = new CommandLine(subcommand);
@@ -108,7 +108,7 @@ class ConnectClusterVaultTest {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(resourceService.listAvailableVaultsConnectClusters(any(), any())).thenReturn(1);
 
         CommandLine cmd = new CommandLine(subcommand);
@@ -123,7 +123,7 @@ class ConnectClusterVaultTest {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();
@@ -139,7 +139,7 @@ class ConnectClusterVaultTest {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
         when(resourceService.vaultsOnConnectClusters(any(), any(), any(), any()))
                 .thenReturn(0);

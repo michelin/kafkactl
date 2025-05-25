@@ -18,8 +18,8 @@
  */
 package com.michelin.kafkactl.command.config;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.hook.HelpHook;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ConfigService;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
@@ -45,7 +45,7 @@ import picocli.CommandLine.Spec;
 public class ConfigUseContext extends HelpHook implements Callable<Integer> {
     @Inject
     @ReflectiveAccess
-    private KafkactlConfig kafkactlConfig;
+    private KafkactlProperties kafkactlProperties;
 
     @Inject
     @ReflectiveAccess
@@ -59,19 +59,19 @@ public class ConfigUseContext extends HelpHook implements Callable<Integer> {
 
     @Override
     public Integer call() throws IOException {
-        if (kafkactlConfig.getContexts().isEmpty()) {
+        if (kafkactlProperties.getContexts().isEmpty()) {
             commandSpec.commandLine().getOut().println("No context pre-defined.");
             return 0;
         }
 
-        Optional<KafkactlConfig.Context> optionalContextToSet = configService.getContextByName(context);
+        Optional<KafkactlProperties.ContextsProperties> optionalContextToSet = configService.getContextByName(context);
         if (optionalContextToSet.isEmpty()) {
             commandSpec.commandLine().getErr().println("No context exists with the name \"" + context + "\".");
             return 1;
         }
 
-        KafkactlConfig.Context contextToSet = optionalContextToSet.get();
-        configService.updateConfigurationContext(contextToSet);
+        KafkactlProperties.ContextsProperties contextPropertiesToSet = optionalContextToSet.get();
+        configService.updateConfigurationContext(contextPropertiesToSet);
         commandSpec.commandLine().getOut().println("Switched to context \"" + context + "\".");
 
         return 0;

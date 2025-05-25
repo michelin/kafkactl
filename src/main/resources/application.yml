@@ -102,7 +102,7 @@ kafkactl:
     VaultResponse:
       - 'CLEAR_TEXT:/spec/clearText'
       - 'ENCRYPTED_TEXT:/spec/encrypted'
-  version: @version@
+  version: '@version@'
 logger:
   levels:
     ROOT: 'OFF'

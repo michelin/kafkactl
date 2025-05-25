@@ -20,7 +20,6 @@ package com.michelin.kafkactl.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Output;
 import com.michelin.kafkactl.model.Resource;
@@ -29,6 +28,7 @@ import com.michelin.kafkactl.model.format.AgoFormat;
 import com.michelin.kafkactl.model.format.DefaultFormat;
 import com.michelin.kafkactl.model.format.OutputFormatStrategy;
 import com.michelin.kafkactl.model.format.PeriodFormat;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.naming.conventions.StringConvention;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
@@ -54,7 +54,7 @@ public class FormatService {
 
     @Inject
     @ReflectiveAccess
-    private KafkactlConfig kafkactlConfig;
+    private KafkactlProperties kafkactlProperties;
 
     /**
      * Display a list of resources.
@@ -212,7 +212,7 @@ public class FormatService {
      */
     private void printTable(String kind, List<Resource> resources, CommandSpec commandSpec) {
         String hyphenatedKind = StringConvention.HYPHENATED.format(kind);
-        List<String> formats = kafkactlConfig.getTableFormat().getOrDefault(hyphenatedKind, defaults);
+        List<String> formats = kafkactlProperties.getTableFormat().getOrDefault(hyphenatedKind, defaults);
 
         PrettyTextTable ptt = new PrettyTextTable(formats, resources);
         commandSpec.commandLine().getOut().println(ptt);

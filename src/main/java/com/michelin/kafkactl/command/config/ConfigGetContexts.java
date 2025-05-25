@@ -22,11 +22,11 @@ import static com.michelin.kafkactl.mixin.UnmaskTokenMixin.MASKED;
 import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONTEXT;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.hook.HelpHook;
 import com.michelin.kafkactl.mixin.UnmaskTokenMixin;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.FormatService;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
@@ -53,7 +53,7 @@ import picocli.CommandLine.Spec;
 public class ConfigGetContexts extends HelpHook implements Callable<Integer> {
     @Inject
     @ReflectiveAccess
-    private KafkactlConfig kafkactlConfig;
+    private KafkactlProperties kafkactlProperties;
 
     @Inject
     @ReflectiveAccess
@@ -67,17 +67,17 @@ public class ConfigGetContexts extends HelpHook implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        if (kafkactlConfig.getContexts().isEmpty()) {
+        if (kafkactlProperties.getContexts().isEmpty()) {
             commandSpec.commandLine().getOut().println("No context pre-defined.");
         } else {
-            List<Resource> contexts = kafkactlConfig.getContexts().stream()
+            List<Resource> contexts = kafkactlProperties.getContexts().stream()
                     .map(userContext -> {
                         Map<String, Object> specs = new HashMap<>();
-                        specs.put("namespace", userContext.getDefinition().getNamespace());
-                        specs.put("api", userContext.getDefinition().getApi());
+                        specs.put("namespace", userContext.getContext().getNamespace());
+                        specs.put("api", userContext.getContext().getApi());
 
                         if (unmaskTokenMixin.unmaskTokens) {
-                            specs.put("token", userContext.getDefinition().getUserToken());
+                            specs.put("token", userContext.getContext().getUserToken());
                         } else {
                             specs.put("token", MASKED);
                         }
