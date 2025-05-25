@@ -30,10 +30,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.Kafkactl;
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ApiResourcesService;
 import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.service.FormatService;
@@ -59,7 +59,7 @@ class ConnectorTest {
     LoginService loginService;
 
     @Mock
-    KafkactlConfig kafkactlConfig;
+    KafkactlProperties kafkactlProperties;
 
     @Mock
     ResourceService resourceService;
@@ -113,7 +113,7 @@ class ConnectorTest {
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.changeConnectorState(any(), any(), any(), any())).thenReturn(Optional.empty());
 
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
         CommandLine cmd = new CommandLine(connector);
         StringWriter sw = new StringWriter();

@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.FormatService;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -42,7 +42,7 @@ import picocli.CommandLine;
 @ExtendWith(MockitoExtension.class)
 class ConfigGetContextsTest {
     @Mock
-    KafkactlConfig kafkactlConfig;
+    KafkactlProperties kafkactlProperties;
 
     @Mock
     FormatService formatService;
@@ -52,7 +52,7 @@ class ConfigGetContextsTest {
 
     @Test
     void shouldGetEmptyContexts() {
-        when(kafkactlConfig.getContexts()).thenReturn(Collections.emptyList());
+        when(kafkactlProperties.getContexts()).thenReturn(Collections.emptyList());
 
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();
@@ -65,16 +65,16 @@ class ConfigGetContextsTest {
 
     @Test
     void shouldGetContextsWithMaskedTokens() {
-        KafkactlConfig.Context context = KafkactlConfig.Context.builder()
+        KafkactlProperties.ContextsProperties contextProperties = KafkactlProperties.ContextsProperties.builder()
                 .name("name")
-                .definition(KafkactlConfig.Context.ApiContext.builder()
+                .context(KafkactlProperties.ContextsProperties.ContextProperties.builder()
                         .api("api")
                         .namespace("namespace")
                         .userToken("userToken")
                         .build())
                 .build();
 
-        when(kafkactlConfig.getContexts()).thenReturn(Collections.singletonList(context));
+        when(kafkactlProperties.getContexts()).thenReturn(Collections.singletonList(contextProperties));
 
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();
@@ -101,16 +101,16 @@ class ConfigGetContextsTest {
 
     @Test
     void shouldGetContextsWithUnmaskedTokens() {
-        KafkactlConfig.Context context = KafkactlConfig.Context.builder()
+        KafkactlProperties.ContextsProperties contextProperties = KafkactlProperties.ContextsProperties.builder()
                 .name("name")
-                .definition(KafkactlConfig.Context.ApiContext.builder()
+                .context(KafkactlProperties.ContextsProperties.ContextProperties.builder()
                         .api("api")
                         .namespace("namespace")
                         .userToken("userToken")
                         .build())
                 .build();
 
-        when(kafkactlConfig.getContexts()).thenReturn(Collections.singletonList(context));
+        when(kafkactlProperties.getContexts()).thenReturn(Collections.singletonList(contextProperties));
 
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();

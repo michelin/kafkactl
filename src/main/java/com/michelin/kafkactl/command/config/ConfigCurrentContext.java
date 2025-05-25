@@ -22,11 +22,11 @@ import static com.michelin.kafkactl.mixin.UnmaskTokenMixin.MASKED;
 import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONTEXT;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.hook.ValidCurrentContextHook;
 import com.michelin.kafkactl.mixin.UnmaskTokenMixin;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.FormatService;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.util.StringUtils;
@@ -51,7 +51,7 @@ import picocli.CommandLine.Mixin;
 public class ConfigCurrentContext extends ValidCurrentContextHook {
     @Inject
     @ReflectiveAccess
-    private KafkactlConfig kafkactlConfig;
+    private KafkactlProperties kafkactlProperties;
 
     @Inject
     @ReflectiveAccess
@@ -63,11 +63,11 @@ public class ConfigCurrentContext extends ValidCurrentContextHook {
     @Override
     public Integer onContextValid() {
         Map<String, Object> specs = new HashMap<>();
-        specs.put("namespace", kafkactlConfig.getCurrentNamespace());
-        specs.put("api", kafkactlConfig.getApi());
+        specs.put("namespace", kafkactlProperties.getCurrentNamespace());
+        specs.put("api", kafkactlProperties.getApi());
 
         if (unmaskTokenMixin.unmaskTokens) {
-            specs.put("token", kafkactlConfig.getUserToken());
+            specs.put("token", kafkactlProperties.getUserToken());
         } else {
             specs.put("token", MASKED);
         }

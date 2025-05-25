@@ -24,8 +24,8 @@ import com.michelin.kafkactl.client.BearerAccessRefreshToken;
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.client.UserInfoResponse;
 import com.michelin.kafkactl.client.UsernameAndPasswordRequest;
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.JwtContent;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Singleton;
@@ -41,7 +41,7 @@ import picocli.CommandLine.Model.CommandSpec;
 @Singleton
 public class LoginService {
     private static final String UNEXPECTED_ERROR = "Unexpected error occurred:";
-    private final KafkactlConfig kafkactlConfig;
+    private final KafkactlProperties kafkactlProperties;
     private final ClusterResourceClient clusterResourceClient;
     private final File jwtFile;
     private String accessToken;
@@ -49,15 +49,15 @@ public class LoginService {
     /**
      * Constructor.
      *
-     * @param kafkactlConfig The Kafkactl config
+     * @param kafkactlProperties The Kafkactl config
      * @param clusterResourceClient The client for resources
      */
-    public LoginService(KafkactlConfig kafkactlConfig, ClusterResourceClient clusterResourceClient) {
-        this.kafkactlConfig = kafkactlConfig;
+    public LoginService(KafkactlProperties kafkactlProperties, ClusterResourceClient clusterResourceClient) {
+        this.kafkactlProperties = kafkactlProperties;
         this.clusterResourceClient = clusterResourceClient;
-        this.jwtFile = new File(kafkactlConfig.getConfigDirectory() + "/jwt");
+        this.jwtFile = new File(kafkactlProperties.getConfigDirectory() + "/jwt");
         // Create base kafkactl dir if not exists
-        File kafkactlDir = new File(kafkactlConfig.getConfigDirectory());
+        File kafkactlDir = new File(kafkactlProperties.getConfigDirectory());
         if (!kafkactlDir.exists()) {
             kafkactlDir.mkdir();
         }
@@ -81,7 +81,7 @@ public class LoginService {
      */
     public boolean doAuthenticate(CommandSpec commandSpec, boolean verbose) {
         return isAuthenticated(commandSpec, verbose)
-                || login(commandSpec, "gitlab", kafkactlConfig.getUserToken(), verbose);
+                || login(commandSpec, "gitlab", kafkactlProperties.getUserToken(), verbose);
     }
 
     /**

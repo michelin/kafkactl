@@ -28,7 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.Kafkactl;
-import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.service.LoginService;
 import com.michelin.kafkactl.service.ResourceService;
@@ -53,7 +53,7 @@ class ResetPasswordTest {
     ConfigService configService;
 
     @Mock
-    KafkactlConfig kafkactlConfig;
+    KafkactlProperties kafkactlProperties;
 
     @Mock
     Kafkactl kafkactl;
@@ -102,7 +102,7 @@ class ResetPasswordTest {
     void shouldNotUpdateUserWhenNotConfirmed() {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
         CommandLine cmd = new CommandLine(resetPassword);
         StringWriter sw = new StringWriter();
@@ -120,7 +120,7 @@ class ResetPasswordTest {
     void shouldUpdateUser() {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(resourceService.resetPassword(any(), any(), any(), any())).thenReturn(0);
 
         CommandLine cmd = new CommandLine(resetPassword);

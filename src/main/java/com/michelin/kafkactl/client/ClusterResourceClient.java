@@ -20,6 +20,7 @@ package com.michelin.kafkactl.client;
 
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
+import com.michelin.kafkactl.model.ServerInfo;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Delete;
@@ -58,6 +59,14 @@ public interface ClusterResourceClient {
      */
     @Get("/token_info")
     UserInfoResponse tokenInfo(@Header("Authorization") String token);
+
+    /**
+     * Get the server information.
+     *
+     * @return The server information
+     */
+    @Get("/api/app-info/version")
+    ServerInfo serverInfo();
 
     /**
      * List all resources kinds.

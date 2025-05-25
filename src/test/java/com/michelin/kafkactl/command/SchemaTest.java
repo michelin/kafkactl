@@ -30,9 +30,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.Kafkactl;
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.LoginService;
@@ -60,7 +60,7 @@ class SchemaTest {
     ConfigService configService;
 
     @Mock
-    KafkactlConfig kafkactlConfig;
+    KafkactlProperties kafkactlProperties;
 
     @Mock
     Kafkactl kafkactl;
@@ -104,7 +104,7 @@ class SchemaTest {
         when(resourceService.changeSchemaCompatibility(any(), any(), any(), any()))
                 .thenReturn(Optional.empty());
 
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
         CommandLine cmd = new CommandLine(schema);
 
@@ -129,7 +129,7 @@ class SchemaTest {
         when(resourceService.changeSchemaCompatibility(any(), any(), any(), any()))
                 .thenReturn(Optional.of(resource));
 
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
         CommandLine cmd = new CommandLine(schema);
 

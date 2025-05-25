@@ -30,10 +30,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.Kafkactl;
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ApiResourcesService;
 import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.service.FormatService;
@@ -74,7 +74,7 @@ class DiffTest {
     ConfigService configService;
 
     @Mock
-    KafkactlConfig kafkactlConfig;
+    KafkactlProperties kafkactlProperties;
 
     @Mock
     Kafkactl kafkactl;
@@ -215,7 +215,7 @@ class DiffTest {
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
 
@@ -245,7 +245,7 @@ class DiffTest {
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
@@ -296,7 +296,7 @@ class DiffTest {
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
@@ -350,7 +350,7 @@ class DiffTest {
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
@@ -417,7 +417,7 @@ class DiffTest {
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
@@ -473,7 +473,7 @@ class DiffTest {
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         doCallRealMethod().when(resourceService).enrichSchemaContent(any(), any());
 
         ApiResource apiResource = ApiResource.builder()
@@ -531,7 +531,7 @@ class DiffTest {
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
         ApiResource apiResource = ApiResource.builder()
                 .kind("Schema")
@@ -583,7 +583,7 @@ class DiffTest {
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         doCallRealMethod().when(resourceService).enrichSchemaContent(any(), any());
 
         CommandLine cmd = new CommandLine(diff);

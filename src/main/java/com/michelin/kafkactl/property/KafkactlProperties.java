@@ -16,12 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.michelin.kafkactl.config;
+package com.michelin.kafkactl.property;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.michelin.kafkactl.service.SystemService;
 import io.micronaut.context.annotation.ConfigurationProperties;
-import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.convert.format.MapFormat;
 import io.micronaut.core.util.StringUtils;
 import java.io.File;
@@ -31,18 +29,18 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-/** Kafkactl config class. */
+/** Kafkactl properties. */
 @Getter
 @Setter
-@Introspected
 @ConfigurationProperties("kafkactl")
-public class KafkactlConfig {
+public class KafkactlProperties {
     public static final String KAFKACTL_CONFIG = "KAFKACTL_CONFIG";
-    private String version;
+
     private String api;
     private String userToken;
     private String currentNamespace;
-    private List<Context> contexts;
+    private List<ContextsProperties> contexts;
+    private String version;
 
     @MapFormat(transformation = MapFormat.MapTransformation.FLAT)
     private Map<String, List<String>> tableFormat;
@@ -72,23 +70,18 @@ public class KafkactlConfig {
                 : SystemService.getProperty("user.home") + "/.kafkactl/config.yml";
     }
 
-    /** Context class. */
     @Getter
     @Setter
     @Builder
-    @Introspected
-    public static class Context {
+    public static class ContextsProperties {
         private String name;
+        private ContextProperties context;
 
-        @JsonProperty("context")
-        private ApiContext definition;
-
-        /** ApiContext class. */
         @Getter
         @Setter
         @Builder
-        @Introspected
-        public static class ApiContext {
+        @ConfigurationProperties("context")
+        public static class ContextProperties {
             private String api;
             private String userToken;
             private String namespace;

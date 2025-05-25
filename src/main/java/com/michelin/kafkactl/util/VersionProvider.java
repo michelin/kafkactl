@@ -18,7 +18,8 @@
  */
 package com.michelin.kafkactl.util;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.client.ClusterResourceClient;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -29,10 +30,21 @@ import picocli.CommandLine.IVersionProvider;
 public class VersionProvider implements IVersionProvider {
     @Inject
     @ReflectiveAccess
-    private KafkactlConfig kafkactlConfig;
+    private KafkactlProperties kafkactlProperties;
+
+    @Inject
+    @ReflectiveAccess
+    private ClusterResourceClient resourceClient;
 
     @Override
     public String[] getVersion() {
-        return new String[] {"Version " + kafkactlConfig.getVersion()};
+        String serverVersion;
+        try {
+            serverVersion = "v" + resourceClient.serverInfo().getVersion();
+        } catch (Exception e) {
+            serverVersion = e.getMessage();
+        }
+
+        return new String[] {"Client Version: v" + kafkactlProperties.getVersion(), "Server Version: " + serverVersion};
     }
 }

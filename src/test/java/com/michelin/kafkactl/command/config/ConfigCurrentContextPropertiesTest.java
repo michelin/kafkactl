@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.service.FormatService;
 import java.io.PrintWriter;
@@ -40,9 +40,9 @@ import picocli.CommandLine;
 
 /** Config current context subcommand test. */
 @ExtendWith(MockitoExtension.class)
-class ConfigCurrentContextTest {
+class ConfigCurrentContextPropertiesTest {
     @Mock
-    KafkactlConfig kafkactlConfig;
+    KafkactlProperties kafkactlProperties;
 
     @Mock
     ConfigService configService;
@@ -56,8 +56,8 @@ class ConfigCurrentContextTest {
     @Test
     void shouldGetCurrentContextWithMaskedTokens() {
         when(configService.isCurrentContextValid()).thenReturn(true);
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
-        when(kafkactlConfig.getApi()).thenReturn("ns4kafka.com");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getApi()).thenReturn("ns4kafka.com");
         when(configService.getCurrentContextName()).thenReturn("current-context");
 
         CommandLine cmd = new CommandLine(subcommand);
@@ -86,9 +86,9 @@ class ConfigCurrentContextTest {
     @Test
     void shouldGetCurrentContextWithUnmaskedTokens() {
         when(configService.isCurrentContextValid()).thenReturn(true);
-        when(kafkactlConfig.getCurrentNamespace()).thenReturn("namespace");
-        when(kafkactlConfig.getApi()).thenReturn("ns4kafka.com");
-        when(kafkactlConfig.getUserToken()).thenReturn("user-token");
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        when(kafkactlProperties.getApi()).thenReturn("ns4kafka.com");
+        when(kafkactlProperties.getUserToken()).thenReturn("user-token");
         when(configService.getCurrentContextName()).thenReturn("current-context");
 
         CommandLine cmd = new CommandLine(subcommand);

@@ -18,10 +18,10 @@
  */
 package com.michelin.kafkactl.hook;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.mixin.NamespaceMixin;
 import com.michelin.kafkactl.mixin.VerboseMixin;
 import com.michelin.kafkactl.model.Resource;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ApiResourcesService;
 import com.michelin.kafkactl.service.LoginService;
 import io.micronaut.core.annotation.ReflectiveAccess;
@@ -46,7 +46,7 @@ public abstract class AuthenticatedHook extends ValidCurrentContextHook {
 
     @Inject
     @ReflectiveAccess
-    protected KafkactlConfig kafkactlConfig;
+    protected KafkactlProperties kafkactlProperties;
 
     @Mixin
     public NamespaceMixin namespaceMixin;
@@ -69,7 +69,7 @@ public abstract class AuthenticatedHook extends ValidCurrentContextHook {
      * @return The current namespace
      */
     protected String getNamespace() {
-        return namespaceMixin.optionalNamespace.orElse(kafkactlConfig.getCurrentNamespace());
+        return namespaceMixin.optionalNamespace.orElse(kafkactlProperties.getCurrentNamespace());
     }
 
     /**

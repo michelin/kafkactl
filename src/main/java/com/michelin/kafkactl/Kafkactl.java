@@ -18,7 +18,7 @@
  */
 package com.michelin.kafkactl;
 
-import static com.michelin.kafkactl.config.KafkactlConfig.KAFKACTL_CONFIG;
+import static com.michelin.kafkactl.property.KafkactlProperties.KAFKACTL_CONFIG;
 
 import com.michelin.kafkactl.command.ApiResources;
 import com.michelin.kafkactl.command.Apply;

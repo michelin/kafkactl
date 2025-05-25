@@ -33,8 +33,8 @@ import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.client.BearerAccessRefreshToken;
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.client.UserInfoResponse;
-import com.michelin.kafkactl.config.KafkactlConfig;
 import com.michelin.kafkactl.model.JwtContent;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import java.io.BufferedWriter;
@@ -60,7 +60,7 @@ class LoginServiceTest {
     ClusterResourceClient clusterResourceClient;
 
     @Mock
-    KafkactlConfig kafkactlConfig;
+    KafkactlProperties kafkactlProperties;
 
     String backUpJwt;
 
@@ -78,13 +78,13 @@ class LoginServiceTest {
 
     @Test
     void shouldNotBeAuthenticatedWhenJwtNotExist() {
-        when(kafkactlConfig.getConfigDirectory()).thenReturn("src/test/resources");
+        when(kafkactlProperties.getConfigDirectory()).thenReturn("src/test/resources");
 
         CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
+        LoginService loginService = new LoginService(kafkactlProperties, clusterResourceClient);
         assertTrue(sw.toString().isBlank());
         assertFalse(loginService.isAuthenticated(cmd.getCommandSpec(), false));
     }
@@ -92,14 +92,14 @@ class LoginServiceTest {
     @Test
     void shouldNotBeAuthenticatedWhenThrowUnauthorized() {
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.unauthorized());
-        when(kafkactlConfig.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
+        when(kafkactlProperties.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
         when(clusterResourceClient.tokenInfo(any())).thenThrow(exception);
 
         CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
+        LoginService loginService = new LoginService(kafkactlProperties, clusterResourceClient);
         boolean actual = loginService.isAuthenticated(cmd.getCommandSpec(), true);
         assertTrue(sw.toString().isBlank());
         assertFalse(actual);
@@ -108,14 +108,14 @@ class LoginServiceTest {
     @Test
     void shouldNotBeAuthenticatedWhenThrowException() {
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
-        when(kafkactlConfig.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
+        when(kafkactlProperties.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
         when(clusterResourceClient.tokenInfo(any())).thenThrow(exception);
 
         CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
+        LoginService loginService = new LoginService(kafkactlProperties, clusterResourceClient);
         boolean actual = loginService.isAuthenticated(cmd.getCommandSpec(), true);
         assertTrue(sw.toString().contains("Unexpected error occurred: error (500)."));
         assertFalse(actual);
@@ -132,10 +132,10 @@ class LoginServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        when(kafkactlConfig.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
+        when(kafkactlProperties.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
         when(clusterResourceClient.tokenInfo(any())).thenReturn(userInfoResponse);
 
-        LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
+        LoginService loginService = new LoginService(kafkactlProperties, clusterResourceClient);
         boolean actual = loginService.isAuthenticated(cmd.getCommandSpec(), true);
         assertTrue(sw.toString().contains("Authentication reused. Welcome username!"));
         assertTrue(sw.toString().contains("Your session is valid until"));
@@ -153,10 +153,10 @@ class LoginServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        when(kafkactlConfig.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
+        when(kafkactlProperties.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
         when(clusterResourceClient.tokenInfo(any())).thenReturn(userInfoResponse);
 
-        LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
+        LoginService loginService = new LoginService(kafkactlProperties, clusterResourceClient);
 
         boolean actual = loginService.isAuthenticated(cmd.getCommandSpec(), true);
         assertTrue(sw.toString().contains("Authentication reused. Welcome username!"));
@@ -169,7 +169,7 @@ class LoginServiceTest {
 
     @Test
     void shouldNotLoginWhenHttpClientResponseException() {
-        when(kafkactlConfig.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
+        when(kafkactlProperties.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
         when(clusterResourceClient.login(any())).thenThrow(exception);
 
@@ -177,7 +177,7 @@ class LoginServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
+        LoginService loginService = new LoginService(kafkactlProperties, clusterResourceClient);
         boolean actual = loginService.login(cmd.getCommandSpec(), "username", "passwd", false);
         assertTrue(sw.toString().contains("Authentication failed because error."));
         assertFalse(actual);
@@ -192,14 +192,14 @@ class LoginServiceTest {
         bearerAccessRefreshToken.setExpiresIn(1);
         bearerAccessRefreshToken.setRoles(Collections.singletonList("user"));
 
-        when(kafkactlConfig.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
+        when(kafkactlProperties.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
         when(clusterResourceClient.login(any())).thenReturn(bearerAccessRefreshToken);
 
         CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
+        LoginService loginService = new LoginService(kafkactlProperties, clusterResourceClient);
 
         boolean actual = loginService.login(cmd.getCommandSpec(), "username", "passwd", true);
         assertTrue(actual);
@@ -222,10 +222,10 @@ class LoginServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        when(kafkactlConfig.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
+        when(kafkactlProperties.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
         when(clusterResourceClient.tokenInfo(any())).thenReturn(userInfoResponse);
 
-        LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
+        LoginService loginService = new LoginService(kafkactlProperties, clusterResourceClient);
 
         boolean actual = loginService.doAuthenticate(cmd.getCommandSpec(), true);
         assertTrue(sw.toString().contains("Authentication reused. Welcome username!"));
@@ -254,11 +254,11 @@ class LoginServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        when(kafkactlConfig.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
+        when(kafkactlProperties.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
         when(clusterResourceClient.tokenInfo(any())).thenReturn(userInfoResponse);
         when(clusterResourceClient.login(any())).thenReturn(bearerAccessRefreshToken);
 
-        LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
+        LoginService loginService = new LoginService(kafkactlProperties, clusterResourceClient);
 
         boolean actual = loginService.doAuthenticate(cmd.getCommandSpec(), false);
         assertTrue(actual);
@@ -279,11 +279,11 @@ class LoginServiceTest {
         cmd.setOut(new PrintWriter(sw));
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
-        when(kafkactlConfig.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
+        when(kafkactlProperties.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
         when(clusterResourceClient.tokenInfo(any())).thenReturn(userInfoResponse);
         when(clusterResourceClient.login(any())).thenThrow(exception);
 
-        LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
+        LoginService loginService = new LoginService(kafkactlProperties, clusterResourceClient);
 
         boolean actual = loginService.doAuthenticate(cmd.getCommandSpec(), false);
         assertFalse(actual);
@@ -295,9 +295,9 @@ class LoginServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        when(kafkactlConfig.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
+        when(kafkactlProperties.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
 
-        LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
+        LoginService loginService = new LoginService(kafkactlProperties, clusterResourceClient);
         JwtContent actual = loginService.readJwtFile();
 
         assertEquals("admin", actual.getSub());
@@ -335,9 +335,9 @@ class LoginServiceTest {
 
     @Test
     void shouldJwtExists() {
-        when(kafkactlConfig.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
+        when(kafkactlProperties.getConfigDirectory()).thenReturn("src/test/resources/fake_login");
 
-        LoginService loginService = new LoginService(kafkactlConfig, clusterResourceClient);
+        LoginService loginService = new LoginService(kafkactlProperties, clusterResourceClient);
         assertTrue(loginService.jwtFileExists());
     }
 }

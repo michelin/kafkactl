@@ -18,7 +18,7 @@
  */
 package com.michelin.kafkactl.service;
 
-import com.michelin.kafkactl.config.KafkactlConfig;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -38,7 +38,7 @@ import org.yaml.snakeyaml.Yaml;
 public class ConfigService {
     @Inject
     @ReflectiveAccess
-    private KafkactlConfig kafkactlConfig;
+    private KafkactlProperties kafkactlProperties;
 
     @Inject
     @ReflectiveAccess
@@ -50,12 +50,12 @@ public class ConfigService {
      * @return The current context name
      */
     public String getCurrentContextName() {
-        return kafkactlConfig.getContexts().stream()
-                .filter(context -> context.getDefinition().getApi().equals(kafkactlConfig.getApi())
-                        && context.getDefinition().getNamespace().equals(kafkactlConfig.getCurrentNamespace())
-                        && context.getDefinition().getUserToken().equals(kafkactlConfig.getUserToken()))
+        return kafkactlProperties.getContexts().stream()
+                .filter(context -> context.getContext().getApi().equals(kafkactlProperties.getApi())
+                        && context.getContext().getNamespace().equals(kafkactlProperties.getCurrentNamespace())
+                        && context.getContext().getUserToken().equals(kafkactlProperties.getUserToken()))
                 .findFirst()
-                .map(KafkactlConfig.Context::getName)
+                .map(KafkactlProperties.ContextsProperties::getName)
                 .orElse(null);
     }
 
@@ -64,8 +64,8 @@ public class ConfigService {
      *
      * @return The current context
      */
-    public Optional<KafkactlConfig.Context> getContextByName(String name) {
-        return kafkactlConfig.getContexts().stream()
+    public Optional<KafkactlProperties.ContextsProperties> getContextByName(String name) {
+        return kafkactlProperties.getContexts().stream()
                 .filter(context -> context.getName().equals(name))
                 .findFirst();
     }
@@ -73,19 +73,21 @@ public class ConfigService {
     /**
      * Update the current configuration context with the given new context.
      *
-     * @param contextToSet The context to set
+     * @param contextPropertiesToSet The context to set
      * @throws IOException Any exception during file writing
      */
-    public void updateConfigurationContext(KafkactlConfig.Context contextToSet) throws IOException {
+    public void updateConfigurationContext(KafkactlProperties.ContextsProperties contextPropertiesToSet)
+            throws IOException {
         Yaml yaml = new Yaml();
-        File initialFile = new File(kafkactlConfig.getConfigPath());
+        File initialFile = new File(kafkactlProperties.getConfigPath());
         InputStream targetStream = new FileInputStream(initialFile);
         Map<String, LinkedHashMap<String, Object>> rootNodeConfig = yaml.load(targetStream);
 
         LinkedHashMap<String, Object> kafkactlNodeConfig = rootNodeConfig.get("kafkactl");
-        kafkactlNodeConfig.put("current-namespace", contextToSet.getDefinition().getNamespace());
-        kafkactlNodeConfig.put("api", contextToSet.getDefinition().getApi());
-        kafkactlNodeConfig.put("user-token", contextToSet.getDefinition().getUserToken());
+        kafkactlNodeConfig.put(
+                "current-namespace", contextPropertiesToSet.getContext().getNamespace());
+        kafkactlNodeConfig.put("api", contextPropertiesToSet.getContext().getApi());
+        kafkactlNodeConfig.put("user-token", contextPropertiesToSet.getContext().getUserToken());
 
         DumperOptions options = new DumperOptions();
         options.setIndent(2);
@@ -93,7 +95,7 @@ public class ConfigService {
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 
         Yaml yamlMapper = new Yaml(options);
-        FileWriter writer = new FileWriter(kafkactlConfig.getConfigPath());
+        FileWriter writer = new FileWriter(kafkactlProperties.getConfigPath());
         yamlMapper.dump(rootNodeConfig, writer);
 
         loginService.deleteJwtFile();
@@ -105,8 +107,8 @@ public class ConfigService {
      * @return True if the current context is valid, false otherwise
      */
     public boolean isCurrentContextValid() {
-        return kafkactlConfig.getApi() != null
-                && kafkactlConfig.getCurrentNamespace() != null
-                && kafkactlConfig.getUserToken() != null;
+        return kafkactlProperties.getApi() != null
+                && kafkactlProperties.getCurrentNamespace() != null
+                && kafkactlProperties.getUserToken() != null;
     }
 }
