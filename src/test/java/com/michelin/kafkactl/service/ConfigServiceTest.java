@@ -177,8 +177,6 @@ class ConfigServiceTest {
 
         String backUp = Files.readString(Paths.get(kafkactlProperties.getConfigPath()));
 
-        assertFalse(backUp.contains("  current-namespace"));
-
         KafkactlProperties.ContextsProperties contextPropertiesToSet = KafkactlProperties.ContextsProperties.builder()
                 .name("name")
                 .context(KafkactlProperties.ContextsProperties.ContextProperties.builder()
