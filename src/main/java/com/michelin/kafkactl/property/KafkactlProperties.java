@@ -20,6 +20,7 @@ package com.michelin.kafkactl.property;
 
 import com.michelin.kafkactl.service.SystemService;
 import io.micronaut.context.annotation.ConfigurationProperties;
+import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.convert.format.MapFormat;
 import io.micronaut.core.util.StringUtils;
 import java.io.File;
@@ -32,6 +33,7 @@ import lombok.Setter;
 /** Kafkactl properties. */
 @Getter
 @Setter
+@Introspected
 @ConfigurationProperties("kafkactl")
 public class KafkactlProperties {
     public static final String KAFKACTL_CONFIG = "KAFKACTL_CONFIG";
@@ -73,6 +75,7 @@ public class KafkactlProperties {
     @Getter
     @Setter
     @Builder
+    @Introspected
     public static class ContextsProperties {
         private String name;
         private ContextProperties context;
@@ -80,6 +83,7 @@ public class KafkactlProperties {
         @Getter
         @Setter
         @Builder
+        @Introspected
         @ConfigurationProperties("context")
         public static class ContextProperties {
             private String api;
