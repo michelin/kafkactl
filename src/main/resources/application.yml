@@ -9,7 +9,7 @@ kafkactl:
   current-namespace: namespace
   user-token: token
   retry:
-    attempt: '4'
+    attempt: '5'
     delay: '2s'
     multiplier: '2.0'
   table-format:
@@ -113,8 +113,8 @@ micronaut:
     name: 'kafkactl'
   http:
     client:
-      connect-timeout: '180s'
-      read-idle-timeout: '180s'
-      read-timeout: '180s'
+      connect-timeout: '60s'
+      read-idle-timeout: '60s'
+      read-timeout: '60s'
       ssl:
         insecure-trust-all-certificates: true
