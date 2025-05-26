@@ -170,12 +170,12 @@ HTTP client timeouts can be configured using the following properties:
 micronaut:
   http:
     client:
-      connect-timeout: '180s'
-      read-idle-timeout: '180s'
-      read-timeout: '180s'
+      connect-timeout: '60s'
+      read-idle-timeout: '60s'
+      read-timeout: '60s'
 ```
 
-Timeouts are set to 180 seconds by default, which is suitable to allow the Ns4Kafka server to perform retries if needed.
+Timeouts are set to 60 seconds by default, which is suitable to allow the Ns4Kafka server to perform retries if needed.
 
 ##### Retry
 
@@ -184,7 +184,7 @@ The Kafkactl HTTP client is configured to retry requests in case of errors. The 
 ```yaml
 kafkactl:
   retry:
-    attempt: '4'
+    attempt: '5'
     delay: '2s'
     multiplier: '2.0'
 ```

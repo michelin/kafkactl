@@ -9,7 +9,7 @@ kafkactl:
   current-namespace: namespace
   user-token: token
   retry:
-    attempt: '4'
+    attempt: '5'
     delay: '2s'
     multiplier: '2.0'
   table-format:
