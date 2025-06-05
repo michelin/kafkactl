@@ -86,39 +86,37 @@ public class Diff extends AuthenticatedHook {
         }
 
         List<Resource> resources = resourceService.parseResources(file, recursive, commandSpec);
-
         try {
             resourceService.validateAllowedResources(resources, commandSpec);
             super.validateNamespace(resources);
-            resourceService.enrichSchemaContent(resources, commandSpec);
-
-            // Process each document individually, return 0 when all succeed
-            String namespace = getNamespace();
-            int errors = resources.stream()
-                    .map(resource -> {
-                        ApiResource apiResource = apiResourcesService
-                                .getResourceDefinitionByKind(resource.getKind())
-                                .orElseThrow();
-                        Resource live = resourceService.getSingleResourceWithType(
-                                apiResource, namespace, resource.getMetadata().getName(), false);
-                        HttpResponse<Resource> merged =
-                                resourceService.apply(apiResource, namespace, resource, true, commandSpec);
-                        if (merged != null && merged.getBody().isPresent()) {
-                            List<String> unifiedDiff = unifiedDiff(live, merged.body());
-                            unifiedDiff.forEach(
-                                    diff -> commandSpec.commandLine().getOut().println(diff));
-                            return 0;
-                        }
-                        return 1;
-                    })
-                    .mapToInt(value -> value)
-                    .sum();
-
-            return errors > 0 ? 1 : 0;
+            List<Resource> preparedResources = resourceService.prepareResources(resources, commandSpec);
+            return diffResources(preparedResources, getNamespace());
         } catch (HttpClientResponseException e) {
             formatService.displayError(e, commandSpec);
             return 1;
         }
+    }
+
+    private int diffResources(List<Resource> resources, String namespace) {
+        int errorCount = resources.stream()
+                .mapToInt(resource -> diffResource(namespace, resource))
+                .sum();
+        return errorCount > 0 ? 1 : 0;
+    }
+
+    private int diffResource(String namespace, Resource resource) {
+        ApiResource apiResource = apiResourcesService
+                .getResourceDefinitionByKind(resource.getKind())
+                .orElseThrow();
+        Resource live = resourceService.getSingleResourceWithType(
+                apiResource, namespace, resource.getMetadata().getName(), false);
+        HttpResponse<Resource> merged = resourceService.apply(apiResource, namespace, resource, true, commandSpec);
+        if (merged != null && merged.getBody().isPresent()) {
+            List<String> unifiedDiff = unifiedDiff(live, merged.body());
+            unifiedDiff.forEach(diff -> commandSpec.commandLine().getOut().println(diff));
+            return 0;
+        }
+        return 1;
     }
 
     /**

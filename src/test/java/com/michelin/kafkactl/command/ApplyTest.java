@@ -215,6 +215,7 @@ class ApplyTest {
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
 
@@ -245,6 +246,7 @@ class ApplyTest {
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
 
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
@@ -282,6 +284,7 @@ class ApplyTest {
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
 
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
@@ -326,7 +329,7 @@ class ApplyTest {
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
-        doCallRealMethod().when(resourceService).enrichSchemaContent(any(), any());
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
 
         ApiResource apiResource = ApiResource.builder()
                 .kind("Schema")
@@ -382,6 +385,7 @@ class ApplyTest {
 
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any())).thenReturn(HttpResponse.ok(resource));
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
 
         CommandLine cmd = new CommandLine(apply);
         StringWriter sw = new StringWriter();
@@ -413,7 +417,7 @@ class ApplyTest {
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
-        doCallRealMethod().when(resourceService).enrichSchemaContent(any(), any());
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
 
         CommandLine cmd = new CommandLine(apply);
         StringWriter sw = new StringWriter();

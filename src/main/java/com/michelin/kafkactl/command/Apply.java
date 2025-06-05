@@ -24,6 +24,7 @@ import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
 import io.micronaut.core.annotation.ReflectiveAccess;
+import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.io.File;
@@ -79,26 +80,29 @@ public class Apply extends DryRunHook {
         }
 
         List<Resource> resources = resourceService.parseResources(file, recursive, commandSpec);
-
         try {
             resourceService.validateAllowedResources(resources, commandSpec);
             validateNamespace(resources);
-            resourceService.enrichSchemaContent(resources, commandSpec);
-
-            int errors = resources.stream()
-                    .map(resource -> {
-                        ApiResource apiResource = apiResourcesService
-                                .getResourceDefinitionByKind(resource.getKind())
-                                .orElseThrow();
-                        return resourceService.apply(apiResource, getNamespace(), resource, dryRun, commandSpec);
-                    })
-                    .mapToInt(value -> value != null ? 0 : 1)
-                    .sum();
-
-            return errors > 0 ? 1 : 0;
+            List<Resource> preparedResources = resourceService.prepareResources(resources, commandSpec);
+            return applyResources(preparedResources, getNamespace());
         } catch (HttpClientResponseException e) {
             formatService.displayError(e, commandSpec);
             return 1;
         }
+    }
+
+    private int applyResources(List<Resource> resources, String namespace) {
+        int errorCount = resources.stream()
+                .mapToInt(resource -> applyResource(namespace, resource))
+                .sum();
+        return errorCount > 0 ? 1 : 0;
+    }
+
+    private int applyResource(String namespace, Resource resource) {
+        ApiResource apiResource = apiResourcesService
+                .getResourceDefinitionByKind(resource.getKind())
+                .orElseThrow();
+        HttpResponse<Resource> httpRes = resourceService.apply(apiResource, namespace, resource, dryRun, commandSpec);
+        return (httpRes != null ? 0 : 1);
     }
 }

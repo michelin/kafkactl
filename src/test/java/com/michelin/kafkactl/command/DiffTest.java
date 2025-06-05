@@ -216,6 +216,7 @@ class DiffTest {
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
 
@@ -246,6 +247,7 @@ class DiffTest {
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
 
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
@@ -297,6 +299,7 @@ class DiffTest {
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
 
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
@@ -351,6 +354,7 @@ class DiffTest {
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
 
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
@@ -418,6 +422,7 @@ class DiffTest {
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
 
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
@@ -474,7 +479,7 @@ class DiffTest {
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
-        doCallRealMethod().when(resourceService).enrichSchemaContent(any(), any());
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
 
         ApiResource apiResource = ApiResource.builder()
                 .kind("Schema")
@@ -532,6 +537,7 @@ class DiffTest {
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
 
         ApiResource apiResource = ApiResource.builder()
                 .kind("Schema")
@@ -584,7 +590,7 @@ class DiffTest {
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
-        doCallRealMethod().when(resourceService).enrichSchemaContent(any(), any());
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
 
         CommandLine cmd = new CommandLine(diff);
         StringWriter sw = new StringWriter();
