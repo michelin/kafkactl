@@ -39,7 +39,7 @@ import picocli.CommandLine;
 
 class ResourceServicePrepareResourcesTest {
 
-    record SchemaData(String schemaContent, File schemaTempFile, List<String> references) {}
+    record SchemaData(String schemaContent, List<String> references) {}
 
     private ResourceService resourceService;
     private CommandLine.Model.CommandSpec commandSpec;
@@ -52,22 +52,12 @@ class ResourceServicePrepareResourcesTest {
         when(commandSpec.commandLine()).thenReturn(commandLine);
     }
 
-    /**
-     * Build a list of resources from a map of schema data.
-     *
-     * @param filesMap A map where the key is the schema name and the value is the SchemaData containing content and
-     *     temp file
-     * @return A list of Resource objects
-     * @throws IOException If there is an error writing to the temporary files
-     */
-    private static Map<String, Resource> buildResources(Map<String, SchemaData> filesMap) throws IOException {
+    private static Map<String, Resource> buildResources(Map<String, SchemaData> schemasMap) throws IOException {
         Map<String, Resource> resourceMap = new HashMap<>();
-        for (Map.Entry<String, SchemaData> entry : filesMap.entrySet()) {
-            File file = entry.getValue().schemaTempFile;
+        for (Map.Entry<String, SchemaData> entry : schemasMap.entrySet()) {
             String schemaContent = entry.getValue().schemaContent;
             String schemaName = entry.getKey();
-            Files.writeString(file.toPath(), schemaContent);
-            Map<String, Object> spec = new HashMap<>(Map.of(SCHEMA_FILE, file.getAbsolutePath()));
+            Map<String, Object> spec = new HashMap<>(Map.of(SCHEMA, schemaContent));
             var referencesMap = new ArrayList<Map<String, String>>();
             for (String ref : entry.getValue().references) {
                 referencesMap.add(Map.of("name", ref));
@@ -158,29 +148,24 @@ class ResourceServicePrepareResourcesTest {
                         .replace("\n", "")
                         .replace("  ", "");
 
-        Map<String, SchemaData> filesMap = new HashMap<>(Map.of(
+        Map<String, SchemaData> schemasMap = new HashMap<>(Map.of(
                 "schemaUnion",
                         new SchemaData(
                                 schemaUnion,
-                                File.createTempFile("schemaUnion", ".avsc"),
                                 List.of("com.example.one.Test1", "com.example.two.Test2", "com.example.three.Test3")),
-                "schema1", new SchemaData(schema1, File.createTempFile("schema1", ".avsc"), List.of()),
-                "schema2", new SchemaData(schema2, File.createTempFile("schema2", ".avsc"), List.of()),
+                "schema1", new SchemaData(schema1, List.of()),
+                "schema2", new SchemaData(schema2, List.of()),
                 "schema3",
                         new SchemaData(
-                                schema3, File.createTempFile("schema3", ".avsc"), List.of("com.example.one.Test1"))));
+                                schema3, List.of("com.example.one.Test1"))));
 
-        Map<String, Resource> resourceMap = buildResources(filesMap);
+        Map<String, Resource> resourceMap = buildResources(schemasMap);
 
         List<Resource> resources = new ArrayList<>(List.of(
                 resourceMap.get("schema3"), resourceMap.get("schema2"),
                 resourceMap.get("schema1"), resourceMap.get("schemaUnion")));
 
         List<Resource> sortedResources = resourceService.prepareResources(resources, commandSpec);
-
-        for (Map.Entry<String, SchemaData> entry : filesMap.entrySet()) {
-            entry.getValue().schemaTempFile.delete();
-        }
 
         List<String> names =
                 sortedResources.stream().map(r -> r.getMetadata().getName()).toList();
@@ -222,25 +207,17 @@ class ResourceServicePrepareResourcesTest {
                         .replace("\n", "")
                         .replace("  ", "");
 
-        Map<String, SchemaData> filesMap = new HashMap<>(Map.of(
-                "schema1", new SchemaData(schema1, File.createTempFile("schema1", ".avsc"), List.of()),
-                "schema2",
-                        new SchemaData(
-                                schema2, File.createTempFile("schema2", ".avsc"), List.of("com.example.one.Test1")),
-                "schema3",
-                        new SchemaData(
-                                schema3, File.createTempFile("schema3", ".avsc"), List.of("com.example.two.Test2"))));
+        Map<String, SchemaData> schemasMap = new HashMap<>(Map.of(
+                "schema1", new SchemaData(schema1, List.of()),
+                "schema2", new SchemaData(schema2, List.of("com.example.one.Test1")),
+                "schema3", new SchemaData(schema3, List.of("com.example.two.Test2"))));
 
-        Map<String, Resource> rMap = buildResources(filesMap);
+        Map<String, Resource> rMap = buildResources(schemasMap);
 
         List<Resource> resources =
                 new ArrayList<>(List.of(rMap.get("schema3"), rMap.get("schema2"), rMap.get("schema1")));
 
         var sortedResources = resourceService.prepareResources(resources, commandSpec);
-
-        for (Map.Entry<String, SchemaData> entry : filesMap.entrySet()) {
-            entry.getValue().schemaTempFile.delete();
-        }
 
         assertEquals(
                 List.of("schema1", "schema2", "schema3"),
@@ -293,22 +270,14 @@ class ResourceServicePrepareResourcesTest {
                         .replace("\n", "")
                         .replace("  ", "");
 
-        Map<String, SchemaData> filesMap = new HashMap<>(Map.of(
-                "schemaLeaf", new SchemaData(schemaLeaf, File.createTempFile("schemaLeaf", ".avsc"), List.of()),
-                "schemaNested",
-                        new SchemaData(
-                                schemaNested,
-                                File.createTempFile("schemaNested", ".avsc"),
-                                List.of("com.example.leaf.Leaf"))));
+        Map<String, SchemaData> schemasMap = new HashMap<>(Map.of(
+                "schemaLeaf", new SchemaData(schemaLeaf, List.of()),
+                "schemaNested", new SchemaData(schemaNested, List.of("com.example.leaf.Leaf"))));
 
-        Map<String, Resource> rMap = buildResources(filesMap);
+        Map<String, Resource> rMap = buildResources(schemasMap);
 
         List<Resource> resources = new ArrayList<>(List.of(rMap.get("schemaNested"), rMap.get("schemaLeaf")));
         var sortedResources = resourceService.prepareResources(resources, commandSpec);
-
-        for (Map.Entry<String, SchemaData> entry : filesMap.entrySet()) {
-            entry.getValue().schemaTempFile.delete();
-        }
 
         assertEquals(
                 List.of("schemaLeaf", "schemaNested"),
