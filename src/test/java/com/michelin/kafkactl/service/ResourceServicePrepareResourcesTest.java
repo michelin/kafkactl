@@ -126,26 +126,26 @@ class ResourceServicePrepareResourcesTest {
         String schema2 = "{\"type\":\"record\",\"name\":\"Test2\",\"namespace\":\"com.example.two\"}";
         String schema3 =
                 """
-                        {
-                          "type": "record",
-                          "name": "Test3",
-                          "namespace": "com.example.three",
-                          "fields": [
-                            {"name": "ref", "type": "com.example.one.Test1"}
-                          ]
-                        }
-                        """
+                                {
+                                  "type": "record",
+                                  "name": "Test3",
+                                  "namespace": "com.example.three",
+                                  "fields": [
+                                    {"name": "ref", "type": "com.example.one.Test1"}
+                                  ]
+                                }
+                                """
                         .replace("\n", "")
                         .replace("  ", "");
 
         String schemaUnion =
                 """
-                        [
-                                "com.example.one.Test1",
-                                "com.example.two.Test2",
-                                "com.example.three.Test3"
-                              ]
-                        """
+                                [
+                                        "com.example.one.Test1",
+                                        "com.example.two.Test2",
+                                        "com.example.three.Test3"
+                                      ]
+                                """
                         .replace("\n", "")
                         .replace("  ", "");
 
@@ -183,29 +183,29 @@ class ResourceServicePrepareResourcesTest {
         String schema1 = "{\"type\":\"record\",\"name\":\"Test1\",\"namespace\":\"com.example.one\"}";
         String schema2 =
                 """
-                        {
-                          "type": "record",
-                          "name": "Test2",
-                          "namespace": "com.example.two",
-                          "fields": [
-                            {"name": "ref", "type": "com.example.one.Test1"}
-                          ]
-                        }
-                        """
+                                {
+                                  "type": "record",
+                                  "name": "Test2",
+                                  "namespace": "com.example.two",
+                                  "fields": [
+                                    {"name": "ref", "type": "com.example.one.Test1"}
+                                  ]
+                                }
+                                """
                         .replace("\n", "")
                         .replace("  ", "");
         // Schéma qui dépend de Test2
         String schema3 =
                 """
-                        {
-                          "type": "record",
-                          "name": "Test3",
-                          "namespace": "com.example.three",
-                          "fields": [
-                            {"name": "ref", "type": "com.example.two.Test2"}
-                          ]
-                        }
-                        """
+                                {
+                                  "type": "record",
+                                  "name": "Test3",
+                                  "namespace": "com.example.three",
+                                  "fields": [
+                                    {"name": "ref", "type": "com.example.two.Test2"}
+                                  ]
+                                }
+                                """
                         .replace("\n", "")
                         .replace("  ", "");
 
@@ -230,45 +230,45 @@ class ResourceServicePrepareResourcesTest {
     void shouldHandleNestedFieldsWithDeepDependencyWhenPrepareResources() throws Exception {
         String schemaLeaf =
                 """
-                        {
-                          "type": "record",
-                          "name": "Leaf",
-                          "namespace": "com.example.leaf"
-                        }"""
+                                {
+                                  "type": "record",
+                                  "name": "Leaf",
+                                  "namespace": "com.example.leaf"
+                                }"""
                         .replace("\n", "")
                         .replace("  ", "");
 
         String schemaNested =
                 """
-                        {
-                          "type": "record",
-                          "name": "Nested",
-                          "namespace": "com.example.nested",
-                          "fields": [
-                            {
-                              "name": "level1",
-                              "type": {
-                                "type": "record",
-                                "name": "Level1",
-                                "fields": [
-                                  {
-                                    "name": "level2",
-                                    "type": {
-                                      "type": "record",
-                                      "name": "Level2",
-                                      "fields": [
-                                        {
-                                          "name": "leafRef",
-                                          "type": "com.example.leaf.Leaf"
-                                        }
-                                      ]
+                                {
+                                  "type": "record",
+                                  "name": "Nested",
+                                  "namespace": "com.example.nested",
+                                  "fields": [
+                                    {
+                                      "name": "level1",
+                                      "type": {
+                                        "type": "record",
+                                        "name": "Level1",
+                                        "fields": [
+                                          {
+                                            "name": "level2",
+                                            "type": {
+                                              "type": "record",
+                                              "name": "Level2",
+                                              "fields": [
+                                                {
+                                                  "name": "leafRef",
+                                                  "type": "com.example.leaf.Leaf"
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        ]
+                                      }
                                     }
-                                  }
-                                ]
-                              }
-                            }
-                          ]
-                        }"""
+                                  ]
+                                }"""
                         .replace("\n", "")
                         .replace("  ", "");
 
@@ -339,6 +339,21 @@ class ResourceServicePrepareResourcesTest {
                 "demoPrefix.topic_64-demo.User",
                 "demoPrefix.topic_64-value",
                 "demoPrefix.topic_64");
+        List<String> actualOrder =
+                sorted.stream().map(r -> r.getMetadata().getName()).toList();
+
+        assertEquals(expectedOrder, actualOrder);
+    }
+
+    @Test
+    void shouldKeepResourcesOrderedWhenAlreadySorted() throws Exception {
+        File yamlFile = new File("src/test/resources/resource_service/resources-in-order.yml");
+        List<Resource> resources = resourceService.parseResources(java.util.Optional.of(yamlFile), false, commandSpec);
+
+        List<Resource> sorted = resourceService.prepareResources(resources, commandSpec);
+
+        List<String> expectedOrder = List.of(
+                "demo", "myRoleBinding1", "acl-topic-schema", "demoPrefix.topic_64-demo.Car", "demoPrefix.topic_64");
         List<String> actualOrder =
                 sorted.stream().map(r -> r.getMetadata().getName()).toList();
 

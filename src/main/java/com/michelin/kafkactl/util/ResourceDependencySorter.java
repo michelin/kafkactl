@@ -24,29 +24,25 @@ public class ResourceDependencySorter {
 
     public static List<String> sortResourceNamesByDependencies(
             Set<String> resourceNames, Map<String, Set<String>> dependencies) {
-        List<String> sorted = new ArrayList<>();
-        Set<String> visited = new HashSet<>();
+        LinkedHashSet<String> visited = new LinkedHashSet<>();
         Set<String> visiting = new HashSet<>();
         for (String name : resourceNames) {
-            visit(name, dependencies, visited, visiting, sorted);
+            visit(name, dependencies, visited, visiting);
         }
-        return sorted;
+        return visited.stream().toList();
     }
 
     private static void visit(
             String resourceName,
             Map<String, Set<String>> dependencies,
-            Set<String> visited,
-            Set<String> visiting,
-            List<String> sorted) {
+            LinkedHashSet<String> visited,
+            Set<String> visiting) {
         if (visited.contains(resourceName)) return;
-        if (visiting.contains(resourceName)) throw new IllegalStateException("Cyclic dependency detected");
-        visiting.add(resourceName);
+        if (!visiting.add(resourceName)) throw new IllegalStateException("Cyclic dependency detected");
         for (String dep : dependencies.getOrDefault(resourceName, Set.of())) {
-            visit(dep, dependencies, visited, visiting, sorted);
+            visit(dep, dependencies, visited, visiting);
         }
         visiting.remove(resourceName);
         visited.add(resourceName);
-        sorted.add(resourceName);
     }
 }
