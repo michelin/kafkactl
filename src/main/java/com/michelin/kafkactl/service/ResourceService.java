@@ -63,6 +63,7 @@ public class ResourceService {
     public static final String ROLE_BINDING_KIND = "RoleBinding";
     public static final String ACL_KIND = "AccessControlEntry";
     public static final String SCHEMA_KIND = "Schema";
+    private static final String OTHER_KIND = "Other";
 
     @Inject
     @ReflectiveAccess
@@ -548,7 +549,7 @@ public class ResourceService {
                 .collect(Collectors.groupingBy(r -> List.of(NAMESPACE_KIND, ROLE_BINDING_KIND, ACL_KIND, SCHEMA_KIND)
                                 .contains(r.getKind())
                         ? r.getKind()
-                        : "Other"));
+                        : OTHER_KIND));
 
         List<Resource> sortedSchemaResources =
                 prepareSchemaResources(resourcesByKind.getOrDefault(SCHEMA_KIND, List.of()), commandSpec);
@@ -558,7 +559,7 @@ public class ResourceService {
                         resourcesByKind.getOrDefault(ROLE_BINDING_KIND, List.of()),
                         resourcesByKind.getOrDefault(ACL_KIND, List.of()),
                         sortedSchemaResources,
-                        resourcesByKind.getOrDefault("Other", List.of()))
+                        resourcesByKind.getOrDefault(OTHER_KIND, List.of()))
                 .forEach(allResources::addAll);
         return allResources;
     }
