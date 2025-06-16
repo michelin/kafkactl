@@ -18,6 +18,7 @@
  */
 package com.michelin.kafkactl.service;
 
+import static com.michelin.kafkactl.service.ResourceService.SCHEMA;
 import static com.michelin.kafkactl.service.ResourceService.SCHEMA_FILE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -312,5 +313,41 @@ class ResourceServicePrepareResourcesTest {
         assertEquals(
                 List.of("schemaLeaf", "schemaNested"),
                 sortedResources.stream().map(r -> r.getMetadata().getName()).toList());
+    }
+
+    @Test
+    void shouldAddNamespacesBeforeSchemasWhenPrepareResource() {
+        ResourceService resourceService = new ResourceService();
+
+        String schemaContent = "{\"type\":\"record\",\"name\":\"Test1\",\"namespace\":\"com.example\"}";
+        String schemaContent2 = "{\"type\":\"record\",\"name\":\"Test2\",\"namespace\":\"com.example\"}";
+        Resource schema1 = Resource.builder()
+                .kind("Schema")
+                .apiVersion("v1")
+                .metadata(Metadata.builder().name("schema1").build())
+                .spec(new HashMap(Map.of(SCHEMA, schemaContent)))
+                .build();
+
+        Resource namespace = Resource.builder()
+                .kind("Namespace")
+                .apiVersion("v1")
+                .metadata(Metadata.builder().name("ns1").build())
+                .spec(Map.of())
+                .build();
+
+        Resource schema2 = Resource.builder()
+                .kind("Schema")
+                .apiVersion("v1")
+                .metadata(Metadata.builder().name("schema2").build())
+                .spec(new HashMap(Map.of(SCHEMA, schemaContent2)))
+                .build();
+
+        List<Resource> input = List.of(schema1, namespace, schema2);
+
+        List<Resource> result = resourceService.prepareResources(input, commandSpec);
+
+        assertEquals("Namespace", result.get(0).getKind());
+        assertEquals("Schema", result.get(1).getKind());
+        assertEquals("Schema", result.get(2).getKind());
     }
 }
