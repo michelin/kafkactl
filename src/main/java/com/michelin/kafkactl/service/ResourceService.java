@@ -57,6 +57,11 @@ public class ResourceService {
     public static final String SCHEMA = "schema";
     public static final String SCHEMA_FILE = "schemaFile";
 
+    public static final String NAMESPACE_KIND = "Namespace";
+    public static final String ROLE_BINDING_KIND = "RoleBinding";
+    public static final String ACL_KIND = "AccessControlEntry";
+    public static final String SCHEMA_KIND = "Schema";
+
     @Inject
     @ReflectiveAccess
     private NamespacedResourceClient namespacedClient;
@@ -80,6 +85,10 @@ public class ResourceService {
     @Inject
     @ReflectiveAccess
     private ApiResourcesService apiResourcesService;
+
+    public void setFileService(FileService fileService) {
+        this.fileService = fileService;
+    }
 
     /**
      * List all resources of the given types.
@@ -525,17 +534,19 @@ public class ResourceService {
 
     public List<Resource> prepareResources(List<Resource> resources, CommandLine.Model.CommandSpec commandSpec) {
         Map<String, List<Resource>> resourcesByKind = resources.stream()
-                .collect(Collectors.groupingBy(r -> switch (r.getKind()) {
-                    case "Schema" -> "Schema";
-                    case "Namespace" -> "Namespace";
-                    default -> "Other";
-                }));
+                .collect(Collectors.groupingBy(r -> List.of(SCHEMA_KIND, NAMESPACE_KIND, ACL_KIND, ROLE_BINDING_KIND)
+                                .contains(r.getKind())
+                        ? r.getKind()
+                        : "Other"));
 
+        // List.of(SCHEMA, NAMESPACE).contains(r.getKind()) ? r.getKind() : "Other")
         List<Resource> sortedSchemaResources =
                 prepareSchemaResources(resourcesByKind.getOrDefault("Schema", List.of()), commandSpec);
         List<Resource> allResources = new ArrayList<>();
         Stream.of(
-                        resourcesByKind.getOrDefault("Namespace", List.of()),
+                        resourcesByKind.getOrDefault(NAMESPACE_KIND, List.of()),
+                        resourcesByKind.getOrDefault(ACL_KIND, List.of()),
+                        resourcesByKind.getOrDefault(ROLE_BINDING_KIND, List.of()),
                         sortedSchemaResources,
                         resourcesByKind.getOrDefault("Other", List.of()))
                 .forEach(allResources::addAll);

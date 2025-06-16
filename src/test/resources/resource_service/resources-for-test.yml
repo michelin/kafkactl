@@ -200,4 +200,3 @@ spec:
         {"name": "active", "type": "boolean", "default": true}
       ]
     }
----

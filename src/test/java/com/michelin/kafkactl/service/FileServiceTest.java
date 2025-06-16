@@ -38,8 +38,9 @@ class FileServiceTest {
     void shouldComputeYamlFileListRecursive() {
         List<File> actual = fileService.computeYamlFileList(new File("src/test/resources"), true);
         assertEquals("config.yml", actual.get(0).getName());
-        assertEquals("topic.yml", actual.get(1).getName());
-        assertEquals(2, actual.size());
+        assertEquals("resources-for-test.yml", actual.get(1).getName());
+        assertEquals("topic.yml", actual.get(2).getName());
+        assertEquals(3, actual.size());
     }
 
     @Test

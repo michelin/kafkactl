@@ -47,6 +47,7 @@ class ResourceServicePrepareResourcesTest {
     @BeforeEach
     void setUp() {
         resourceService = new ResourceService();
+        resourceService.setFileService(new FileService());
         commandSpec = mock(CommandLine.Model.CommandSpec.class);
         CommandLine commandLine = mock(CommandLine.class);
         when(commandSpec.commandLine()).thenReturn(commandLine);
@@ -150,14 +151,15 @@ class ResourceServicePrepareResourcesTest {
 
         Map<String, SchemaData> schemasMap = new HashMap<>(Map.of(
                 "schemaUnion",
-                        new SchemaData(
-                                schemaUnion,
-                                List.of("com.example.one.Test1", "com.example.two.Test2", "com.example.three.Test3")),
-                "schema1", new SchemaData(schema1, List.of()),
-                "schema2", new SchemaData(schema2, List.of()),
+                new SchemaData(
+                        schemaUnion,
+                        List.of("com.example.one.Test1", "com.example.two.Test2", "com.example.three.Test3")),
+                "schema1",
+                new SchemaData(schema1, List.of()),
+                "schema2",
+                new SchemaData(schema2, List.of()),
                 "schema3",
-                        new SchemaData(
-                                schema3, List.of("com.example.one.Test1"))));
+                new SchemaData(schema3, List.of("com.example.one.Test1"))));
 
         Map<String, Resource> resourceMap = buildResources(schemasMap);
 
@@ -228,45 +230,45 @@ class ResourceServicePrepareResourcesTest {
     void shouldHandleNestedFieldsWithDeepDependencyWhenPrepareResources() throws Exception {
         String schemaLeaf =
                 """
-                {
-                  "type": "record",
-                  "name": "Leaf",
-                  "namespace": "com.example.leaf"
-                }"""
+                        {
+                          "type": "record",
+                          "name": "Leaf",
+                          "namespace": "com.example.leaf"
+                        }"""
                         .replace("\n", "")
                         .replace("  ", "");
 
         String schemaNested =
                 """
-                {
-                  "type": "record",
-                  "name": "Nested",
-                  "namespace": "com.example.nested",
-                  "fields": [
-                    {
-                      "name": "level1",
-                      "type": {
-                        "type": "record",
-                        "name": "Level1",
-                        "fields": [
-                          {
-                            "name": "level2",
-                            "type": {
-                              "type": "record",
-                              "name": "Level2",
-                              "fields": [
-                                {
-                                  "name": "leafRef",
-                                  "type": "com.example.leaf.Leaf"
-                                }
-                              ]
+                        {
+                          "type": "record",
+                          "name": "Nested",
+                          "namespace": "com.example.nested",
+                          "fields": [
+                            {
+                              "name": "level1",
+                              "type": {
+                                "type": "record",
+                                "name": "Level1",
+                                "fields": [
+                                  {
+                                    "name": "level2",
+                                    "type": {
+                                      "type": "record",
+                                      "name": "Level2",
+                                      "fields": [
+                                        {
+                                          "name": "leafRef",
+                                          "type": "com.example.leaf.Leaf"
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
                             }
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                }"""
+                          ]
+                        }"""
                         .replace("\n", "")
                         .replace("  ", "");
 
@@ -318,5 +320,28 @@ class ResourceServicePrepareResourcesTest {
         assertEquals("Namespace", result.get(0).getKind());
         assertEquals("Schema", result.get(1).getKind());
         assertEquals("Schema", result.get(2).getKind());
+    }
+
+    @Test
+    void shouldOrderResourcesFromYamlFile() throws Exception {
+        File yamlFile = new File("src/test/resources/resource_service/resources-for-test.yml");
+        List<Resource> resources = resourceService.parseResources(java.util.Optional.of(yamlFile), false, commandSpec);
+
+        List<Resource> sorted = resourceService.prepareResources(resources, commandSpec);
+
+        List<String> expectedOrder = List.of(
+                "demo",
+                "acl-topic-schema",
+                "acl-topic-demo",
+                "myRoleBinding1",
+                "myRoleBinding2",
+                "demoPrefix.topic_64-demo.Car",
+                "demoPrefix.topic_64-demo.User",
+                "demoPrefix.topic_64-value",
+                "demoPrefix.topic_64");
+        List<String> actualOrder =
+                sorted.stream().map(r -> r.getMetadata().getName()).toList();
+
+        assertEquals(expectedOrder, actualOrder);
     }
 }
