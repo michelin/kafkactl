@@ -26,6 +26,8 @@ import static com.michelin.kafkactl.util.constant.ResourceKind.DELETE_RECORDS_RE
 import static com.michelin.kafkactl.util.constant.ResourceKind.SUBJECT;
 import static com.michelin.kafkactl.util.constant.ResourceKind.VAULT_RESPONSE;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.model.ApiResource;
@@ -532,16 +534,24 @@ public class ResourceService {
         }
     }
 
+    /**
+     * Sort resources following this order: 1. Namespace resources, 2. ACL and RoleBinding, 3. Connector,
+     * ConnectCluster, KafkaStreams and Schemas. Schemas are further ordered according to their dependencies (aka
+     * references), specified by the fully qualified names of Schemas.
+     *
+     * @param resources The list of schema to sort
+     * @param commandSpec The command that triggered the action
+     * @return A sorted list of resources
+     */
     public List<Resource> prepareResources(List<Resource> resources, CommandLine.Model.CommandSpec commandSpec) {
         Map<String, List<Resource>> resourcesByKind = resources.stream()
-                .collect(Collectors.groupingBy(r -> List.of(SCHEMA_KIND, NAMESPACE_KIND, ACL_KIND, ROLE_BINDING_KIND)
+                .collect(Collectors.groupingBy(r -> List.of(NAMESPACE_KIND, ACL_KIND, ROLE_BINDING_KIND, SCHEMA_KIND)
                                 .contains(r.getKind())
                         ? r.getKind()
                         : "Other"));
 
-        // List.of(SCHEMA, NAMESPACE).contains(r.getKind()) ? r.getKind() : "Other")
         List<Resource> sortedSchemaResources =
-                prepareSchemaResources(resourcesByKind.getOrDefault("Schema", List.of()), commandSpec);
+                prepareSchemaResources(resourcesByKind.getOrDefault(SCHEMA_KIND, List.of()), commandSpec);
         List<Resource> allResources = new ArrayList<>();
         Stream.of(
                         resourcesByKind.getOrDefault(NAMESPACE_KIND, List.of()),
@@ -553,15 +563,6 @@ public class ResourceService {
         return allResources;
     }
 
-    /**
-     * Sort schema resources based on their dependencies. Schemas are assumed to be enriched. It extracts fully
-     * qualified names from the schema content and sorts the resources accordingly. Resources without a fully qualified
-     * name are added at the end.
-     *
-     * @param schemaResources The list of schema resources to sort
-     * @param commandSpec The command that triggered the action
-     * @return A sorted list of schema resources
-     */
     private List<Resource> prepareSchemaResources(List<Resource> schemaResources, CommandSpec commandSpec) {
         Map<String, Resource> nameToResource = new HashMap<>();
         Map<String, Set<String>> dependencies = new HashMap<>();
@@ -620,10 +621,8 @@ public class ResourceService {
 
     private static String extractFullyQualifiedName(Resource resource, CommandSpec commandSpec) {
         try {
-            String schemaContent = getSchemaContent(resource, commandSpec);
-            com.fasterxml.jackson.databind.JsonNode node =
-                    new com.fasterxml.jackson.databind.ObjectMapper().readTree(schemaContent);
-            if (node.isArray()) return null; // simple union
+            JsonNode node = new ObjectMapper().readTree(getSchemaContent(resource, commandSpec));
+            if (node.isArray()) return null; // if schema is a union
             String name = node.has("name") ? node.get("name").asText() : null;
             String ns = node.has("namespace") ? node.get("namespace").asText() : null;
             return ns != null ? ns + "." + name : name;

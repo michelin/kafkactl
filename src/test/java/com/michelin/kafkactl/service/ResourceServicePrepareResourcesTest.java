@@ -323,7 +323,7 @@ class ResourceServicePrepareResourcesTest {
     }
 
     @Test
-    void shouldOrderResourcesFromYamlFile() throws Exception {
+    void shouldOrderResourcesFromYamlFileWithNamespacesACLsRoleBindingsFirst() throws Exception {
         File yamlFile = new File("src/test/resources/resource_service/resources-for-test.yml");
         List<Resource> resources = resourceService.parseResources(java.util.Optional.of(yamlFile), false, commandSpec);
 
