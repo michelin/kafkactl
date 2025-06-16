@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.michelin.kafkactl.service;
+package com.michelin.kafkactl.service.resource;
 
 import static com.michelin.kafkactl.service.ResourceService.SCHEMA;
 import static com.michelin.kafkactl.service.ResourceService.SCHEMA_FILE;
@@ -26,8 +26,9 @@ import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
+import com.michelin.kafkactl.service.FileService;
+import com.michelin.kafkactl.service.ResourceService;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,7 +54,7 @@ class ResourceServicePrepareResourcesTest {
         when(commandSpec.commandLine()).thenReturn(commandLine);
     }
 
-    private static Map<String, Resource> buildResources(Map<String, SchemaData> schemasMap) throws IOException {
+    private static Map<String, Resource> buildResources(Map<String, SchemaData> schemasMap) {
         Map<String, Resource> resourceMap = new HashMap<>();
         for (Map.Entry<String, SchemaData> entry : schemasMap.entrySet()) {
             String schemaContent = entry.getValue().schemaContent;
@@ -121,7 +122,7 @@ class ResourceServicePrepareResourcesTest {
     }
 
     @Test
-    void shouldEnrichSchemasWithUnionDependencyWhenPrepareResources() throws Exception {
+    void shouldEnrichSchemasWithUnionDependencyWhenPrepareResources() {
         String schema1 = "{\"type\":\"record\",\"name\":\"Test1\",\"namespace\":\"com.example.one\"}";
         String schema2 = "{\"type\":\"record\",\"name\":\"Test2\",\"namespace\":\"com.example.two\"}";
         String schema3 =
@@ -179,7 +180,7 @@ class ResourceServicePrepareResourcesTest {
     }
 
     @Test
-    void shouldSortResourcesByDependenciesWhenPrepareResources() throws Exception {
+    void shouldSortResourcesByDependenciesWhenPrepareResources() {
         String schema1 = "{\"type\":\"record\",\"name\":\"Test1\",\"namespace\":\"com.example.one\"}";
         String schema2 =
                 """
@@ -227,7 +228,7 @@ class ResourceServicePrepareResourcesTest {
     }
 
     @Test
-    void shouldHandleNestedFieldsWithDeepDependencyWhenPrepareResources() throws Exception {
+    void shouldHandleNestedFieldsWithDeepDependencyWhenPrepareResources() {
         String schemaLeaf =
                 """
                                 {
@@ -323,8 +324,8 @@ class ResourceServicePrepareResourcesTest {
     }
 
     @Test
-    void shouldOrderResourcesFromYamlFileWithNamespacesACLsRoleBindingsFirst() throws Exception {
-        File yamlFile = new File("src/test/resources/resource_service/resources-for-test.yml");
+    void shouldOrderResourcesFromYamlFileWithNamespacesACLsRoleBindingsFirst() {
+        File yamlFile = new File("src/test/resources/resource_service/resources-unordered.yml");
         List<Resource> resources = resourceService.parseResources(java.util.Optional.of(yamlFile), false, commandSpec);
 
         List<Resource> sorted = resourceService.prepareResources(resources, commandSpec);
@@ -346,7 +347,7 @@ class ResourceServicePrepareResourcesTest {
     }
 
     @Test
-    void shouldKeepResourcesOrderedWhenAlreadySorted() throws Exception {
+    void shouldKeepResourcesOrderedWhenAlreadySorted() {
         File yamlFile = new File("src/test/resources/resource_service/resources-in-order.yml");
         List<Resource> resources = resourceService.parseResources(java.util.Optional.of(yamlFile), false, commandSpec);
 
