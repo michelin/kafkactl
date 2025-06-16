@@ -74,7 +74,7 @@ class ResourceServicePrepareResourcesTest {
     }
 
     @Test
-    void prepareResources_shouldEnrichSchemaFromFile() throws Exception {
+    void shouldEnrichSchemaFromFileWhenPrepareResources() throws Exception {
 
         File tempSchema = File.createTempFile("test-schema", ".avsc");
         String schemaContent = "{\"type\":\"record\",\"name\":\"Test\"}";
@@ -99,7 +99,7 @@ class ResourceServicePrepareResourcesTest {
     }
 
     @Test
-    void prepareResources_shouldHandleFileNotFound() {
+    void shouldHandleFileNotFoundWhenPrepareResources() {
         String fakePath = "not-exist.avsc";
         Map<String, Object> spec = new HashMap<>();
         spec.put(SCHEMA_FILE, fakePath);
@@ -120,7 +120,7 @@ class ResourceServicePrepareResourcesTest {
     }
 
     @Test
-    void prepareSchemaResources_shouldEnrichSchemasWithUnionDependency() throws Exception {
+    void shouldEnrichSchemasWithUnionDependencyWhenPrepareResources() throws Exception {
         String schema1 = "{\"type\":\"record\",\"name\":\"Test1\",\"namespace\":\"com.example.one\"}";
         String schema2 = "{\"type\":\"record\",\"name\":\"Test2\",\"namespace\":\"com.example.two\"}";
         String schema3 =
@@ -177,7 +177,7 @@ class ResourceServicePrepareResourcesTest {
     }
 
     @Test
-    void prepareSchemaResources_shouldSortResourcesByDependencies() throws Exception {
+    void shouldSortResourcesByDependenciesWhenPrepareResources() throws Exception {
         String schema1 = "{\"type\":\"record\",\"name\":\"Test1\",\"namespace\":\"com.example.one\"}";
         String schema2 =
                 """
@@ -225,7 +225,7 @@ class ResourceServicePrepareResourcesTest {
     }
 
     @Test
-    void prepareSchemaResources_shouldHandleNestedFieldsWithDeepDependency() throws Exception {
+    void shouldHandleNestedFieldsWithDeepDependencyWhenPrepareResources() throws Exception {
         String schemaLeaf =
                 """
                 {

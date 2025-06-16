@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 class ResourceDependencySorterTest {
 
     @Test
-    void sortResourceNamesByDependencies_shouldSortDependencies() {
+    void shouldSortStringsByDependenciesWhenSortResourceNamesByDependencies() {
         Set<String> resourceNames = Set.of("A", "B", "C");
         Map<String, Set<String>> deps = Map.of(
                 "A", Set.of(),
@@ -40,7 +40,7 @@ class ResourceDependencySorterTest {
     }
 
     @Test
-    void sortResourceNamesByDependencies_shouldThrowOnCycle() {
+    void shouldThrowOnCycleWhenSortResourceNamesByDependencies() {
         Set<String> resourceNames = Set.of("A");
         Map<String, Set<String>> deps = Map.of("A", Set.of("A"));
         assertThrows(
