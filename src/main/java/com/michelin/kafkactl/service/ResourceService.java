@@ -545,7 +545,7 @@ public class ResourceService {
      */
     public List<Resource> prepareResources(List<Resource> resources, CommandLine.Model.CommandSpec commandSpec) {
         Map<String, List<Resource>> resourcesByKind = resources.stream()
-                .collect(Collectors.groupingBy(r -> List.of(NAMESPACE_KIND, ACL_KIND, ROLE_BINDING_KIND, SCHEMA_KIND)
+                .collect(Collectors.groupingBy(r -> List.of(NAMESPACE_KIND, ROLE_BINDING_KIND, ACL_KIND, SCHEMA_KIND)
                                 .contains(r.getKind())
                         ? r.getKind()
                         : "Other"));
@@ -555,8 +555,8 @@ public class ResourceService {
         List<Resource> allResources = new ArrayList<>();
         Stream.of(
                         resourcesByKind.getOrDefault(NAMESPACE_KIND, List.of()),
-                        resourcesByKind.getOrDefault(ACL_KIND, List.of()),
                         resourcesByKind.getOrDefault(ROLE_BINDING_KIND, List.of()),
+                        resourcesByKind.getOrDefault(ACL_KIND, List.of()),
                         sortedSchemaResources,
                         resourcesByKind.getOrDefault("Other", List.of()))
                 .forEach(allResources::addAll);

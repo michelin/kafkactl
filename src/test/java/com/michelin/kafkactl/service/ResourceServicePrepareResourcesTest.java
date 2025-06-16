@@ -331,10 +331,10 @@ class ResourceServicePrepareResourcesTest {
 
         List<String> expectedOrder = List.of(
                 "demo",
-                "acl-topic-schema",
-                "acl-topic-demo",
                 "myRoleBinding1",
                 "myRoleBinding2",
+                "acl-topic-schema",
+                "acl-topic-demo",
                 "demoPrefix.topic_64-demo.Car",
                 "demoPrefix.topic_64-demo.User",
                 "demoPrefix.topic_64-value",
