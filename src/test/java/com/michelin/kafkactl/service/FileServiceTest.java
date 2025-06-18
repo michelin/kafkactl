@@ -24,6 +24,7 @@ import com.michelin.kafkactl.model.Resource;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,11 +38,9 @@ class FileServiceTest {
     @Test
     void shouldComputeYamlFileListRecursive() {
         List<File> actual = fileService.computeYamlFileList(new File("src/test/resources"), true);
-        assertEquals("config.yml", actual.get(0).getName());
-        assertEquals("resources-unordered.yml", actual.get(1).getName());
-        assertEquals("resources-in-order.yml", actual.get(2).getName());
-        assertEquals("topic.yml", actual.get(3).getName());
-        assertEquals(4, actual.size());
+        assertEquals(
+                List.of("config.yml", "resources-in-order.yml", "resources-unordered.yml", "topic.yml"),
+                actual.stream().map(File::getName).sorted().collect(Collectors.toList()));
     }
 
     @Test
