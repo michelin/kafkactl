@@ -26,12 +26,15 @@ import static com.michelin.kafkactl.util.constant.ResourceKind.DELETE_RECORDS_RE
 import static com.michelin.kafkactl.util.constant.ResourceKind.SUBJECT;
 import static com.michelin.kafkactl.util.constant.ResourceKind.VAULT_RESPONSE;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Output;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.SchemaCompatibility;
+import com.michelin.kafkactl.util.ResourceDependencySorter;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.util.StringUtils;
@@ -42,19 +45,25 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.io.File;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import picocli.CommandLine;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;
 
 /** Resource service. */
 @Singleton
 public class ResourceService {
+    public static final String REFERENCES = "references";
+    public static final String SCHEMA = "schema";
     public static final String SCHEMA_FILE = "schemaFile";
+
+    public static final String NAMESPACE_KIND = "Namespace";
+    public static final String ROLE_BINDING_KIND = "RoleBinding";
+    public static final String ACL_KIND = "AccessControlEntry";
+    public static final String SCHEMA_KIND = "Schema";
+    private static final String OTHER_KIND = "Other";
 
     @Inject
     @ReflectiveAccess
@@ -523,31 +532,99 @@ public class ResourceService {
     }
 
     /**
-     * Enrich the schema file with the content of the schema.
+     * Sort resources following this order: 1. Namespace resources, 2. ACL and RoleBinding, 3. Connector,
+     * ConnectCluster, KafkaStreams and Schemas. Schemas are further ordered according to their dependencies (aka
+     * references), specified by the fully qualified names of Schemas.
      *
-     * @param resources The resources to enrich
+     * @param resources The list of schema to sort
      * @param commandSpec The command that triggered the action
+     * @return A sorted list of resources
      */
-    public void enrichSchemaContent(List<Resource> resources, CommandSpec commandSpec) {
-        resources.stream()
-                .filter(resource -> resource.getKind().equals("Schema")
-                        && StringUtils.isNotEmpty(
-                                (CharSequence) resource.getSpec().get(SCHEMA_FILE)))
-                .forEach(resource -> {
-                    try {
-                        resource.getSpec()
-                                .put(
-                                        "schema",
-                                        Files.readString(new File(resource.getSpec()
-                                                        .get(SCHEMA_FILE)
-                                                        .toString())
-                                                .toPath()));
-                    } catch (Exception e) {
-                        throw new ParameterException(
-                                commandSpec.commandLine(),
-                                "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE)
-                                        + ". Schema path must be relative to the CLI.");
-                    }
-                });
+    public List<Resource> prepareResources(List<Resource> resources, CommandLine.Model.CommandSpec commandSpec) {
+        Map<String, List<Resource>> resourcesByKind = resources.stream()
+                .collect(Collectors.groupingBy(r -> List.of(NAMESPACE_KIND, ROLE_BINDING_KIND, ACL_KIND, SCHEMA_KIND)
+                                .contains(r.getKind())
+                        ? r.getKind()
+                        : OTHER_KIND));
+
+        List<Resource> sortedSchemaResources =
+                prepareSchemaResources(resourcesByKind.getOrDefault(SCHEMA_KIND, List.of()), commandSpec);
+        List<Resource> allResources = new ArrayList<>();
+        Stream.of(
+                        resourcesByKind.getOrDefault(NAMESPACE_KIND, List.of()),
+                        resourcesByKind.getOrDefault(ROLE_BINDING_KIND, List.of()),
+                        resourcesByKind.getOrDefault(ACL_KIND, List.of()),
+                        sortedSchemaResources,
+                        resourcesByKind.getOrDefault(OTHER_KIND, List.of()))
+                .forEach(allResources::addAll);
+        return allResources;
+    }
+
+    private List<Resource> prepareSchemaResources(List<Resource> schemaResources, CommandSpec commandSpec) {
+        Map<String, Resource> nameToResource = new HashMap<>();
+        Map<String, Set<String>> dependencies = new HashMap<>();
+        List<Resource> nofqNameResources = new ArrayList<>();
+        List<Resource> sortedResources = new ArrayList<>();
+        for (Resource resource : schemaResources) {
+            resource.getSpec().put(SCHEMA, getSchemaContent(resource, commandSpec));
+            String fqName = extractFullyQualifiedName(resource, commandSpec);
+            if (fqName != null) {
+                nameToResource.put(fqName, resource);
+                dependencies.put(fqName, getSchemaReferences(resource));
+            } else {
+                nofqNameResources.add(resource);
+            }
+        }
+        List<String> sortedSchemaNames =
+                ResourceDependencySorter.sortResourceNamesByDependencies(nameToResource.keySet(), dependencies);
+        for (String fqName : sortedSchemaNames) {
+            sortedResources.add(nameToResource.get(fqName));
+        }
+
+        sortedResources.addAll(nofqNameResources);
+        return sortedResources;
+    }
+
+    private static Set<String> getSchemaReferences(Resource resource) {
+        Set<String> refs = new HashSet<>();
+        Object referencesObj = resource.getSpec().get(REFERENCES);
+        if (!(referencesObj instanceof List<?>)) {
+            return refs;
+        }
+        for (Object refObj : (List<?>) referencesObj) {
+            if (refObj instanceof Map<?, ?> refMap) {
+                Object nameObj = refMap.get("name");
+                if (nameObj instanceof String name && name.contains(".")) {
+                    refs.add(name);
+                }
+            }
+        }
+        return refs;
+    }
+
+    private static String getSchemaContent(Resource resource, CommandSpec commandSpec) {
+        if (StringUtils.isNotEmpty((CharSequence) resource.getSpec().get(SCHEMA))) {
+            return resource.getSpec().get(SCHEMA).toString();
+        }
+        try {
+            return Files.readString(new File(resource.getSpec().get(SCHEMA_FILE).toString()).toPath());
+        } catch (Exception e) {
+            throw new ParameterException(
+                    commandSpec.commandLine(),
+                    "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE)
+                            + ". Schema path must be relative to the CLI.");
+        }
+    }
+
+    private static String extractFullyQualifiedName(Resource resource, CommandSpec commandSpec) {
+        try {
+            JsonNode node = new ObjectMapper().readTree(getSchemaContent(resource, commandSpec));
+            if (node.isArray()) return null; // if schema is a union
+            String name = node.has("name") ? node.get("name").asText() : null;
+            String ns = node.has("namespace") ? node.get("namespace").asText() : null;
+            return ns != null ? ns + "." + name : name;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
