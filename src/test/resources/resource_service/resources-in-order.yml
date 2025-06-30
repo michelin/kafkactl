@@ -118,9 +118,17 @@ kind: "Schema"
 metadata:
   name: "demoPrefix.topic_64-demo.Car"
 spec:
-  schema: "{\n  \"type\": \"record\",\n  \"name\": \"Car\",\n  \"namespace\": \"demo\"\
-    ,\n  \"fields\": [\n    {\"name\": \"carId\", \"type\": \"string\"},\n    {\"\
-    name\": \"make\", \"type\": \"string\"},\n    {\"name\": \"model\", \"type\":\
-    \ \"string\"},\n    {\"name\": \"year\", \"type\": \"int\"},\n    {\"name\": \"\
-    color\", \"type\": \"string\"},\n    {\"name\": \"ownerId\", \"type\": [\"null\"\
-    , \"string\"], \"default\": null}\n  ]\n}"
+  schema: |
+    {
+      "type": "record",
+      "name": "Car",
+      "namespace": "demo",
+      "fields": [
+        {"name": "carId", "type": "string"},
+        {"name": "make", "type": "string"},
+        {"name": "model", "type": "string"},
+        {"name": "year", "type": "int"},
+        {"name": "color", "type": "string"},
+        {"name": "ownerId", "type": ["null", "string"], "default": null}
+      ]
+    }
