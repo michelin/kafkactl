@@ -114,6 +114,7 @@ spec:
     retention.ms: 604800000
     confluent.value.subject.name.strategy: "io.confluent.kafka.serializers.subject.TopicRecordNameStrategy"
 ---
+apiVersion: "v1"
 kind: "Schema"
 metadata:
   name: "demoPrefix.topic_64-demo.Car"
