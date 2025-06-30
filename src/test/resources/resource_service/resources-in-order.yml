@@ -91,10 +91,10 @@ spec:
 apiVersion: "v1"
 kind: "AccessControlEntry"
 metadata:
-  name: "acl-topic-schema"
+  name: "acl-topic"
   namespace: "demo"
 spec:
-  resourceType: "SCHEMA"
+  resourceType: "TOPIC"
   resource: "demoPrefix."
   resourcePatternType: "PREFIXED"
   permission: "OWNER"

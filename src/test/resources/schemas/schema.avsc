@@ -1,0 +1,19 @@
+{
+  "namespace": "io.github.michelin.ns4kafka.avro",
+  "type": "record",
+  "name": "KafkaPerson",
+  "fields": [
+    {
+      "name": "id",
+      "type": "long"
+	},
+	{
+      "name": "firstName",
+      "type": "string"
+	},
+	{
+      "name": "lastName",
+      "type": "string"
+	}
+  ]
+}

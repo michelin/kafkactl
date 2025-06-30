@@ -15,10 +15,10 @@ spec:
 apiVersion: "v1"
 kind: "AccessControlEntry"
 metadata:
-  name: "acl-topic-schema"
+  name: "acl-group"
   namespace: "demo"
 spec:
-  resourceType: "SCHEMA"
+  resourceType: "GROUP"
   resource: "demoPrefix."
   resourcePatternType: "PREFIXED"
   permission: "OWNER"
@@ -27,7 +27,7 @@ spec:
 apiVersion: "v1"
 kind: "AccessControlEntry"
 metadata:
-  name: "acl-topic-demo"
+  name: "acl-topic"
   namespace: "demo"
 spec:
   resourceType: "TOPIC"
@@ -101,7 +101,11 @@ kind: "Schema"
 metadata:
   name: "demoPrefix.topic_64-value"
 spec:
-  schema: "[\n\"demo.User\",\n\"demo.Car\"\n]\n"
+  schema: |
+    [
+    "demo.User",
+    "demo.Car"
+    ]
   references:
   - name: "demo.User"
     subject: "demoPrefix.topic_64-demo.User"
