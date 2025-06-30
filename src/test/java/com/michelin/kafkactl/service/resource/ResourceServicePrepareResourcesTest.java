@@ -29,11 +29,11 @@ import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FileService;
 import com.michelin.kafkactl.service.ResourceService;
 import java.io.File;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,48 +44,41 @@ import picocli.CommandLine;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceServicePrepareResourcesTest {
-
-    record SchemaData(String schemaContent, List<String> references) {}
-
-    @InjectMocks
-    private ResourceService resourceService;
-
     @Spy
     private FileService fileService;
 
     @Mock
     private CommandLine.Model.CommandSpec commandSpec;
 
-    private static Map<String, Resource> buildResources(Map<String, SchemaData> schemasMap) {
-        Map<String, Resource> resourceMap = new HashMap<>();
-        for (Map.Entry<String, SchemaData> entry : schemasMap.entrySet()) {
-            String schemaContent = entry.getValue().schemaContent;
-            String schemaName = entry.getKey();
-            Map<String, Object> spec = new HashMap<>(Map.of(SCHEMA, schemaContent));
-            var referencesMap = new ArrayList<Map<String, String>>();
-            for (String ref : entry.getValue().references) {
-                referencesMap.add(Map.of("name", ref));
-            }
-            spec.put("references", referencesMap);
-            Resource res = Resource.builder()
-                    .kind("Schema")
-                    .metadata(Metadata.builder().name(schemaName).build())
-                    .spec(spec)
-                    .build();
-            resourceMap.put(schemaName, res);
-        }
-        return resourceMap;
-    }
+    @InjectMocks
+    private ResourceService resourceService;
 
     @Test
-    void shouldEnrichSchemaFromFileWhenPrepareResources() throws Exception {
-
-        File tempSchema = File.createTempFile("test-schema", ".avsc");
-        String schemaContent = "{\"type\":\"record\",\"name\":\"Test\"}";
-        Files.writeString(tempSchema.toPath(), schemaContent);
+    void shouldEnrichSchemaFromFileWhenPrepareResources() {
+        String schemaContent =
+                """
+            {
+              "namespace": "io.github.michelin.ns4kafka.avro",
+              "type": "record",
+              "name": "KafkaPerson",
+              "fields": [
+                {
+                  "name": "id",
+                  "type": "long"
+            \t},
+            \t{
+                  "name": "firstName",
+                  "type": "string"
+            \t},
+            \t{
+                  "name": "lastName",
+                  "type": "string"
+            \t}
+              ]
+            }""";
 
         Map<String, Object> spec = new HashMap<>();
-        spec.put(SCHEMA_FILE, tempSchema.getAbsolutePath());
+        spec.put(SCHEMA_FILE, new File("src/test/resources/schemas/schema.avsc"));
 
         Resource schemaResource = Resource.builder()
                 .kind("Schema")
@@ -93,18 +86,14 @@ class ResourceServicePrepareResourcesTest {
                 .spec(spec)
                 .build();
 
-        List<Resource> resources = new ArrayList<>(List.of(schemaResource));
+        resourceService.prepareResources(List.of(schemaResource), commandSpec);
 
-        resourceService.prepareResources(resources, commandSpec);
-
-        assertEquals(schemaContent, schemaResource.getSpec().get("schema"));
-
-        tempSchema.delete();
+        assertEquals(schemaContent, schemaResource.getSpec().get("schema").toString());
     }
 
     @Test
     void shouldHandleFileNotFoundWhenPrepareResources() {
-        Map<String, Object> spec = new HashMap<>(Map.of(SCHEMA_FILE, "not-exist.avsc"));
+        Map<String, Object> spec = Map.of(SCHEMA_FILE, "not-exist.avsc");
 
         Resource schemaResource = Resource.builder()
                 .kind("Schema")
@@ -152,7 +141,7 @@ class ResourceServicePrepareResourcesTest {
                         .replace("\n", "")
                         .replace("  ", "");
 
-        Map<String, SchemaData> schemasMap = new HashMap<>(Map.of(
+        Map<String, SchemaData> schemasMap = Map.of(
                 "schemaUnion",
                 new SchemaData(
                         schemaUnion,
@@ -162,13 +151,13 @@ class ResourceServicePrepareResourcesTest {
                 "schema2",
                 new SchemaData(schema2, List.of()),
                 "schema3",
-                new SchemaData(schema3, List.of("com.example.one.Test1"))));
+                new SchemaData(schema3, List.of("com.example.one.Test1")));
 
         Map<String, Resource> resourceMap = buildResources(schemasMap);
 
-        List<Resource> resources = new ArrayList<>(List.of(
+        List<Resource> resources = List.of(
                 resourceMap.get("schema3"), resourceMap.get("schema2"),
-                resourceMap.get("schema1"), resourceMap.get("schemaUnion")));
+                resourceMap.get("schema1"), resourceMap.get("schemaUnion"));
 
         List<Resource> sortedResources = resourceService.prepareResources(resources, commandSpec);
 
@@ -197,7 +186,6 @@ class ResourceServicePrepareResourcesTest {
                                 """
                         .replace("\n", "")
                         .replace("  ", "");
-        // Schéma qui dépend de Test2
         String schema3 =
                 """
                                 {
@@ -212,15 +200,14 @@ class ResourceServicePrepareResourcesTest {
                         .replace("\n", "")
                         .replace("  ", "");
 
-        Map<String, SchemaData> schemasMap = new HashMap<>(Map.of(
+        Map<String, SchemaData> schemasMap = Map.of(
                 "schema1", new SchemaData(schema1, List.of()),
                 "schema2", new SchemaData(schema2, List.of("com.example.one.Test1")),
-                "schema3", new SchemaData(schema3, List.of("com.example.two.Test2"))));
+                "schema3", new SchemaData(schema3, List.of("com.example.two.Test2")));
 
         Map<String, Resource> rMap = buildResources(schemasMap);
 
-        List<Resource> resources =
-                new ArrayList<>(List.of(rMap.get("schema3"), rMap.get("schema2"), rMap.get("schema1")));
+        List<Resource> resources = List.of(rMap.get("schema3"), rMap.get("schema2"), rMap.get("schema1"));
 
         var sortedResources = resourceService.prepareResources(resources, commandSpec);
 
@@ -275,13 +262,13 @@ class ResourceServicePrepareResourcesTest {
                         .replace("\n", "")
                         .replace("  ", "");
 
-        Map<String, SchemaData> schemasMap = new HashMap<>(Map.of(
+        Map<String, SchemaData> schemasMap = Map.of(
                 "schemaLeaf", new SchemaData(schemaLeaf, List.of()),
-                "schemaNested", new SchemaData(schemaNested, List.of("com.example.leaf.Leaf"))));
+                "schemaNested", new SchemaData(schemaNested, List.of("com.example.leaf.Leaf")));
 
         Map<String, Resource> rMap = buildResources(schemasMap);
 
-        List<Resource> resources = new ArrayList<>(List.of(rMap.get("schemaNested"), rMap.get("schemaLeaf")));
+        List<Resource> resources = List.of(rMap.get("schemaNested"), rMap.get("schemaLeaf"));
         var sortedResources = resourceService.prepareResources(resources, commandSpec);
 
         assertEquals(
@@ -291,15 +278,13 @@ class ResourceServicePrepareResourcesTest {
 
     @Test
     void shouldAddNamespacesBeforeSchemasWhenPrepareResource() {
-        ResourceService resourceService = new ResourceService();
-
         String schemaContent = "{\"type\":\"record\",\"name\":\"Test1\",\"namespace\":\"com.example\"}";
         String schemaContent2 = "{\"type\":\"record\",\"name\":\"Test2\",\"namespace\":\"com.example\"}";
         Resource schema1 = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
                 .metadata(Metadata.builder().name("schema1").build())
-                .spec(new HashMap(Map.of(SCHEMA, schemaContent)))
+                .spec(new HashMap<>(Map.of(SCHEMA, schemaContent)))
                 .build();
 
         Resource namespace = Resource.builder()
@@ -313,7 +298,7 @@ class ResourceServicePrepareResourcesTest {
                 .kind("Schema")
                 .apiVersion("v1")
                 .metadata(Metadata.builder().name("schema2").build())
-                .spec(new HashMap(Map.of(SCHEMA, schemaContent2)))
+                .spec(new HashMap<>(Map.of(SCHEMA, schemaContent2)))
                 .build();
 
         List<Resource> input = List.of(schema1, namespace, schema2);
@@ -328,20 +313,20 @@ class ResourceServicePrepareResourcesTest {
     @Test
     void shouldOrderResourcesFromYamlFileWithNamespacesACLsRoleBindingsFirst() {
         File yamlFile = new File("src/test/resources/resource_service/resources-unordered.yml");
-        List<Resource> resources = resourceService.parseResources(java.util.Optional.of(yamlFile), false, commandSpec);
-
+        List<Resource> resources = resourceService.parseResources(Optional.of(yamlFile), false, commandSpec);
         List<Resource> sorted = resourceService.prepareResources(resources, commandSpec);
 
         List<String> expectedOrder = List.of(
                 "demo",
                 "myRoleBinding1",
                 "myRoleBinding2",
-                "acl-topic-schema",
-                "acl-topic-demo",
+                "acl-group",
+                "acl-topic",
                 "demoPrefix.topic_64-demo.Car",
                 "demoPrefix.topic_64-demo.User",
                 "demoPrefix.topic_64-value",
                 "demoPrefix.topic_64");
+
         List<String> actualOrder =
                 sorted.stream().map(r -> r.getMetadata().getName()).toList();
 
@@ -351,15 +336,43 @@ class ResourceServicePrepareResourcesTest {
     @Test
     void shouldKeepResourcesOrderedWhenAlreadySorted() {
         File yamlFile = new File("src/test/resources/resource_service/resources-in-order.yml");
-        List<Resource> resources = resourceService.parseResources(java.util.Optional.of(yamlFile), false, commandSpec);
+        List<Resource> resources = resourceService.parseResources(Optional.of(yamlFile), false, commandSpec);
 
         List<Resource> sorted = resourceService.prepareResources(resources, commandSpec);
 
-        List<String> expectedOrder = List.of(
-                "demo", "myRoleBinding1", "acl-topic-schema", "demoPrefix.topic_64-demo.Car", "demoPrefix.topic_64");
+        List<String> expectedOrder =
+                List.of("demo", "myRoleBinding1", "acl-topic", "demoPrefix.topic_64-demo.Car", "demoPrefix.topic_64");
         List<String> actualOrder =
                 sorted.stream().map(r -> r.getMetadata().getName()).toList();
 
         assertEquals(expectedOrder, actualOrder);
     }
+
+    private static Map<String, Resource> buildResources(Map<String, SchemaData> schemasMap) {
+        Map<String, Resource> resourceMap = new HashMap<>();
+
+        for (Map.Entry<String, SchemaData> entry : schemasMap.entrySet()) {
+            String schemaContent = entry.getValue().schemaContent;
+            String schemaName = entry.getKey();
+            Map<String, Object> spec = new HashMap<>();
+            spec.put(SCHEMA, schemaContent);
+
+            var referencesMap = new ArrayList<Map<String, String>>();
+            for (String ref : entry.getValue().references) {
+                referencesMap.add(Map.of("name", ref));
+            }
+
+            spec.put("references", referencesMap);
+            Resource res = Resource.builder()
+                    .kind("Schema")
+                    .metadata(Metadata.builder().name(schemaName).build())
+                    .spec(spec)
+                    .build();
+            resourceMap.put(schemaName, res);
+        }
+
+        return resourceMap;
+    }
+
+    record SchemaData(String schemaContent, List<String> references) {}
 }

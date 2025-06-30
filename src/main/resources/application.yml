@@ -1,120 +1,120 @@
 kafkactl:
   contexts:
   - context:
-      api: http://localhost:8080
-      namespace: namespace
-      user-token: token
-    name: local
-  api: http://localhost:8080
-  current-namespace: namespace
-  user-token: token
+      api: "http://localhost:8080"
+      namespace: "namespace"
+      user-token: "token"
+    name: "local"
+  api: "http://localhost:8080"
+  current-namespace: "namespace"
+  user-token: "token"
   retry:
-    attempt: '5'
-    delay: '2s'
-    multiplier: '2.0'
+    attempt: "5"
+    delay: "2s"
+    multiplier: "2.0"
   table-format:
     AccessControlEntry:
-      - 'ACL:/metadata/name'
-      - 'GRANTED_BY:/metadata/namespace'
-      - 'GRANTED_TO:/spec/grantedTo'
-      - 'TYPE:/spec/resourceType'
-      - 'RESOURCE:/spec/resource'
-      - 'PATTERN:/spec/resourcePatternType'
-      - 'PERMISSION:/spec/permission'
-      - 'AGE:/metadata/creationTimestamp%AGO'
+    - "ACL:/metadata/name"
+    - "GRANTED_BY:/metadata/namespace"
+    - "GRANTED_TO:/spec/grantedTo"
+    - "TYPE:/spec/resourceType"
+    - "RESOURCE:/spec/resource"
+    - "PATTERN:/spec/resourcePatternType"
+    - "PERMISSION:/spec/permission"
+    - "AGE:/metadata/creationTimestamp%AGO"
     AuthInfo:
-      - 'NAMESPACE:/spec/namespace'
-      - 'VERBS:/spec/verbs'
-      - 'RESOURCES:/spec/resources'
+    - "NAMESPACE:/spec/namespace"
+    - "VERBS:/spec/verbs"
+    - "RESOURCES:/spec/resources"
     ChangeConnectorState:
-      - 'CONNECTOR:/metadata/name'
-      - 'STATUS:/status/code'
-      - 'ERROR_MSG:/status/errorMessage'
+    - "CONNECTOR:/metadata/name"
+    - "STATUS:/status/code"
+    - "ERROR_MSG:/status/errorMessage"
     ConnectCluster:
-      - 'CONNECT CLUSTER:/metadata/name'
-      - 'URL:/spec/url'
-      - 'ERROR_MSG:/spec/statusMessage'
-      - 'STATUS:/spec/status'
+    - "CONNECT CLUSTER:/metadata/name"
+    - "URL:/spec/url"
+    - "ERROR_MSG:/spec/statusMessage"
+    - "STATUS:/spec/status"
     Connector:
-      - 'CONNECTOR:/metadata/name'
-      - 'WORKERS:/spec/connectCluster'
-      - 'CLASS:/spec/config/connector.class'
-      - 'TOPICS:/spec/config/topics'
-      - 'AGE:/metadata/creationTimestamp%AGO'
+    - "CONNECTOR:/metadata/name"
+    - "WORKERS:/spec/connectCluster"
+    - "CLASS:/spec/config/connector.class"
+    - "TOPICS:/spec/config/topics"
+    - "AGE:/metadata/creationTimestamp%AGO"
     ConsumerGroupResetOffsetsResponse:
-      - 'CONSUMER_GROUP:/spec/consumerGroup'
-      - 'TOPIC:/spec/topic'
-      - 'PARTITION:/spec/partition'
-      - 'OFFSET:/spec/offset'
+    - "CONSUMER_GROUP:/spec/consumerGroup"
+    - "TOPIC:/spec/topic"
+    - "PARTITION:/spec/partition"
+    - "OFFSET:/spec/offset"
     Context:
-      - 'NAME:/metadata/name'
-      - 'NAMESPACE:/spec/namespace'
-      - 'API:/spec/api'
-      - 'TOKEN:/spec/token'
+    - "NAME:/metadata/name"
+    - "NAMESPACE:/spec/namespace"
+    - "API:/spec/api"
+    - "TOKEN:/spec/token"
     DeleteRecordsResponse:
-      - 'OFFSET:/spec/offset'
-      - 'PARTITION:/spec/partition'
-      - 'TOPIC:/spec/topic'
+    - "OFFSET:/spec/offset"
+    - "PARTITION:/spec/partition"
+    - "TOPIC:/spec/topic"
     KafkaUserResetPassword:
-      - 'NAMESPACE:/metadata/namespace'
-      - 'CLUSTER:/metadata/cluster'
-      - 'USER:/metadata/name'
-      - 'PASSWORD:/spec/newPassword'
+    - "NAMESPACE:/metadata/namespace"
+    - "CLUSTER:/metadata/cluster"
+    - "USER:/metadata/name"
+    - "PASSWORD:/spec/newPassword"
     Namespace:
-      - 'NAMESPACE:/metadata/name'
-      - 'CLUSTER:/metadata/cluster'
-      - 'USER:/spec/kafkaUser' 
-      - 'CONNECTS:/spec/connectClusters'
-      - 'LDAP:/metadata/labels/support-group'
-      - 'CONTACTS:/metadata/labels/contacts'
+    - "NAMESPACE:/metadata/name"
+    - "CLUSTER:/metadata/cluster"
+    - "USER:/spec/kafkaUser"
+    - "CONNECTS:/spec/connectClusters"
+    - "LDAP:/metadata/labels/support-group"
+    - "CONTACTS:/metadata/labels/contacts"
     ResourceDefinition:
-      - 'KIND:/metadata/name'
-      - 'NAMES:/spec/names'
-      - 'NAMESPACED:/spec/namespaced'
-      - 'SYNCHRONIZABLE:/spec/synchronizable'
+    - "KIND:/metadata/name"
+    - "NAMES:/spec/names"
+    - "NAMESPACED:/spec/namespaced"
+    - "SYNCHRONIZABLE:/spec/synchronizable"
     ResourceQuotaResponse:
-      - 'QUOTA:/metadata/name'
-      - 'COUNT/TOPICS:/spec/countTopic'
-      - 'COUNT/PARTITIONS:/spec/countPartition'
-      - 'DISK/TOPICS:/spec/diskTopic'
-      - 'COUNT/CONNECTORS:/spec/countConnector'
-      - 'USER/CONSUMER_BYTE_RATE:/spec/consumerByteRate'
-      - 'USER/PRODUCER_BYTE_RATE:/spec/producerByteRate'
+    - "QUOTA:/metadata/name"
+    - "COUNT/TOPICS:/spec/countTopic"
+    - "COUNT/PARTITIONS:/spec/countPartition"
+    - "DISK/TOPICS:/spec/diskTopic"
+    - "COUNT/CONNECTORS:/spec/countConnector"
+    - "USER/CONSUMER_BYTE_RATE:/spec/consumerByteRate"
+    - "USER/PRODUCER_BYTE_RATE:/spec/producerByteRate"
     RoleBinding:
-      - 'ROLE_BINDING:/metadata/name'
-      - 'GROUP:/spec/subject/subjectName'
-      - 'VERBS:/spec/role/verbs'
-      - 'RESOURCES:/spec/role/resourceTypes'
+    - "ROLE_BINDING:/metadata/name"
+    - "GROUP:/spec/subject/subjectName"
+    - "VERBS:/spec/role/verbs"
+    - "RESOURCES:/spec/role/resourceTypes"
     Schema:
-      - 'SUBJECT:/metadata/name'
-      - 'ID:/spec/id'
-      - 'VERSION:/spec/version'
-      - 'CONFIG:/spec/compatibility'
-      - 'TYPE:/spec/schemaType'
+    - "SUBJECT:/metadata/name"
+    - "ID:/spec/id"
+    - "VERSION:/spec/version"
+    - "CONFIG:/spec/compatibility"
+    - "TYPE:/spec/schemaType"
     SchemaCompatibilityState:
-      - 'CONFIG:/spec/compatibility'
-      - 'SUBJECT:/metadata/name'
+    - "CONFIG:/spec/compatibility"
+    - "SUBJECT:/metadata/name"
     Topic:
-      - 'TOPIC:/metadata/name'
-      - 'RETENTION:/spec/configs/retention.ms%PERIOD'
-      - 'POLICY:/spec/configs/cleanup.policy'
-      - 'AGE:/metadata/creationTimestamp%AGO'
+    - "TOPIC:/metadata/name"
+    - "RETENTION:/spec/configs/retention.ms%PERIOD"
+    - "POLICY:/spec/configs/cleanup.policy"
+    - "AGE:/metadata/creationTimestamp%AGO"
     VaultResponse:
-      - 'CLEAR_TEXT:/spec/clearText'
-      - 'ENCRYPTED_TEXT:/spec/encrypted'
-  version: '@version@'
+    - "CLEAR_TEXT:/spec/clearText"
+    - "ENCRYPTED_TEXT:/spec/encrypted"
+  version: "@version@"
 logger:
   levels:
-    ROOT: 'OFF'
-    io.micronaut.http.client.netty.DefaultHttpClient: 'OFF'
-    io.micronaut.http.client.netty.ssl.NettyClientSslBuilder: 'OFF'
+    ROOT: "OFF"
+    io.micronaut.http.client.netty.DefaultHttpClient: "OFF"
+    io.micronaut.http.client.netty.ssl.NettyClientSslBuilder: "OFF"
 micronaut:
   application:
-    name: 'kafkactl'
+    name: "kafkactl"
   http:
     client:
-      connect-timeout: '60s'
-      read-idle-timeout: '60s'
-      read-timeout: '60s'
+      connect-timeout: "60s"
+      read-idle-timeout: "60s"
+      read-timeout: "60s"
       ssl:
         insecure-trust-all-certificates: true

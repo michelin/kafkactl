@@ -1,15 +1,15 @@
 kafkactl:
   contexts:
-  - name: dev
+  - name: "dev"
     context:
-      api: https://ns4kafka-dev-api.domain.com
-      user-token: my_token
-      namespace: my_namespace
-  - name: prod
+      api: "https://ns4kafka-dev-api.domain.com"
+      user-token: "my_token"
+      namespace: "my_namespace"
+  - name: "prod"
     context:
-      api: https://ns4kafka-prod-api.domain.com
-      user-token: my_token
-      namespace: my_namespace
-  current-namespace: namespace
-  api: https://ns4kafka.com
-  user-token: userToken
+      api: "https://ns4kafka-prod-api.domain.com"
+      user-token: "my_token"
+      namespace: "my_namespace"
+  current-namespace: "namespace"
+  api: "https://ns4kafka.com"
+  user-token: "userToken"
