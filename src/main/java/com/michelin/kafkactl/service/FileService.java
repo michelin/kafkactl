@@ -22,6 +22,7 @@ import com.michelin.kafkactl.model.Resource;
 import jakarta.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
@@ -58,8 +59,7 @@ public class FileService {
                     try {
                         return Files.readString(path);
                     } catch (IOException e) {
-                        // checked to unchecked
-                        throw new RuntimeException(e);
+                        throw new UncheckedIOException(e);
                     }
                 })
                 .flatMap(this::parseResourceStreamFromString)
