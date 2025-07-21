@@ -38,7 +38,7 @@ dependencies {
 
     testImplementation("io.micronaut:micronaut-http-client")
     testImplementation("org.mockito:mockito-junit-jupiter:5.18.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.13.3")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.13.4")
     testImplementation("org.mockito:mockito-core")
 
     testAnnotationProcessor("org.projectlombok:lombok")
