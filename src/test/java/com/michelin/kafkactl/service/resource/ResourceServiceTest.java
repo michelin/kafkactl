@@ -1000,7 +1000,7 @@ class ResourceServiceTest {
                 .thenReturn(Collections.emptyList());
 
         int actual = resourceService.importAll(
-                Collections.singletonList(apiResource), "namespace", any(), false, cmd.getCommandSpec());
+                Collections.singletonList(apiResource), "namespace", "*", false, cmd.getCommandSpec());
 
         assertEquals(0, actual);
         assertTrue(sw.toString().contains("No topic to import."));
