@@ -950,7 +950,7 @@ class ResourceServiceTest {
     }
 
     @Test
-    void shouldImportAllSuccess() {
+    void shouldImportAllResources() {
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
                 .path("topics")
@@ -971,11 +971,11 @@ class ResourceServiceTest {
 
         CommandLine cmd = new CommandLine(new Kafkactl());
 
-        when(namespacedClient.importResources(any(), any(), any(), anyBoolean()))
+        when(namespacedClient.importResources(any(), any(), any(), any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(topicResource));
 
         int actual = resourceService.importAll(
-                Collections.singletonList(apiResource), "namespace", false, cmd.getCommandSpec());
+                Collections.singletonList(apiResource), "namespace", "*", false, cmd.getCommandSpec());
 
         assertEquals(0, actual);
         verify(formatService)
@@ -983,7 +983,7 @@ class ResourceServiceTest {
     }
 
     @Test
-    void shouldImportAllEmpty() {
+    void shouldImportNoResource() {
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
                 .path("topics")
@@ -996,18 +996,18 @@ class ResourceServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        when(namespacedClient.importResources(any(), any(), any(), anyBoolean()))
+        when(namespacedClient.importResources(any(), any(), any(), any(), anyBoolean()))
                 .thenReturn(Collections.emptyList());
 
         int actual = resourceService.importAll(
-                Collections.singletonList(apiResource), "namespace", false, cmd.getCommandSpec());
+                Collections.singletonList(apiResource), "namespace", any(), false, cmd.getCommandSpec());
 
         assertEquals(0, actual);
         assertTrue(sw.toString().contains("No topic to import."));
     }
 
     @Test
-    void shouldImportAllFail() {
+    void shouldNotImportAllResources() {
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
                 .path("topics")
@@ -1019,11 +1019,11 @@ class ResourceServiceTest {
         CommandLine cmd = new CommandLine(new Kafkactl());
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
-        when(namespacedClient.importResources(any(), any(), any(), anyBoolean()))
+        when(namespacedClient.importResources(any(), any(), any(), any(), anyBoolean()))
                 .thenThrow(exception);
 
         int actual = resourceService.importAll(
-                Collections.singletonList(apiResource), "namespace", false, cmd.getCommandSpec());
+                Collections.singletonList(apiResource), "namespace", "*", false, cmd.getCommandSpec());
 
         assertEquals(1, actual);
         verify(formatService).displayError(exception, cmd.getCommandSpec());

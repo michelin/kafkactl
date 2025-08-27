@@ -147,14 +147,40 @@ class ImportTest {
                 .build();
 
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.importAll(any(), any(), anyBoolean(), any())).thenReturn(0);
+        when(resourceService.importAll(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(importCmd);
 
         int code = cmd.execute("topic", "-n", "namespace");
         assertEquals(0, code);
         verify(resourceService)
-                .importAll(Collections.singletonList(apiResource), "namespace", false, cmd.getCommandSpec());
+                .importAll(Collections.singletonList(apiResource), "namespace", "*", false, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldImportSpecificTopicResources() {
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
+        when(resourceService.importAll(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(0);
+
+        CommandLine cmd = new CommandLine(importCmd);
+
+        int code = cmd.execute("topic", "myTopic", "-n", "namespace");
+        assertEquals(0, code);
+        verify(resourceService)
+                .importAll(Collections.singletonList(apiResource), "namespace", "myTopic", false, cmd.getCommandSpec());
     }
 
     @Test
@@ -171,7 +197,8 @@ class ImportTest {
                 .build();
 
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.importAll(any(), any(), anyBoolean(), any())).thenReturn(0);
+        when(resourceService.importAll(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(importCmd);
         StringWriter sw = new StringWriter();
@@ -181,7 +208,7 @@ class ImportTest {
         assertEquals(0, code);
         assertTrue(sw.toString().contains("Dry run execution."));
         verify(resourceService)
-                .importAll(Collections.singletonList(apiResource), "namespace", true, cmd.getCommandSpec());
+                .importAll(Collections.singletonList(apiResource), "namespace", "*", true, cmd.getCommandSpec());
     }
 
     @Test
@@ -216,13 +243,15 @@ class ImportTest {
 
         when(apiResourcesService.listResourceDefinitions())
                 .thenReturn(List.of(apiResource, nonNamespacedApiResource, nonSyncApiResource));
-        when(resourceService.importAll(any(), any(), anyBoolean(), any())).thenReturn(0);
+        when(resourceService.importAll(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(0);
 
         CommandLine cmd = new CommandLine(importCmd);
 
         int code = cmd.execute("all");
         assertEquals(0, code);
         verify(resourceService)
-                .importAll(List.of(apiResource, nonNamespacedApiResource), "namespace", false, cmd.getCommandSpec());
+                .importAll(
+                        List.of(apiResource, nonNamespacedApiResource), "namespace", "*", false, cmd.getCommandSpec());
     }
 }
