@@ -280,12 +280,13 @@ public class ResourceService {
      * @param commandSpec The command that triggered the action
      * @return 0 if the command succeed, 1 otherwise
      */
-    public int importAll(List<ApiResource> apiResources, String namespace, boolean dryRun, CommandSpec commandSpec) {
+    public int importAll(
+            List<ApiResource> apiResources, String namespace, String name, boolean dryRun, CommandSpec commandSpec) {
         int errors = apiResources.stream()
                 .map(apiResource -> {
                     try {
                         List<Resource> resources = namespacedClient.importResources(
-                                namespace, apiResource.getPath(), loginService.getAuthorization(), dryRun);
+                                namespace, apiResource.getPath(), loginService.getAuthorization(), name, dryRun);
                         if (!resources.isEmpty()) {
                             formatService.displayList(apiResource.getKind(), resources, TABLE, commandSpec);
                         } else {

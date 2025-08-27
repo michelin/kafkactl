@@ -112,7 +112,7 @@ public class Delete extends DryRunHook {
                                 dryRun,
                                 commandSpec);
                     })
-                    .mapToInt(value -> Boolean.TRUE.equals(value) ? 0 : 1)
+                    .mapToInt(value -> value ? 0 : 1)
                     .sum();
 
             return errors > 0 ? 1 : 0;

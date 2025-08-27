@@ -48,6 +48,13 @@ public class Import extends DryRunHook {
     @Parameters(index = "0", description = "Resource type.", arity = "1")
     public String resourceType;
 
+    @Parameters(
+            index = "1",
+            description = "Resource name or wildcard matching resource names.",
+            arity = "0..1",
+            defaultValue = "*")
+    public String resourceName;
+
     /**
      * Run the "get" command.
      *
@@ -56,7 +63,7 @@ public class Import extends DryRunHook {
     public Integer onAuthSuccess() {
         // Validate resourceType + custom type ALL
         List<ApiResource> apiResources = validateResourceType();
-        return resourceService.importAll(apiResources, getNamespace(), dryRun, commandSpec);
+        return resourceService.importAll(apiResources, getNamespace(), resourceName, dryRun, commandSpec);
     }
 
     /**

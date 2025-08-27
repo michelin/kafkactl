@@ -119,9 +119,13 @@ public interface NamespacedResourceClient {
      * @param dryrun Is dry-run mode or not?
      * @return The list of imported resources
      */
-    @Post("{namespace}/{kind}/_/import{?dryrun}")
+    @Post("{namespace}/{kind}/_/import{?name,dryrun}")
     List<Resource> importResources(
-            String namespace, String kind, @Header("Authorization") String token, @QueryValue boolean dryrun);
+            String namespace,
+            String kind,
+            @Header("Authorization") String token,
+            @QueryValue String name,
+            @QueryValue boolean dryrun);
 
     /**
      * Delete records for a given topic.

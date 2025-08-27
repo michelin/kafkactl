@@ -627,29 +627,33 @@ The `import` command allows you to import unsynchronized resources between Ns4Ka
 cluster.
 
 ```console
-Usage: kafkactl import [-hv] [--dry-run] [-n=<optionalNamespace>] <resourceType>
+Usage: kafkactl import [-hv] [--dry-run] [-n=<optionalNamespace>] <resourceType> [<resourceName>]
 
 Description: Import non-synchronized resources.
 
 Parameters:
-      <resourceType>   Resource type.
+      <resourceType>     Resource type.
+      [<resourceName>]   Resource name or wildcard matching resource names.
 
 Options:
-      --dry-run        Does not persist resources. Validate only.
-  -h, --help           Show this help message and exit.
+      --dry-run          Does not persist resources. Validate only.
+  -h, --help             Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                       Override namespace defined in config or YAML resources.
-  -v, --verbose        Enable the verbose mode.
+                         Override namespace defined in config or YAML resources.
+  -v, --verbose          Enable the verbose mode.
 ```
 
 - `resourceType`: This option specifies the type of resource that you want to import, which can be either `topics`
-  or `connects`.
+  or `connectors`.
+- `resourceName`: This option specifies the name of the resource to import.
 
 Example(s):
 
 ```console
 kafkactl import topics
-kafkactl import connects
+kafkactl import topic myTopicName
+kafkactl import connectors
+kafkactl import connector myConnectorName
 ```
 
 ### Reset Offsets
