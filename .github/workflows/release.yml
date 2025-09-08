@@ -62,7 +62,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update release
-        uses: ncipollo/release-action@v1.18.0
+        uses: ncipollo/release-action@v1.20.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
@@ -148,7 +148,7 @@ jobs:
         run: mv ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}${{ matrix.extension }} ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
 
       - name: Update release
-        uses: ncipollo/release-action@v1.18.0
+        uses: ncipollo/release-action@v1.20.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
