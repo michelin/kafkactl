@@ -62,7 +62,7 @@ jobs:
 
       - name: Grype source code
         id: grype_source_code
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           path: .
           fail-build: true
@@ -91,7 +91,7 @@ jobs:
 
       - name: Grype Docker image
         id: grype_docker_image
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           image: michelin/kafkactl:${{ steps.metadata.outputs.current_version }}
           fail-build: true
@@ -177,7 +177,7 @@ jobs:
       - name: Grype Docker image
         if: matrix.os == 'ubuntu-latest'
         id: grype_docker_image
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           image: michelin/kafkactl:${{ steps.metadata.outputs.current_version }}-native
           fail-build: true
