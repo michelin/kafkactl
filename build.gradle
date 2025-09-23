@@ -86,15 +86,8 @@ graalvmNative {
     }
 }
 
-docker {
-    buildOptions {
-        buildArgs = [:]
-        platforms = ["linux/amd64", "linux/arm64"]
-    }
-}
-
 dockerfile {
-    baseImage = "eclipse-temurin:21-jre-alpine"
+    baseImage("eclipse-temurin:21-jre-alpine")
     runCommand("apk update && apk upgrade && rm -rf /var/cache/apk/*")
 }
 

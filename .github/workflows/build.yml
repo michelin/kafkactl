@@ -27,8 +27,7 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      -
-        name: Set up Docker Buildx
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Cache SonarCloud packages
@@ -49,7 +48,9 @@ jobs:
         run: ./gradlew spotlessCheck
 
       - name: Build
-        run: ./gradlew build --info
+        run: |
+          ./gradlew build --info
+          ./gradlew dockerfile
 
       - name: Publish test report
         if: always()
@@ -91,7 +92,12 @@ jobs:
           path: ${{ github.workspace }}/build/libs/kafkactl-${{ steps.metadata.outputs.current_version }}.jar
 
       - name: Docker build
-        run: ./gradlew dockerBuild
+        uses: docker/build-push-action@v6
+        with:
+          context: build/docker/main
+          push: false
+          tags: michelin/kafkactl:${{ steps.metadata.outputs.current_version }}
+          platforms: linux/amd64,linux/arm64
 
       - name: Grype Docker image
         id: grype_docker_image
@@ -118,7 +124,12 @@ jobs:
 
       - name: Docker push
         if: github.ref == 'refs/heads/main'
-        run: ./gradlew dockerBuild dockerPush
+        uses: docker/build-push-action@v6
+        with:
+          context: build/docker/main
+          push: true
+          tags: michelin/kafkactl:${{ steps.metadata.outputs.current_version }}
+          platforms: linux/amd64,linux/arm64
 
   build-native:
     name: Build Native Image ${{ matrix.platform }}
