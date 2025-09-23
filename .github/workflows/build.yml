@@ -97,7 +97,6 @@ jobs:
           context: build/docker/main
           load: true
           tags: michelin/kafkactl:${{ steps.metadata.outputs.current_version }}
-          platforms: linux/amd64,linux/arm64
 
       - name: Grype Docker image
         id: grype_docker_image
@@ -172,7 +171,9 @@ jobs:
         run: ./gradlew spotlessCheck
 
       - name: Build
-        run: ./gradlew nativeCompile ${{ matrix.os == 'ubuntu-latest' && '-Pmusl' || '' }}
+        run: |
+          ./gradlew nativeCompile ${{ matrix.os == 'ubuntu-latest' && '-Pmusl' || '' }}
+          ./gradlew dockerfileNative
 
       - name: Metadata
         id: metadata
@@ -187,7 +188,11 @@ jobs:
 
       - name: Docker build
         if: matrix.os == 'ubuntu-latest'
-        run: ./gradlew dockerBuildNative
+        uses: docker/build-push-action@v6
+        with:
+          context: build/docker/native-main
+          load: true
+          tags: michelin/kafkactl:${{ steps.metadata.outputs.current_version }}-native
 
       - name: Grype Docker image
         if: matrix.os == 'ubuntu-latest'
@@ -213,6 +218,11 @@ jobs:
           username: ${{ secrets.MICHELIN_DOCKER_HUB_USERNAME }}
           password: ${{ secrets.MICHELIN_DOCKER_HUB_PASSWD }}
 
-      - name: Docker push
+      - name: Docker build
         if: matrix.os == 'ubuntu-latest' && github.ref == 'refs/heads/main'
-        run: ./gradlew dockerBuildNative dockerPushNative
+        uses: docker/build-push-action@v6
+        with:
+          context: build/docker/native-main
+          push: true
+          tags: michelin/kafkactl:${{ steps.metadata.outputs.current_version }}-native
+          platforms: linux/amd64,linux/arm64
