@@ -95,7 +95,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: build/docker/main
-          push: false
+          load: true
           tags: michelin/kafkactl:${{ steps.metadata.outputs.current_version }}
           platforms: linux/amd64,linux/arm64
 
