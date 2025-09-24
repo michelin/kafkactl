@@ -86,11 +86,6 @@ graalvmNative {
     }
 }
 
-dockerfile {
-    baseImage = "eclipse-temurin:21-jre-alpine"
-    runCommand("apk update && apk upgrade && rm -rf /var/cache/apk/*")
-}
-
 dockerfileNative {
     baseImage("ubuntu:24.04")
     runCommand("apt-get update && apt-get upgrade -y")
