@@ -211,7 +211,7 @@ jobs:
         with:
           distribution: 'graalvm'
           java-version: '21'
-          native-image-musl: ${{ startsWith(matrix.os, 'ubuntu') }}
+          native-image-musl: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache Gradle packages
