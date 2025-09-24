@@ -120,7 +120,7 @@ jobs:
         run: |
           ./gradlew build -x test
           ./gradlew dockerfile
-          echo image=michelin/kafkactl:${{ needs.build-jar.outputs.version }}-$(echo ${{ matrix.architecture }} | sed 's/\//-/g') >> $GITHUB_OUTPUT
+          echo image=michelin/kafkactl:${{ needs.build-jar.outputs.current_version }}-$(echo ${{ matrix.architecture }} | sed 's/\//-/g') >> $GITHUB_OUTPUT
 
       - name: Build Docker image for ${{ matrix.architecture }}
         uses: docker/build-push-action@v6
