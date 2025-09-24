@@ -105,6 +105,7 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: kafkactl-jar
+          path: build/libs
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -157,7 +158,8 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: kafkactl-jar
-
+          path: build/libs
+          
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 

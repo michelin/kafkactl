@@ -2,6 +2,7 @@ FROM eclipse-temurin:21-jre-alpine
 
 ARG VERSION
 
+# Use application.jar as the name to comply with legacy Micronaut Dockerfile
 COPY build/libs/kafkactl-$VERSION.jar /home/app/application.jar
 
 RUN apk update \
