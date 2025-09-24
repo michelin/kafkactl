@@ -88,13 +88,13 @@ jobs:
           name: kafkactl-jar
           path: ${{ github.workspace }}/build/libs/kafkactl-${{ steps.metadata.outputs.current_version }}.jar
 
-  build-docker-multi-platform:
-    name: Build Docker multi-platform
+  build-docker:
+    name: Build Docker ${{ matrix.platform }}
     runs-on: ubuntu-latest
     needs: build-jar
     strategy:
       matrix:
-        architecture: [linux/amd64, linux/arm64]
+        platform: [linux/amd64, linux/arm64]
     steps:
       - name: Checkout project
         uses: actions/checkout@v5
@@ -122,22 +122,22 @@ jobs:
         run: |
           ./gradlew build -x test
           ./gradlew dockerfile
-          echo image=michelin/kafkactl:${{ needs.build-jar.outputs.current_version }}-$(echo ${{ matrix.architecture }} | sed 's/\//-/g') >> $GITHUB_OUTPUT
+          echo image_name=michelin/kafkactl:${{ needs.build-jar.outputs.current_version }}-$(echo ${{ matrix.platform }} | sed 's/\//-/g') >> $GITHUB_OUTPUT
 
-      - name: Build Docker image for ${{ matrix.architecture }}
+      - name: Docker build
         uses: docker/build-push-action@v6
         with:
           context: build/docker/main
-          platforms: ${{ matrix.architecture }}
+          platforms: ${{ matrix.platform }}
           push: false
           load: true
-          tags: ${{ steps.build.outputs.image }}
+          tags: ${{ steps.build.outputs.image_name }}
 
-      - name: Grype Docker image scan
+      - name: Grype Docker image
         id: grype_docker_image
         uses: anchore/scan-action@v7
         with:
-          image: ${{ steps.build.outputs.image }}
+          image: ${{ steps.build.outputs.image_name }}
           fail-build: true
           severity-cutoff: high
           only-fixed: true
@@ -147,13 +147,13 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ steps.grype_docker_image.outputs.sarif }}
-          category: docker-image-${{ matrix.architecture }}
+          category: docker-image-${{ matrix.platform }}
 
-  push-docker-multi-platform:
-    name: Push Docker multi-platform
+  push-docker:
+    name: Push Docker
     runs-on: ubuntu-latest
-    needs: [build-jar, build-docker-multi-platform]
-    # if: github.ref == 'refs/heads/main'
+    needs: [build-jar, build-docker]
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout project
         uses: actions/checkout@v5
@@ -200,10 +200,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
+        os: [ 'ubuntu-latest', 'ubuntu-24.04-arm', 'windows-latest', 'macos-latest' ]
         include:
           - os: 'ubuntu-latest'
             platform: 'linux-amd64'
+            extension: ''
+          - os: 'ubuntu-24.04-arm'
+            platform: 'linux-arm64'
             extension: ''
           - os: 'macos-latest'
             platform: 'darwin-arm64'
