@@ -193,7 +193,7 @@ jobs:
           context: build/docker/main
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: michelin/kafkactl:${{ needs.build-jar.outputs.version }}
+          tags: michelin/kafkactl:${{ needs.build-jar.outputs.current_version }}
 
   build-native:
     name: Build Native Image ${{ matrix.platform }}
