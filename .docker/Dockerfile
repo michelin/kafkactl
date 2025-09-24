@@ -1,13 +1,14 @@
-FROM alpine:3.21
+FROM alpine:3
 
-LABEL org.opencontainers.image.authors="io.github.loicgreffier"
+ARG VERSION
 
-COPY target/docsource /app/docsource
+# Use application as the name to comply with legacy Micronaut native Dockerfile
+COPY build/native/nativeCompile/kafkactl-$VERSION /app/application
 
 RUN apk update \
-    && echo -e "#!/bin/sh\n\n/app/docsource \"\$@\"" > /usr/bin/docsource \
-    && chmod +x /usr/bin/docsource \
+    && echo -e "#!/bin/sh\n\n/app/application \"\$@\"" > /usr/bin/kafkactl \
+    && chmod +x /usr/bin/kafkactl \
     && apk upgrade \
     && rm -rf /var/cache/apk/*
 
-ENTRYPOINT ["docsource"]
+ENTRYPOINT ["/app/application"]

@@ -94,7 +94,7 @@ jobs:
     needs: build-jar
     strategy:
       matrix:
-        platform: [linux/amd64, linux/arm64]
+        platform: ['linux/amd64', linux/arm64']
     steps:
       - name: Checkout project
         uses: actions/checkout@v5
@@ -159,7 +159,7 @@ jobs:
         with:
           name: kafkactl-jar
           path: build/libs
-          
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -238,16 +238,50 @@ jobs:
           name: kafkactl-${{ matrix.platform }}
           path: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}${{ matrix.extension }}
 
+  build-docker-native:
+    name: Build Docker Native Image ${{ matrix.platform }}
+    runs-on: ubuntu-latest
+    needs: build-native
+    strategy:
+      matrix:
+        platform: ['linux/amd64', 'linux/arm64']
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Download native artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: kafkactl-${{ matrix.platform }}
+          path: build/native/nativeCompile
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        id: build
+        run: echo image_name=michelin/kafkactl:${{ needs.build-native.outputs.current_version }}-native-$(echo ${{ matrix.platform }} | sed 's/\//-/g') >> $GITHUB_OUTPUT
+
       - name: Docker build
-        if: startsWith(matrix.os, 'ubuntu')
-        run: ./gradlew dockerBuildNative
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: .docker/Dockerfile
+          platforms: ${{ matrix.platform }}
+          build-args: VERSION=${{ needs.build-native.outputs.current_version }}
+          push: false
+          load: true
+          tags: ${{ steps.build.outputs.image_name }}
+        env:
+          DOCKER_BUILD_SUMMARY: false
 
       - name: Grype Docker image
-        if: startsWith(matrix.os, 'ubuntu')
         id: grype_docker_image
         uses: anchore/scan-action@v7
         with:
-          image: michelin/kafkactl:${{ steps.metadata.outputs.current_version }}-native
+          image: ${{ steps.build.outputs.image_name }}
           fail-build: true
           severity-cutoff: high
           only-fixed: true
@@ -257,15 +291,43 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ steps.grype_docker_image.outputs.sarif }}
-          category: 'docker-image'
+          category: docker-image-native-${{ matrix.platform }}
+
+  push-docker-native:
+    name: Push Docker Native Image
+    runs-on: ubuntu-latest
+    needs: [build-native, build-docker-native]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Download native artifact
+        uses: actions/download-artifact@v5
+        with:
+          pattern: kafkactl-linux-*
+          path: build/native/nativeCompile
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Docker login
-        if: startsWith(matrix.os, 'ubuntu') && github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.MICHELIN_DOCKER_HUB_USERNAME }}
           password: ${{ secrets.MICHELIN_DOCKER_HUB_PASSWD }}
 
       - name: Docker push
-        if: startsWith(matrix.os, 'ubuntu') && github.ref == 'refs/heads/main'
-        run: ./gradlew dockerBuildNative dockerPushNative
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: .docker/Dockerfile
+          build-args: VERSION=${{ needs.build-native.outputs.current_version }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: michelin/kafkactl:${{ needs.build-native.outputs.current_version }}-native
+        env:
+          DOCKER_BUILD_SUMMARY: false
