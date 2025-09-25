@@ -11,4 +11,4 @@ RUN apk update \
     && apk upgrade \
     && rm -rf /var/cache/apk/*
 
-ENTRYPOINT ["java", "-jar", "/home/app/application.jar"]
+ENTRYPOINT ["kafkactl"]
