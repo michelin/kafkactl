@@ -211,7 +211,7 @@ jobs:
         with:
           distribution: 'graalvm'
           java-version: '21'
-          native-image-musl: false
+          native-image-musl: ${{ matrix.os == 'ubuntu-latest' }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache Gradle packages
@@ -225,7 +225,7 @@ jobs:
         run: ./gradlew spotlessCheck
 
       - name: Build
-        run: ./gradlew nativeCompile ${{ startsWith(matrix.os, 'ubuntu') && '-Pmusl' || '' }}
+        run: ./gradlew nativeCompile ${{ matrix.os == 'ubuntu-latest' && '-Pmusl' || '' }}
 
       - name: Metadata
         id: metadata
