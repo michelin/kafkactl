@@ -254,8 +254,9 @@ jobs:
       - name: Download native artifact
         uses: actions/download-artifact@v5
         with:
-          name: kafkactl-$(echo ${{ matrix.platform }} | sed 's/\//-/g')
+          pattern: kafkactl-linux-*
           path: build/native/nativeCompile
+          merge-multiple: true
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
