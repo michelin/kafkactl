@@ -94,7 +94,7 @@ jobs:
     needs: build-jar
     strategy:
       matrix:
-        platform: ['linux/amd64', 'linux/arm64']
+        platform: [ 'linux/amd64', 'linux/arm64' ]
     steps:
       - name: Checkout project
         uses: actions/checkout@v5
@@ -146,7 +146,7 @@ jobs:
   push-docker:
     name: Push Docker
     runs-on: ubuntu-latest
-    needs: [build-jar, build-docker]
+    needs: [ build-jar, build-docker ]
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout project
@@ -188,7 +188,7 @@ jobs:
       current_version: ${{ steps.metadata.outputs.current_version }}
     strategy:
       matrix:
-        os: ['ubuntu-latest', 'ubuntu-24.04-arm', 'windows-latest', 'macos-latest']
+        os: [ 'ubuntu-latest', 'ubuntu-24.04-arm', 'windows-latest', 'macos-latest' ]
         include:
           - os: 'ubuntu-latest'
             platform: 'linux-amd64'
@@ -246,7 +246,7 @@ jobs:
     needs: build-native
     strategy:
       matrix:
-        platform: ['linux/amd64', 'linux/arm64']
+        platform: [ 'linux/amd64', 'linux/arm64' ]
     steps:
       - name: Checkout project
         uses: actions/checkout@v5
@@ -299,7 +299,7 @@ jobs:
   push-docker-native:
     name: Push Docker Native Image
     runs-on: ubuntu-latest
-    needs: [build-native, build-docker-native]
+    needs: [ build-native, build-docker-native ]
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout project
