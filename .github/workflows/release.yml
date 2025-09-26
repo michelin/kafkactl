@@ -132,7 +132,7 @@ jobs:
   release-native:
     name: Release Native Image
     runs-on: ubuntu-latest
-    needs: [ build-native ]
+    needs: build-native
     steps:
       - name: Checkout project
         uses: actions/checkout@v5
