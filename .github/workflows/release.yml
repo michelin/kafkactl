@@ -163,7 +163,9 @@ jobs:
           build-args: VERSION=${{ needs.build-native.outputs.current_version }}
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: michelin/kafkactl:${{ needs.build-native.outputs.current_version }}-native
+          tags: |
+            michelin/kafkactl:${{ needs.build-native.outputs.current_version }}-native
+            ${{ needs.build-native.outputs.is_latest_version == 'true' && 'michelin/kafkactl:latest-native' || '' }}
         env:
           DOCKER_BUILD_SUMMARY: false
 
