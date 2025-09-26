@@ -82,10 +82,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
+        os: [ 'ubuntu-latest', 'ubuntu-24.04-arm', 'windows-latest', 'macos-latest' ]
         include:
           - os: 'ubuntu-latest'
             platform: 'linux-amd64'
+            extension: ''
+          - os: 'ubuntu-24.04-arm'
+            platform: 'linux-arm64'
             extension: ''
           - os: 'macos-latest'
             platform: 'darwin-arm64'
@@ -133,14 +136,20 @@ jobs:
           username: ${{ secrets.MICHELIN_DOCKER_HUB_USERNAME }}
           password: ${{ secrets.MICHELIN_DOCKER_HUB_PASSWD }}
 
-      - name: Docker build and push
+      - name: Docker push
         if: matrix.os == 'ubuntu-latest'
-        run: |
-          if [ "${{ steps.metadata.outputs.is_latest_version }}" == "true" ]; then
-            ./gradlew dockerBuildNative dockerPushNative -PreleaseLatest
-          else 
-            ./gradlew dockerBuildNative dockerPushNative
-          fi
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: .docker/Dockerfile
+          build-args: VERSION=${{ needs.build-native.outputs.current_version }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            michelin/kafkactl:${{ needs.build-native.outputs.current_version }}-native
+            ${{ steps.metadata.outputs.is_latest_version == 'true' && 'michelin/kafkactl:latest-native' || '' }}
+        env:
+          DOCKER_BUILD_SUMMARY: false
 
       - name: Generate release changelog
         uses: mikepenz/release-changelog-builder-action@v5
