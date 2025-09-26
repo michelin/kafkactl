@@ -80,6 +80,9 @@ jobs:
   build-native:
     name: Release Native Image ${{ matrix.platform }}
     runs-on: ${{ matrix.os }}
+    outputs:
+      current_version: ${{ steps.metadata.outputs.current_version }}
+      is_latest_version: ${{ steps.metadata.outputs.is_latest_version }}
     strategy:
       matrix:
         os: [ 'ubuntu-latest', 'ubuntu-24.04-arm', 'windows-latest', 'macos-latest' ]
