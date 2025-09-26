@@ -101,7 +101,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download JAR artifact
+      - name: Download artifact
         uses: actions/download-artifact@v5
         with:
           name: kafkactl-jar
@@ -154,7 +154,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download JAR artifact
+      - name: Download artifact
         uses: actions/download-artifact@v5
         with:
           name: kafkactl-jar
@@ -253,7 +253,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download native artifact
+      - name: Download artifact
         uses: actions/download-artifact@v5
         with:
           pattern: kafkactl-linux-*
