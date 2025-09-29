@@ -8,7 +8,7 @@ COPY build/native/nativeCompile/kafkactl-$TARGETOS-$TARGETARCH/kafkactl-* /home/
 
 RUN apt-get update \
     && echo -e "#!/bin/sh\n\n/home/app/application \"\$@\"" > /usr/bin/kafkactl \
-    && chmod +x /usr/bin/kafkactl \
+    && chmod +x /usr/bin/kafkactl /home/app/application \
     && apt-get upgrade -y
 
 ENTRYPOINT ["kafkactl"]
