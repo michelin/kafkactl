@@ -86,39 +86,6 @@ graalvmNative {
     }
 }
 
-dockerfile {
-    baseImage = "eclipse-temurin:21-jre-alpine"
-    runCommand("apk update && apk upgrade && rm -rf /var/cache/apk/*")
-}
-
-dockerfileNative {
-    baseImage("ubuntu:24.04")
-    runCommand("apt-get update && apt-get upgrade -y")
-    editDockerfile {
-        after("COPY --link --from=graalvm /home/app/application /app/application") {
-            insert("RUN ln -s /app/application /usr/bin/kafkactl && chmod 777 /usr/bin/kafkactl")
-        }
-    }
-}
-
-if (project.hasProperty("releaseLatest")) {
-    dockerBuild {
-        images.set(["michelin/kafkactl:" + version, "michelin/kafkactl:latest"])
-    }
-
-    dockerBuildNative {
-        images.set(["michelin/kafkactl:" + version + "-native", "michelin/kafkactl:latest-native"])
-    }
-} else {
-    dockerBuild {
-        images.set(["michelin/kafkactl:" + version])
-    }
-
-    dockerBuildNative {
-        images.set(["michelin/kafkactl:" + version + "-native"])
-    }
-}
-
 sonarqube {
     properties {
         property "sonar.projectKey", "michelin_kafkactl"

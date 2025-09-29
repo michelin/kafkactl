@@ -6,7 +6,7 @@ on:
       - 'v*.*.*'
 
 jobs:
-  build-jar:
+  release-jar:
     name: Release JAR
     runs-on: ubuntu-latest
     steps:
@@ -39,25 +39,36 @@ jobs:
           echo current_version=$(echo $CURRENT_VERSION) >> $GITHUB_OUTPUT
           echo is_latest_version=$(echo $(test "$LATEST_VERSION" == "$CURRENT_VERSION" && echo true || echo false)) >> $GITHUB_OUTPUT
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kafkactl-jar
+          path: build/libs/kafkactl-${{ steps.metadata.outputs.current_version }}.jar
+
       - name: Docker login
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.MICHELIN_DOCKER_HUB_USERNAME }}
           password: ${{ secrets.MICHELIN_DOCKER_HUB_PASSWD }}
 
-      - name: Docker build and push
-        run: |
-          if [ "${{ steps.metadata.outputs.is_latest_version }}" == "true" ]; then
-            ./gradlew dockerBuild dockerPush -PreleaseLatest
-          else 
-            ./gradlew dockerBuild dockerPush
-          fi
+      - name: Docker push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: .docker/jar.Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            michelin/kafkactl:${{ needs.metadata.outputs.current_version }}
+            ${{ steps.metadata.outputs.is_latest_version == 'true' && 'michelin/kafkactl:latest' || '' }}
+        env:
+          DOCKER_BUILD_SUMMARY: false
 
       - name: Generate release changelog
         uses: mikepenz/release-changelog-builder-action@v5
         id: build_changelog
         with:
-          configuration: 'changelog-builder.json'
+          configuration: changelog-builder.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -66,20 +77,26 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: ${{ github.workspace }}/build/libs/kafkactl-${{ steps.metadata.outputs.current_version }}.jar
+          artifacts: build/libs/kafkactl-${{ steps.metadata.outputs.current_version }}.jar
           draft: true
           prerelease: true
           allowUpdates: true
 
-  release-native:
-    name: Release Native Image ${{ matrix.platform }}
+  build-native:
+    name: Build Native Image ${{ matrix.platform }}
     runs-on: ${{ matrix.os }}
+    outputs:
+      current_version: ${{ steps.metadata.outputs.current_version }}
+      is_latest_version: ${{ steps.metadata.outputs.is_latest_version }}
     strategy:
       matrix:
-        os: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
+        os: [ 'ubuntu-latest', 'ubuntu-24.04-arm', 'windows-latest', 'macos-latest' ]
         include:
           - os: 'ubuntu-latest'
             platform: 'linux-amd64'
+            extension: ''
+          - os: 'ubuntu-24.04-arm'
+            platform: 'linux-arm64'
             extension: ''
           - os: 'macos-latest'
             platform: 'darwin-arm64'
@@ -120,39 +137,69 @@ jobs:
           echo is_latest_version=$(echo $(test "$LATEST_VERSION" == "$CURRENT_VERSION" && echo true || echo false)) >> $GITHUB_OUTPUT
         shell: bash
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kafkactl-${{ matrix.platform }}
+          path: build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}${{ matrix.extension }}
+
+  release-native:
+    name: Release Native Image
+    runs-on: ubuntu-latest
+    needs: build-native
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Download artifact
+        uses: actions/download-artifact@v5
+        with:
+          pattern: kafkactl-*
+          path: build/native/nativeCompile
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Docker login
-        if: matrix.os == 'ubuntu-latest'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.MICHELIN_DOCKER_HUB_USERNAME }}
           password: ${{ secrets.MICHELIN_DOCKER_HUB_PASSWD }}
 
-      - name: Docker build and push
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          if [ "${{ steps.metadata.outputs.is_latest_version }}" == "true" ]; then
-            ./gradlew dockerBuildNative dockerPushNative -PreleaseLatest
-          else 
-            ./gradlew dockerBuildNative dockerPushNative
-          fi
+      - name: Docker push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: .docker/Dockerfile
+          build-args: MULTI_PLATFORM_BUILD=true
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            michelin/kafkactl:${{ needs.build-native.outputs.current_version }}-native
+            ${{ needs.build-native.outputs.is_latest_version == 'true' && 'michelin/kafkactl:latest-native' || '' }}
+        env:
+          DOCKER_BUILD_SUMMARY: false
 
       - name: Generate release changelog
         uses: mikepenz/release-changelog-builder-action@v5
         id: build_changelog
         with:
-          configuration: 'changelog-builder.json'
+          configuration: changelog-builder.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Rename file
-        run: mv ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}${{ matrix.extension }} ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
+        run: mv build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}${{ matrix.extension }} build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
 
       - name: Update release
         uses: ncipollo/release-action@v1.20.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: ${{ github.workspace }}/build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
+          artifacts: build/native/nativeCompile/kafkactl-*/kafkactl-${{ steps.metadata.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
           draft: true
           prerelease: true
           allowUpdates: true
