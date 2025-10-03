@@ -59,7 +59,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            michelin/kafkactl:${{ needs.metadata.outputs.current_version }}
+            michelin/kafkactl:${{ steps.metadata.outputs.current_version }}
             ${{ steps.metadata.outputs.is_latest_version == 'true' && 'michelin/kafkactl:latest' || '' }}
         env:
           DOCKER_BUILD_SUMMARY: false
@@ -191,14 +191,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Rename file
-        run: mv build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}${{ matrix.extension }} build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
+        run: mv build/native/nativeCompile/kafkactl-${{ needs.build-native.outputs.current_version }}${{ matrix.extension }} build/native/nativeCompile/kafkactl-${{ needs.build-native.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
 
       - name: Update release
         uses: ncipollo/release-action@v1.20.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: build/native/nativeCompile/kafkactl-*/kafkactl-${{ steps.metadata.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
+          artifacts: build/native/nativeCompile/kafkactl-*/kafkactl-${{ needs.build-native.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
           draft: true
           prerelease: true
           allowUpdates: true
