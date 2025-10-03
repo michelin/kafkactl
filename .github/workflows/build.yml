@@ -275,7 +275,6 @@ jobs:
         with:
           context: .
           file: .docker/Dockerfile
-          build-args: MULTI_PLATFORM_BUILD=true
           platforms: ${{ matrix.platform }}
           push: false
           load: true
@@ -330,7 +329,6 @@ jobs:
         with:
           context: .
           file: .docker/Dockerfile
-          build-args: MULTI_PLATFORM_BUILD=true
           platforms: linux/amd64,linux/arm64
           push: true
           tags: michelin/kafkactl:${{ needs.build-native.outputs.current_version }}-native
