@@ -45,6 +45,9 @@ jobs:
           name: kafkactl-jar
           path: build/libs/kafkactl-${{ steps.metadata.outputs.current_version }}.jar
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Docker login
         uses: docker/login-action@v3
         with:
@@ -137,11 +140,14 @@ jobs:
           echo is_latest_version=$(echo $(test "$LATEST_VERSION" == "$CURRENT_VERSION" && echo true || echo false)) >> $GITHUB_OUTPUT
         shell: bash
 
+      - name: Rename file
+        run: mv build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}${{ matrix.extension }} build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: kafkactl-${{ matrix.platform }}
-          path: build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}${{ matrix.extension }}
+          path: build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
 
   release-native:
     name: Release Native Image
@@ -190,15 +196,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Rename file
-        run: mv build/native/nativeCompile/kafkactl-${{ needs.build-native.outputs.current_version }}${{ matrix.extension }} build/native/nativeCompile/kafkactl-${{ needs.build-native.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
-
       - name: Update release
         uses: ncipollo/release-action@v1.20.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.build_changelog.outputs.changelog }}
-          artifacts: build/native/nativeCompile/kafkactl-*/kafkactl-${{ needs.build-native.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
+          artifacts: build/native/nativeCompile/kafkactl-*/*
           draft: true
           prerelease: true
           allowUpdates: true
