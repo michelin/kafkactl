@@ -20,7 +20,7 @@ dependencies {
     annotationProcessor("io.micronaut.validation:micronaut-validation-processor")
 
     implementation("info.picocli:picocli")
-    implementation("io.micronaut:micronaut-http-client:4.9.11")
+    implementation("io.micronaut:micronaut-http-client:4.10.2")
     implementation("io.micronaut:micronaut-jackson-databind")
     implementation("io.micronaut.picocli:micronaut-picocli")
     implementation("io.micronaut.validation:micronaut-validation")
