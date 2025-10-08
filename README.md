@@ -982,6 +982,7 @@ metadata:
 spec:
   kafkaUser: kafkaServiceAccount
   protectionEnabled: false
+  transactionsEnabled: true
   connectClusters:
     - myConnectCluster
   topicValidator:
@@ -1042,6 +1043,9 @@ spec:
   grant public ACL
   or to grant ACL to public namespaces. Only protected namespaces can consume or produce records in protected namespaces
   resources. The field is optional and by default, the namespace is public.
+- `spec.transactionsEnabled` is a boolean defining if transactions are allowed for the namespace. If enabled, the needed
+  transactional ID ACLs will be automatically created based on GROUP ACLs. The field is optional and by default,
+  transactions are enabled.
 - `spec.connectClusters` is a list of Kafka Connect clusters. It should refer to a Kafka Connect cluster declared in the
   Ns4Kafka configuration.
 - `spec.topicValidator` is a list of constraints for topics.
