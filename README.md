@@ -1040,8 +1040,8 @@ spec:
 - `spec.kafkaUser` is the Kafka principal. It should refer to an Account ID. It will be used to create ACLs on this
   service account.
 - `spec.protectionEnabled` is a boolean that defines whether the namespace is protected. Protected namespaces cannot grant public ACLs or grant ACLs to public namespaces. 
-  Only protected namespaces can consume or produce records in protected namespace resources. This field is optional; by default, the namespace is public.
-- `spec.transactionsEnabled` is a boolean that defines whether transactions are allowed for the namespace. If enabled, the required transactional ID ACLs will be automatically created based on GROUP ACLs.
+  Protected namespaces can only consume or produce records in protected namespace resources. This field is optional; by default, namespaces are public.
+- `spec.transactionsEnabled` is a boolean that defines whether transactions are allowed for the namespace. If enabled, the transactional ID ACLs will be created based on GROUP ACLs.
   This field is optional; by default, transactions are enabled.
 - `spec.connectClusters` is a list of Kafka Connect clusters. It should refer to a Kafka Connect cluster declared in the
   Ns4Kafka configuration.
