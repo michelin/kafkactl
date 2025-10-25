@@ -38,7 +38,7 @@ class FileServiceTest {
     void shouldComputeYamlFileListRecursive() {
         List<File> actual = fileService.computeYamlFileList(new File("src/test/resources"), true);
         assertEquals(
-                List.of("config.yml", "ordered-resources.yml", "unordered-resources.yml", "topic.yml"),
+                List.of("config.yml", "ordered-resources.yml", "topic.yml", "unordered-resources.yml"),
                 actual.stream().map(File::getName).sorted().toList());
     }
 

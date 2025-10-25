@@ -56,28 +56,32 @@ class ResourceServicePrepareResourcesTest {
     @Test
     void shouldSetSchemaFromSchemaFilePath() {
         String schemaContent = normalize("""
-            {
-              "namespace": "io.github.michelin.ns4kafka.avro",
-              "type": "record",
-              "name": "KafkaPerson",
-              "fields": [
                 {
-                  "name": "id",
-                  "type": "long"
-                },
-                {
-                  "name": "firstName",
-                  "type": "string"
-                },
-                {
-                  "name": "lastName",
-                  "type": "string"
-                }
-              ]
-            }""");
+                   "namespace": "com.michelin.kafkactl",
+                   "type": "record",
+                   "name": "PersonAvro",
+                   "fields": [
+                     {
+                       "name": "firstName",
+                       "type": [
+                         "string"
+                       ],
+                       "doc": "First name of the person"
+                     },
+                     {
+                       "name": "lastName",
+                       "type": [
+                         "null",
+                         "string"
+                       ],
+                       "default": null,
+                       "doc": "Last name of the person"
+                     }
+                   ]
+                 }""");
 
         Map<String, Object> spec = new HashMap<>();
-        spec.put(SCHEMA_FILE_FIELD, new File("src/test/resources/schemas/schema.avsc"));
+        spec.put(SCHEMA_FILE_FIELD, new File("src/test/resources/person.avsc"));
 
         Resource schemaResource = Resource.builder()
                 .kind("Schema")

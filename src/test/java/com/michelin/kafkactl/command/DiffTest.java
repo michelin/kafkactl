@@ -18,6 +18,7 @@
  */
 package com.michelin.kafkactl.command;
 
+import static com.michelin.kafkactl.service.ResourceService.SCHEMA_FIELD;
 import static com.michelin.kafkactl.service.ResourceService.SCHEMA_FILE_FIELD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -490,6 +491,7 @@ class DiffTest {
                 .build();
 
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
+        when(resourceService.sortSchemaReferences(any())).thenReturn(List.of("com.michelin.kafkactl.PersonAvro"));
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
                 .thenReturn(null);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
@@ -518,9 +520,6 @@ class DiffTest {
 
     @Test
     void shouldDiffInlineSchema() {
-        Map<String, Object> specs = new HashMap<>();
-        specs.put("schema", "{schema}");
-
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
@@ -531,7 +530,10 @@ class DiffTest {
                         .name("prefix.schema")
                         .namespace("namespace")
                         .build())
-                .spec(specs)
+                .spec(
+                        Map.of(
+                                SCHEMA_FIELD,
+                                "{\"type\":\"record\",\"name\":\"Customer\",\"namespace\":\"com.michelin.kafka.avro\", \"fields\": [{ \"name\": \"ref\", \"type\": \"string\" }]}"))
                 .build();
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
@@ -548,6 +550,7 @@ class DiffTest {
                 .build();
 
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
+        when(resourceService.sortSchemaReferences(any())).thenReturn(List.of("com.michelin.kafka.avro.Customer"));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any())).thenReturn(HttpResponse.ok(resource));
 
         CommandLine cmd = new CommandLine(diff);
@@ -566,7 +569,12 @@ class DiffTest {
         assertTrue(sw.toString().contains("+  labels: null"));
         assertTrue(sw.toString().contains("+  name: prefix.schema"));
         assertTrue(sw.toString().contains("+  namespace: namespace"));
-        assertTrue(sw.toString().contains("+  schema: '{schema}'"));
+        assertTrue(sw.toString().contains("+spec:"));
+        assertTrue(
+                sw.toString()
+                        .contains(
+                                "+  schema: '{\"type\":\"record\",\"name\":\"Customer\",\"namespace\":\"com.michelin.kafka.avro\","));
+        assertTrue(sw.toString().contains("+    \"fields\": [{ \"name\": \"ref\", \"type\": \"string\" }]}'"));
     }
 
     @Test

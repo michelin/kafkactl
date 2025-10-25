@@ -574,7 +574,9 @@ public class ResourceService {
         Map<String, List<SchemaReference>> referencesByParentName = new HashMap<>();
 
         resources.forEach(resource -> {
-            resource.getSpec().put(SCHEMA_FIELD, getSchemaContent(resource, commandSpec));
+            HashMap<String, Object> spec = new HashMap<>(resource.getSpec());
+            spec.put(SCHEMA_FIELD, getSchemaContent(resource, commandSpec));
+            resource.setSpec(spec);
 
             List<SchemaReference> references = new ArrayList<>();
             if (resource.getSpec().get(REFERENCES_FIELD) instanceof List<?> refs) {
@@ -597,9 +599,8 @@ public class ResourceService {
                                 + "\", \"fields\":[{\"name\":\"id\",\"type\":\"string\"}]}";
                     }));
 
-            String name = new AvroSchema(
-                            resource.getSpec().get(SCHEMA_FIELD).toString(), references, resolvedReferences, null)
-                    .name();
+            String name =
+                    new AvroSchema(spec.get(SCHEMA_FIELD).toString(), references, resolvedReferences, null).name();
 
             schemaByName.put(name, resource);
             referencesByParentName.put(name, references);
