@@ -129,7 +129,7 @@ public class Diff extends AuthenticatedHook {
     /**
      * Compute the difference between current resource and applied resource.
      *
-     * @param   live The current resource
+     * @param live The current resource
      * @param merged The applied new resource
      * @return The differences
      */
@@ -158,7 +158,8 @@ public class Diff extends AuthenticatedHook {
             mergedYaml = removeIgnoredFields(mergedYaml, ignoreFields, yaml);
         }
 
-        List<String> oldResourceStr = liveYaml.isEmpty() ? List.of() : liveYaml.lines().toList();
+        List<String> oldResourceStr =
+                liveYaml.isEmpty() ? List.of() : liveYaml.lines().toList();
         List<String> newResourceStr = mergedYaml.lines().toList();
         Patch<String> diff = DiffUtils.diff(oldResourceStr, newResourceStr);
         return UnifiedDiffUtils.generateUnifiedDiff(
@@ -183,7 +184,6 @@ public class Diff extends AuthenticatedHook {
         if (yamlContent.isEmpty()) {
             return yamlContent;
         }
-
 
         Object data = yaml.load(yamlContent);
         if (!(data instanceof java.util.Map)) {

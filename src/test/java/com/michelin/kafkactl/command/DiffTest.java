@@ -160,7 +160,7 @@ class DiffTest {
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
         doThrow(new ParameterException(
-                cmd.getCommandSpec().commandLine(), "The server does not have resource type(s) Topic."))
+                        cmd.getCommandSpec().commandLine(), "The server does not have resource type(s) Topic."))
                 .when(resourceService)
                 .validateAllowedResources(any(), any());
 
@@ -473,7 +473,6 @@ class DiffTest {
         assertFalse(output.contains("replicationFactor"));
     }
 
-
     @Test
     void shouldDiffWithMultipleIgnoreFields() {
         when(configService.isCurrentContextValid()).thenReturn(true);
@@ -556,7 +555,7 @@ class DiffTest {
                 .metadata(Metadata.builder()
                         .name("prefix.topic")
                         .namespace("namespace")
-                        .labels(Map.of("key", "value", "key2", "value2","key3", "value3", "key4", "value4"))
+                        .labels(Map.of("key", "value", "key2", "value2", "key3", "value3", "key4", "value4"))
                         .build())
                 .spec(Map.of(
                         "replicationFactor", 1,
@@ -585,7 +584,7 @@ class DiffTest {
                 .metadata(Metadata.builder()
                         .name("prefix.topic")
                         .namespace("namespace")
-                        .labels(Map.of("world", "hello", "key2", "value2","key3", "value3", "key4", "value4"))
+                        .labels(Map.of("world", "hello", "key2", "value2", "key3", "value3", "key4", "value4"))
                         .build())
                 .spec(Map.of(
                         "replicationFactor", 3,
