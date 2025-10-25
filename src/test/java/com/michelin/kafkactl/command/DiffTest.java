@@ -18,7 +18,7 @@
  */
 package com.michelin.kafkactl.command;
 
-import static com.michelin.kafkactl.service.ResourceService.SCHEMA_FILE;
+import static com.michelin.kafkactl.service.ResourceService.SCHEMA_FILE_FIELD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -461,7 +461,7 @@ class DiffTest {
     @Test
     void shouldDiffSchemaWhenNoLive() {
         Map<String, Object> specs = new HashMap<>();
-        specs.put(SCHEMA_FILE, "src/test/resources/person.avsc");
+        specs.put(SCHEMA_FILE_FIELD, "src/test/resources/person.avsc");
 
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
@@ -572,7 +572,7 @@ class DiffTest {
     @Test
     void shouldNotDiffSchemaWhenNotExist() {
         Map<String, Object> specs = new HashMap<>();
-        specs.put(SCHEMA_FILE, "src/test/resources/not-exist.avsc");
+        specs.put(SCHEMA_FILE_FIELD, "src/test/resources/not-exist.avsc");
 
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
