@@ -33,6 +33,7 @@ import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -71,6 +72,12 @@ public class Diff extends AuthenticatedHook {
             names = {"-R", "--recursive"},
             description = "Search file recursively.")
     public boolean recursive;
+
+    @Option(
+            names = {"--ignore-fields"},
+            description = "Comma-separated list of YAML paths to ignore (e.g., metadata.labels.creationDateTime)",
+            split = ",")
+    public List<String> ignoreFields = List.of();
 
     /**
      * Run the "diff" command.
@@ -122,7 +129,7 @@ public class Diff extends AuthenticatedHook {
     /**
      * Compute the difference between current resource and applied resource.
      *
-     * @param live The current resource
+     * @param   live The current resource
      * @param merged The applied new resource
      * @return The differences
      */
@@ -142,8 +149,17 @@ public class Diff extends AuthenticatedHook {
         representer.addClassTag(Resource.class, Tag.MAP);
         Yaml yaml = new Yaml(representer, options);
 
-        List<String> oldResourceStr = live != null ? yaml.dump(live).lines().toList() : List.of();
-        List<String> newResourceStr = yaml.dump(merged).lines().toList();
+        String liveYaml = live != null ? yaml.dump(live) : "";
+        String mergedYaml = yaml.dump(merged);
+
+        // Remove ignored fields
+        if (!ignoreFields.isEmpty()) {
+            liveYaml = removeIgnoredFields(liveYaml, ignoreFields, yaml);
+            mergedYaml = removeIgnoredFields(mergedYaml, ignoreFields, yaml);
+        }
+
+        List<String> oldResourceStr = liveYaml.isEmpty() ? List.of() : liveYaml.lines().toList();
+        List<String> newResourceStr = mergedYaml.lines().toList();
         Patch<String> diff = DiffUtils.diff(oldResourceStr, newResourceStr);
         return UnifiedDiffUtils.generateUnifiedDiff(
                 String.format(
@@ -153,5 +169,59 @@ public class Diff extends AuthenticatedHook {
                 oldResourceStr,
                 diff,
                 3);
+    }
+
+    /**
+     * Remove ignored fields from YAML content.
+     *
+     * @param yamlContent The YAML content
+     * @param ignoreFields List of dot-notation paths to ignore
+     * @param yaml The YAML instance for parsing/dumping
+     * @return The YAML content without ignored fields
+     */
+    private String removeIgnoredFields(String yamlContent, List<String> ignoreFields, Yaml yaml) {
+        if (yamlContent.isEmpty()) {
+            return yamlContent;
+        }
+
+
+        Object data = yaml.load(yamlContent);
+        if (!(data instanceof java.util.Map)) {
+            return yamlContent;
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> map = (Map<String, Object>) data;
+
+        // Remove each ignored field
+        for (String path : ignoreFields) {
+            removeFieldByPath(map, path);
+        }
+
+        // Dump back to YAML
+        return yaml.dump(map);
+    }
+
+    /**
+     * Remove a field from a map using dot-notation path.
+     *
+     * @param map The map to modify
+     * @param path The dot-notation path (e.g., "metadata.labels.creationDateTime")
+     */
+    @SuppressWarnings("unchecked")
+    private void removeFieldByPath(Map<String, Object> map, String path) {
+        String[] parts = path.split("\\.");
+        Map<String, Object> current = map;
+
+        for (int i = 0; i < parts.length - 1; i++) {
+            Object next = current.get(parts[i]);
+            if (!(next instanceof Map)) {
+                return; // Path doesn't exist
+            }
+            current = (Map<String, Object>) next;
+        }
+
+        // Remove the final key
+        current.remove(parts[parts.length - 1]);
     }
 }
