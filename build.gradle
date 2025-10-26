@@ -1,5 +1,5 @@
 plugins {
-    id("com.gradleup.shadow") version "8.3.8"
+    id("com.gradleup.shadow") version "8.3.9"
     id("io.micronaut.application") version "4.5.4"
     id("jacoco")
     id("org.sonarqube") version "7.0.0.6105"
@@ -23,7 +23,7 @@ dependencies {
     annotationProcessor("io.micronaut.validation:micronaut-validation-processor")
 
     implementation("info.picocli:picocli")
-    implementation("io.micronaut:micronaut-http-client:4.10.7")
+    implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
     implementation("io.micronaut.picocli:micronaut-picocli")
     implementation("io.micronaut.validation:micronaut-validation")
