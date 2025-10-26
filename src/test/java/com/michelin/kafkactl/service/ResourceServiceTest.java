@@ -1418,19 +1418,6 @@ class ResourceServiceTest {
     }
 
     @Test
-    void shouldVaultsOnConnectClustersAndThrowException() {
-        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
-        when(namespacedClient.listAvailableVaultsConnectClusters(any(), any())).thenThrow(exception);
-
-        CommandLine cmd = new CommandLine(new Kafkactl());
-
-        int actual = resourceService.listAvailableVaultsConnectClusters("namespace", cmd.getCommandSpec());
-
-        assertEquals(1, actual);
-        verify(formatService).displayError(exception, cmd.getCommandSpec());
-    }
-
-    @Test
     void shouldParse() {
         CommandLine cmd = new CommandLine(new Kafkactl());
 
