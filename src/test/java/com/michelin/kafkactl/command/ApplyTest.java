@@ -18,16 +18,13 @@
  */
 package com.michelin.kafkactl.command;
 
-import static com.michelin.kafkactl.service.ResourceService.SCHEMA_FILE;
+import static com.michelin.kafkactl.service.ResourceService.SCHEMA_FIELD;
+import static com.michelin.kafkactl.service.ResourceService.SCHEMA_FILE_FIELD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.model.ApiResource;
@@ -311,7 +308,7 @@ class ApplyTest {
     @Test
     void shouldApplySchema() {
         Map<String, Object> specs = new HashMap<>();
-        specs.put(SCHEMA_FILE, "src/test/resources/person.avsc");
+        specs.put(SCHEMA_FILE_FIELD, "src/test/resources/person.avsc");
 
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
@@ -340,6 +337,7 @@ class ApplyTest {
                 .build();
 
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
+        when(resourceService.sortSchemaReferences(any())).thenReturn(List.of("com.michelin.kafkactl.PersonAvro"));
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
 
@@ -355,9 +353,6 @@ class ApplyTest {
 
     @Test
     void shouldApplyInlineSchema() {
-        Map<String, Object> specs = new HashMap<>();
-        specs.put("schema", "{schema}");
-
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
@@ -368,11 +363,15 @@ class ApplyTest {
                         .name("prefix.schema")
                         .namespace("namespace")
                         .build())
-                .spec(specs)
+                .spec(
+                        Map.of(
+                                SCHEMA_FIELD,
+                                "{\"type\":\"record\",\"name\":\"Customer\",\"namespace\":\"com.michelin.kafka.avro\", \"fields\": [{ \"name\": \"ref\", \"type\": \"string\" }]}"))
                 .build();
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
+        when(resourceService.sortSchemaReferences(any())).thenReturn(List.of("com.michelin.kafka.avro.Customer"));
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
         ApiResource apiResource = ApiResource.builder()
@@ -399,7 +398,7 @@ class ApplyTest {
     @Test
     void shouldNotApplySchemaWhenNotExist() {
         Map<String, Object> specs = new HashMap<>();
-        specs.put(SCHEMA_FILE, "src/test/resources/not-exist.avsc");
+        specs.put(SCHEMA_FILE_FIELD, "src/test/resources/not-exist.avsc");
 
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);

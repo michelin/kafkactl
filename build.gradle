@@ -12,6 +12,9 @@ group = "com.michelin.kafkactl"
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://packages.confluent.io/maven")
+    }
 }
 
 dependencies {
@@ -30,6 +33,7 @@ dependencies {
     implementation("io.github.java-diff-utils:java-diff-utils:4.16")
     implementation("io.micronaut:micronaut-retry")
     implementation("org.yaml:snakeyaml")
+    implementation("io.confluent:kafka-schema-registry-client:8.1.0")
 
     compileOnly("org.graalvm.nativeimage:svm")
     compileOnly("org.projectlombok:lombok")
@@ -111,7 +115,7 @@ test {
 spotless {
     java {
         target "src/main/java/**/*.java", "src/test/java/**/*.java"
-        palantirJavaFormat("2.58.0").style("PALANTIR").formatJavadoc(true)
+        palantirJavaFormat("2.81.0").style("PALANTIR").formatJavadoc(true)
         removeUnusedImports()
         formatAnnotations()
         importOrder()
@@ -138,7 +142,10 @@ spotless {
 import org.apache.tools.ant.filters.ReplaceTokens
 
 processResources {
+    Property<String> version = project.objects.property(String)
+    version.set(project.version.toString())
+
     filesMatching("application.yml") {
-        filter(ReplaceTokens, tokens: [version: project.version])
+        filter(ReplaceTokens, tokens: [version: version.get()])
     }
 }

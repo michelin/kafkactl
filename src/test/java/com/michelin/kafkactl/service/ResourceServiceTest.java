@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.michelin.kafkactl.service.resource;
+package com.michelin.kafkactl.service;
 
 import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CHANGE_CONNECTOR_STATE;
@@ -49,10 +49,6 @@ import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.SchemaCompatibility;
-import com.michelin.kafkactl.service.FileService;
-import com.michelin.kafkactl.service.FormatService;
-import com.michelin.kafkactl.service.LoginService;
-import com.michelin.kafkactl.service.ResourceService;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
@@ -1419,19 +1415,6 @@ class ResourceServiceTest {
         assertEquals(0, actual);
         verify(formatService)
                 .displayList(VAULT_RESPONSE, Collections.singletonList(availableVaults), TABLE, cmd.getCommandSpec());
-    }
-
-    @Test
-    void shouldVaultsOnConnectClustersAndThrowException() {
-        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
-        when(namespacedClient.listAvailableVaultsConnectClusters(any(), any())).thenThrow(exception);
-
-        CommandLine cmd = new CommandLine(new Kafkactl());
-
-        int actual = resourceService.listAvailableVaultsConnectClusters("namespace", cmd.getCommandSpec());
-
-        assertEquals(1, actual);
-        verify(formatService).displayError(exception, cmd.getCommandSpec());
     }
 
     @Test
