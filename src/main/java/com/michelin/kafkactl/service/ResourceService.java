@@ -582,6 +582,22 @@ public class ResourceService {
             if (resource.getSpec().get(REFERENCES_FIELD) instanceof List<?> refs) {
                 refs.forEach(ref -> {
                     Map<?, ?> schemaReference = (Map<?, ?>) ref;
+
+                    if (!schemaReference.containsKey("name")) {
+                        throw new ParameterException(
+                                commandSpec.commandLine(), "Schema reference is missing required fields \"name\".");
+                    }
+
+                    if (!schemaReference.containsKey("subject")) {
+                        throw new ParameterException(
+                                commandSpec.commandLine(), "Schema reference is missing required fields \"subject\".");
+                    }
+
+                    if (!schemaReference.containsKey("version")) {
+                        throw new ParameterException(
+                                commandSpec.commandLine(), "Schema reference is missing required fields \"version\".");
+                    }
+
                     references.add(new SchemaReference(
                             schemaReference.get("name").toString(),
                             schemaReference.get("subject").toString(),

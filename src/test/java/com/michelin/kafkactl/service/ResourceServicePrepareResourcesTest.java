@@ -283,11 +283,135 @@ class ResourceServicePrepareResourcesTest {
                         List.of(Map.of("name", "com.example.leaf.Leaf", "subject", "leaf-subject", "version", 1))))
                 .build();
 
-        var sortedResources = resourceService.prepareResources(List.of(schemaNested, schemaLeaf), commandSpec);
+        List<Resource> sortedResources =
+                resourceService.prepareResources(List.of(schemaNested, schemaLeaf), commandSpec);
 
         assertEquals(
                 List.of("schemaLeaf", "schemaNested"),
                 sortedResources.stream().map(r -> r.getMetadata().getName()).toList());
+    }
+
+    @Test
+    void shouldHandleMissingNameInReferencesGracefully() {
+        Resource schemaCustomer = Resource.builder()
+                .kind("Schema")
+                .apiVersion("v1")
+                .metadata(Metadata.builder().name("Customer").build())
+                .spec(
+                        Map.of(
+                                SCHEMA_FIELD,
+                                "{\"type\":\"record\",\"name\":\"Customer\",\"namespace\":\"com.michelin.kafka.avro\", \"fields\": [{ \"name\": \"ref\", \"type\": \"string\" }]}"))
+                .build();
+
+        Resource schemaOrder = Resource.builder()
+                .kind("Schema")
+                .apiVersion("v1")
+                .metadata(Metadata.builder().name("Order").build())
+                .spec(Map.of(
+                        SCHEMA_FIELD,
+                        normalize("""
+                                {
+                                  "type": "record",
+                                  "name": "Order",
+                                  "namespace": "com.michelin.kafka.avro",
+                                  "fields": [
+                                    { "name": "ref", "type": "com.michelin.kafka.avro.Customer"}
+                                  ]
+                                }
+                                """),
+                        REFERENCES_FIELD,
+                        List.of(Map.of("subject", "abc.customer-value", "version", 1))))
+                .build();
+
+        when(commandSpec.commandLine()).thenReturn(mock(CommandLine.class));
+
+        Exception ex = assertThrows(
+                CommandLine.ParameterException.class,
+                () -> resourceService.prepareResources(List.of(schemaOrder, schemaCustomer), commandSpec));
+
+        assertEquals("Schema reference is missing required fields \"name\".", ex.getMessage());
+    }
+
+    @Test
+    void shouldHandleMissingSubjectInReferencesGracefully() {
+        Resource schemaCustomer = Resource.builder()
+                .kind("Schema")
+                .apiVersion("v1")
+                .metadata(Metadata.builder().name("Customer").build())
+                .spec(
+                        Map.of(
+                                SCHEMA_FIELD,
+                                "{\"type\":\"record\",\"name\":\"Customer\",\"namespace\":\"com.michelin.kafka.avro\", \"fields\": [{ \"name\": \"ref\", \"type\": \"string\" }]}"))
+                .build();
+
+        Resource schemaOrder = Resource.builder()
+                .kind("Schema")
+                .apiVersion("v1")
+                .metadata(Metadata.builder().name("Order").build())
+                .spec(Map.of(
+                        SCHEMA_FIELD,
+                        normalize("""
+                                {
+                                  "type": "record",
+                                  "name": "Order",
+                                  "namespace": "com.michelin.kafka.avro",
+                                  "fields": [
+                                    { "name": "ref", "type": "com.michelin.kafka.avro.Customer"}
+                                  ]
+                                }
+                                """),
+                        REFERENCES_FIELD,
+                        List.of(Map.of("name", "com.michelin.kafka.avro.Customer", "version", 1))))
+                .build();
+
+        when(commandSpec.commandLine()).thenReturn(mock(CommandLine.class));
+
+        Exception ex = assertThrows(
+                CommandLine.ParameterException.class,
+                () -> resourceService.prepareResources(List.of(schemaOrder, schemaCustomer), commandSpec));
+
+        assertEquals("Schema reference is missing required fields \"subject\".", ex.getMessage());
+    }
+
+    @Test
+    void shouldHandleMissingVersionInReferencesGracefully() {
+        Resource schemaCustomer = Resource.builder()
+                .kind("Schema")
+                .apiVersion("v1")
+                .metadata(Metadata.builder().name("Customer").build())
+                .spec(
+                        Map.of(
+                                SCHEMA_FIELD,
+                                "{\"type\":\"record\",\"name\":\"Customer\",\"namespace\":\"com.michelin.kafka.avro\", \"fields\": [{ \"name\": \"ref\", \"type\": \"string\" }]}"))
+                .build();
+
+        Resource schemaOrder = Resource.builder()
+                .kind("Schema")
+                .apiVersion("v1")
+                .metadata(Metadata.builder().name("Order").build())
+                .spec(Map.of(
+                        SCHEMA_FIELD,
+                        normalize("""
+                                {
+                                  "type": "record",
+                                  "name": "Order",
+                                  "namespace": "com.michelin.kafka.avro",
+                                  "fields": [
+                                    { "name": "ref", "type": "com.michelin.kafka.avro.Customer"}
+                                  ]
+                                }
+                                """),
+                        REFERENCES_FIELD,
+                        List.of(Map.of("name", "com.michelin.kafka.avro.Customer", "subject", "abc.customer-value"))))
+                .build();
+
+        when(commandSpec.commandLine()).thenReturn(mock(CommandLine.class));
+
+        Exception ex = assertThrows(
+                CommandLine.ParameterException.class,
+                () -> resourceService.prepareResources(List.of(schemaOrder, schemaCustomer), commandSpec));
+
+        assertEquals("Schema reference is missing required fields \"version\".", ex.getMessage());
     }
 
     @Test
