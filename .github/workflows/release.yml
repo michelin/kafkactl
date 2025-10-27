@@ -40,7 +40,7 @@ jobs:
           echo is_latest_version=$(echo $(test "$LATEST_VERSION" == "$CURRENT_VERSION" && echo true || echo false)) >> $GITHUB_OUTPUT
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: kafkactl-jar
           path: build/libs/kafkactl-${{ steps.metadata.outputs.current_version }}.jar
@@ -144,7 +144,7 @@ jobs:
         run: mv build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}${{ matrix.extension }} build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: kafkactl-${{ matrix.platform }}
           path: build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}-${{ matrix.platform }}${{ matrix.extension }}
