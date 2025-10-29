@@ -947,7 +947,8 @@ class DiffTest {
         cmd.setOut(new PrintWriter(sw));
 
         // Ignore non-existent fields - should not break anything
-        int code = cmd.execute("-f", "topic.yml", "--ignore-fields", "spec.nonexistent.field,spec.another.missing,metadata.fake.path");
+        int code = cmd.execute(
+                "-f", "topic.yml", "--ignore-fields", "spec.nonexistent.field,spec.another.missing,metadata.fake.path");
         assertEquals(0, code);
 
         String output = sw.toString();

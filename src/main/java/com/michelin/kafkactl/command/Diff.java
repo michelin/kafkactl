@@ -203,8 +203,8 @@ public class Diff extends AuthenticatedHook {
     }
 
     /**
-     * Remove a field from a map using dot-notation path.
-     * Handles both nested format (spec.cleanup.policy) and flat format (spec."cleanup.policy").
+     * Remove a field from a map using dot-notation path. Handles both nested format (spec.cleanup.policy) and flat
+     * format (spec."cleanup.policy").
      *
      * @param map The map to modify
      * @param path The dot-notation path (e.g., "metadata.labels.creationDateTime" or "spec.cleanup.policy")
@@ -215,10 +215,9 @@ public class Diff extends AuthenticatedHook {
     }
 
     /**
-     * Recursively remove a field from a map using path parts.
-     * At each level, tries both:
-     * 1. Nested navigation (current part is a Map key, continue recursing)
-     * 2. Flat key (remaining parts joined with dots form a single key at current level)
+     * Recursively remove a field from a map using path parts. At each level, tries both: 1. Nested navigation (current
+     * part is a Map key, continue recursing) 2. Flat key (remaining parts joined with dots form a single key at current
+     * level)
      *
      * @param map The current map to search
      * @param parts The path parts array
