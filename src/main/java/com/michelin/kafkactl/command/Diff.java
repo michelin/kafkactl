@@ -204,24 +204,47 @@ public class Diff extends AuthenticatedHook {
 
     /**
      * Remove a field from a map using dot-notation path.
+     * Handles both nested format (spec.cleanup.policy) and flat format (spec."cleanup.policy").
      *
      * @param map The map to modify
-     * @param path The dot-notation path (e.g., "metadata.labels.creationDateTime")
+     * @param path The dot-notation path (e.g., "metadata.labels.creationDateTime" or "spec.cleanup.policy")
      */
-    @SuppressWarnings("unchecked")
     private void removeFieldByPath(Map<String, Object> map, String path) {
         String[] parts = path.split("\\.");
-        Map<String, Object> current = map;
+        removeFieldRecursive(map, parts, 0);
+    }
 
-        for (int i = 0; i < parts.length - 1; i++) {
-            Object next = current.get(parts[i]);
-            if (!(next instanceof Map)) {
-                return; // Path doesn't exist
-            }
-            current = (Map<String, Object>) next;
+    /**
+     * Recursively remove a field from a map using path parts.
+     * At each level, tries both:
+     * 1. Nested navigation (current part is a Map key, continue recursing)
+     * 2. Flat key (remaining parts joined with dots form a single key at current level)
+     *
+     * @param map The current map to search
+     * @param parts The path parts array
+     * @param index The current index in the parts array
+     * @return true if the field was successfully removed, false otherwise
+     */
+    @SuppressWarnings("unchecked")
+    private boolean removeFieldRecursive(Map<String, Object> map, String[] parts, int index) {
+        // Base case: we've navigated to the final part
+        if (index == parts.length - 1) {
+            return map.remove(parts[index]) != null;
         }
 
-        // Remove the final key
-        current.remove(parts[parts.length - 1]);
+        String currentPart = parts[index];
+
+        // Strategy 1: Try nested navigation
+        Object next = map.get(currentPart);
+        if (next instanceof Map) {
+            Map<String, Object> nestedMap = (Map<String, Object>) next;
+            if (removeFieldRecursive(nestedMap, parts, index + 1)) {
+                return true;
+            }
+        }
+
+        // Strategy 2: Try flat key (join remaining parts with dots)
+        String flatKey = String.join(".", java.util.Arrays.copyOfRange(parts, index, parts.length));
+        return map.remove(flatKey) != null;
     }
 }
