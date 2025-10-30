@@ -186,16 +186,17 @@ public class Diff extends AuthenticatedHook {
         }
 
         Object data = yaml.load(yamlContent);
-        if (!(data instanceof java.util.Map)) {
+        if (!(data instanceof Map)) {
             return yamlContent;
         }
 
         @SuppressWarnings("unchecked")
         Map<String, Object> map = (Map<String, Object>) data;
 
-        // Remove each ignored field
+        // Remove each ignored field using removeFieldRecursive directly
         for (String path : ignoreFields) {
-            removeFieldByPath(map, path);
+            List<String> parts = List.of(path.split("\\."));
+            removeField(map, parts);
         }
 
         // Dump back to YAML
@@ -203,47 +204,24 @@ public class Diff extends AuthenticatedHook {
     }
 
     /**
-     * Remove a field from a map using dot-notation path. Handles both nested format (spec.cleanup.policy) and flat
-     * format (spec."cleanup.policy").
+     * Remove a field from a map using a list of path parts. Handles both nested and flat keys.
      *
      * @param map The map to modify
-     * @param path The dot-notation path (e.g., "metadata.labels.creationDateTime" or "spec.cleanup.policy")
-     */
-    private void removeFieldByPath(Map<String, Object> map, String path) {
-        String[] parts = path.split("\\.");
-        removeFieldRecursive(map, parts, 0);
-    }
-
-    /**
-     * Recursively remove a field from a map using path parts. At each level, tries both: 1. Nested navigation (current
-     * part is a Map key, continue recursing) 2. Flat key (remaining parts joined with dots form a single key at current
-     * level)
-     *
-     * @param map The current map to search
-     * @param parts The path parts array
-     * @param index The current index in the parts array
-     * @return true if the field was successfully removed, false otherwise
+     * @param parts The list of path parts
      */
     @SuppressWarnings("unchecked")
-    private boolean removeFieldRecursive(Map<String, Object> map, String[] parts, int index) {
-        // Base case: we've navigated to the final part
-        if (index == parts.length - 1) {
-            return map.remove(parts[index]) != null;
+    private void removeField(Map<String, Object> map, List<String> parts) {
+        if (parts.isEmpty()) {
+            return;
         }
+        // Remove flat key if present
+        String flatKey = String.join(".", parts);
+        map.remove(flatKey);
 
-        String currentPart = parts[index];
-
-        // Strategy 1: Try nested navigation
-        Object next = map.get(currentPart);
+        // Recurse into nested map if possible
+        Object next = map.get(parts.getFirst());
         if (next instanceof Map) {
-            Map<String, Object> nestedMap = (Map<String, Object>) next;
-            if (removeFieldRecursive(nestedMap, parts, index + 1)) {
-                return true;
-            }
+            removeField((Map<String, Object>) next, parts.subList(1, parts.size()));
         }
-
-        // Strategy 2: Try flat key (join remaining parts with dots)
-        String flatKey = String.join(".", java.util.Arrays.copyOfRange(parts, index, parts.length));
-        return map.remove(flatKey) != null;
     }
 }
