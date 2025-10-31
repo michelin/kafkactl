@@ -403,6 +403,221 @@ class DiffTest {
     }
 
     @Test
+    void shouldDiffWithIgnoreFields() {
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+
+        Resource resource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Map.of(
+                        "replicationFactor", 1,
+                        "partitions", 1,
+                        "cleanup.policy", "delete"))
+                .build();
+
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
+                .thenReturn(Collections.singletonList(resource));
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
+
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
+
+        Resource live = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Map.of(
+                        "replicationFactor", 3,
+                        "partitions", 3))
+                .build();
+
+        when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
+                .thenReturn(live);
+        when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
+
+        CommandLine cmd = new CommandLine(diff);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        // Ignore replicationFactor field
+        int code = cmd.execute("-f", "topic.yml", "--ignore-fields", "spec.replicationFactor");
+        assertEquals(0, code);
+
+        String output = sw.toString();
+        assertTrue(output.contains("--- Topic/prefix.topic-LIVE"));
+        assertTrue(output.contains("+++ Topic/prefix.topic-MERGED"));
+        assertTrue(output.contains("   name: prefix.topic"));
+        assertTrue(output.contains("   namespace: namespace"));
+        assertTrue(output.contains(" spec:"));
+        assertTrue(output.contains("-  partitions: 3"));
+        assertTrue(output.contains("+  cleanup.policy: delete"));
+        assertTrue(output.contains("+  partitions: 1"));
+
+        // replicationFactor should NOT appear in the diff since it's ignored
+        assertFalse(output.contains("replicationFactor"));
+    }
+
+    @Test
+    void shouldDiffWithMultipleIgnoreFields() {
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+
+        Resource resource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Map.of(
+                        "replicationFactor", 1,
+                        "partitions", 1,
+                        "cleanup.policy", "delete"))
+                .build();
+
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
+                .thenReturn(Collections.singletonList(resource));
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
+
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
+
+        Resource live = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Map.of(
+                        "replicationFactor", 3,
+                        "partitions", 3))
+                .build();
+
+        when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
+                .thenReturn(live);
+        when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
+
+        CommandLine cmd = new CommandLine(diff);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        // Ignore both replicationFactor and partitions fields
+        int code = cmd.execute("-f", "topic.yml", "--ignore-fields", "spec.replicationFactor,spec.partitions");
+        assertEquals(0, code);
+
+        String output = sw.toString();
+        assertTrue(output.contains("--- Topic/prefix.topic-LIVE"));
+        assertTrue(output.contains("+++ Topic/prefix.topic-MERGED"));
+        assertTrue(output.contains("   name: prefix.topic"));
+        assertTrue(output.contains("   namespace: namespace"));
+        assertTrue(output.contains("spec:"));
+        assertTrue(output.contains("+  cleanup.policy: delete"));
+
+        // Both replicationFactor and partitions should NOT appear in the diff
+        assertFalse(output.contains("replicationFactor"));
+        assertFalse(output.contains("partitions"));
+    }
+
+    @Test
+    void shouldDiffWithIgnoreFieldWithSubFields() {
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+
+        Resource resource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .labels(Map.of("key", "value", "key2", "value2", "key3", "value3", "key4", "value4"))
+                        .build())
+                .spec(Map.of(
+                        "replicationFactor", 1,
+                        "partitions", 1,
+                        "cleanup.policy", "delete"))
+                .build();
+
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
+                .thenReturn(Collections.singletonList(resource));
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
+
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
+
+        Resource live = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .labels(Map.of("world", "hello", "key2", "value2", "key3", "value3", "key4", "value4"))
+                        .build())
+                .spec(Map.of(
+                        "replicationFactor", 3,
+                        "partitions", 3))
+                .build();
+
+        when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
+                .thenReturn(live);
+        when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
+
+        CommandLine cmd = new CommandLine(diff);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        // Ignore both metadata.labels object
+        int code = cmd.execute("-f", "topic.yml", "--ignore-fields", "metadata.labels");
+        assertEquals(0, code);
+
+        String output = sw.toString();
+        assertTrue(output.contains("--- Topic/prefix.topic-LIVE"));
+        assertTrue(output.contains("+++ Topic/prefix.topic-MERGED"));
+        assertTrue(output.contains("   name: prefix.topic"));
+        assertTrue(output.contains("   namespace: namespace"));
+        assertTrue(output.contains("spec:"));
+        assertTrue(output.contains("+  cleanup.policy: delete"));
+
+        // As labels are ignored no object should be seen in the diff
+        assertFalse(output.contains("labels"));
+    }
+
+    @Test
     void shouldDiffWhenNoLive() {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
@@ -610,5 +825,149 @@ class DiffTest {
                 sw.toString()
                         .contains(
                                 "Cannot open schema file src/test/resources/not-exist.avsc. Schema path must be relative to the CLI."));
+    }
+
+    @Test
+    void shouldDiffWithIgnoreFlatFormatField() {
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+
+        Resource resource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Map.of(
+                        "replicationFactor", 1,
+                        "partitions", 1,
+                        "cleanup.policy", "delete"))
+                .build();
+
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
+                .thenReturn(Collections.singletonList(resource));
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
+
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
+
+        Resource live = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Map.of(
+                        "replicationFactor", 3,
+                        "partitions", 3,
+                        "cleanup.policy", "compact"))
+                .build();
+
+        when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
+                .thenReturn(live);
+        when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
+
+        CommandLine cmd = new CommandLine(diff);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        // Ignore cleanup.policy field (flat format)
+        int code = cmd.execute("-f", "topic.yml", "--ignore-fields", "spec.cleanup.policy");
+        assertEquals(0, code);
+
+        String output = sw.toString();
+        assertTrue(output.contains("--- Topic/prefix.topic-LIVE"));
+        assertTrue(output.contains("+++ Topic/prefix.topic-MERGED"));
+        assertTrue(output.contains("   name: prefix.topic"));
+        assertTrue(output.contains("   namespace: namespace"));
+        assertTrue(output.contains("spec:"));
+        assertTrue(output.contains("-  partitions: 3"));
+        assertTrue(output.contains("-  replicationFactor: 3"));
+        assertTrue(output.contains("+  partitions: 1"));
+        assertTrue(output.contains("+  replicationFactor: 1"));
+
+        // cleanup.policy should NOT appear in the diff since it's ignored
+        assertFalse(output.contains("cleanup.policy"));
+    }
+
+    @Test
+    void shouldDiffWithIgnoreNonExistentField() {
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+
+        Resource resource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Map.of(
+                        "replicationFactor", 1,
+                        "partitions", 1))
+                .build();
+
+        when(resourceService.parseResources(any(), anyBoolean(), any()))
+                .thenReturn(Collections.singletonList(resource));
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        doCallRealMethod().when(resourceService).prepareResources(any(), any());
+
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
+
+        Resource live = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Metadata.builder()
+                        .name("prefix.topic")
+                        .namespace("namespace")
+                        .build())
+                .spec(Map.of(
+                        "replicationFactor", 3,
+                        "partitions", 3))
+                .build();
+
+        when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
+                .thenReturn(live);
+        when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
+                .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
+
+        CommandLine cmd = new CommandLine(diff);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        // Ignore non-existent fields - should not break anything
+        int code = cmd.execute(
+                "-f", "topic.yml", "--ignore-fields", "spec.nonexistent.field,spec.another.missing,metadata.fake.path");
+        assertEquals(0, code);
+
+        String output = sw.toString();
+        assertTrue(output.contains("--- Topic/prefix.topic-LIVE"));
+        assertTrue(output.contains("+++ Topic/prefix.topic-MERGED"));
+        assertTrue(output.contains("   name: prefix.topic"));
+        assertTrue(output.contains("   namespace: namespace"));
+        assertTrue(output.contains("spec:"));
+        assertTrue(output.contains("-  partitions: 3"));
+        assertTrue(output.contains("-  replicationFactor: 3"));
+        assertTrue(output.contains("+  partitions: 1"));
+        assertTrue(output.contains("+  replicationFactor: 1"));
     }
 }

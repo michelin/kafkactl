@@ -33,6 +33,7 @@ import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -71,6 +72,12 @@ public class Diff extends AuthenticatedHook {
             names = {"-R", "--recursive"},
             description = "Search file recursively.")
     public boolean recursive;
+
+    @Option(
+            names = {"--ignore-fields"},
+            description = "Comma-separated list of YAML paths to ignore (e.g., metadata.labels.creationDateTime)",
+            split = ",")
+    public List<String> ignoreFields = List.of();
 
     /**
      * Run the "diff" command.
@@ -142,8 +149,18 @@ public class Diff extends AuthenticatedHook {
         representer.addClassTag(Resource.class, Tag.MAP);
         Yaml yaml = new Yaml(representer, options);
 
-        List<String> oldResourceStr = live != null ? yaml.dump(live).lines().toList() : List.of();
-        List<String> newResourceStr = yaml.dump(merged).lines().toList();
+        String liveYaml = live != null ? yaml.dump(live) : "";
+        String mergedYaml = yaml.dump(merged);
+
+        // Remove ignored fields
+        if (!ignoreFields.isEmpty()) {
+            liveYaml = removeIgnoredFields(liveYaml, ignoreFields, yaml);
+            mergedYaml = removeIgnoredFields(mergedYaml, ignoreFields, yaml);
+        }
+
+        List<String> oldResourceStr =
+                liveYaml.isEmpty() ? List.of() : liveYaml.lines().toList();
+        List<String> newResourceStr = mergedYaml.lines().toList();
         Patch<String> diff = DiffUtils.diff(oldResourceStr, newResourceStr);
         return UnifiedDiffUtils.generateUnifiedDiff(
                 String.format(
@@ -153,5 +170,58 @@ public class Diff extends AuthenticatedHook {
                 oldResourceStr,
                 diff,
                 3);
+    }
+
+    /**
+     * Remove ignored fields from YAML content.
+     *
+     * @param yamlContent The YAML content
+     * @param ignoreFields List of dot-notation paths to ignore
+     * @param yaml The YAML instance for parsing/dumping
+     * @return The YAML content without ignored fields
+     */
+    private String removeIgnoredFields(String yamlContent, List<String> ignoreFields, Yaml yaml) {
+        if (yamlContent.isEmpty()) {
+            return yamlContent;
+        }
+
+        Object data = yaml.load(yamlContent);
+        if (!(data instanceof Map)) {
+            return yamlContent;
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> map = (Map<String, Object>) data;
+
+        // Remove each ignored field using removeFieldRecursive directly
+        for (String path : ignoreFields) {
+            List<String> parts = List.of(path.split("\\."));
+            removeField(map, parts);
+        }
+
+        // Dump back to YAML
+        return yaml.dump(map);
+    }
+
+    /**
+     * Remove a field from a map using a list of path parts. Handles both nested and flat keys.
+     *
+     * @param map The map to modify
+     * @param parts The list of path parts
+     */
+    @SuppressWarnings("unchecked")
+    private void removeField(Map<String, Object> map, List<String> parts) {
+        if (parts.isEmpty()) {
+            return;
+        }
+        // Remove flat key if present
+        String flatKey = String.join(".", parts);
+        map.remove(flatKey);
+
+        // Recurse into nested map if possible
+        Object next = map.get(parts.getFirst());
+        if (next instanceof Map) {
+            removeField((Map<String, Object>) next, parts.subList(1, parts.size()));
+        }
     }
 }
