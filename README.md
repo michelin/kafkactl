@@ -555,12 +555,16 @@ to easily identify any differences.
 
 ```console
 Usage: kafkactl diff [-hRv] [-f=<file>] [-n=<optionalNamespace>]
+               [--ignore-fields=<ignoreFields>[,<ignoreFields>...]]...
 
 Description: Get differences between a new resource and a old resource.
 
 Options:
   -f, --file=<file>   YAML file or directory containing resources to compare.
   -h, --help          Show this help message and exit.
+      --ignore-fields=<ignoreFields>[,<ignoreFields>...]
+                      Comma-separated list of YAML paths to ignore (e.g.,
+                        metadata.labels.creationDateTime)
   -n, --namespace=<optionalNamespace>
                       Override namespace defined in config or YAML resources.
   -R, --recursive     Search file recursively.
@@ -571,6 +575,8 @@ Example(s):
 
 ```console
 kafkactl diff -f resource.yml
+kafkactl diff -f resource.yml --ignore-fields metadata.labels
+kafkactl diff -f resource.yml --ignore-fields spec.replicationFactor,spec.partitions
 ```
 
 ### Get
@@ -615,6 +621,8 @@ kafkactl get schema *-value
 
 Administrators can filter namespace resources using the `--search` option, which currently only supports search on
 namespace topics.
+
+When querying multiple schemas, detailed information is omitted from the results.
 
 Example(s):
 
