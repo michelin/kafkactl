@@ -58,8 +58,6 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
         * [Connect Cluster](#connect-cluster-2)
         * [Kafka Streams](#kafka-streams)
         * [Schema](#schema-2)
-          * [Local file](#local-file)
-          * [Inline](#inline)
     * [Administrator](#administrator)
         * [Namespace](#namespace)
             * [Validation Constraints](#validation-constraints)
@@ -898,8 +896,6 @@ metadata:
 The `Schema` resource allows you to declare subjects for your schemas. You can either reference a local `avsc` file
 with `spec.schemaFile`, or define your schema directly inline with `spec.schema`.
 
-- `metadata.name` must be the subject name in the Schema Registry. It must follow the naming strategy allowed at the namespace level, which can be one of `TopicNameStrategy`, `RecordNameStrategy`, or `TopicRecordNameStrategy`.
-
 ##### Local file
 
 ```yml
@@ -1156,19 +1152,6 @@ connectValidator:
             - io.confluent.connect.jdbc.JdbcSinkConnector
             - io.confluent.connect.jdbc.JdbcSourceConnector
 ```
-
-##### Subject Naming Strategy
-
-The authorized subject naming strategy can be enforced at the namespace level.
-
-For Confluent Cloud clusters, if not specified, the strategy defaults to `TopicNameStrategy`. It can be configured in the `topicValidator` using the 
-[`confluent.key.subject.name.strategy`](https://docs.confluent.io/platform/current/installation/configuration/topic-configs.html#confluent-key-subject-name-strategy)
-or [`confluent.value.subject.name.strategy`](https://docs.confluent.io/platform/current/installation/configuration/topic-configs.html#confluent-value-subject-name-strategy) properties, with one of the following values:
-- `TopicNameStrategy`: `<topic>-key` or `<topic>-value`
-- `RecordNameStrategy`: `<full_record_name>`
-- `TopicRecordNameStrategy`: `<topic>-<full_record_name>`
-
-For self-managed clusters, the strategy defaults to `TopicNameStrategy` and cannot be changed.
 
 #### ACL Owner
 
