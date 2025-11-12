@@ -622,7 +622,7 @@ kafkactl get schema *-value
 Administrators can filter namespace resources using the `--search` option, which currently only supports search on
 namespace topics.
 
-When querying multiple schemas, detailed information is omitted from the results.
+When querying multiple schemas, detailed information is omitted from the results, for performance reasons.
 
 Example(s):
 
