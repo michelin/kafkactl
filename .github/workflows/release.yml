@@ -164,7 +164,6 @@ jobs:
         with:
           pattern: kafkactl-*
           path: build/native/nativeCompile
-          merge-multiple: true
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
