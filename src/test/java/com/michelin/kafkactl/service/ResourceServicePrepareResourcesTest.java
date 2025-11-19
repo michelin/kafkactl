@@ -604,11 +604,8 @@ class ResourceServicePrepareResourcesTest {
 
         var actual = resourceService.prepareResources(List.of(schemaResource1, schemaResource2), commandSpec);
 
-        assertEquals(
-                2, actual.size());
-        assertEquals(
-                "test1", actual.getFirst().getMetadata().getName());
-        assertEquals(
-                "test2", actual.get(1).getMetadata().getName());
+        assertEquals(2, actual.size());
+        assertEquals("test1", actual.getFirst().getMetadata().getName());
+        assertEquals("test2", actual.get(1).getMetadata().getName());
     }
 }
