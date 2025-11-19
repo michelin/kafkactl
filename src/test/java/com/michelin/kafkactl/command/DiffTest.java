@@ -706,7 +706,7 @@ class DiffTest {
                 .build();
 
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.sortSchemaReferences(any())).thenReturn(List.of("com.michelin.kafkactl.PersonAvro"));
+        when(resourceService.sortSchemaReferences(any())).thenReturn(List.of());
         when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
                 .thenReturn(null);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
@@ -765,7 +765,7 @@ class DiffTest {
                 .build();
 
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.sortSchemaReferences(any())).thenReturn(List.of("com.michelin.kafka.avro.Customer"));
+        when(resourceService.sortSchemaReferences(any())).thenReturn(List.of());
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any())).thenReturn(HttpResponse.ok(resource));
 
         CommandLine cmd = new CommandLine(diff);

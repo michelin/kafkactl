@@ -555,8 +555,8 @@ class ResourceServicePrepareResourcesTest {
                 "myRoleBinding2",
                 "acl-group",
                 "acl-topic",
-                "demoPrefix.topic_64-demo.User",
                 "demoPrefix.topic_64-demo.Car",
+                "demoPrefix.topic_64-demo.User",
                 "demoPrefix.topic_64-value",
                 "demoPrefix.topic_64");
 
@@ -583,5 +583,32 @@ class ResourceServicePrepareResourcesTest {
 
     private String normalize(String str) {
         return str.replace("\n", "").replace("\r", "").replace("\t", "").replace(" ", "");
+    }
+
+    @Test
+    void shouldApplySchemasWithSameSchemaFile() {
+        Map<String, Object> spec = new HashMap<>();
+        spec.put(SCHEMA_FILE_FIELD, new File("src/test/resources/person.avsc"));
+
+        Resource schemaResource1 = Resource.builder()
+                .kind("Schema")
+                .metadata(Metadata.builder().name("test1").build())
+                .spec(spec)
+                .build();
+
+        Resource schemaResource2 = Resource.builder()
+                .kind("Schema")
+                .metadata(Metadata.builder().name("test2").build())
+                .spec(spec)
+                .build();
+
+        var actual = resourceService.prepareResources(List.of(schemaResource1, schemaResource2), commandSpec);
+
+        assertEquals(
+                2, actual.size());
+        assertEquals(
+                "test1", actual.getFirst().getMetadata().getName());
+        assertEquals(
+                "test2", actual.get(1).getMetadata().getName());
     }
 }
