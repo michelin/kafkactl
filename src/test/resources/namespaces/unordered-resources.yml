@@ -102,10 +102,21 @@ metadata:
   name: "demoPrefix.topic_64-value"
 spec:
   schema: |
-    [
-    "demo.User",
-    "demo.Car"
-    ]
+    {
+      "type": "record",
+      "namespace": "demo",
+      "name": "Leasing",
+      "fields": [
+        {
+          "name": "User",
+          "type": "demo.User"
+        },
+        {
+          "name": "Car",
+          "type": "demo.Car"
+        }
+      ]
+    }
   references:
   - name: "demo.User"
     subject: "demoPrefix.topic_64-demo.User"

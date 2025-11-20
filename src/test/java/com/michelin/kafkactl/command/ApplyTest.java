@@ -337,7 +337,7 @@ class ApplyTest {
                 .build();
 
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.sortSchemaReferences(any())).thenReturn(List.of("com.michelin.kafkactl.PersonAvro"));
+        when(resourceService.sortSchemaReferences(any())).thenReturn(List.of());
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
 
@@ -345,7 +345,7 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic.yml");
+        int code = cmd.execute("-f", "schema.yml");
         assertEquals(0, code);
         assertFalse(resource.getSpec().get("schema").toString().isBlank());
         verify(resourceService).apply(apiResource, "namespace", resource, false, cmd.getCommandSpec());
@@ -371,7 +371,7 @@ class ApplyTest {
 
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
-        when(resourceService.sortSchemaReferences(any())).thenReturn(List.of("com.michelin.kafka.avro.Customer"));
+        when(resourceService.sortSchemaReferences(any())).thenReturn(List.of());
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
         ApiResource apiResource = ApiResource.builder()

@@ -570,16 +570,18 @@ public class ResourceService {
      * @return A sorted list of schema resources
      */
     private List<Resource> prepareSchemaResources(List<Resource> resources, CommandSpec commandSpec) {
-        Map<String, Resource> schemaByName = new HashMap<>();
+        Map<String, Stream<Resource>> schemasByName = new HashMap<>();
         Map<String, List<SchemaReference>> referencesByParentName = new HashMap<>();
+
+        List<Resource> finalResources = new ArrayList<>();
 
         resources.forEach(resource -> {
             HashMap<String, Object> spec = new HashMap<>(resource.getSpec());
             spec.put(SCHEMA_FIELD, getSchemaContent(resource, commandSpec));
             resource.setSpec(spec);
 
-            List<SchemaReference> references = new ArrayList<>();
             if (resource.getSpec().get(REFERENCES_FIELD) instanceof List<?> refs) {
+                List<SchemaReference> references = new ArrayList<>();
                 refs.forEach(ref -> {
                     Map<?, ?> schemaReference = (Map<?, ?>) ref;
 
@@ -603,28 +605,37 @@ public class ResourceService {
                             schemaReference.get("subject").toString(),
                             (int) schemaReference.get("version")));
                 });
+
+                // Mock resolved references. Enough to extract schema name and sort referencesByName.
+                Map<String, String> resolvedReferences = references.stream()
+                        .collect(Collectors.toMap(SchemaReference::getSubject, ref -> {
+                            int lastDotIndex = ref.getName().lastIndexOf(".");
+                            return "{\"type\":\"record\",\"name\":\""
+                                    + ref.getName().substring(lastDotIndex + 1) + "\",\"namespace\":\""
+                                    + ref.getName().substring(0, lastDotIndex)
+                                    + "\", \"fields\":[{\"name\":\"id\",\"type\":\"string\"}]}";
+                        }));
+
+                String name =
+                        new AvroSchema(spec.get(SCHEMA_FIELD).toString(), references, resolvedReferences, null).name();
+
+                // String subjectName = resource.getMetadata().getName();
+                Stream<Resource> schemasList =
+                        Stream.concat(schemasByName.getOrDefault(name, Stream.of()), Stream.of(resource));
+                schemasByName.put(name, schemasList);
+                referencesByParentName.put(name, references);
+
+            } else {
+                finalResources.add(resource);
             }
-
-            // Mock resolved references. Enough to extract schema name and sort referencesByName.
-            Map<String, String> resolvedReferences = references.stream()
-                    .collect(Collectors.toMap(SchemaReference::getSubject, ref -> {
-                        int lastDotIndex = ref.getName().lastIndexOf(".");
-                        return "{\"type\":\"record\",\"name\":\""
-                                + ref.getName().substring(lastDotIndex + 1) + "\",\"namespace\":\""
-                                + ref.getName().substring(0, lastDotIndex)
-                                + "\", \"fields\":[{\"name\":\"id\",\"type\":\"string\"}]}";
-                    }));
-
-            String name =
-                    new AvroSchema(spec.get(SCHEMA_FIELD).toString(), references, resolvedReferences, null).name();
-
-            schemaByName.put(name, resource);
-            referencesByParentName.put(name, references);
         });
 
-        return sortSchemaReferences(referencesByParentName).stream()
-                .map(schemaByName::get)
+        List<Resource> sortedSchemaReference = sortSchemaReferences(referencesByParentName).stream()
+                .flatMap(schemasByName::get)
                 .toList();
+        finalResources.addAll(sortedSchemaReference);
+
+        return finalResources;
     }
 
     /**
@@ -655,7 +666,7 @@ public class ResourceService {
             Map<String, List<SchemaReference>> dependencies,
             LinkedHashSet<String> sorted,
             Set<String> visiting) {
-        if (sorted.contains(name)) {
+        if (sorted.contains(name) || !dependencies.containsKey(name)) {
             return;
         }
 
