@@ -570,7 +570,7 @@ public class ResourceService {
      * @return A sorted list of schema resources
      */
     private List<Resource> prepareSchemaResources(List<Resource> resources, CommandSpec commandSpec) {
-        Map<String, Resource> schemaByName = new HashMap<>();
+        Map<String, Stream<Resource>> schemasByName = new HashMap<>();
         Map<String, List<SchemaReference>> referencesByParentName = new HashMap<>();
 
         List<Resource> finalResources = new ArrayList<>();
@@ -619,15 +619,19 @@ public class ResourceService {
                 String name =
                         new AvroSchema(spec.get(SCHEMA_FIELD).toString(), references, resolvedReferences, null).name();
 
-                schemaByName.put(name, resource);
+                // String subjectName = resource.getMetadata().getName();
+                Stream<Resource> schemasList =
+                        Stream.concat(schemasByName.getOrDefault(name, Stream.of()), Stream.of(resource));
+                schemasByName.put(name, schemasList);
                 referencesByParentName.put(name, references);
+
             } else {
                 finalResources.add(resource);
             }
         });
 
         List<Resource> sortedSchemaReference = sortSchemaReferences(referencesByParentName).stream()
-                .map(schemaByName::get)
+                .flatMap(schemasByName::get)
                 .toList();
         finalResources.addAll(sortedSchemaReference);
 

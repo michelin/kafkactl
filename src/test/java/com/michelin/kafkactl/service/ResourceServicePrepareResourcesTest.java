@@ -602,10 +602,41 @@ class ResourceServicePrepareResourcesTest {
                 .spec(spec)
                 .build();
 
-        var actual = resourceService.prepareResources(List.of(schemaResource1, schemaResource2), commandSpec);
+        List<Resource> actual =
+                resourceService.prepareResources(List.of(schemaResource1, schemaResource2), commandSpec);
 
         assertEquals(2, actual.size());
         assertEquals("test1", actual.getFirst().getMetadata().getName());
         assertEquals("test2", actual.get(1).getMetadata().getName());
+    }
+
+    @Test
+    void shouldApplySchemasWithSameSchemaAndReference() {
+        Map<String, Object> spec = new HashMap<>();
+        spec.put(
+                SCHEMA_FIELD,
+                "{\"type\":\"record\",\"name\":\"Customer\",\"namespace\":\"myNamespace\", \"fields\": [{ \"name\": \"status\", \"type\": \"Status\" }]}");
+        spec.put(
+                REFERENCES_FIELD,
+                List.of(Map.of("name", "myNamespace.Status", "subject", "abc.status-value", "version", 1)));
+
+        Resource schemaResource1 = Resource.builder()
+                .kind("Schema")
+                .metadata(Metadata.builder().name("abc.customer1-value").build())
+                .spec(spec)
+                .build();
+
+        Resource schemaResource2 = Resource.builder()
+                .kind("Schema")
+                .metadata(Metadata.builder().name("abc.customer2-value").build())
+                .spec(spec)
+                .build();
+
+        List<Resource> actual =
+                resourceService.prepareResources(List.of(schemaResource1, schemaResource2), commandSpec);
+
+        assertEquals(2, actual.size());
+        assertEquals("abc.customer1-value", actual.getFirst().getMetadata().getName());
+        assertEquals("abc.customer2-value", actual.get(1).getMetadata().getName());
     }
 }
