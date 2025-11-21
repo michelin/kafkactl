@@ -995,8 +995,12 @@ spec:
   kafkaUser: kafkaServiceAccount
   protectionEnabled: false
   transactionsEnabled: true
+  subjectNameStrategies:
+  - "TopicNameStrategy"
+  - "RecordNameStrategy"
+  - "TopicRecordNameStrategy"
   connectClusters:
-    - myConnectCluster
+  - myConnectCluster
   topicValidator:
     validationConstraints:
       partitions:
@@ -1055,6 +1059,7 @@ spec:
   Protected namespaces can only consume or produce records in protected namespace resources. This field is optional; by default, namespaces are public.
 - `spec.transactionsEnabled` is a boolean that defines whether transactions are allowed for the namespace. If enabled, the transactional ID ACLs will be created based on GROUP ACLs.
   This field is optional; by default, transactions are enabled.
+- `spec.subjectNameStrategies` is a list of allowed subject name strategies for schemas in the namespace. It can be `TopicNameStrategy`, `RecordNameStrategy`, or `TopicRecordNameStrategy`.
 - `spec.connectClusters` is a list of Kafka Connect clusters. It should refer to a Kafka Connect cluster declared in the
   Ns4Kafka configuration.
 - `spec.topicValidator` is a list of constraints for topics.
@@ -1164,19 +1169,6 @@ connectValidator:
             - io.confluent.connect.jdbc.JdbcSinkConnector
             - io.confluent.connect.jdbc.JdbcSourceConnector
 ```
-
-##### Subject Naming Strategy
-
-The authorized subject naming strategy can be enforced at the namespace level.
-
-For Confluent Cloud clusters, if not specified, the strategy defaults to `TopicNameStrategy`. It can be configured in the `topicValidator` using the
-[`confluent.key.subject.name.strategy`](https://docs.confluent.io/platform/current/installation/configuration/topic-configs.html#confluent-key-subject-name-strategy)
-or [`confluent.value.subject.name.strategy`](https://docs.confluent.io/platform/current/installation/configuration/topic-configs.html#confluent-value-subject-name-strategy) properties, with one of the following values:
-- `TopicNameStrategy`: `<topic>-key` or `<topic>-value`
-- `RecordNameStrategy`: `<full_record_name>`
-- `TopicRecordNameStrategy`: `<topic>-<full_record_name>`
-
-For self-managed clusters, the strategy defaults to `TopicNameStrategy` and cannot be changed.
 
 #### ACL Owner
 

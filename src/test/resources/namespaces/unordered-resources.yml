@@ -10,7 +10,6 @@ spec:
     cleanup.policy: "delete"
     min.insync.replicas: "1"
     retention.ms: 604800000
-    confluent.value.subject.name.strategy: "io.confluent.kafka.serializers.subject.TopicRecordNameStrategy"
 ---
 apiVersion: "v1"
 kind: "AccessControlEntry"
@@ -71,12 +70,6 @@ spec:
         validStrings:
         - "delete"
         - "compact"
-      confluent.value.subject.name.strategy:
-        validation-type: "ValidString"
-        validStrings:
-        - "io.confluent.kafka.serializers.subject.TopicNameStrategy"
-        - "io.confluent.kafka.serializers.subject.TopicRecordNameStrategy"
-        - "io.confluent.kafka.serializers.subject.RecordNameStrategy"
   connectValidator:
     validationConstraints:
       key.converter:
