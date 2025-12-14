@@ -509,6 +509,7 @@ public class ResourceService {
                         commandSpec.commandLine(),
                         "Could not find YAML or YML files in " + file.get().getName() + " directory.");
             }
+
             // Load each files
             return fileService.parseResourceListFromFiles(yamlFiles);
         }

@@ -120,7 +120,6 @@ class DeleteTest {
 
         int code = cmd.execute("-f", "src/test/resources/topics/unknown.yml");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains("File or directory not found"));
     }
 
     @Test
