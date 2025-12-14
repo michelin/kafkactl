@@ -619,12 +619,10 @@ public class ResourceService {
                 String name =
                         new AvroSchema(spec.get(SCHEMA_FIELD).toString(), references, resolvedReferences, null).name();
 
-                // String subjectName = resource.getMetadata().getName();
                 Stream<Resource> schemasList =
                         Stream.concat(schemasByName.getOrDefault(name, Stream.of()), Stream.of(resource));
                 schemasByName.put(name, schemasList);
                 referencesByParentName.put(name, references);
-
             } else {
                 finalResources.add(resource);
             }

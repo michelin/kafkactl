@@ -113,16 +113,30 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenNoFileInStdin() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
-
         CommandLine cmd = new CommandLine(diff);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+
         int code = cmd.execute();
         assertEquals(2, code);
         assertTrue(sw.toString().contains("Required one of -f or stdin."));
+    }
+
+    @Test
+    void shouldNotDiffWhenFileNotFound() {
+        CommandLine cmd = new CommandLine(diff);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+
+        int code = cmd.execute("-f", "src/test/resources/topics/unknown.yml");
+        assertEquals(2, code);
+        assertTrue(sw.toString().contains("File or directory not found"));
     }
 
     @Test
@@ -137,7 +151,7 @@ class DiffTest {
                 .thenThrow(new ParameterException(
                         cmd.getCommandSpec().commandLine(), "Could not find YAML or YML files in topic directory."));
 
-        int code = cmd.execute("-f", "topic");
+        int code = cmd.execute("-f", "src/test/resources/topics-empty");
         assertEquals(2, code);
         assertTrue(sw.toString().contains("Could not find YAML or YML files in topic directory."));
     }
@@ -165,7 +179,7 @@ class DiffTest {
                 .when(resourceService)
                 .validateAllowedResources(any(), any());
 
-        int code = cmd.execute("-f", "topic.yml");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml");
         assertEquals(2, code);
         assertTrue(sw.toString().contains("The server does not have resource type(s) Topic."));
     }
@@ -192,7 +206,7 @@ class DiffTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic.yml", "-n", "namespaceMismatch");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml", "-n", "namespaceMismatch");
         assertEquals(2, code);
         assertTrue(sw.toString()
                 .contains("Namespace mismatch between Kafkactl configuration and YAML resource(s): "
@@ -225,7 +239,7 @@ class DiffTest {
 
         CommandLine cmd = new CommandLine(diff);
 
-        int code = cmd.execute("-f", "topic.yml");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml");
         assertEquals(1, code);
         verify(formatService).displayError(exception, cmd.getCommandSpec());
     }
@@ -278,7 +292,7 @@ class DiffTest {
 
         CommandLine cmd = new CommandLine(diff);
 
-        int code = cmd.execute("-f", "topic.yml");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml");
         assertEquals(1, code);
     }
 
@@ -330,7 +344,7 @@ class DiffTest {
 
         CommandLine cmd = new CommandLine(diff);
 
-        int code = cmd.execute("-f", "topic.yml");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml");
         assertEquals(1, code);
     }
 
@@ -388,7 +402,7 @@ class DiffTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic.yml");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml");
         assertEquals(0, code);
         assertTrue(sw.toString().contains("--- Topic/prefix.topic-LIVE"));
         assertTrue(sw.toString().contains("+++ Topic/prefix.topic-MERGED"));
@@ -457,7 +471,8 @@ class DiffTest {
         cmd.setOut(new PrintWriter(sw));
 
         // Ignore replicationFactor field
-        int code = cmd.execute("-f", "topic.yml", "--ignore-fields", "spec.replicationFactor");
+        int code =
+                cmd.execute("-f", "src/test/resources/topics/topic.yml", "--ignore-fields", "spec.replicationFactor");
         assertEquals(0, code);
 
         String output = sw.toString();
@@ -529,7 +544,11 @@ class DiffTest {
         cmd.setOut(new PrintWriter(sw));
 
         // Ignore both replicationFactor and partitions fields
-        int code = cmd.execute("-f", "topic.yml", "--ignore-fields", "spec.replicationFactor,spec.partitions");
+        int code = cmd.execute(
+                "-f",
+                "src/test/resources/topics/topic.yml",
+                "--ignore-fields",
+                "spec.replicationFactor,spec.partitions");
         assertEquals(0, code);
 
         String output = sw.toString();
@@ -602,7 +621,7 @@ class DiffTest {
         cmd.setOut(new PrintWriter(sw));
 
         // Ignore both metadata.labels object
-        int code = cmd.execute("-f", "topic.yml", "--ignore-fields", "metadata.labels");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml", "--ignore-fields", "metadata.labels");
         assertEquals(0, code);
 
         String output = sw.toString();
@@ -658,7 +677,7 @@ class DiffTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic.yml");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml");
         assertEquals(0, code);
         assertTrue(sw.toString().contains("--- Topic/prefix.topic-LIVE"));
         assertTrue(sw.toString().contains("+++ Topic/prefix.topic-MERGED"));
@@ -716,7 +735,7 @@ class DiffTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic.yml");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml");
         assertEquals(0, code);
         assertFalse(resource.getSpec().get("schema").toString().isBlank());
         assertTrue(sw.toString().contains("--- Schema/prefix.schema-LIVE"));
@@ -772,7 +791,7 @@ class DiffTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic.yml");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml");
         assertEquals(0, code);
         assertTrue(sw.toString().contains("--- Schema/prefix.schema-LIVE"));
         assertTrue(sw.toString().contains("+++ Schema/prefix.schema-MERGED"));
@@ -819,7 +838,7 @@ class DiffTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic.yml");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml");
         assertEquals(2, code);
         assertTrue(
                 sw.toString()
@@ -883,7 +902,7 @@ class DiffTest {
         cmd.setOut(new PrintWriter(sw));
 
         // Ignore cleanup.policy field (flat format)
-        int code = cmd.execute("-f", "topic.yml", "--ignore-fields", "spec.cleanup.policy");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml", "--ignore-fields", "spec.cleanup.policy");
         assertEquals(0, code);
 
         String output = sw.toString();
@@ -956,7 +975,10 @@ class DiffTest {
 
         // Ignore non-existent fields - should not break anything
         int code = cmd.execute(
-                "-f", "topic.yml", "--ignore-fields", "spec.nonexistent.field,spec.another.missing,metadata.fake.path");
+                "-f",
+                "src/test/resources/topics/topic.yml",
+                "--ignore-fields",
+                "spec.nonexistent.field,spec.another.missing,metadata.fake.path");
         assertEquals(0, code);
 
         String output = sw.toString();
