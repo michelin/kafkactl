@@ -499,7 +499,7 @@ public class ResourceService {
             if (!file.get().exists()) {
                 throw new ParameterException(
                         commandSpec.commandLine(),
-                        "File or directory \"" + file.get().getAbsolutePath() + "\"not found");
+                        "File or directory \"" + file.get().getAbsolutePath() + "\" not found.");
             }
 
             // List all files to process
