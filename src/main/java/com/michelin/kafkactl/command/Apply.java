@@ -79,12 +79,6 @@ public class Apply extends DryRunHook {
             throw new ParameterException(commandSpec.commandLine(), "Required one of -f or stdin.");
         }
 
-        if (file.isPresent() && !file.get().exists()) {
-            throw new ParameterException(
-                    commandSpec.commandLine(),
-                    "File or directory not found: " + file.get().getAbsolutePath());
-        }
-
         List<Resource> resources = resourceService.parseResources(file, recursive, commandSpec);
         try {
             resourceService.validateAllowedResources(resources, commandSpec);

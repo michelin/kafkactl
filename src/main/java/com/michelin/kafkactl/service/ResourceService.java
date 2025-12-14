@@ -496,6 +496,12 @@ public class ResourceService {
      */
     public List<Resource> parseResources(Optional<File> file, boolean recursive, CommandSpec commandSpec) {
         if (file.isPresent()) {
+            if (!file.get().exists()) {
+                throw new ParameterException(
+                        commandSpec.commandLine(),
+                        "File or directory \"" + file.get().getAbsolutePath() + "\"not found");
+            }
+
             // List all files to process
             List<File> yamlFiles = fileService.computeYamlFileList(file.get(), recursive);
             if (yamlFiles.isEmpty()) {

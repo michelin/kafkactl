@@ -122,20 +122,6 @@ class ApplyTest {
     }
 
     @Test
-    void shouldNotApplyWhenFileNotFound() {
-        CommandLine cmd = new CommandLine(apply);
-        StringWriter sw = new StringWriter();
-        cmd.setErr(new PrintWriter(sw));
-
-        when(configService.isCurrentContextValid()).thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
-
-        int code = cmd.execute("-f", "src/test/resources/topics/unknown.yml");
-        assertEquals(2, code);
-        assertTrue(sw.toString().contains("File or directory not found"));
-    }
-
-    @Test
     void shouldNotApplyWhenYmlFileNotFound() {
         CommandLine cmd = new CommandLine(apply);
         StringWriter sw = new StringWriter();
@@ -145,12 +131,11 @@ class ApplyTest {
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenThrow(new ParameterException(
-                        cmd.getCommandSpec().commandLine(),
-                        "Could not find YAML or YML files in topics-empty directory."));
+                        cmd.getCommandSpec().commandLine(), "Could not find YAML or YML files in topic directory."));
 
-        int code = cmd.execute("-f", "src/test/resources/topics-empty");
+        int code = cmd.execute("-f", "topic");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains("Could not find YAML or YML files in topics-empty directory."));
+        assertTrue(sw.toString().contains("Could not find YAML or YML files in topic directory."));
     }
 
     @Test
@@ -176,7 +161,7 @@ class ApplyTest {
                 .when(resourceService)
                 .validateAllowedResources(any(), any());
 
-        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml");
+        int code = cmd.execute("-f", "topic.yml");
         assertEquals(2, code);
         assertTrue(sw.toString().contains("The server does not have resource type(s) Topic."));
     }
@@ -203,7 +188,7 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml", "-n", "namespaceMismatch");
+        int code = cmd.execute("-f", "topic.yml", "-n", "namespaceMismatch");
         assertEquals(2, code);
         assertTrue(sw.toString()
                 .contains("Namespace mismatch between Kafkactl configuration and YAML resource(s): "
@@ -235,7 +220,7 @@ class ApplyTest {
 
         CommandLine cmd = new CommandLine(apply);
 
-        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml");
+        int code = cmd.execute("-f", "topic.yml");
         assertEquals(1, code);
         verify(formatService).displayError(exception, cmd.getCommandSpec());
     }
@@ -276,7 +261,7 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml");
+        int code = cmd.execute("-f", "topic.yml");
         assertEquals(0, code);
         verify(resourceService).apply(apiResource, "namespace", resource, false, cmd.getCommandSpec());
     }
@@ -314,7 +299,7 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml", "--dry-run");
+        int code = cmd.execute("-f", "topic.yml", "--dry-run");
         assertEquals(0, code);
         assertTrue(sw.toString().contains("Dry run execution."));
         verify(resourceService).apply(apiResource, "namespace", resource, true, cmd.getCommandSpec());
@@ -360,7 +345,7 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "src/test/resources/schemas/schema.yml");
+        int code = cmd.execute("-f", "schema.yml");
         assertEquals(0, code);
         assertFalse(resource.getSpec().get("schema").toString().isBlank());
         verify(resourceService).apply(apiResource, "namespace", resource, false, cmd.getCommandSpec());
@@ -405,7 +390,7 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml");
+        int code = cmd.execute("-f", "topic.yml");
         assertEquals(0, code);
         verify(resourceService).apply(apiResource, "namespace", resource, false, cmd.getCommandSpec());
     }
@@ -437,7 +422,7 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml");
+        int code = cmd.execute("-f", "topic.yml");
         assertEquals(2, code);
         assertTrue(
                 sw.toString()

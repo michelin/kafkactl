@@ -74,14 +74,6 @@ public class Delete extends DryRunHook {
      */
     @Override
     public Integer onAuthSuccess() {
-        if (config.fileConfig != null
-                && config.fileConfig.file.isPresent()
-                && !config.fileConfig.file.get().exists()) {
-            throw new ParameterException(
-                    commandSpec.commandLine(),
-                    "File or directory not found: "
-                            + config.fileConfig.file.get().getAbsolutePath());
-        }
 
         if (config.nameConfig != null
                 && !config.nameConfig.confirmed
@@ -139,6 +131,13 @@ public class Delete extends DryRunHook {
      */
     private List<Resource> parseResources(String namespace) {
         if (config.fileConfig != null && config.fileConfig.file.isPresent()) {
+            if (!config.fileConfig.file.get().exists()) {
+                throw new ParameterException(
+                        commandSpec.commandLine(),
+                        "File or directory not found: "
+                                + config.fileConfig.file.get().getAbsolutePath());
+            }
+
             // List all files to process
             List<File> yamlFiles =
                     fileService.computeYamlFileList(config.fileConfig.file.get(), config.fileConfig.recursive);
