@@ -145,11 +145,12 @@ class ApplyTest {
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenThrow(new ParameterException(
-                        cmd.getCommandSpec().commandLine(), "Could not find YAML or YML files in topic directory."));
+                        cmd.getCommandSpec().commandLine(),
+                        "Could not find YAML or YML files in topics-empty directory."));
 
         int code = cmd.execute("-f", "src/test/resources/topics-empty");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains("Could not find YAML or YML files in topic directory."));
+        assertTrue(sw.toString().contains("Could not find YAML or YML files in topics-empty directory."));
     }
 
     @Test

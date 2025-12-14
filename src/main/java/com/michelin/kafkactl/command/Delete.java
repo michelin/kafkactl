@@ -74,6 +74,15 @@ public class Delete extends DryRunHook {
      */
     @Override
     public Integer onAuthSuccess() {
+        if (config.fileConfig != null
+                && config.fileConfig.file.isPresent()
+                && !config.fileConfig.file.get().exists()) {
+            throw new ParameterException(
+                    commandSpec.commandLine(),
+                    "File or directory not found: "
+                            + config.fileConfig.file.get().getAbsolutePath());
+        }
+
         if (config.nameConfig != null
                 && !config.nameConfig.confirmed
                 && !dryRun
