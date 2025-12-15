@@ -163,7 +163,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download native artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: kafkactl-linux-*
           path: build/native/nativeCompile
