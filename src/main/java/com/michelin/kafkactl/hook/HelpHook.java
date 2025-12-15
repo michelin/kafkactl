@@ -21,7 +21,10 @@ package com.michelin.kafkactl.hook;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-/** Help abstract command. */
+/**
+ * Help abstract command. This is preferred over the mixinStandardHelpOptions property of {@link Command}, which
+ * displays the "-V" version option that is only available on the main Kafkactl command.
+ */
 @Command
 public abstract class HelpHook {
     @Option(

@@ -78,9 +78,11 @@ public class Kafkactl implements Callable<Integer> {
     public CommandSpec commandSpec;
 
     /**
-     * Main Micronaut method There are 3 ways to configure kafkactl: - Setup config file in $HOME/.kafkactl/config.yml -
-     * Setup config file anywhere and set KAFKACTL_CONFIG=/path/to/config.yml - No file but environment variables
-     * instead
+     * Main Micronaut method.
+     *
+     * <p>There are three ways to configure kafkactl: - Set up a config file in $HOME/.kafkactl/config.yml - Set up a
+     * config file anywhere and set KAFKACTL_CONFIG=/path/to/config.yml - Use environment variables instead of a config
+     * file
      *
      * @param args Input arguments
      */

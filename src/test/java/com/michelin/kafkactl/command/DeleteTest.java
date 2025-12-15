@@ -98,15 +98,28 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByNameWhenNotAuthenticated() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
-
         CommandLine cmd = new CommandLine(delete);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
+
         int code = cmd.execute("topic", "myTopic");
         assertEquals(1, code);
+    }
+
+    @Test
+    void shouldNotDeleteWhenFileNotFound() {
+        CommandLine cmd = new CommandLine(delete);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+
+        int code = cmd.execute("-f", "src/test/resources/topics/unknown.yml");
+        assertEquals(2, code);
     }
 
     @Test
@@ -120,9 +133,9 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic");
+        int code = cmd.execute("-f", "src/test/resources/topics-empty");
         assertEquals(2, code);
-        assertTrue(sw.toString().contains("Could not find YAML or YML files in topic directory."));
+        assertTrue(sw.toString().contains("Could not find YAML or YML files in topics-empty directory."));
     }
 
     @Test
@@ -152,7 +165,7 @@ class DeleteTest {
                 .when(resourceService)
                 .validateAllowedResources(any(), any());
 
-        int code = cmd.execute("-f", "topic", "-n", "namespace");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml", "-n", "namespace");
         assertEquals(2, code);
         assertTrue(sw.toString().contains("The server does not have resource type(s) Topic."));
     }
@@ -195,7 +208,7 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic", "-n", "namespaceMismatch");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml", "-n", "namespaceMismatch");
         assertEquals(2, code);
         assertTrue(sw.toString()
                 .contains("Namespace mismatch between Kafkactl configuration and YAML resource(s): "
@@ -237,7 +250,7 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic", "-n", "namespace");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml", "-n", "namespace");
         assertEquals(0, code);
     }
 
@@ -276,7 +289,7 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic", "-n", "namespace");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml", "-n", "namespace");
         assertEquals(0, code);
     }
 
@@ -364,7 +377,7 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        int code = cmd.execute("-f", "topic", "--dry-run", "-n", "namespace");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml", "--dry-run", "-n", "namespace");
         assertEquals(0, code);
         assertTrue(sw.toString().contains("Dry run execution."));
     }
@@ -402,7 +415,7 @@ class DeleteTest {
 
         CommandLine cmd = new CommandLine(delete);
 
-        int code = cmd.execute("-f", "topic", "-n", "namespace");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml", "-n", "namespace");
         assertEquals(1, code);
     }
 
@@ -431,7 +444,7 @@ class DeleteTest {
 
         CommandLine cmd = new CommandLine(delete);
 
-        int code = cmd.execute("-f", "topic", "-n", "namespace");
+        int code = cmd.execute("-f", "src/test/resources/topics/topic.yml", "-n", "namespace");
         assertEquals(1, code);
         verify(formatService).displayError(exception, cmd.getCommandSpec());
     }

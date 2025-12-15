@@ -1435,7 +1435,17 @@ class ResourceServiceTest {
     }
 
     @Test
-    void shouldNotParseNotFound() {
+    void shouldNotParseWhenFileDoesNotExist() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+
+        Optional<File> file = Optional.of(new File("src/test/resources/topics/unknown.yml"));
+        CommandLine.Model.CommandSpec spec = cmd.getCommandSpec();
+
+        assertThrows(ParameterException.class, () -> resourceService.parseResources(file, false, spec));
+    }
+
+    @Test
+    void shouldNotParseWhenNoYamlFilesInDirectory() {
         CommandLine cmd = new CommandLine(new Kafkactl());
 
         when(fileService.computeYamlFileList(any(), anyBoolean())).thenReturn(Collections.emptyList());

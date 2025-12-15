@@ -496,6 +496,12 @@ public class ResourceService {
      */
     public List<Resource> parseResources(Optional<File> file, boolean recursive, CommandSpec commandSpec) {
         if (file.isPresent()) {
+            if (!file.get().exists()) {
+                throw new ParameterException(
+                        commandSpec.commandLine(),
+                        "File or directory \"" + file.get().getAbsolutePath() + "\" not found.");
+            }
+
             // List all files to process
             List<File> yamlFiles = fileService.computeYamlFileList(file.get(), recursive);
             if (yamlFiles.isEmpty()) {
@@ -503,6 +509,7 @@ public class ResourceService {
                         commandSpec.commandLine(),
                         "Could not find YAML or YML files in " + file.get().getName() + " directory.");
             }
+
             // Load each files
             return fileService.parseResourceListFromFiles(yamlFiles);
         }
@@ -619,12 +626,10 @@ public class ResourceService {
                 String name =
                         new AvroSchema(spec.get(SCHEMA_FIELD).toString(), references, resolvedReferences, null).name();
 
-                // String subjectName = resource.getMetadata().getName();
                 Stream<Resource> schemasList =
                         Stream.concat(schemasByName.getOrDefault(name, Stream.of()), Stream.of(resource));
                 schemasByName.put(name, schemasList);
                 referencesByParentName.put(name, references);
-
             } else {
                 finalResources.add(resource);
             }
