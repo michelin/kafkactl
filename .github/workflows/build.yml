@@ -86,7 +86,7 @@ jobs:
           DOCKER_BUILD_SUMMARY: false
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: kafkactl-jar
           path: build/libs/kafkactl-${{ steps.metadata.outputs.current_version }}.jar
@@ -145,7 +145,7 @@ jobs:
         shell: bash
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: kafkactl-${{ matrix.platform }}
           path: build/native/nativeCompile/kafkactl-${{ steps.metadata.outputs.current_version }}${{ matrix.extension }}
