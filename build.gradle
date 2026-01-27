@@ -33,7 +33,7 @@ dependencies {
     implementation("io.github.java-diff-utils:java-diff-utils:4.16")
     implementation("io.micronaut:micronaut-retry")
     implementation("org.yaml:snakeyaml")
-    implementation("io.confluent:kafka-schema-registry-client:8.1.0")
+    implementation("io.confluent:kafka-schema-registry-client:8.1.1")
 
     compileOnly("org.graalvm.nativeimage:svm")
     compileOnly("org.projectlombok:lombok")
