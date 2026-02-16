@@ -58,6 +58,8 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
         * [Connect Cluster](#connect-cluster-2)
         * [Kafka Streams](#kafka-streams)
         * [Schema](#schema-2)
+            * [Local file](#local-file)
+            * [Inline](#inline)
     * [Administrator](#administrator)
         * [Namespace](#namespace)
             * [Validation Constraints](#validation-constraints)
@@ -904,6 +906,8 @@ metadata:
 The `Schema` resource allows you to declare subjects for your schemas. You can either reference a local `avsc` file
 with `spec.schemaFile`, or define your schema directly inline with `spec.schema`.
 
+- `metadata.name` must be the subject name in the Schema Registry. It must follow the naming strategy allowed at the namespace level, which can be one of `TopicNameStrategy`, `RecordNameStrategy`, or `TopicRecordNameStrategy`.
+
 ##### Local file
 
 ```yml
@@ -991,8 +995,12 @@ spec:
   kafkaUser: kafkaServiceAccount
   protectionEnabled: false
   transactionsEnabled: true
+  subjectNameStrategies:
+  - "TopicNameStrategy"
+  - "RecordNameStrategy"
+  - "TopicRecordNameStrategy"
   connectClusters:
-    - myConnectCluster
+  - myConnectCluster
   topicValidator:
     validationConstraints:
       partitions:
@@ -1051,6 +1059,7 @@ spec:
   Protected namespaces can only consume or produce records in protected namespace resources. This field is optional; by default, namespaces are public.
 - `spec.transactionsEnabled` is a boolean that defines whether transactions are allowed for the namespace. If enabled, the transactional ID ACLs will be created based on GROUP ACLs.
   This field is optional; by default, transactions are enabled.
+- `spec.subjectNameStrategies` is a list of allowed subject name strategies for schemas in the namespace. It can be `TopicNameStrategy`, `RecordNameStrategy`, or `TopicRecordNameStrategy`.
 - `spec.connectClusters` is a list of Kafka Connect clusters. It should refer to a Kafka Connect cluster declared in the
   Ns4Kafka configuration.
 - `spec.topicValidator` is a list of constraints for topics.
