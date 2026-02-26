@@ -16,27 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.michelin.kafkactl.command.connectcluster;
+package com.michelin.kafkactl.command.subjectconfig;
 
 import com.michelin.kafkactl.hook.HelpHook;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
 
-/** Connect clusters subcommand. */
+/** Subject config subcommand. */
 @Command(
-        name = "connect-cluster",
-        subcommands = {ConnectClusterVault.class},
+        name = "subject-config",
+        subcommands = {SubjectConfigUpdate.class, SubjectConfigDelete.class},
         headerHeading = "@|bold Usage|@:",
         synopsisHeading = " ",
         synopsisSubcommandLabel = "COMMAND",
         descriptionHeading = "%n@|bold Description|@: ",
-        description = "Interact with connect clusters.",
+        description = "Interact with subjects config.",
         parameterListHeading = "%n@|bold Parameters|@:%n",
         optionListHeading = "%n@|bold Options|@:%n",
         commandListHeading = "%n@|bold Commands|@:%n",
         usageHelpAutoWidth = true)
-public class ConnectCluster extends HelpHook {
+public class SubjectConfig extends HelpHook {
     @Spec
     public CommandSpec commandSpec;
 }

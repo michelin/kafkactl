@@ -24,8 +24,7 @@ import lombok.Getter;
 /** Schema compatibility. */
 @Getter
 @AllArgsConstructor
-public enum SchemaCompatibility {
-    GLOBAL("global"),
+public enum SubjectCompatibility {
     BACKWARD("backward"),
     BACKWARD_TRANSITIVE("backward-transitive"),
     FORWARD("forward"),

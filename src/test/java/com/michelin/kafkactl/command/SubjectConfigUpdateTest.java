@@ -18,22 +18,18 @@
  */
 package com.michelin.kafkactl.command;
 
-import static com.michelin.kafkactl.model.Output.TABLE;
-import static com.michelin.kafkactl.util.constant.ResourceKind.SCHEMA_COMPATIBILITY_STATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.Kafkactl;
+import com.michelin.kafkactl.command.subjectconfig.SubjectConfigUpdate;
+import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ConfigService;
-import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.LoginService;
 import com.michelin.kafkactl.service.ResourceService;
 import java.io.PrintWriter;
@@ -48,7 +44,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
 
 @ExtendWith(MockitoExtension.class)
-class SchemaTest {
+class SubjectConfigUpdateTest {
     @Mock
     LoginService loginService;
 
@@ -64,21 +60,18 @@ class SchemaTest {
     @Mock
     Kafkactl kafkactl;
 
-    @Mock
-    FormatService formatService;
-
     @InjectMocks
-    Schema schema;
+    SubjectConfigUpdate subjectConfigUpdate;
 
     @Test
     void shouldReturnInvalidCurrentContext() {
-        CommandLine cmd = new CommandLine(schema);
+        CommandLine cmd = new CommandLine(subjectConfigUpdate);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
         when(configService.isCurrentContextValid()).thenReturn(false);
 
-        int code = cmd.execute("backward", "mySubject");
+        int code = cmd.execute("mySubject", "--compatibility", "backward");
         assertEquals(1, code);
         assertTrue(sw.toString()
                 .contains("No valid current context found. "
@@ -86,38 +79,23 @@ class SchemaTest {
     }
 
     @Test
-    void shouldNotUpdateCompatWhenNotAuthenticated() {
+    void shouldNotUpdateConfigWhenNotAuthenticated() {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
-        CommandLine cmd = new CommandLine(schema);
+        CommandLine cmd = new CommandLine(subjectConfigUpdate);
 
-        int code = cmd.execute("backward", "mySubject");
+        int code = cmd.execute("mySubject", "--compatibility", "backward");
         assertEquals(1, code);
     }
 
     @Test
-    void shouldNotUpdateCompatWhenEmptyResponseList() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
-        when(resourceService.changeSchemaCompatibility(any(), any(), any(), any()))
-                .thenReturn(Optional.empty());
-
-        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
-
-        CommandLine cmd = new CommandLine(schema);
-
-        int code = cmd.execute("backward", "mySubject");
-        assertEquals(1, code);
-    }
-
-    @Test
-    void shouldUpdateCompat() {
+    void shouldUpdateConfig() {
         Resource resource = Resource.builder()
-                .kind("SchemaCompatibilityState")
+                .kind("SubjectConfigState")
                 .apiVersion("v1")
                 .metadata(Resource.Metadata.builder()
-                        .name("prefix.schema-value")
+                        .name("mySubject")
                         .namespace("namespace")
                         .build())
                 .spec(Collections.emptyMap())
@@ -125,20 +103,29 @@ class SchemaTest {
 
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
-        when(resourceService.changeSchemaCompatibility(any(), any(), any(), any()))
+        when(resourceService.updateSubjectConfig(any(), any(), any(), any(), any()))
                 .thenReturn(Optional.of(resource));
 
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
-        CommandLine cmd = new CommandLine(schema);
+        CommandLine cmd = new CommandLine(subjectConfigUpdate);
 
-        int code = cmd.execute("backward", "mySubject", "-n", "namespace");
+        int code =
+                cmd.execute("mySubject", "--compatibility", "backward", "--alias", "anotherSubject", "-n", "namespace");
         assertEquals(0, code);
-        verify(formatService)
-                .displayList(
-                        eq(SCHEMA_COMPATIBILITY_STATE),
-                        argThat(schemas -> schemas.getFirst().equals(resource)),
-                        eq(TABLE),
-                        eq(cmd.getCommandSpec()));
+
+        code = cmd.execute("mySubject", "--compatibility", "backward", "-n", "namespace");
+        assertEquals(0, code);
+
+        code = cmd.execute("mySubject", "--alias", "anotherSubject", "-n", "namespace");
+        assertEquals(0, code);
+    }
+
+    @Test
+    void shouldNotUpdateCompatibilityWhenNonExistingCompatibility() {
+        CommandLine cmd = new CommandLine(subjectConfigUpdate);
+
+        int code = cmd.execute("mySubject", "--compatibility", "nonExisting", "-n", "namespace");
+        assertEquals(2, code);
     }
 }

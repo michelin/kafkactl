@@ -24,6 +24,7 @@ import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECT_CLUSTER;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONSUMER_GROUP_RESET_OFFSET_RESPONSE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.DELETE_RECORDS_RESPONSE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.SUBJECT;
+import static com.michelin.kafkactl.util.constant.ResourceKind.SUBJECT_CONFIG_STATE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.VAULT_RESPONSE;
 
 import com.michelin.kafkactl.client.ClusterResourceClient;
@@ -31,7 +32,7 @@ import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Output;
 import com.michelin.kafkactl.model.Resource;
-import com.michelin.kafkactl.model.SchemaCompatibility;
+import com.michelin.kafkactl.model.SubjectCompatibility;
 import io.confluent.kafka.schemaregistry.avro.AvroSchema;
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference;
 import io.micronaut.core.annotation.Nullable;
@@ -422,26 +423,61 @@ public class ResourceService {
     }
 
     /**
-     * Change the compatibility of a given schema.
+     * Update the config of a given subject.
      *
      * @param namespace The namespace
      * @param subject The schema subject
      * @param compatibility The compatibility to apply
+     * @param alias The alias to apply
      * @param commandSpec The command that triggered the action
      * @return The resource
      */
-    public Optional<Resource> changeSchemaCompatibility(
-            String namespace, String subject, SchemaCompatibility compatibility, CommandSpec commandSpec) {
+    public Optional<Resource> updateSubjectConfig(
+            String namespace,
+            String subject,
+            @Nullable SubjectCompatibility compatibility,
+            @Nullable String alias,
+            CommandSpec commandSpec) {
         try {
-            HttpResponse<Resource> response = namespacedClient.changeSchemaCompatibility(
-                    namespace, subject, Map.of("compatibility", compatibility.name()), loginService.getAuthorization());
+            Map<String, String> config = new HashMap<>();
+            config.put(
+                    "compatibility",
+                    compatibility != null ? compatibility.toString().toUpperCase() : null);
+            config.put("alias", alias);
 
-            // Micronaut does not throw exception on 404, so produce a 404 manually
-            if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
-                throw new HttpClientResponseException(response.reason(), response);
-            }
+            HttpResponse<Resource> response =
+                    namespacedClient.updateSubjectConfig(namespace, subject, config, loginService.getAuthorization());
 
+            commandSpec
+                    .commandLine()
+                    .getOut()
+                    .println(formatService.prettifyKind(SUBJECT_CONFIG_STATE) + " \"" + subject + "\"" + " updated.");
             return response.getBody();
+        } catch (HttpClientResponseException exception) {
+            formatService.displayError(exception, SUBJECT, subject, commandSpec);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Delete the config of a given subject.
+     *
+     * @param namespace The namespace
+     * @param subject The schema subject
+     * @param commandSpec The command that triggered the action
+     * @return The resource
+     */
+    public Optional<Resource> deleteSubjectConfig(String namespace, String subject, CommandSpec commandSpec) {
+        try {
+            Optional<Resource> subjectConfig = namespacedClient
+                    .deleteSubjectConfig(namespace, subject, loginService.getAuthorization())
+                    .getBody();
+
+            commandSpec
+                    .commandLine()
+                    .getOut()
+                    .println(formatService.prettifyKind(SUBJECT_CONFIG_STATE) + " \"" + subject + "\"" + " deleted.");
+            return subjectConfig;
         } catch (HttpClientResponseException exception) {
             formatService.displayError(exception, SUBJECT, subject, commandSpec);
             return Optional.empty();
