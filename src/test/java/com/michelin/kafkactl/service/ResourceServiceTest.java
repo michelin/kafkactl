@@ -25,8 +25,8 @@ import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECT_CLUSTER;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONSUMER_GROUP_RESET_OFFSET_RESPONSE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.DELETE_RECORDS_RESPONSE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.KAFKA_USER_RESET_PASSWORD;
-import static com.michelin.kafkactl.util.constant.ResourceKind.SCHEMA_COMPATIBILITY_STATE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.SUBJECT;
+import static com.michelin.kafkactl.util.constant.ResourceKind.SUBJECT_CONFIG_STATE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.VAULT_RESPONSE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -48,7 +48,7 @@ import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
-import com.michelin.kafkactl.model.SchemaCompatibility;
+import com.michelin.kafkactl.model.SubjectCompatibility;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
@@ -1228,9 +1228,9 @@ class ResourceServiceTest {
     }
 
     @Test
-    void shouldChangeSchemaCompatibility() {
-        Resource changeSchemaCompatResource = Resource.builder()
-                .kind(SCHEMA_COMPATIBILITY_STATE)
+    void shouldUpdateSubjectConfig() {
+        Resource updateSubjectConfigResource = Resource.builder()
+                .kind(SUBJECT_CONFIG_STATE)
                 .apiVersion("v1")
                 .metadata(Metadata.builder().name("subject").build())
                 .spec(Map.of())
@@ -1238,53 +1238,58 @@ class ResourceServiceTest {
 
         CommandLine cmd = new CommandLine(new Kafkactl());
 
-        when(namespacedClient.changeSchemaCompatibility(any(), any(), any(), any()))
-                .thenReturn(HttpResponse.ok(changeSchemaCompatResource));
+        when(namespacedClient.updateSubjectConfig(any(), any(), any(), any()))
+                .thenReturn(HttpResponse.ok(updateSubjectConfigResource));
 
-        Optional<Resource> actual = resourceService.changeSchemaCompatibility(
-                "namespace", "subject", SchemaCompatibility.FORWARD_TRANSITIVE, cmd.getCommandSpec());
+        Optional<Resource> actual = resourceService.updateSubjectConfig(
+                "namespace", "subject", SubjectCompatibility.FORWARD_TRANSITIVE, null, cmd.getCommandSpec());
 
         assertTrue(actual.isPresent());
-        assertEquals(changeSchemaCompatResource, actual.get());
+        assertEquals(updateSubjectConfigResource, actual.get());
     }
 
     @Test
-    void shouldChangeSchemaCompatibilityNotFound() {
-        Resource changeConnectorStateResource = Resource.builder()
-                .kind(CHANGE_CONNECTOR_STATE)
-                .apiVersion("v1")
-                .metadata(Metadata.builder().name("subject").build())
-                .spec(Map.of())
-                .build();
-
-        CommandLine cmd = new CommandLine(new Kafkactl());
-
-        when(namespacedClient.changeSchemaCompatibility(any(), any(), any(), any()))
-                .thenReturn(HttpResponse.notFound(changeConnectorStateResource));
-
-        Optional<Resource> actual = resourceService.changeSchemaCompatibility(
-                "namespace", "subject", SchemaCompatibility.FORWARD_TRANSITIVE, cmd.getCommandSpec());
-
-        assertTrue(actual.isEmpty());
-        verify(formatService)
-                .displayError(
-                        argThat(exception -> exception.getStatus().equals(HttpStatus.NOT_FOUND)
-                                && exception.getMessage().equals("Not Found")),
-                        eq(SUBJECT),
-                        eq("subject"),
-                        eq(cmd.getCommandSpec()));
-    }
-
-    @Test
-    void shouldChangeSchemaCompatFail() {
+    void shouldNotUpdateSubjectConfig() {
         CommandLine cmd = new CommandLine(new Kafkactl());
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
-        when(namespacedClient.changeSchemaCompatibility(any(), any(), any(), any()))
-                .thenThrow(exception);
+        when(namespacedClient.updateSubjectConfig(any(), any(), any(), any())).thenThrow(exception);
 
-        Optional<Resource> actual = resourceService.changeSchemaCompatibility(
-                "namespace", "subject", SchemaCompatibility.FORWARD_TRANSITIVE, cmd.getCommandSpec());
+        Optional<Resource> actual = resourceService.updateSubjectConfig(
+                "namespace", "subject", SubjectCompatibility.FORWARD_TRANSITIVE, null, cmd.getCommandSpec());
+
+        assertTrue(actual.isEmpty());
+        verify(formatService).displayError(exception, SUBJECT, "subject", cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldDeleteSubjectConfig() {
+        Resource deleteSubjectConfigResource = Resource.builder()
+                .kind(SUBJECT_CONFIG_STATE)
+                .apiVersion("v1")
+                .metadata(Metadata.builder().name("subject").build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+
+        when(namespacedClient.deleteSubjectConfig(any(), any(), any()))
+                .thenReturn(HttpResponse.ok(deleteSubjectConfigResource));
+
+        Optional<Resource> actual = resourceService.deleteSubjectConfig("namespace", "subject", cmd.getCommandSpec());
+
+        assertTrue(actual.isPresent());
+        assertEquals(deleteSubjectConfigResource, actual.get());
+    }
+
+    @Test
+    void shouldNotDeleteSubjectConfig() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        when(namespacedClient.deleteSubjectConfig(any(), any(), any())).thenThrow(exception);
+
+        Optional<Resource> actual = resourceService.deleteSubjectConfig("namespace", "subject", cmd.getCommandSpec());
 
         assertTrue(actual.isEmpty());
         verify(formatService).displayError(exception, SUBJECT, "subject", cmd.getCommandSpec());
