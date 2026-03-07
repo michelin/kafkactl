@@ -67,7 +67,7 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
                 * [NonEmptyString](#nonemptystring)
                 * [ContainsList](#containslist)
                 * [CompositeValidator](#compositevalidator)
-        * [ACL Owner](#acl-owner)
+        * [ACL Owner-Typed](#acl-owner-typed)
         * [Role Binding](#role-binding)
         * [Quota](#quota)
 * [CI/CD](#cicd)
@@ -118,13 +118,13 @@ kafkactl:
     - name: dev
       context:
         api: https://ns4kafka-dev-api.domain.com
-        user-token: my_gitlab_token
-        namespace: my_namespace
+        user-token: gitLabToken
+        namespace: myNamespace
     - name: prod
       context:
         api: https://ns4kafka-prod-api.domain.com
-        user-token: my_gitlab_token
-        namespace: my_namespace
+        user-token: gitLabToken
+        namespace: myNamespace
 ```
 
 For each context, define your token and your namespace.
@@ -800,8 +800,10 @@ spec:
 
 #### ACL
 
-To provide access to your topics to another namespace, you can add an Access Control List (ACL) using the following
-example, where "daaagbl0" is your namespace and "dbbbgbl0" is the namespace that needs access to your topics:
+The `AccessControlEntry` grant permissions to other namespaces on your owned resources.
+
+An ACL is identified by its name and associated namespace.
+A namespace can have _n_ ACLs granted to another namespace.
 
 ```yaml
 ---
@@ -809,26 +811,25 @@ apiVersion: v1
 kind: AccessControlEntry
 metadata:
   name: acl-topic-a-b
-  namespace: daaagbl0
+  namespace: myNamespace
 spec:
   resourceType: TOPIC
-  resource: aaa.
+  resource: abc.
   resourcePatternType: PREFIXED
   permission: READ
-  grantedTo: dbbbgbl0
+  grantedTo: anotherNamespace
 ```
 
-Here are some points to keep in mind:
-
-- `spec.resourceType` can be `TOPIC`, `GROUP`, `CONNECT`, or `CONNECT_CLUSTER`.
+- `spec.resourceType` can be `TOPIC` or `CONNECT_CLUSTER`.
 - `spec.resourcePatternType` can be `PREFIXED` or `LITERAL`.
 - `spec.permission` can be `READ` or `WRITE`.
 - `spec.grantedTo` must reference a namespace on the same Kafka cluster as yours.
-- `spec.resource` must reference any “sub-resource” that you own. For example, if you are owner of the prefix “aaa”, you
+- `spec.resource` must reference any "sub-resource" that you own. For example, if you own the prefix "abc.", you
   can grant READ or WRITE access to:
-    - the whole prefix: “aaa”
-    - a sub prefix: “aaa_subprefix”
-    - a literal topic name: “aaa_myTopic”
+    - The whole prefix: "abc."
+    - A sub prefix: "abc.subprefix"
+    - A literal topic name: "abc.myTopic"
+- Using this ACL, the namespace `myNamespace` will grant read access to all topics starting with "abc." to the namespace `anotherNamespace`.
 
 <h4 id="connector-2">Connector</h4>
 
@@ -977,6 +978,8 @@ Here is the list of resources a Ns4Kafka administrator can manage.
 #### Namespace
 
 The `Namespace` resource is the core of Ns4Kafka.
+
+A namespace, identified by its name, is unique within Ns4Kafka across all managed Kafka clusters. Once created for a managed Kafka cluster, it cannot be moved to another cluster.
 
 ```yml
 ---
@@ -1161,9 +1164,13 @@ connectValidator:
             - io.confluent.connect.jdbc.JdbcSourceConnector
 ```
 
-#### ACL Owner
+#### ACL Owner-typed
 
-ACLs with owner permission can only be deployed by administrators.
+The `AccessControlEntry` with owner permissions define the resources a namespace owns.
+
+An owner-typed ACL is identified by its name and associated namespace.
+A namespace can have _n_ owner-typed ACLs.
+Two owner-typed ACLs with different names that cover the same resources cannot be created in the same namespace. They can only exist in different namespaces.
 
 ```yml
 ---
@@ -1180,13 +1187,16 @@ spec:
   grantedTo: myNamespace
 ```
 
-- With this ACL, the namespace "myNamespace" will be the owner of topics prefixed by "myPrefix.". No one else is able to
+- `resourceType` can be `TOPIC`, `GROUP`, `CONNECT`, or `CONNECT_CLUSTER`.
+- Using this ACL, the namespace `myNamespace` will be the owner of topics prefixed by `myPrefix.`. No one else is able to
   modify these resources.
-- `resourceType` can be `topic`, `connect`, `connect_cluster` or `group`.
 
 #### Role Binding
 
-The `Role Binding` resource links a namespace to a project team.
+The `RoleBinding` resource links a namespace to a project team.
+
+A role binding is identified by its name and associated namespace.
+A namespace can have _n_ role bindings.
 
 ```yaml
 ---
@@ -1236,12 +1246,14 @@ spec:
     subjectName: myGitLabGroup
 ```
 
-- With this role binding, members of the group "myGitLabGroup" can use Ns4Kafka to manage topics starting with "
-  myPrefix." on the "myCluster" Kafka cluster.
+- Using this role binding, members of the group `myGitLabGroup` can access the namespace `myNamespace` and are granted permissions to the related Ns4Kafka endpoints.
 
 #### Quota
 
-It is possible to define quotas on a namespace.
+The `ResourceQuota` limits the use of resources.
+
+A quota is identified by its associated namespace only.
+A namespace can have only one quota.
 
 ```yml
 apiVersion: v1
