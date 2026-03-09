@@ -71,7 +71,7 @@ jobs:
           echo image_name=michelin/kafkactl:$platform_slug-jar >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
         
       - name: Docker build
         uses: docker/build-push-action@v6
@@ -176,7 +176,7 @@ jobs:
           echo image_name=michelin/kafkactl:$platform_slug >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Docker build
         uses: docker/build-push-action@v6
