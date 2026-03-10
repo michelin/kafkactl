@@ -175,20 +175,28 @@ public interface NamespacedResourceClient {
             @Header("Authorization") String token);
 
     /**
-     * Change the schema compatibility mode.
+     * Change the subject config.
      *
      * @param namespace The namespace
      * @param subject The subject
-     * @param compatibility The compatibility to apply
+     * @param config The config to apply
      * @param token The auth token
      * @return The change compatibility response
      */
     @Post("{namespace}/schemas/{subject}/config")
-    HttpResponse<Resource> changeSchemaCompatibility(
-            String namespace,
-            String subject,
-            @Body Map<String, String> compatibility,
-            @Header("Authorization") String token);
+    HttpResponse<Resource> updateSubjectConfig(
+            String namespace, String subject, @Body Map<String, String> config, @Header("Authorization") String token);
+
+    /**
+     * Delete the subject config.
+     *
+     * @param namespace The namespace
+     * @param subject The subject
+     * @param token The auth token
+     * @return The change compatibility response
+     */
+    @Delete("{namespace}/schemas/{subject}/config")
+    HttpResponse<Resource> deleteSubjectConfig(String namespace, String subject, @Header("Authorization") String token);
 
     /**
      * Reset password of a given user.
