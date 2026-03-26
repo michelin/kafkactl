@@ -1159,6 +1159,47 @@ class ResourceServiceTest {
     }
 
     @Test
+    void shouldDeleteGroupSuccess() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        doCallRealMethod().when(formatService).prettifyKind(any());
+        when(namespacedClient.deleteGroup(any(), any(), any(), anyBoolean())).thenReturn(HttpResponse.noContent());
+
+        int actual = resourceService.deleteGroup("namespace", "group", false, cmd.getCommandSpec());
+
+        assertEquals(0, actual);
+        assertTrue(sw.toString().contains("Consumer group \"group\" deleted."));
+    }
+
+    @Test
+    void shouldDeleteGroupNotFound() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+
+        when(namespacedClient.deleteGroup(any(), any(), any(), anyBoolean())).thenReturn(HttpResponse.notFound());
+
+        int actual = resourceService.deleteGroup("namespace", "group", false, cmd.getCommandSpec());
+
+        assertEquals(1, actual);
+        verify(formatService)
+                .displayError(any(HttpClientResponseException.class), eq("ConsumerGroup"), eq("group"), eq(cmd.getCommandSpec()));
+    }
+
+    @Test
+    void shouldDeleteGroupFail() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+
+        when(namespacedClient.deleteGroup(any(), any(), any(), anyBoolean())).thenThrow(exception);
+
+        int actual = resourceService.deleteGroup("namespace", "group", false, cmd.getCommandSpec());
+
+        assertEquals(1, actual);
+        verify(formatService).displayError(exception, "ConsumerGroup", "group", cmd.getCommandSpec());
+    }
+
+    @Test
     void shouldChangeConnectorState() {
         Resource changeConnectorStateResource = Resource.builder()
                 .kind(CHANGE_CONNECTOR_STATE)

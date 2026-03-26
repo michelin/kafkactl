@@ -212,6 +212,7 @@ Commands:
   delete           Delete a resource.
   diff             Get differences between a new resource and a old resource.
   get              Get resources by resource type for the current namespace.
+  group            Interact with consumer groups.
   import           Import non-synchronized resources.
   reset-offsets    Reset consumer group offsets.
   schema           Interact with schemas.
@@ -548,6 +549,28 @@ kafkactl delete schema *
 kafkactl delete schema mySchema -V latest
 ```
 
+### Group
+
+The `group` command allows you to interact with consumer groups.
+
+```console
+Usage: kafkactl group [-h] [COMMAND]
+
+Description: Interact with consumer groups.
+
+Commands:
+  delete  Delete a consumer group.
+
+Options:
+  -h, --help   Show this help message and exit.
+```
+
+Example(s):
+
+```console
+kafkactl group delete myConsumerGroup
+```
+
 ### Diff
 
 The `diff` command allows you to compare a new YAML descriptor with the current one deployed in Ns4Kafka, allowing you
@@ -663,6 +686,32 @@ kafkactl import topics
 kafkactl import topic myTopicName
 kafkactl import connectors
 kafkactl import connector myConnectorName
+```
+
+### Group Delete
+
+The `group delete` command allows you to delete a consumer group.
+
+```console
+Usage: kafkactl group delete [-hv] [--dry-run] [-n=<optionalNamespace>] <group>
+
+Description: Delete a consumer group.
+
+Parameters:
+      <group>     Consumer group name.
+
+Options:
+      --dry-run   Does not persist resources. Validate only.
+  -h, --help      Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
+```
+
+Example(s):
+
+```console
+kafkactl group delete myConsumerGroup
 ```
 
 ### Reset Offsets
