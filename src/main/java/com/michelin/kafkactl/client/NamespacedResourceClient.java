@@ -159,6 +159,22 @@ public interface NamespacedResourceClient {
             @QueryValue boolean dryrun);
 
     /**
+     * Delete a consumer group.
+     *
+     * @param token The authentication token
+     * @param namespace The namespace
+     * @param consumerGroupName The consumer group
+     * @param dryrun Is dry run mode or not?
+     * @return The delete response
+     */
+    @Delete("{namespace}/consumer-groups/{consumerGroupName}{?dryrun}")
+    HttpResponse<?> deleteGroup(
+            @Header("Authorization") String token,
+            String namespace,
+            String consumerGroupName,
+            @QueryValue boolean dryrun);
+
+    /**
      * Change the state of a given connector.
      *
      * @param namespace The namespace

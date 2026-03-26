@@ -358,6 +358,36 @@ public class ResourceService {
     }
 
     /**
+     * Delete a consumer group.
+     *
+     * @param namespace The namespace
+     * @param group The consumer group
+     * @param dryRun Is dry run mode or not?
+     * @param commandSpec The command that triggered the action
+     * @return 0 if the command succeeded, 1 otherwise
+     */
+    public int deleteGroup(String namespace, String group, boolean dryRun, CommandSpec commandSpec) {
+        try {
+            HttpResponse<?> response = namespacedClient.deleteGroup(
+                    loginService.getAuthorization(), namespace, group, dryRun);
+
+            // Micronaut does not throw exception on 404, so produce a 404 manually
+            if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
+                throw new HttpClientResponseException(response.reason(), response);
+            }
+
+            commandSpec
+                    .commandLine()
+                    .getOut()
+                    .println(formatService.prettifyKind("ConsumerGroup") + " \"" + group + "\" deleted.");
+            return 0;
+        } catch (HttpClientResponseException exception) {
+            formatService.displayError(exception, "ConsumerGroup", group, commandSpec);
+            return 1;
+        }
+    }
+
+    /**
      * Change the state of a given connector.
      *
      * @param namespace The namespace
