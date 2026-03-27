@@ -168,7 +168,7 @@ public interface NamespacedResourceClient {
      * @return The delete response
      */
     @Delete("{namespace}/consumer-groups/{consumerGroupName}{?dryrun}")
-    HttpResponse<?> deleteGroup(
+    HttpResponse<Void> deleteGroup(
             @Header("Authorization") String token,
             String namespace,
             String consumerGroupName,
