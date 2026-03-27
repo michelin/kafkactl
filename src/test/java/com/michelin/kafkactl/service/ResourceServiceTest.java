@@ -1183,7 +1183,11 @@ class ResourceServiceTest {
 
         assertEquals(1, actual);
         verify(formatService)
-                .displayError(any(HttpClientResponseException.class), eq("ConsumerGroup"), eq("group"), eq(cmd.getCommandSpec()));
+                .displayError(
+                        any(HttpClientResponseException.class),
+                        eq("ConsumerGroup"),
+                        eq("group"),
+                        eq(cmd.getCommandSpec()));
     }
 
     @Test

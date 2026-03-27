@@ -368,8 +368,8 @@ public class ResourceService {
      */
     public int deleteGroup(String namespace, String group, boolean dryRun, CommandSpec commandSpec) {
         try {
-            HttpResponse<?> response = namespacedClient.deleteGroup(
-                    loginService.getAuthorization(), namespace, group, dryRun);
+            HttpResponse<?> response =
+                    namespacedClient.deleteGroup(loginService.getAuthorization(), namespace, group, dryRun);
 
             // Micronaut does not throw exception on 404, so produce a 404 manually
             if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
