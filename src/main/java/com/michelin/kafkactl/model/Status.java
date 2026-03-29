@@ -33,12 +33,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Status {
-    @Builder.Default
-    private String apiVersion = "v1";
-
-    @Builder.Default
-    private String kind = "Status";
-
     private StatusPhase status;
     private String message;
     private String reason;
@@ -51,7 +45,7 @@ public class Status {
         FAILED;
 
         /**
-         * Build status phase from string. This is because Ns4Kafka returns capitalised status phases.
+         * Build status phase from string. This is because Ns4Kafka returns capitalized status phases.
          *
          * @param key the key
          * @return the status phase

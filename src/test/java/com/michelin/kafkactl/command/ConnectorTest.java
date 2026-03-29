@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.model.ApiResource;
-import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ApiResourcesService;
@@ -128,7 +127,7 @@ class ConnectorTest {
         Resource resource = Resource.builder()
                 .kind("Connector")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.connector")
                         .namespace("namespace")
                         .build())
@@ -156,7 +155,7 @@ class ConnectorTest {
         Resource resource = Resource.builder()
                 .kind("Connector")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.connector")
                         .namespace("namespace")
                         .build())

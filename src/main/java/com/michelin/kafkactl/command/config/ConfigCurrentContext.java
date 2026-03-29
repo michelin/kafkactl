@@ -24,7 +24,6 @@ import static com.michelin.kafkactl.util.constant.ResourceKind.CONTEXT;
 
 import com.michelin.kafkactl.hook.ValidCurrentContextHook;
 import com.michelin.kafkactl.mixin.UnmaskTokenMixin;
-import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.FormatService;
@@ -74,7 +73,7 @@ public class ConfigCurrentContext extends ValidCurrentContextHook {
 
         String currentContextName = configService.getCurrentContextName();
         Resource currentContextAsResource = Resource.builder()
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name(currentContextName != null ? currentContextName : StringUtils.EMPTY_STRING)
                         .build())
                 .spec(specs)

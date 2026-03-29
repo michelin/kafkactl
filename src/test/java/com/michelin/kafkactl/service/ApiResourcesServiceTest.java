@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.model.ApiResource;
-import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import java.util.Collections;
 import java.util.List;
@@ -188,7 +187,7 @@ class ApiResourcesServiceTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .namespace("namespace")
                         .build())

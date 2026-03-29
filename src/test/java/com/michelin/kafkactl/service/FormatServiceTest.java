@@ -26,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.model.ApiResource;
-import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.Status;
 import io.micronaut.http.HttpResponse;
@@ -55,7 +54,7 @@ class FormatServiceTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -77,7 +76,7 @@ class FormatServiceTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name(null)
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -99,7 +98,7 @@ class FormatServiceTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("prefix.topic").build())
+                .metadata(Resource.Metadata.builder().name("prefix.topic").build())
                 .spec(Collections.emptyMap())
                 .build();
 
@@ -118,7 +117,7 @@ class FormatServiceTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -141,7 +140,7 @@ class FormatServiceTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("prefix.topic").build())
+                .metadata(Resource.Metadata.builder().name("prefix.topic").build())
                 .spec(Collections.emptyMap())
                 .build();
 
@@ -159,7 +158,7 @@ class FormatServiceTest {
         Resource resource = Resource.builder()
                 .kind("RoleBinding")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("roleBinding").build())
+                .metadata(Resource.Metadata.builder().name("roleBinding").build())
                 .spec(Map.of(
                         "subject",
                         Map.of("subjectName", "GROUP"),
@@ -287,7 +286,7 @@ class FormatServiceTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())

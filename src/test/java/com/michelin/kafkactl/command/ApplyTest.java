@@ -28,7 +28,6 @@ import static org.mockito.Mockito.*;
 
 import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.model.ApiResource;
-import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ApiResourcesService;
@@ -150,7 +149,7 @@ class ApplyTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("prefix.topic").build())
+                .metadata(Resource.Metadata.builder().name("prefix.topic").build())
                 .spec(Collections.emptyMap())
                 .build();
 
@@ -174,7 +173,7 @@ class ApplyTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .namespace("namespace")
                         .build())
@@ -200,7 +199,7 @@ class ApplyTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .namespace("namespace")
                         .build())
@@ -233,7 +232,7 @@ class ApplyTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .namespace("namespace")
                         .build())
@@ -274,7 +273,7 @@ class ApplyTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("prefix.topic").build())
+                .metadata(Resource.Metadata.builder().name("prefix.topic").build())
                 .spec(Collections.emptyMap())
                 .build();
 
@@ -316,7 +315,7 @@ class ApplyTest {
         Resource resource = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.schema")
                         .namespace("namespace")
                         .build())
@@ -359,7 +358,7 @@ class ApplyTest {
         Resource resource = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.schema")
                         .namespace("namespace")
                         .build())
@@ -406,7 +405,7 @@ class ApplyTest {
         Resource resource = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.schema")
                         .namespace("namespace")
                         .build())
