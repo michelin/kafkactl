@@ -19,7 +19,6 @@
 package com.michelin.kafkactl.command;
 
 import com.michelin.kafkactl.hook.DryRunHook;
-import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.ResourceService;
 import io.micronaut.core.annotation.ReflectiveAccess;
@@ -99,7 +98,10 @@ public class ResetOffsets extends DryRunHook {
         Resource consumerGroupResetOffset = Resource.builder()
                 .apiVersion("v1")
                 .kind("ConsumerGroupResetOffsets")
-                .metadata(Metadata.builder().namespace(namespace).name(group).build())
+                .metadata(Resource.Metadata.builder()
+                        .namespace(namespace)
+                        .name(group)
+                        .build())
                 .spec(consumerGroupResetOffsetSpec)
                 .build();
 

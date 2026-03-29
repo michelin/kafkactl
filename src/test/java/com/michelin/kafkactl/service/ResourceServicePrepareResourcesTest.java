@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference;
 import java.io.File;
@@ -85,7 +84,7 @@ class ResourceServicePrepareResourcesTest {
 
         Resource schemaResource = Resource.builder()
                 .kind("Schema")
-                .metadata(Metadata.builder().name("test").build())
+                .metadata(Resource.Metadata.builder().name("test").build())
                 .spec(spec)
                 .build();
 
@@ -101,7 +100,7 @@ class ResourceServicePrepareResourcesTest {
 
         Resource schemaResource = Resource.builder()
                 .kind("Schema")
-                .metadata(Metadata.builder().name("test").build())
+                .metadata(Resource.Metadata.builder().name("test").build())
                 .spec(spec)
                 .build();
 
@@ -121,7 +120,7 @@ class ResourceServicePrepareResourcesTest {
         Resource schemaCustomer = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("Customer").build())
+                .metadata(Resource.Metadata.builder().name("Customer").build())
                 .spec(
                         Map.of(
                                 SCHEMA_FIELD,
@@ -131,7 +130,7 @@ class ResourceServicePrepareResourcesTest {
         Resource schemaProduct = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("Product").build())
+                .metadata(Resource.Metadata.builder().name("Product").build())
                 .spec(
                         Map.of(
                                 SCHEMA_FIELD,
@@ -141,7 +140,7 @@ class ResourceServicePrepareResourcesTest {
         Resource schemaOrder = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("Order").build())
+                .metadata(Resource.Metadata.builder().name("Order").build())
                 .spec(Map.of(
                         SCHEMA_FIELD,
                         normalize("""
@@ -167,7 +166,7 @@ class ResourceServicePrepareResourcesTest {
         Resource schemaUnion = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("Union").build())
+                .metadata(Resource.Metadata.builder().name("Union").build())
                 .spec(Map.of(
                         SCHEMA_FIELD,
                         normalize("""
@@ -228,7 +227,7 @@ class ResourceServicePrepareResourcesTest {
         Resource schemaLeaf = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("schemaLeaf").build())
+                .metadata(Resource.Metadata.builder().name("schemaLeaf").build())
                 .spec(Map.of(SCHEMA_FIELD, normalize("""
                                 {
                                   "type": "record",
@@ -246,7 +245,7 @@ class ResourceServicePrepareResourcesTest {
         Resource schemaNested = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("schemaNested").build())
+                .metadata(Resource.Metadata.builder().name("schemaNested").build())
                 .spec(Map.of(
                         SCHEMA_FIELD,
                         normalize("""
@@ -296,7 +295,7 @@ class ResourceServicePrepareResourcesTest {
         Resource schemaCustomer = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("Customer").build())
+                .metadata(Resource.Metadata.builder().name("Customer").build())
                 .spec(
                         Map.of(
                                 SCHEMA_FIELD,
@@ -306,7 +305,7 @@ class ResourceServicePrepareResourcesTest {
         Resource schemaOrder = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("Order").build())
+                .metadata(Resource.Metadata.builder().name("Order").build())
                 .spec(Map.of(
                         SCHEMA_FIELD,
                         normalize("""
@@ -337,7 +336,7 @@ class ResourceServicePrepareResourcesTest {
         Resource schemaCustomer = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("Customer").build())
+                .metadata(Resource.Metadata.builder().name("Customer").build())
                 .spec(
                         Map.of(
                                 SCHEMA_FIELD,
@@ -347,7 +346,7 @@ class ResourceServicePrepareResourcesTest {
         Resource schemaOrder = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("Order").build())
+                .metadata(Resource.Metadata.builder().name("Order").build())
                 .spec(Map.of(
                         SCHEMA_FIELD,
                         normalize("""
@@ -378,7 +377,7 @@ class ResourceServicePrepareResourcesTest {
         Resource schemaCustomer = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("Customer").build())
+                .metadata(Resource.Metadata.builder().name("Customer").build())
                 .spec(
                         Map.of(
                                 SCHEMA_FIELD,
@@ -388,7 +387,7 @@ class ResourceServicePrepareResourcesTest {
         Resource schemaOrder = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("Order").build())
+                .metadata(Resource.Metadata.builder().name("Order").build())
                 .spec(Map.of(
                         SCHEMA_FIELD,
                         normalize("""
@@ -508,7 +507,7 @@ class ResourceServicePrepareResourcesTest {
         Resource schema1 = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("schema1").build())
+                .metadata(Resource.Metadata.builder().name("schema1").build())
                 .spec(
                         new HashMap<>(
                                 Map.of(
@@ -519,14 +518,14 @@ class ResourceServicePrepareResourcesTest {
         Resource namespace = Resource.builder()
                 .kind("Namespace")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("ns1").build())
+                .metadata(Resource.Metadata.builder().name("ns1").build())
                 .spec(Map.of())
                 .build();
 
         Resource schema2 = Resource.builder()
                 .kind("Schema")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("schema2").build())
+                .metadata(Resource.Metadata.builder().name("schema2").build())
                 .spec(
                         new HashMap<>(
                                 Map.of(
@@ -592,13 +591,13 @@ class ResourceServicePrepareResourcesTest {
 
         Resource schemaResource1 = Resource.builder()
                 .kind("Schema")
-                .metadata(Metadata.builder().name("test1").build())
+                .metadata(Resource.Metadata.builder().name("test1").build())
                 .spec(spec)
                 .build();
 
         Resource schemaResource2 = Resource.builder()
                 .kind("Schema")
-                .metadata(Metadata.builder().name("test2").build())
+                .metadata(Resource.Metadata.builder().name("test2").build())
                 .spec(spec)
                 .build();
 
@@ -622,13 +621,15 @@ class ResourceServicePrepareResourcesTest {
 
         Resource schemaResource1 = Resource.builder()
                 .kind("Schema")
-                .metadata(Metadata.builder().name("abc.customer1-value").build())
+                .metadata(
+                        Resource.Metadata.builder().name("abc.customer1-value").build())
                 .spec(spec)
                 .build();
 
         Resource schemaResource2 = Resource.builder()
                 .kind("Schema")
-                .metadata(Metadata.builder().name("abc.customer2-value").build())
+                .metadata(
+                        Resource.Metadata.builder().name("abc.customer2-value").build())
                 .spec(spec)
                 .build();
 

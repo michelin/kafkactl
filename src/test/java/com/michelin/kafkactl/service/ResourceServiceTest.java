@@ -46,7 +46,6 @@ import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.model.ApiResource;
-import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.SchemaCompatibility;
 import io.micronaut.http.HttpResponse;
@@ -102,7 +101,7 @@ class ResourceServiceTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -133,7 +132,7 @@ class ResourceServiceTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -221,7 +220,7 @@ class ResourceServiceTest {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -231,7 +230,7 @@ class ResourceServiceTest {
         Resource connectorResource = Resource.builder()
                 .kind("Connector")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -310,7 +309,7 @@ class ResourceServiceTest {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -443,7 +442,7 @@ class ResourceServiceTest {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -470,7 +469,7 @@ class ResourceServiceTest {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -497,7 +496,7 @@ class ResourceServiceTest {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -527,7 +526,7 @@ class ResourceServiceTest {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -554,7 +553,7 @@ class ResourceServiceTest {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -581,7 +580,7 @@ class ResourceServiceTest {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -606,7 +605,7 @@ class ResourceServiceTest {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -642,7 +641,7 @@ class ResourceServiceTest {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -678,7 +677,7 @@ class ResourceServiceTest {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -718,7 +717,7 @@ class ResourceServiceTest {
         doCallRealMethod().when(formatService).prettifyKind(any());
 
         Resource deletedResource = Resource.builder()
-                .metadata(Metadata.builder().name("name").build())
+                .metadata(Resource.Metadata.builder().name("name").build())
                 .build();
 
         when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean()))
@@ -747,11 +746,11 @@ class ResourceServiceTest {
         doCallRealMethod().when(formatService).prettifyKind(any());
 
         Resource deletedResource1 = Resource.builder()
-                .metadata(Metadata.builder().name("name1").build())
+                .metadata(Resource.Metadata.builder().name("name1").build())
                 .build();
 
         Resource deletedResource2 = Resource.builder()
-                .metadata(Metadata.builder().name("name2").build())
+                .metadata(Resource.Metadata.builder().name("name2").build())
                 .build();
 
         when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean()))
@@ -782,7 +781,7 @@ class ResourceServiceTest {
         doCallRealMethod().when(formatService).prettifyKind(any());
 
         Resource deletedResource = Resource.builder()
-                .metadata(Metadata.builder().name("name").build())
+                .metadata(Resource.Metadata.builder().name("name").build())
                 .build();
 
         when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean()))
@@ -812,7 +811,7 @@ class ResourceServiceTest {
         doCallRealMethod().when(formatService).prettifyKind(any());
 
         Resource deletedResource = Resource.builder()
-                .metadata(Metadata.builder().name("name").build())
+                .metadata(Resource.Metadata.builder().name("name").build())
                 .build();
 
         when(nonNamespacedClient.delete(any(), any(), any(), anyBoolean()))
@@ -841,11 +840,11 @@ class ResourceServiceTest {
         doCallRealMethod().when(formatService).prettifyKind(any());
 
         Resource deletedResource1 = Resource.builder()
-                .metadata(Metadata.builder().name("name1").build())
+                .metadata(Resource.Metadata.builder().name("name1").build())
                 .build();
 
         Resource deletedResource2 = Resource.builder()
-                .metadata(Metadata.builder().name("name2").build())
+                .metadata(Resource.Metadata.builder().name("name2").build())
                 .build();
 
         when(nonNamespacedClient.delete(any(), any(), any(), anyBoolean()))
@@ -958,7 +957,7 @@ class ResourceServiceTest {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -1030,7 +1029,7 @@ class ResourceServiceTest {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -1084,7 +1083,7 @@ class ResourceServiceTest {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -1112,7 +1111,7 @@ class ResourceServiceTest {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -1137,7 +1136,7 @@ class ResourceServiceTest {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
                         .build())
@@ -1208,7 +1207,7 @@ class ResourceServiceTest {
         Resource changeConnectorStateResource = Resource.builder()
                 .kind(CHANGE_CONNECTOR_STATE)
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("connector").build())
+                .metadata(Resource.Metadata.builder().name("connector").build())
                 .spec(Map.of())
                 .build();
 
@@ -1229,7 +1228,7 @@ class ResourceServiceTest {
         Resource changeConnectorStateResource = Resource.builder()
                 .kind(CHANGE_CONNECTOR_STATE)
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("connector").build())
+                .metadata(Resource.Metadata.builder().name("connector").build())
                 .spec(Map.of())
                 .build();
 
@@ -1256,7 +1255,7 @@ class ResourceServiceTest {
         Resource changeConnectorStateResource = Resource.builder()
                 .kind(CHANGE_CONNECTOR_STATE)
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("connector").build())
+                .metadata(Resource.Metadata.builder().name("connector").build())
                 .spec(Map.of())
                 .build();
 
@@ -1277,7 +1276,7 @@ class ResourceServiceTest {
         Resource changeSchemaCompatResource = Resource.builder()
                 .kind(SCHEMA_COMPATIBILITY_STATE)
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("subject").build())
+                .metadata(Resource.Metadata.builder().name("subject").build())
                 .spec(Map.of())
                 .build();
 
@@ -1298,7 +1297,7 @@ class ResourceServiceTest {
         Resource changeConnectorStateResource = Resource.builder()
                 .kind(CHANGE_CONNECTOR_STATE)
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("subject").build())
+                .metadata(Resource.Metadata.builder().name("subject").build())
                 .spec(Map.of())
                 .build();
 
@@ -1340,7 +1339,7 @@ class ResourceServiceTest {
         Resource changeSchemaCompatResource = Resource.builder()
                 .kind(KAFKA_USER_RESET_PASSWORD)
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("user").build())
+                .metadata(Resource.Metadata.builder().name("user").build())
                 .spec(Map.of())
                 .build();
 
@@ -1360,7 +1359,7 @@ class ResourceServiceTest {
         Resource changeConnectorStateResource = Resource.builder()
                 .kind(KAFKA_USER_RESET_PASSWORD)
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("prefix.topic").build())
+                .metadata(Resource.Metadata.builder().name("prefix.topic").build())
                 .spec(Map.of())
                 .build();
 
@@ -1397,7 +1396,7 @@ class ResourceServiceTest {
         Resource availableVaults = Resource.builder()
                 .kind(CONNECT_CLUSTER)
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("connectCluster").build())
+                .metadata(Resource.Metadata.builder().name("connectCluster").build())
                 .spec(Map.of())
                 .build();
 
@@ -1445,7 +1444,7 @@ class ResourceServiceTest {
         Resource availableVaults = Resource.builder()
                 .kind(CONNECT_CLUSTER)
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("connectCluster").build())
+                .metadata(Resource.Metadata.builder().name("connectCluster").build())
                 .spec(Map.of())
                 .build();
 

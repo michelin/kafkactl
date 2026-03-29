@@ -24,7 +24,6 @@ import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR;
 
 import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.model.ApiResource;
-import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
@@ -92,7 +91,7 @@ public class Connector extends AuthenticatedHook {
 
             List<Resource> changeConnectorResponses = connectors.stream()
                     .map(connector -> Resource.builder()
-                            .metadata(Metadata.builder()
+                            .metadata(Resource.Metadata.builder()
                                     .namespace(namespace)
                                     .name(connector)
                                     .build())

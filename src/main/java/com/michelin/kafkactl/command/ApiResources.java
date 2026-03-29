@@ -22,7 +22,6 @@ import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.RESOURCE_DEFINITION;
 
 import com.michelin.kafkactl.hook.AuthenticatedHook;
-import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FormatService;
 import io.micronaut.core.annotation.ReflectiveAccess;
@@ -58,7 +57,7 @@ public class ApiResources extends AuthenticatedHook {
         try {
             List<Resource> resources = apiResourcesService.listResourceDefinitions().stream()
                     .map(apiResource -> Resource.builder()
-                            .metadata(Metadata.builder()
+                            .metadata(Resource.Metadata.builder()
                                     .name(apiResource.getKind())
                                     .build())
                             .spec(Map.of(

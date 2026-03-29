@@ -24,7 +24,6 @@ import static com.michelin.kafkactl.util.constant.ResourceKind.CONTEXT;
 
 import com.michelin.kafkactl.hook.HelpHook;
 import com.michelin.kafkactl.mixin.UnmaskTokenMixin;
-import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.FormatService;
@@ -83,7 +82,7 @@ public class ConfigGetContexts extends HelpHook implements Callable<Integer> {
                         }
 
                         return Resource.builder()
-                                .metadata(Metadata.builder()
+                                .metadata(Resource.Metadata.builder()
                                         .name(userContext.getName())
                                         .build())
                                 .spec(specs)

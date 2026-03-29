@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.model.ApiResource;
-import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ApiResourcesService;
@@ -152,7 +151,7 @@ class DeleteTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .namespace("namespace")
                         .build())
@@ -195,7 +194,7 @@ class DeleteTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .namespace("namespace")
                         .build())
@@ -225,7 +224,7 @@ class DeleteTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .namespace("namespace")
                         .build())
@@ -264,7 +263,7 @@ class DeleteTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .namespace("namespace")
                         .build())
@@ -355,7 +354,7 @@ class DeleteTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder().name("prefix.topic").build())
+                .metadata(Resource.Metadata.builder().name("prefix.topic").build())
                 .spec(Collections.emptyMap())
                 .build();
 
@@ -392,7 +391,7 @@ class DeleteTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .namespace("namespace")
                         .build())
@@ -429,7 +428,7 @@ class DeleteTest {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("prefix.topic")
                         .namespace("namespace")
                         .build())
