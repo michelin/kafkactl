@@ -18,6 +18,7 @@
  */
 package com.michelin.kafkactl.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.micronaut.core.annotation.ReflectiveAccess;
@@ -62,5 +63,48 @@ public class Resource {
 
         @JsonFormat(shape = JsonFormat.Shape.STRING)
         private Date creationTimestamp;
+
+        private Status status;
+
+        @Getter
+        @Setter
+        @Builder
+        @ReflectiveAccess
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class Status {
+            private Phase phase;
+            private String message;
+
+            @JsonFormat(shape = JsonFormat.Shape.STRING)
+            private Date lastUpdateTime;
+        }
+
+        public enum Phase {
+            PENDING("Pending"),
+            FAIL("Fail"),
+            SUCCESS("Success");
+
+            private final String name;
+
+            Phase(String name) {
+                this.name = name;
+            }
+
+            @Override
+            public String toString() {
+                return name;
+            }
+
+            @JsonCreator
+            public static Phase fromString(String key) {
+                for (Phase type : Phase.values()) {
+                    if (type.name().equalsIgnoreCase(key)) {
+                        return type;
+                    }
+                }
+                return null;
+            }
+        }
     }
 }
