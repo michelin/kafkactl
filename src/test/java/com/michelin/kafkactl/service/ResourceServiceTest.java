@@ -673,6 +673,84 @@ class ResourceServiceTest {
     }
 
     @Test
+    void shouldApplyNamespacedResourceWithWarningsInResponse() {
+        Resource topicResource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder()
+                        .name("prefix.topic")
+                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter out = new StringWriter();
+        StringWriter err = new StringWriter();
+        cmd.setOut(new PrintWriter(out));
+        cmd.setErr(new PrintWriter(err));
+
+        doCallRealMethod().when(formatService).prettifyKind(any());
+        when(namespacedClient.apply(any(), any(), any(), any(), anyBoolean()))
+                .thenReturn(HttpResponse.ok(topicResource)
+                        .header("X-Ns4kafka-Result", "created")
+                        .header("X-Ns4kafka-Warnings", "first warning,second warning"));
+
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        HttpResponse<Resource> actual =
+                resourceService.apply(apiResource, "namespace", topicResource, false, cmd.getCommandSpec());
+
+        assertEquals(HttpStatus.OK, actual.getStatus());
+        assertEquals(topicResource, actual.body());
+        assertTrue(out.toString().contains("Topic \"prefix.topic\" created."));
+        assertTrue(err.toString().contains("The resource prefix.topic was applied with 2 warnings:"));
+        assertTrue(err.toString().contains("- first warning"));
+        assertTrue(err.toString().contains("- second warning"));
+    }
+
+    @Test
+    void shouldApplyNamespacedResourceWithoutWarningOutputWhenWarningsHeaderBlank() {
+        Resource topicResource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder()
+                        .name("prefix.topic")
+                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter err = new StringWriter();
+        cmd.setErr(new PrintWriter(err));
+
+        doCallRealMethod().when(formatService).prettifyKind(any());
+        when(namespacedClient.apply(any(), any(), any(), any(), anyBoolean()))
+                .thenReturn(HttpResponse.ok(topicResource).header("X-Ns4kafka-Warnings", ""));
+
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        HttpResponse<Resource> actual =
+                resourceService.apply(apiResource, "namespace", topicResource, false, cmd.getCommandSpec());
+
+        assertEquals(HttpStatus.OK, actual.getStatus());
+        assertTrue(err.toString().isBlank());
+    }
+
+    @Test
     void shouldApplyNonNamespacedResource() {
         Resource topicResource = Resource.builder()
                 .kind("Topic")
