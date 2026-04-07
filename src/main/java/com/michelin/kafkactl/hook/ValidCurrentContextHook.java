@@ -20,6 +20,7 @@ package com.michelin.kafkactl.hook;
 
 import com.michelin.kafkactl.command.config.Config;
 import com.michelin.kafkactl.command.config.ConfigUseContext;
+import com.michelin.kafkactl.mixin.ContextMixin;
 import com.michelin.kafkactl.service.ConfigService;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
 
@@ -40,8 +42,20 @@ public abstract class ValidCurrentContextHook extends HelpHook implements Callab
     @Spec
     protected CommandSpec commandSpec;
 
+    @Mixin
+    public ContextMixin contextMixin;
+
     @Override
     public Integer call() throws Exception {
+        // Apply context from command-line option if specified
+        if (contextMixin.optionalContext.isPresent()) {
+            String contextName = contextMixin.optionalContext.get();
+            if (!configService.applyContextByName(contextName)) {
+                commandSpec.commandLine().getErr().println("No context exists with the name \"" + contextName + "\".");
+                return 1;
+            }
+        }
+
         if (!configService.isCurrentContextValid()) {
             CommandLine configSubcommand = new CommandLine(new Config());
             CommandLine configUseContextSubcommand = new CommandLine(new ConfigUseContext());

@@ -149,6 +149,21 @@ To check your current context, use the following command:
 kafkactl config current-context
 ```
 
+#### Using Context Option
+
+Most Kafkactl commands support the `--context` (or `-c`) option, which allows you to temporarily override the current context without persisting the change to the configuration file. This is particularly useful for one-off commands or when working across multiple contexts.
+
+```command
+kafkactl -c dev get all
+kafkactl --context prod get topics
+```
+
+This option can be combined with other command options:
+
+```command
+kafkactl -c dev -n myNamespace get topics
+```
+
 ### Authentication
 
 Kafkactl supports only Bearer JWT authentication. It requires a token to be set in the `user-token` field of the context
