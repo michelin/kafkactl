@@ -216,17 +216,6 @@ public class ResourceService {
                                     : "")
                             + ".");
 
-            String warnings = response.header("X-Ns4kafka-Warnings");
-            if (warnings != null && !warnings.isBlank()) {
-                List<String> warningsList = Arrays.asList(warnings.split(","));
-                commandSpec
-                        .commandLine()
-                        .getErr()
-                        .println("The resource " + resource.getMetadata().getName() + " was applied with "
-                                + warningsList.size() + " warnings:");
-                warningsList.forEach(
-                        warning -> commandSpec.commandLine().getErr().println("- " + warning));
-            }
             return response;
         } catch (HttpClientResponseException e) {
             formatService.displayError(
