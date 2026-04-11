@@ -54,7 +54,10 @@ public class Completion implements Callable<Integer> {
             commandSpec.commandLine().getOut().println(script);
             return 0;
         } catch (Exception e) {
-            commandSpec.commandLine().getErr().println("An error occurred while generating completion script: " + e.getMessage());
+            commandSpec
+                    .commandLine()
+                    .getErr()
+                    .println("An error occurred while generating completion script: " + e.getMessage());
             return 1;
         }
     }
