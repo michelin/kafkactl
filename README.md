@@ -35,6 +35,7 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
     * [Auth](#auth)
         * [Info](#info)
         * [Renew](#renew)
+    * [Completion](#completion)
     * [Config](#config)
         * [Current Context](#current-context)
         * [Get Contexts](#get-contexts)
@@ -207,6 +208,7 @@ Commands:
   api-resources    Print the supported API resources on the server.
   apply            Create or update a resource.
   auth             Interact with authentication.
+  completion       Generate bash/zsh completion script for kafkactl.
   config           Manage configuration.
   connect-cluster  Interact with connect clusters.
   connector        Interact with connectors.
@@ -327,6 +329,41 @@ kafkactl apply -f resource.yml
 ```
 
 The resources have to be described in YAML manifests.
+
+### Completion
+
+Kafkactl supports bash/zsh shell completion to help you quickly type commands and options.
+
+#### Requirements
+
+- **Bash**: Version 4.0 or higher
+    - On macOS, you may need to upgrade bash: `brew install bash`
+    - Bash completion package: `brew install bash-completion@2` (macOS) or `apt-get install bash-completion` (Ubuntu/Debian)
+- **Zsh**: Works with default zsh installation
+- **Kafkactl**: Must be installed and accessible in your PATH
+
+#### Setup
+
+**1. Enable it in your shell (for persistent setup):**
+```bash
+# For Bash - add to ~/.bashrc
+source <(kafkactl completion)
+
+# For Zsh - add to ~/.zshrc
+autoload -U +X compinit && compinit
+autoload -U +X bashcompinit && bashcompinit
+source <(kafkactl completion)
+```
+
+**3. Reload your shell:**
+```bash
+source ~/.bashrc  # or source ~/.zshrc for zsh
+```
+
+**4. Test it:**
+```bash
+kafkactl <TAB>         # Shows all available commands
+```
 
 ### Config
 
