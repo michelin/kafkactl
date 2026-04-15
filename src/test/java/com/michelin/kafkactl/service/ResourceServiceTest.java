@@ -732,7 +732,8 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual = resourceService.delete(apiResource, "namespace", "name", null, false, false, cmd.getCommandSpec());
+        boolean actual =
+                resourceService.delete(apiResource, "namespace", "name", null, false, false, cmd.getCommandSpec());
 
         assertTrue(actual);
         assertTrue(sw.toString().contains("Topic \"name\" deleted."));
@@ -903,7 +904,8 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual = resourceService.delete(apiResource, "namespace", "name", null, false, false, cmd.getCommandSpec());
+        boolean actual =
+                resourceService.delete(apiResource, "namespace", "name", null, false, false, cmd.getCommandSpec());
 
         assertTrue(actual);
         assertTrue(sw.toString().contains("Topic \"name\" deleted."));
@@ -961,8 +963,8 @@ class ResourceServiceTest {
         when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean(), any()))
                 .thenThrow(exception);
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "prefix.topic", null, false, false, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, "namespace", "prefix.topic", null, false, false, cmd.getCommandSpec());
 
         assertFalse(actual);
         verify(formatService).displayError(exception, "Topic", "prefix.topic", cmd.getCommandSpec());
@@ -983,8 +985,8 @@ class ResourceServiceTest {
         when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(HttpResponse.notFound());
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "prefix.topic", null, false, false, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, "namespace", "prefix.topic", null, false, false, cmd.getCommandSpec());
 
         assertFalse(actual);
         verify(formatService)
@@ -1010,8 +1012,8 @@ class ResourceServiceTest {
 
         when(nonNamespacedClient.delete(any(), any(), any(), anyBoolean())).thenReturn(HttpResponse.notFound());
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "prefix.topic", null, false, false, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, "namespace", "prefix.topic", null, false, false, cmd.getCommandSpec());
 
         assertFalse(actual);
         verify(formatService)

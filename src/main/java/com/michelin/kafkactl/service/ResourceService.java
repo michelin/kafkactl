@@ -244,9 +244,8 @@ public class ResourceService {
             boolean force,
             CommandSpec commandSpec) {
         try {
-            Boolean forceDelete = force && List.of(CONNECTOR, CONNECT_CLUSTER).contains(apiResource.getKind())
-                    ? Boolean.TRUE
-                    : null;
+            Boolean forceDelete =
+                    force && List.of(CONNECTOR, CONNECT_CLUSTER).contains(apiResource.getKind()) ? Boolean.TRUE : null;
             HttpResponse<List<Resource>> response = apiResource.isNamespaced()
                     ? namespacedClient.delete(
                             namespace,

@@ -367,8 +367,7 @@ class DeleteTest {
 
         int code = cmd.execute("connect-cluster", "my-cluster", "-n", "namespace", "--force");
         assertEquals(0, code);
-        verify(resourceService)
-                .delete(any(), eq("namespace"), eq("my-cluster"), eq(null), eq(false), eq(true), any());
+        verify(resourceService).delete(any(), eq("namespace"), eq("my-cluster"), eq(null), eq(false), eq(true), any());
     }
 
     @Test
