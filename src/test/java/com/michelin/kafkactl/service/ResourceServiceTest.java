@@ -893,7 +893,7 @@ class ResourceServiceTest {
         doCallRealMethod().when(formatService).prettifyKind(any());
 
         Resource deletedResource = Resource.builder()
-                .metadata(Metadata.builder().name("connector").build())
+                .metadata(Resource.Metadata.builder().name("connector").build())
                 .build();
 
         when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean(), any()))
@@ -931,7 +931,7 @@ class ResourceServiceTest {
         doCallRealMethod().when(formatService).prettifyKind(any());
 
         Resource deletedResource = Resource.builder()
-                .metadata(Metadata.builder().name("cluster").build())
+                .metadata(Resource.Metadata.builder().name("cluster").build())
                 .build();
 
         when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean(), any()))
