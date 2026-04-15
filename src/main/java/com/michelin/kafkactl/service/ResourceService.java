@@ -215,6 +215,7 @@ public class ResourceService {
                                     ? " " + response.header("X-Ns4kafka-Result")
                                     : "")
                             + ".");
+
             return response;
         } catch (HttpClientResponseException e) {
             formatService.displayError(

@@ -111,4 +111,27 @@ public class ConfigService {
                 && kafkactlProperties.getCurrentNamespace() != null
                 && kafkactlProperties.getUserToken() != null;
     }
+
+    /**
+     * Apply a context by name without persisting it to the config file. This is useful for temporary context switching
+     * via command-line options.
+     *
+     * @param contextName The name of the context to apply
+     * @return True if the context was found and applied, false otherwise
+     * @throws IOException Any exception during JWT file deletion
+     */
+    public boolean applyContextByName(String contextName) throws IOException {
+        Optional<KafkactlProperties.ContextsProperties> contextProperties = getContextByName(contextName);
+        if (contextProperties.isEmpty()) {
+            return false;
+        }
+
+        KafkactlProperties.ContextsProperties context = contextProperties.get();
+        kafkactlProperties.setApi(context.getContext().getApi());
+        kafkactlProperties.setCurrentNamespace(context.getContext().getNamespace());
+        kafkactlProperties.setUserToken(context.getContext().getUserToken());
+
+        loginService.deleteJwtFile();
+        return true;
+    }
 }
