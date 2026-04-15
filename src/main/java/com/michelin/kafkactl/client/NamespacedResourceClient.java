@@ -47,7 +47,7 @@ public interface NamespacedResourceClient {
      * @param dryrun Is dry-run mode or not?
      * @return The delete response
      */
-    @Delete("{namespace}/{kind}{?name,version,dryrun}")
+    @Delete("{namespace}/{kind}{?name,version,dryrun,force}")
     @Retryable(
             delay = "${kafkactl.retry.delay}",
             attempts = "${kafkactl.retry.attempt}",
@@ -59,7 +59,8 @@ public interface NamespacedResourceClient {
             @Header("Authorization") String token,
             @QueryValue String name,
             @Nullable @QueryValue String version,
-            @QueryValue boolean dryrun);
+            @QueryValue boolean dryrun,
+            @Nullable @QueryValue Boolean force);
 
     /**
      * Apply a given resource.

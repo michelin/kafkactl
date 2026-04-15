@@ -66,6 +66,11 @@ public class Delete extends DryRunHook {
     @ArgGroup(multiplicity = "1")
     public EitherOf config;
 
+    @Option(
+            names = {"--force"},
+            description = "Force deletion for supported resources such as connect clusters and connectors.")
+    public boolean force;
+
     /**
      * Run the "delete" command.
      *
@@ -109,6 +114,7 @@ public class Delete extends DryRunHook {
                                         ? spec.get(VERSION).toString()
                                         : null),
                                 dryRun,
+                                force,
                                 commandSpec);
                     })
                     .mapToInt(value -> value ? 0 : 1)
