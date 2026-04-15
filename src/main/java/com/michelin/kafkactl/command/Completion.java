@@ -25,13 +25,13 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
 
-/** Completion subcommand to generate bash/zsh completion scripts. */
+/** Completion subcommand to generate shell completion scripts. */
 @Command(
         name = "completion",
         headerHeading = "@|bold Usage|@:",
         synopsisHeading = " ",
         descriptionHeading = "%n@|bold Description|@: ",
-        description = "Generate bash/zsh completion script for kafkactl.",
+        description = "Generate shell completion scripts.",
         parameterListHeading = "%n@|bold Parameters|@:%n",
         optionListHeading = "%n@|bold Options|@:%n",
         commandListHeading = "%n@|bold Commands|@:%n",
