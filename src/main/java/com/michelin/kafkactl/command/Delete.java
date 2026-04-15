@@ -68,7 +68,7 @@ public class Delete extends DryRunHook {
 
     @Option(
             names = {"--force"},
-            description = "Force delete resource from Ns4Kafka. Only for connector and connect cluster.")
+            description = "Force deletion for supported resources such as connect clusters and connectors.")
     public boolean force;
 
     /**

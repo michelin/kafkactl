@@ -320,7 +320,7 @@ class DeleteTest {
     }
 
     @Test
-    void shouldForceDeleteConnectorByName() {
+    void shouldDeleteConnectorByNameWithForce() {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
@@ -346,7 +346,7 @@ class DeleteTest {
     }
 
     @Test
-    void shouldForceDeleteConnectClusterByName() {
+    void shouldDeleteConnectClusterByNameWithForce() {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
@@ -367,7 +367,8 @@ class DeleteTest {
 
         int code = cmd.execute("connect-cluster", "my-cluster", "-n", "namespace", "--force");
         assertEquals(0, code);
-        verify(resourceService).delete(any(), eq("namespace"), eq("my-cluster"), eq(null), eq(false), eq(true), any());
+        verify(resourceService)
+                .delete(any(), eq("namespace"), eq("my-cluster"), eq(null), eq(false), eq(true), any());
     }
 
     @Test

@@ -60,7 +60,7 @@ public interface NamespacedResourceClient {
             @QueryValue String name,
             @Nullable @QueryValue String version,
             @QueryValue boolean dryrun,
-            @QueryValue boolean force);
+            @Nullable @QueryValue Boolean force);
 
     /**
      * Apply a given resource.
