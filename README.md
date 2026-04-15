@@ -25,6 +25,7 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
 * [Download](#download)
 * [Configuration](#configuration)
   * [Contexts](#contexts)
+    * [On-the-Fly Context Switching](#on-the-fly-context-switching)
   * [Authentication](#authentication)
   * [HTTP Client](#http-client)
     * [Timeout](#timeout)
@@ -47,6 +48,8 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
     * [Delete](#delete)
     * [Diff](#diff)
     * [Get](#get)
+    * [Group](#group)
+        * [Delete](#delete-1)
     * [Import](#import)
     * [Reset Offsets](#reset-offsets)
     * [Reset Password](#reset-password)
@@ -150,19 +153,13 @@ To check your current context, use the following command:
 kafkactl config current-context
 ```
 
-#### Using Context Option
+#### On-the-Fly Context Switching
 
-Most Kafkactl commands support the `--context` (or `-c`) option, which allows you to temporarily override the current context without persisting the change to the configuration file. This is particularly useful for one-off commands or when working across multiple contexts.
+Contextual commands support the `--context` or `-c` option, which allows you to override the current context for a single command, without persisting the change to the configuration file.
 
 ```command
 kafkactl -c dev get all
 kafkactl --context prod get topics
-```
-
-This option can be combined with other command options:
-
-```command
-kafkactl -c dev -n myNamespace get topics
 ```
 
 ### Authentication
@@ -223,7 +220,7 @@ Commands:
   api-resources    Print the supported API resources on the server.
   apply            Create or update a resource.
   auth             Interact with authentication.
-  completion       Generate bash/zsh completion script for kafkactl.
+  completion       Generate shell completion scripts
   config           Manage configuration.
   connect-cluster  Interact with connect clusters.
   connector        Interact with connectors.
@@ -322,13 +319,15 @@ kafkactl auth renew
 The `apply` command allows you to deploy a resource.
 
 ```console
-Usage: kafkactl apply [-hRv] [--dry-run] [-f=<file>] [-n=<optionalNamespace>]
+Usage: kafkactl apply [-hRv] [--dry-run] [-c=<optionalContext>] [-f=<file>] [-n=<optionalNamespace>]
 
 Description: Create or update a resource.
 
 Options:
+  -c, --context=<optionalContext>
+                      Override context defined in config.
       --dry-run       Does not persist resources. Validate only.
-  -f, --file=<file>   YAML file or directory containing resources.
+  -f, --file=<file>   YAML file or directory containing resources to apply.
   -h, --help          Show this help message and exit.
   -n, --namespace=<optionalNamespace>
                       Override namespace defined in config or YAML resources.
@@ -347,19 +346,20 @@ The resources have to be described in YAML manifests.
 
 ### Completion
 
-Kafkactl supports bash/zsh shell completion to help you quickly type commands and options.
+The `completion` command allows you to generate shell completion scripts for Bash and Zsh.
 
 #### Requirements
 
 - **Bash**: Version 4.0 or higher
-    - On macOS, you may need to upgrade bash: `brew install bash`
-    - Bash completion package: `brew install bash-completion@2` (macOS) or `apt-get install bash-completion` (Ubuntu/Debian)
-- **Zsh**: Works with default zsh installation
+    - On macOS, you may need to install Bash: `brew install bash`
+    - Bash completion package: `brew install bash-completion@2` (macOS) or `apt install bash-completion` (Ubuntu/Debian)
+- **Zsh**: Works with default Zsh installation
 - **Kafkactl**: Must be installed and accessible in your PATH
 
 #### Setup
 
-**1. Enable it in your shell (for persistent setup):**
+Enable completion in your shell as follows:
+
 ```bash
 # For Bash - add to ~/.bashrc
 source <(kafkactl completion)
@@ -370,15 +370,19 @@ autoload -U +X bashcompinit && bashcompinit
 source <(kafkactl completion)
 ```
 
-**3. Reload your shell:**
+Reload your shell:
+
 ```bash
 source ~/.bashrc  # or source ~/.zshrc for zsh
 ```
 
-**4. Test it:**
+Completion should be available immediately:
+
 ```bash
-kafkactl <TAB>         # Shows all available commands
+kafkactl <TAB>
 ```
+
+This works for the JAR version (wrapped as a binary, see the [Picocli documentation](https://picocli.info/autocomplete.html#_create_command)), as well as for Linux and macOS versions of Kafkactl.
 
 ### Config
 
@@ -481,7 +485,7 @@ Commands:
 The `vault` command allows you to vault sensitive connector configuration.
 
 ```console
-Usage: kafkactl connect-cluster vault [-hv] [-n=<optionalNamespace>] <connectClusterName> [<secrets>...]
+Usage: kafkactl connect-cluster vault [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] <connectClusterName> [<secrets>...]
 
 Description: Vault secrets for a connect cluster.
 
@@ -490,6 +494,8 @@ Parameters:
       [<secrets>...]         Secrets to vaults separated by space.
 
 Options:
+  -c, --context=<optionalContext>
+                             Override context defined in config.
   -h, --help                 Show this help message and exit.
   -n, --namespace=<optionalNamespace>
                              Override namespace defined in config or YAML resources.
@@ -512,7 +518,7 @@ kafkactl connect-cluster vault myConnectCluster someClearText
 The `connector` command allows you to interact with Kafka Connect connectors.
 
 ```console
-Usage: kafkactl connector [-hv] [-n=<optionalNamespace>] <action> <connectors>...
+Usage: kafkactl connector [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] <action> <connectors>...
 
 Description: Interact with connectors.
 
@@ -521,6 +527,8 @@ Parameters:
       <connectors>...   Connector names separated by space or "all" for all connectors.
 
 Options:
+  -c, --context=<optionalContext>
+                        Override context defined in config.
   -h, --help            Show this help message and exit.
   -n, --namespace=<optionalNamespace>
                         Override namespace defined in config or YAML resources.
@@ -543,7 +551,7 @@ kafkactl connector restart myConnector
 The `delete-records` command allows you to delete all records within "delete" typed topics.
 
 ```console
-Usage: kafkactl delete-records [-hv] [--dry-run] [-n=<optionalNamespace>] <topic>
+Usage: kafkactl delete-records [-hv] [--dry-run] [-c=<optionalContext>] [-n=<optionalNamespace>] <topic>
 
 Description: Delete all records within a topic.
 
@@ -551,6 +559,8 @@ Parameters:
       <topic>     Name of the topic.
 
 Options:
+  -c, --context=<optionalContext>
+                  Override context defined in config.
       --dry-run   Does not persist resources. Validate only.
   -h, --help      Show this help message and exit.
   -n, --namespace=<optionalNamespace>
@@ -572,7 +582,8 @@ Please note that the resources are deleted instantly and cannot be recovered onc
 with the resource is permanently lost.
 
 ```console
-Usage: kafkactl delete [-hv] [--dry-run] [-n=<optionalNamespace>] ([<resourceType> <name> [-V[=<version>]]] | [[-f=<file>] [-R]])
+Usage: kafkactl delete [-hv] [--dry-run] [-c=<optionalContext>] [-n=<optionalNamespace>] ([<resourceType> <resourceName> [-V[=<version>]] [--execute]] | [[-f=<file>] [-R]])
+
 Description: Delete a resource.
 
 Parameters:
@@ -580,16 +591,18 @@ Parameters:
       <resourceName>   Resource name or wildcard matching resource names.
 
 Options:
+  -c, --context=<optionalContext>
+                       Override context defined in config.
       --dry-run        Does not persist resources. Validate only.
+      --execute        This option is mandatory to delete resources with wildcard.
   -f, --file=<file>    YAML file or directory containing resources to delete.
   -h, --help           Show this help message and exit.
   -n, --namespace=<optionalNamespace>
                        Override namespace defined in config or YAML resources.
   -R, --recursive      Search file recursively.
   -v, --verbose        Enable the verbose mode.
-  -V, --version=<version>
+  -V, --version[=<version>]
                        Version to delete. Only with schema resource and name parameter.
-      --execute        This option is mandatory to delete resources with wildcard.
 ```
 
 Example(s):
@@ -603,45 +616,23 @@ kafkactl delete schema *
 kafkactl delete schema mySchema -V latest
 ```
 
-### Group
-
-The `group` command allows you to interact with consumer groups.
-
-```console
-Usage: kafkactl group [-h] [COMMAND]
-
-Description: Interact with consumer groups.
-
-Commands:
-  delete  Delete a consumer group.
-
-Options:
-  -h, --help   Show this help message and exit.
-```
-
-Example(s):
-
-```console
-kafkactl group delete myConsumerGroup
-```
-
 ### Diff
 
 The `diff` command allows you to compare a new YAML descriptor with the current one deployed in Ns4Kafka, allowing you
 to easily identify any differences.
 
 ```console
-Usage: kafkactl diff [-hRv] [-f=<file>] [-n=<optionalNamespace>]
-               [--ignore-fields=<ignoreFields>[,<ignoreFields>...]]...
+Usage: kafkactl diff [-hRv] [-c=<optionalContext>] [-f=<file>] [-n=<optionalNamespace>] [--ignore-fields=<ignoreFields>[,<ignoreFields>...]]...
 
 Description: Get differences between a new resource and a old resource.
 
 Options:
+  -c, --context=<optionalContext>
+                      Override context defined in config.
   -f, --file=<file>   YAML file or directory containing resources to compare.
   -h, --help          Show this help message and exit.
       --ignore-fields=<ignoreFields>[,<ignoreFields>...]
-                      Comma-separated list of YAML paths to ignore (e.g.,
-                        metadata.labels.creationDateTime)
+                      Comma-separated list of YAML paths to ignore (e.g., metadata.labels.creationDateTime)
   -n, --namespace=<optionalNamespace>
                       Override namespace defined in config or YAML resources.
   -R, --recursive     Search file recursively.
@@ -661,7 +652,7 @@ kafkactl diff -f resource.yml --ignore-fields spec.replicationFactor,spec.partit
 The `get` command allows you to retrieve information about one or multiple resources.
 
 ```console
-Usage: kafkactl get [-hv] [-n=<optionalNamespace>] [-o=<output>] <resourceType> [<resourceName>]
+Usage: kafkactl get [-hv] [--search[=<String=String>[,<String=String>...]]]... [-c=<optionalContext>] [-n=<optionalNamespace>] [-o=<output>] <resourceType> [<resourceName>]
 
 Description: Get resources by resource type for the current namespace.
 
@@ -670,10 +661,11 @@ Parameters:
       [<resourceName>]    Resource name or wildcard matching resource names.
 
 Options:
+  -c, --context=<optionalContext>
+                          Override context defined in config.
   -h, --help              Show this help message and exit.
   -n, --namespace=<optionalNamespace>
-                          Override namespace defined in config or YAML
-                            resources.
+                          Override namespace defined in config or YAML resources.
   -o, --output=<output>   Output format (yaml, yml, table).
       --search[=<String=String>[,<String=String>...]]
                           Search resources based on parameters.
@@ -707,13 +699,57 @@ Example(s):
 kafkactl get namespace --search topic=myTopic
 ```
 
+### Group
+
+The `group` command allows you to interact with consumer groups.
+
+```console
+Usage: kafkactl group [-h] COMMAND
+
+Description: Interact with consumer groups.
+
+Options:
+  -h, --help   Show this help message and exit.
+
+Commands:
+  delete  Delete a consumer group.
+```
+
+#### Delete
+
+The `delete` command allows you to delete a consumer group.
+
+```console
+Usage: kafkactl group delete [-hv] [--dry-run] [-c=<optionalContext>] [-n=<optionalNamespace>] <group>
+
+Description: Delete a consumer group.
+
+Parameters:
+      <group>     Consumer group name.
+
+Options:
+  -c, --context=<optionalContext>
+                  Override context defined in config.
+      --dry-run   Does not persist resources. Validate only.
+  -h, --help      Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
+```
+
+Example(s):
+
+```console
+kafkactl group delete myConsumerGroup
+```
+
 ### Import
 
 The `import` command allows you to import unsynchronized resources between Ns4Kafka and the Kafka broker/Kafka Connect
 cluster.
 
 ```console
-Usage: kafkactl import [-hv] [--dry-run] [-n=<optionalNamespace>] <resourceType> [<resourceName>]
+Usage: kafkactl import [-hv] [--dry-run] [-c=<optionalContext>] [-n=<optionalNamespace>] <resourceType> [<resourceName>]
 
 Description: Import non-synchronized resources.
 
@@ -722,6 +758,8 @@ Parameters:
       [<resourceName>]   Resource name or wildcard matching resource names.
 
 Options:
+  -c, --context=<optionalContext>
+                         Override context defined in config.
       --dry-run          Does not persist resources. Validate only.
   -h, --help             Show this help message and exit.
   -n, --namespace=<optionalNamespace>
@@ -742,38 +780,12 @@ kafkactl import connectors
 kafkactl import connector myConnectorName
 ```
 
-### Group Delete
-
-The `group delete` command allows you to delete a consumer group.
-
-```console
-Usage: kafkactl group delete [-hv] [--dry-run] [-n=<optionalNamespace>] <group>
-
-Description: Delete a consumer group.
-
-Parameters:
-      <group>     Consumer group name.
-
-Options:
-      --dry-run   Does not persist resources. Validate only.
-  -h, --help      Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or YAML resources.
-  -v, --verbose   Enable the verbose mode.
-```
-
-Example(s):
-
-```console
-kafkactl group delete myConsumerGroup
-```
-
 ### Reset Offsets
 
 The `reset-offsets` command allows you to reset the offsets of consumer groups and topics.
 
 ```console
-Usage: kafkactl reset-offsets [-hv] [--dry-run] --group=<group>[-n=<optionalNamespace>] (--topic=<topic> | --all-topics) (--to-earliest | --to-latest |
+Usage: kafkactl reset-offsets [-hv] [--dry-run] [-c=<optionalContext>] --group=<group> [-n=<optionalNamespace>] (--topic=<topic> | --all-topics) (--to-earliest | --to-latest |
                         --to-datetime=<datetime> | --shift-by=<shiftBy> | --by-duration=<duration> | --to-offset=<offset>)
 
 Description: Reset consumer group offsets.
@@ -782,6 +794,8 @@ Options:
       --all-topics           All topics.
       --by-duration=<duration>
                              Shift offset by a duration format (PnDTnHnMnS).
+  -c, --context=<optionalContext>
+                             Override context defined in config.
       --dry-run              Does not persist resources. Validate only.
       --group=<group>        Consumer group name.
   -h, --help                 Show this help message and exit.
@@ -813,7 +827,7 @@ kafkactl reset-offsets --group myConsumerGroup --topic myTopic --to-earliest
 The `reset-password` command allows you to reset the password of a user.
 
 ```console
-Usage: kafkactl reset-password [-hv] [--execute] [-n=<optionalNamespace>] [-o=<output>] <user>
+Usage: kafkactl reset-password [-hv] [--execute] [-c=<optionalContext>] [-n=<optionalNamespace>] [-o=<output>] <user>
 
 Description: Reset a Kafka password.
 
@@ -821,6 +835,8 @@ Parameters:
       <user>              The user to reset password.
 
 Options:
+  -c, --context=<optionalContext>
+                          Override context defined in config.
       --execute           This option is mandatory to change the password
   -h, --help              Show this help message and exit.
   -n, --namespace=<optionalNamespace>
@@ -840,7 +856,7 @@ kafkactl reset-password myUser
 The `schema` command allows you to modify the schema compatibility.
 
 ```console
-Usage: kafkactl schema [-hv] [-n=<optionalNamespace>] <compatibility> <subjects>...
+Usage: kafkactl schema [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] <compatibility> <subjects>...
 
 Description: Interact with schemas.
 
@@ -849,6 +865,8 @@ Parameters:
       <subjects>...     Subject names separated by space.
 
 Options:
+  -c, --context=<optionalContext>
+                        Override context defined in config.
   -h, --help            Show this help message and exit.
   -n, --namespace=<optionalNamespace>
                         Override namespace defined in config or YAML resources.

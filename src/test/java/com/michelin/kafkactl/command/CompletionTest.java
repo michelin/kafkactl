@@ -51,6 +51,6 @@ class CompletionTest {
         int code = cmd.execute("-h");
         assertEquals(0, code);
         String output = sw.toString();
-        assertTrue(output.contains("Generate bash/zsh completion script for kafkactl"));
+        assertTrue(output.contains("Generate shell completion scripts."));
     }
 }
