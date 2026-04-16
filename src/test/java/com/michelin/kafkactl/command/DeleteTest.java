@@ -320,7 +320,7 @@ class DeleteTest {
     }
 
     @Test
-    void shouldDeleteConnectorByNameWithForce() {
+    void shouldForceDeleteConnectorByName() {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
@@ -346,7 +346,7 @@ class DeleteTest {
     }
 
     @Test
-    void shouldDeleteConnectClusterByNameWithForce() {
+    void shouldForceDeleteConnectClusterByName() {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
