@@ -342,7 +342,15 @@ class DeleteTest {
         int code = cmd.execute("connector", "prefix.connector", "-n", "namespace", "--force");
         assertEquals(0, code);
         verify(resourceService)
-                .delete(any(), eq("namespace"), eq("prefix.connector"), eq(null), eq(false), eq(true), eq(false), any());
+                .delete(
+                        any(),
+                        eq("namespace"),
+                        eq("prefix.connector"),
+                        eq(null),
+                        eq(false),
+                        eq(true),
+                        eq(false),
+                        any());
     }
 
     @Test
@@ -594,7 +602,8 @@ class DeleteTest {
         assertTrue(sw.toString()
                 .contains("Rerun the command with option --dry-run to see the resources that will be deleted."));
         assertTrue(sw.toString().contains("Rerun the command with option --execute to execute this operation."));
-        verify(resourceService, never()).delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any());
+        verify(resourceService, never())
+                .delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any());
     }
 
     @Test
@@ -612,7 +621,8 @@ class DeleteTest {
         assertTrue(sw.toString()
                 .contains("Rerun the command with option --dry-run to see the resources that will be deleted."));
         assertTrue(sw.toString().contains("Rerun the command with option --execute to execute this operation."));
-        verify(resourceService, never()).delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any());
+        verify(resourceService, never())
+                .delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any());
     }
 
     @Test

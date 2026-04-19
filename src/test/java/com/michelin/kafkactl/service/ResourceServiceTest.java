@@ -732,8 +732,8 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "name", null, false, false, false, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, "namespace", "name", null, false, false, false, cmd.getCommandSpec());
 
         assertTrue(actual);
         assertTrue(sw.toString().contains("Topic \"name\" deleted."));
@@ -767,8 +767,8 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "name*", null, false, false, false, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, "namespace", "name*", null, false, false, false, cmd.getCommandSpec());
 
         assertTrue(actual);
         assertTrue(sw.toString().contains("Topic \"name1\" deleted."));
@@ -828,12 +828,20 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "connector", null, false, true, false, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, "namespace", "connector", null, false, true, false, cmd.getCommandSpec());
 
         assertTrue(actual);
         verify(namespacedClient)
-                .delete(eq("namespace"), eq("connectors"), any(), eq("connector"), isNull(), eq(false), eq(true), eq(false));
+                .delete(
+                        eq("namespace"),
+                        eq("connectors"),
+                        any(),
+                        eq("connector"),
+                        isNull(),
+                        eq(false),
+                        eq(true),
+                        eq(false));
     }
 
     @Test
@@ -859,8 +867,8 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "cluster", null, false, true, false, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, "namespace", "cluster", null, false, true, false, cmd.getCommandSpec());
 
         assertTrue(actual);
         verify(namespacedClient)
@@ -898,8 +906,8 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "cluster", null, false, false, true, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, "namespace", "cluster", null, false, false, true, cmd.getCommandSpec());
 
         assertTrue(actual);
         verify(namespacedClient)
@@ -937,8 +945,8 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "cluster", null, false, true, true, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, "namespace", "cluster", null, false, true, true, cmd.getCommandSpec());
 
         assertTrue(actual);
         verify(namespacedClient)
@@ -976,8 +984,8 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "topic", null, false, true, true, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, "namespace", "topic", null, false, true, true, cmd.getCommandSpec());
 
         assertTrue(actual);
         verify(namespacedClient)
@@ -1007,8 +1015,8 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "name", null, false, false, false, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, "namespace", "name", null, false, false, false, cmd.getCommandSpec());
 
         assertTrue(actual);
         assertTrue(sw.toString().contains("Topic \"name\" deleted."));
@@ -1042,8 +1050,8 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "name*", null, false, false, false, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, "namespace", "name*", null, false, false, false, cmd.getCommandSpec());
 
         assertTrue(actual);
         assertTrue(sw.toString().contains("Topic \"name1\" deleted."));
