@@ -582,7 +582,7 @@ Please note that the resources are deleted instantly and cannot be recovered onc
 with the resource is permanently lost.
 
 ```console
-Usage: kafkactl delete [-hv] [--dry-run] [--force] [-n=<optionalNamespace>] ([<resourceType> <name> [-V[=<version>]]] | [[-f=<file>] [-R]])
+Usage: kafkactl delete [-hv] [--dry-run] [--force] [--cascade] [-n=<optionalNamespace>] ([<resourceType> <name> [-V[=<version>]]] | [[-f=<file>] [-R]])
 Description: Delete a resource.
 
 Parameters:
@@ -592,6 +592,7 @@ Parameters:
 Options:
   -c, --context=<optionalContext>
                        Override context defined in config.
+      --cascade        Cascade delete related connectors from Ns4Kafka. Only for connect cluster.
       --dry-run        Does not persist resources. Validate only.
       --execute        This option is mandatory to delete resources with wildcard.
   -f, --file=<file>    YAML file or directory containing resources to delete.
@@ -613,6 +614,8 @@ kafkactl delete -f resource.yml
 kafkactl delete topic myTopic
 kafkactl delete connector myConnector --force
 kafkactl delete connect-cluster myConnectCluster --force
+kafkactl delete connect-cluster myConnectCluster --cascade
+kafkactl delete connect-cluster myConnectCluster --cascade --force
 kafkactl delete topic *-test
 kafkactl delete schema *
 kafkactl delete schema mySchema -V latest
