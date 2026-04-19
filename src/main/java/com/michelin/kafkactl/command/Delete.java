@@ -66,6 +66,16 @@ public class Delete extends DryRunHook {
     @ArgGroup(multiplicity = "1")
     public EitherOf config;
 
+    @Option(
+            names = {"--force"},
+            description = "Force delete resource from Ns4Kafka. Only for connector and connect cluster.")
+    public boolean force;
+
+    @Option(
+            names = {"--cascade"},
+            description = "Cascade delete related connectors from Ns4Kafka. Only for connect cluster.")
+    public boolean cascade;
+
     /**
      * Run the "delete" command.
      *
@@ -109,6 +119,8 @@ public class Delete extends DryRunHook {
                                         ? spec.get(VERSION).toString()
                                         : null),
                                 dryRun,
+                                force,
+                                cascade,
                                 commandSpec);
                     })
                     .mapToInt(value -> value ? 0 : 1)

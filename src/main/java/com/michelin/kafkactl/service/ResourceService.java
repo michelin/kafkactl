@@ -241,11 +241,20 @@ public class ResourceService {
             String name,
             @Nullable String version,
             boolean dryRun,
+            boolean force,
+            boolean cascade,
             CommandSpec commandSpec) {
         try {
             HttpResponse<List<Resource>> response = apiResource.isNamespaced()
                     ? namespacedClient.delete(
-                            namespace, apiResource.getPath(), loginService.getAuthorization(), name, version, dryRun)
+                            namespace,
+                            apiResource.getPath(),
+                            loginService.getAuthorization(),
+                            name,
+                            version,
+                            dryRun,
+                            force,
+                            cascade)
                     : nonNamespacedClient.delete(loginService.getAuthorization(), apiResource.getPath(), name, dryRun);
 
             // Micronaut does not throw exception on 404, so produce a 404 manually
