@@ -36,7 +36,6 @@ import com.michelin.kafkactl.command.config.Config;
 import com.michelin.kafkactl.command.connectcluster.ConnectCluster;
 import com.michelin.kafkactl.command.group.Group;
 import com.michelin.kafkactl.command.subjectconfig.SubjectConfig;
-import com.michelin.kafkactl.command.group.Group;
 import com.michelin.kafkactl.service.SystemService;
 import com.michelin.kafkactl.util.VersionProvider;
 import io.micronaut.configuration.picocli.PicocliRunner;

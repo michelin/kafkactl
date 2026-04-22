@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.command.subjectconfig.SubjectConfigUpdate;
-import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ConfigService;
