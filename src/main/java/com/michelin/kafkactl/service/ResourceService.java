@@ -29,6 +29,7 @@ import static com.michelin.kafkactl.util.constant.ResourceKind.VAULT_RESPONSE;
 import com.michelin.kafkactl.client.ClusterResourceClient;
 import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.model.ApiResource;
+import com.michelin.kafkactl.model.DeleteMode;
 import com.michelin.kafkactl.model.Output;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.SchemaCompatibility;
@@ -232,6 +233,7 @@ public class ResourceService {
      * @param name The resource name or wildcard
      * @param version The version of the resource, for schemas only
      * @param dryRun Is dry run mode or not?
+     * @param deleteMode The delete mode
      * @param commandSpec The command that triggered the action
      * @return true if deletion succeeded, false otherwise
      */
@@ -241,8 +243,7 @@ public class ResourceService {
             String name,
             @Nullable String version,
             boolean dryRun,
-            boolean force,
-            boolean cascade,
+            DeleteMode deleteMode,
             CommandSpec commandSpec) {
         try {
             HttpResponse<List<Resource>> response = apiResource.isNamespaced()
@@ -253,8 +254,8 @@ public class ResourceService {
                             name,
                             version,
                             dryRun,
-                            force,
-                            cascade)
+                            deleteMode.force(),
+                            deleteMode.cascade())
                     : nonNamespacedClient.delete(loginService.getAuthorization(), apiResource.getPath(), name, dryRun);
 
             // Micronaut does not throw exception on 404, so produce a 404 manually

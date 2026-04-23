@@ -30,6 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.model.ApiResource;
+import com.michelin.kafkactl.model.DeleteMode;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ApiResourcesService;
@@ -243,7 +244,7 @@ class DeleteTest {
                 .build();
 
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any(), any()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
@@ -282,7 +283,7 @@ class DeleteTest {
                 .build();
 
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any(), any()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
@@ -308,7 +309,7 @@ class DeleteTest {
 
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any(), any()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
@@ -334,7 +335,7 @@ class DeleteTest {
 
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any(), any()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
@@ -348,8 +349,7 @@ class DeleteTest {
                         eq("prefix.connector"),
                         eq(null),
                         eq(false),
-                        eq(true),
-                        eq(false),
+                        eq(DeleteMode.FORCE),
                         any());
     }
 
@@ -368,7 +368,7 @@ class DeleteTest {
 
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any(), any()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
@@ -376,7 +376,14 @@ class DeleteTest {
         int code = cmd.execute("connect-cluster", "my-cluster", "-n", "namespace", "--force");
         assertEquals(0, code);
         verify(resourceService)
-                .delete(any(), eq("namespace"), eq("my-cluster"), eq(null), eq(false), eq(true), eq(false), any());
+                .delete(
+                        any(),
+                        eq("namespace"),
+                        eq("my-cluster"),
+                        eq(null),
+                        eq(false),
+                        eq(DeleteMode.FORCE),
+                        any());
     }
 
     @Test
@@ -394,7 +401,7 @@ class DeleteTest {
 
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any(), any()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
@@ -402,7 +409,14 @@ class DeleteTest {
         int code = cmd.execute("connect-cluster", "my-cluster", "-n", "namespace", "--cascade");
         assertEquals(0, code);
         verify(resourceService)
-                .delete(any(), eq("namespace"), eq("my-cluster"), eq(null), eq(false), eq(false), eq(true), any());
+                .delete(
+                        any(),
+                        eq("namespace"),
+                        eq("my-cluster"),
+                        eq(null),
+                        eq(false),
+                        eq(DeleteMode.CASCADE),
+                        any());
     }
 
     @Test
@@ -420,7 +434,7 @@ class DeleteTest {
 
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any(), any()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
@@ -428,7 +442,14 @@ class DeleteTest {
         int code = cmd.execute("connect-cluster", "my-cluster", "-n", "namespace", "--cascade", "--force");
         assertEquals(0, code);
         verify(resourceService)
-                .delete(any(), eq("namespace"), eq("my-cluster"), eq(null), eq(false), eq(true), eq(true), any());
+                .delete(
+                        any(),
+                        eq("namespace"),
+                        eq("my-cluster"),
+                        eq(null),
+                        eq(false),
+                        eq(DeleteMode.FORCE_CASCADE),
+                        any());
     }
 
     @Test
@@ -446,7 +467,7 @@ class DeleteTest {
 
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any(), any()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
@@ -482,7 +503,7 @@ class DeleteTest {
                 .build();
 
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any(), any()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
@@ -522,7 +543,7 @@ class DeleteTest {
                 .build();
 
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any(), any()))
                 .thenReturn(false);
 
         CommandLine cmd = new CommandLine(delete);
@@ -576,7 +597,7 @@ class DeleteTest {
 
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any(), any()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
@@ -603,7 +624,7 @@ class DeleteTest {
                 .contains("Rerun the command with option --dry-run to see the resources that will be deleted."));
         assertTrue(sw.toString().contains("Rerun the command with option --execute to execute this operation."));
         verify(resourceService, never())
-                .delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any());
+                .delete(any(), any(), any(), any(), anyBoolean(), any(), any());
     }
 
     @Test
@@ -622,7 +643,7 @@ class DeleteTest {
                 .contains("Rerun the command with option --dry-run to see the resources that will be deleted."));
         assertTrue(sw.toString().contains("Rerun the command with option --execute to execute this operation."));
         verify(resourceService, never())
-                .delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any());
+                .delete(any(), any(), any(), any(), anyBoolean(), any(), any());
     }
 
     @Test
@@ -640,7 +661,7 @@ class DeleteTest {
 
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any(), any()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
@@ -667,7 +688,7 @@ class DeleteTest {
 
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(), any()))
+        when(resourceService.delete(any(), any(), any(), any(), anyBoolean(), any(), any()))
                 .thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
