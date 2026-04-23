@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.command.subjectconfig.SubjectConfigDelete;
-import com.michelin.kafkactl.model.Metadata;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ConfigService;
@@ -94,7 +93,7 @@ class SubjectConfigDeleteTest {
         Resource resource = Resource.builder()
                 .kind("SubjectConfigState")
                 .apiVersion("v1")
-                .metadata(Metadata.builder()
+                .metadata(Resource.Metadata.builder()
                         .name("mySubject")
                         .namespace("namespace")
                         .build())
