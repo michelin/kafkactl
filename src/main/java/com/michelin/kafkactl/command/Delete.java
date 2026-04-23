@@ -20,6 +20,7 @@ package com.michelin.kafkactl.command;
 
 import com.michelin.kafkactl.hook.DryRunHook;
 import com.michelin.kafkactl.model.ApiResource;
+import com.michelin.kafkactl.model.DeleteMode;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FileService;
 import com.michelin.kafkactl.service.FormatService;
@@ -106,7 +107,7 @@ public class Delete extends DryRunHook {
 
             // Process each document individually, return 0 when all succeed
             int errors = resources.stream()
-                    .map(resource -> {
+                    .mapToInt(resource -> {
                         ApiResource apiResource = apiResourcesService
                                 .getResourceDefinitionByKind(resource.getKind())
                                 .orElseThrow();
@@ -119,14 +120,14 @@ public class Delete extends DryRunHook {
                                         ? spec.get(VERSION).toString()
                                         : null),
                                 dryRun,
-                                force,
-                                cascade,
-                                commandSpec);
+                                DeleteMode.of(force, cascade),
+                                commandSpec)
+                                ? 0
+                                : 1;
                     })
-                    .mapToInt(value -> value ? 0 : 1)
                     .sum();
 
-            return errors > 0 ? 1 : 0;
+            return errors == 0 ? 0 : 1;
         } catch (HttpClientResponseException e) {
             formatService.displayError(e, commandSpec);
             return 1;
