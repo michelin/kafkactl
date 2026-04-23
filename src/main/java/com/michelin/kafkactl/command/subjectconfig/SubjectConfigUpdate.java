@@ -48,12 +48,12 @@ public class SubjectConfigUpdate extends AuthenticatedHook {
     public String subject;
 
     @Option(
-            names = {"-c", "--compatibility"},
+            names = {"--compatibility"},
             description = "Compatibility to set (${COMPLETION-CANDIDATES}).")
     public SubjectCompatibility compatibility;
 
     @Option(
-            names = {"-a", "--alias"},
+            names = {"--alias"},
             description = "Alias to set.")
     public String alias;
 
