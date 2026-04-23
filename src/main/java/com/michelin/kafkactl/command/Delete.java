@@ -113,15 +113,15 @@ public class Delete extends DryRunHook {
                                 .orElseThrow();
                         Map<String, Object> spec = resource.getSpec();
                         return resourceService.delete(
-                                apiResource,
-                                namespace,
-                                resource.getMetadata().getName(),
-                                (spec != null && spec.containsKey(VERSION)
-                                        ? spec.get(VERSION).toString()
-                                        : null),
-                                dryRun,
-                                DeleteMode.of(force, cascade),
-                                commandSpec)
+                                        apiResource,
+                                        namespace,
+                                        resource.getMetadata().getName(),
+                                        (spec != null && spec.containsKey(VERSION)
+                                                ? spec.get(VERSION).toString()
+                                                : null),
+                                        dryRun,
+                                        DeleteMode.of(force, cascade),
+                                        commandSpec)
                                 ? 0
                                 : 1;
                     })

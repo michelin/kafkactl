@@ -376,14 +376,7 @@ class DeleteTest {
         int code = cmd.execute("connect-cluster", "my-cluster", "-n", "namespace", "--force");
         assertEquals(0, code);
         verify(resourceService)
-                .delete(
-                        any(),
-                        eq("namespace"),
-                        eq("my-cluster"),
-                        eq(null),
-                        eq(false),
-                        eq(DeleteMode.FORCE),
-                        any());
+                .delete(any(), eq("namespace"), eq("my-cluster"), eq(null), eq(false), eq(DeleteMode.FORCE), any());
     }
 
     @Test
@@ -409,14 +402,7 @@ class DeleteTest {
         int code = cmd.execute("connect-cluster", "my-cluster", "-n", "namespace", "--cascade");
         assertEquals(0, code);
         verify(resourceService)
-                .delete(
-                        any(),
-                        eq("namespace"),
-                        eq("my-cluster"),
-                        eq(null),
-                        eq(false),
-                        eq(DeleteMode.CASCADE),
-                        any());
+                .delete(any(), eq("namespace"), eq("my-cluster"), eq(null), eq(false), eq(DeleteMode.CASCADE), any());
     }
 
     @Test
@@ -623,8 +609,7 @@ class DeleteTest {
         assertTrue(sw.toString()
                 .contains("Rerun the command with option --dry-run to see the resources that will be deleted."));
         assertTrue(sw.toString().contains("Rerun the command with option --execute to execute this operation."));
-        verify(resourceService, never())
-                .delete(any(), any(), any(), any(), anyBoolean(), any(), any());
+        verify(resourceService, never()).delete(any(), any(), any(), any(), anyBoolean(), any(), any());
     }
 
     @Test
@@ -642,8 +627,7 @@ class DeleteTest {
         assertTrue(sw.toString()
                 .contains("Rerun the command with option --dry-run to see the resources that will be deleted."));
         assertTrue(sw.toString().contains("Rerun the command with option --execute to execute this operation."));
-        verify(resourceService, never())
-                .delete(any(), any(), any(), any(), anyBoolean(), any(), any());
+        verify(resourceService, never()).delete(any(), any(), any(), any(), anyBoolean(), any(), any());
     }
 
     @Test
