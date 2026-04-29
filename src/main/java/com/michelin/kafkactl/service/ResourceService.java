@@ -206,27 +206,31 @@ public class ResourceService {
                     : nonNamespacedClient.apply(
                             loginService.getAuthorization(), apiResource.getPath(), resource, dryRun);
 
-            commandSpec
-                    .commandLine()
-                    .getOut()
-                    .println(formatService.prettifyKind(response.body().getKind())
-                            + " \"" + response.body().getMetadata().getName() + "\""
-                            + (response.header("X-Ns4kafka-Result") != null
-                                    ? " " + response.header("X-Ns4kafka-Result")
-                                    : "")
-                            + ".");
-
-            String warnings = response.header("X-Ns4kafka-Warnings");
-            if (warnings != null && !warnings.isBlank()) {
-                List<String> warningsList = Arrays.asList(warnings.split(","));
+            String headerWarning = response.header("X-Ns4kafka-Warnings");
+            if (StringUtils.isNotEmpty(headerWarning)) {
+                List<String> warnings = Arrays.asList(headerWarning.split(","));
                 commandSpec
                         .commandLine()
-                        .getErr()
-                        .println("The resource " + resource.getMetadata().getName() + " was applied with "
-                                + warningsList.size() + " warnings:");
-                warningsList.forEach(
-                        warning -> commandSpec.commandLine().getErr().println("- " + warning));
+                        .getOut()
+                        .println(formatService.prettifyKind(response.body().getKind())
+                                + " \"" + response.body().getMetadata().getName() + "\""
+                                + (response.header("X-Ns4kafka-Result") != null
+                                        ? " " + response.header("X-Ns4kafka-Result")
+                                        : "")
+                                + " with " + warnings.size() + (warnings.size() > 1 ? " warnings:" : " warning:"));
+                warnings.forEach(warning -> commandSpec.commandLine().getOut().println("- " + warning));
+            } else {
+                commandSpec
+                        .commandLine()
+                        .getOut()
+                        .println(formatService.prettifyKind(response.body().getKind())
+                                + " \"" + response.body().getMetadata().getName() + "\""
+                                + (response.header("X-Ns4kafka-Result") != null
+                                        ? " " + response.header("X-Ns4kafka-Result")
+                                        : "")
+                                + ".");
             }
+
             return response;
         } catch (HttpClientResponseException e) {
             formatService.displayError(
