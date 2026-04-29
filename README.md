@@ -67,6 +67,8 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
     * [Administrator](#administrator)
         * [Namespace](#namespace)
             * [Validation Constraints](#validation-constraints)
+                * [Topic](#topic-1)
+                * [Connector](#connector-3)
                 * [Range](#range)
                 * [ValidList](#validlist)
                 * [ValidString](#validstring)
@@ -1195,16 +1197,50 @@ spec:
 Validation constraints define a list of properties that must adhere to rules specified by the `validation-type`.
 They can be defined for topics using `topicValidator` and for connectors using `connectValidator`.
 
-For topics, the following constraints are available:
+###### Topic
 
-- `validationConstraints` applies to all topics.
+Topic validation constraints applied to all topics using `spec.topicValidator.validationConstraints`. 
 
-For connectors, the following constraints are available:
+```yml
+topicValidator:
+  validationConstraints:
+    <property>:
+      validation-type: <validation-type>
+```
 
-- `validationConstraints` applies to all connectors.
-- `sourceValidationConstraints` applies to source connectors.
-- `sinkValidationConstraints` applies to sink connectors.
-- `classValidationConstraints` applies to connectors of a specific class.
+The `property` field can be any topic configuration property, or: 
+- `name` for the topic name
+- `partitions` for the number of partitions
+- `replication.factor` for the replication factor
+
+###### Connector
+
+Connector validation constraints are applied using one of the following:
+
+- `spec.connectValidator.validationConstraints` applies to all connectors.
+- `spec.connectValidator.sourceValidationConstraints` applies to source connectors.
+- `spec.connectValidator.sinkValidationConstraints` applies to sink connectors.
+- `spec.connectValidator.classValidationConstraints` applies to connectors of a specific class.
+
+```yml
+connectValidator:
+  validationConstraints:
+    <property>:
+      validation-type: <validation-type>
+  sourceValidationConstraints:
+    <property>:
+      validation-type: <validation-type>
+  sinkValidationConstraints:
+    <property>:
+      validation-type: <validation-type>
+  classValidationConstraints:
+    <connector-class>:
+      <property>:
+        validation-type: <validation-type>
+```
+
+The `property` field can be any connector configuration property.
+The `connector-class` field can be any valid connector class, such as `io.confluent.connect.jdbc.JdbcSinkConnector`.
 
 ###### Range
 
