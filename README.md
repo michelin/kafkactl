@@ -714,7 +714,35 @@ Options:
   -h, --help   Show this help message and exit.
 
 Commands:
+  list    List all consumer groups for the current namespace.
   delete  Delete a consumer group.
+```
+
+#### List
+
+The `list` command allows you to list the consumer groups owned by the current namespace.
+
+```console
+Usage: kafkactl group list [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] [-o=<output>]
+
+Description: List all consumer groups for the current namespace.
+
+Options:
+  -c, --context=<optionalContext>
+                  Override context defined in config.
+  -h, --help      Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                  Override namespace defined in config or YAML resources.
+  -o, --output=<output>
+                  Output format (table, yaml, yml).
+  -v, --verbose   Enable the verbose mode.
+```
+
+Example(s):
+
+```console
+kafkactl group list
+kafkactl group list -o yaml
 ```
 
 #### Delete
@@ -1349,6 +1377,7 @@ spec:
       - connect-clusters
       - connect-clusters/vaults
       - acls
+      - consumer-groups
       - consumer-groups/reset
       - streams
     verbs:
