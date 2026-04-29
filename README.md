@@ -66,9 +66,9 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
             * [Inline](#inline)
     * [Administrator](#administrator)
         * [Namespace](#namespace)
-            * [Validation Constraints](#validation-constraints)
-                * [Topic](#topic-1)
-                * [Connector](#connector-3)
+            * [Topic Validation Constraints](#topic-validation-constraints)
+            * [Connector Validation Constraints](#connector-validation-constraints)
+            * [Validation Constraint Types](#validation-constraint-types)
                 * [Range](#range)
                 * [ValidList](#validlist)
                 * [ValidString](#validstring)
@@ -1192,14 +1192,10 @@ spec:
 - `spec.topicValidator` is a list of constraints for topics.
 - `spec.connectValidator` is a list of constraints for connectors.
 
-##### Validation Constraints
+##### Topic Validation Constraints
 
-Validation constraints define a list of properties that must adhere to rules specified by the `validation-type`.
-They can be defined for topics using `topicValidator` and for connectors using `connectValidator`.
-
-###### Topic
-
-Topic validation constraints applied to all topics using `spec.topicValidator.validationConstraints`. 
+Topic validation constraints define a list of topic properties that must adhere to rules specified by the `validation-type`.
+They apply to all topics using `spec.topicValidator.validationConstraints`. 
 
 ```yml
 topicValidator:
@@ -1213,9 +1209,10 @@ The `property` field can be any topic configuration property, or:
 - `partitions` for the number of partitions
 - `replication.factor` for the replication factor
 
-###### Connector
+##### Connector Validation Constraints
 
-Connector validation constraints are applied using one of the following:
+Connector validation constraints define a list of connector properties that must adhere to rules specified by the `validation-type`.
+They are applied using one of the following:
 
 - `spec.connectValidator.validationConstraints` applies to all connectors.
 - `spec.connectValidator.sourceValidationConstraints` applies to source connectors.
@@ -1241,6 +1238,10 @@ connectValidator:
 
 The `property` field can be any connector configuration property.
 The `connector-class` field can be any valid connector class, such as `io.confluent.connect.jdbc.JdbcSinkConnector`.
+
+##### Validation Constraint Types
+
+Multiple types of validation constraints are supported.
 
 ###### Range
 
