@@ -18,25 +18,42 @@
  */
 package com.michelin.kafkactl.command.group;
 
-import com.michelin.kafkactl.hook.HelpHook;
+import com.michelin.kafkactl.hook.AuthenticatedHook;
+import com.michelin.kafkactl.model.Output;
+import com.michelin.kafkactl.service.ResourceService;
+import io.micronaut.core.annotation.ReflectiveAccess;
+import jakarta.inject.Inject;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Spec;
+import picocli.CommandLine.Option;
 
-/** Group subcommand. */
+/** List consumer groups subcommand. */
 @Command(
-        name = "group",
-        subcommands = {GroupDelete.class, GroupList.class},
+        name = "list",
         headerHeading = "@|bold Usage|@:",
         synopsisHeading = " ",
-        synopsisSubcommandLabel = "COMMAND",
         descriptionHeading = "%n@|bold Description|@: ",
-        description = "Interact with consumer groups.",
-        parameterListHeading = "%n@|bold Parameters|@:%n",
+        description = "List all consumer groups for the current namespace.",
         optionListHeading = "%n@|bold Options|@:%n",
         commandListHeading = "%n@|bold Commands|@:%n",
         usageHelpAutoWidth = true)
-public class Group extends HelpHook {
-    @Spec
-    public CommandSpec commandSpec;
+public class GroupList extends AuthenticatedHook {
+    @Inject
+    @ReflectiveAccess
+    private ResourceService resourceService;
+
+    @Option(
+            names = {"-o", "--output"},
+            description = "Output format (${COMPLETION-CANDIDATES}).",
+            defaultValue = "table")
+    public Output output;
+
+    /**
+     * Run the "group list" command.
+     *
+     * @return The command return code
+     */
+    @Override
+    public Integer onAuthSuccess() {
+        return resourceService.listGroups(getNamespace(), output, commandSpec);
+    }
 }

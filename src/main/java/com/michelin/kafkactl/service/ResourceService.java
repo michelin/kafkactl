@@ -396,6 +396,29 @@ public class ResourceService {
     }
 
     /**
+     * List all consumer groups for a namespace.
+     *
+     * @param namespace The namespace
+     * @param output The output format
+     * @param commandSpec The command that triggered the action
+     * @return 0 if the command succeeded, 1 otherwise
+     */
+    public int listGroups(String namespace, Output output, CommandSpec commandSpec) {
+        try {
+            List<Resource> resources = namespacedClient.listGroups(loginService.getAuthorization(), namespace);
+            if (!resources.isEmpty()) {
+                formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
+            } else {
+                commandSpec.commandLine().getOut().println("No consumer group to display.");
+            }
+            return 0;
+        } catch (HttpClientResponseException exception) {
+            formatService.displayError(exception, commandSpec);
+            return 1;
+        }
+    }
+
+    /**
      * Change the state of a given connector.
      *
      * @param namespace The namespace
