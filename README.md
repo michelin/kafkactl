@@ -1204,7 +1204,8 @@ topicValidator:
       validation-type: <validation-type>
 ```
 
-The `property` field can be any topic configuration property, or: 
+The `property` field can be any topic configuration property, or:
+
 - `name` for the topic name
 - `partitions` for the number of partitions
 - `replication.factor` for the replication factor
@@ -1236,7 +1237,10 @@ connectValidator:
         validation-type: <validation-type>
 ```
 
-The `property` field can be any connector configuration property.
+The `property` field can be any connector configuration property, or:
+
+- `name` for the connector name
+
 The `connector-class` field can be any valid connector class, such as `io.confluent.connect.jdbc.JdbcSinkConnector`.
 
 ##### Validation Constraint Types
