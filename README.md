@@ -1192,8 +1192,8 @@ spec:
 
 ##### Validation Constraints
 
-Validations constraints enforce rules on the configuration of topics using `topicValidator` and connectors using
-`connectValidator`.
+Validation constraints define a list of properties that must adhere to rules specified by the `validation-type`.
+They can be defined for topics using `topicValidator` and for connectors using `connectValidator`.
 
 For topics, the following constraints are available:
 
@@ -1205,9 +1205,6 @@ For connectors, the following constraints are available:
 - `sourceValidationConstraints` applies to source connectors.
 - `sinkValidationConstraints` applies to sink connectors.
 - `classValidationConstraints` applies to connectors of a specific class.
-
-Validation constraints define a list of properties that must adhere to specific rules set by the `validation-type`.
-If the field is present, it will be validated; otherwise, it can be omitted without causing an error.
 
 ###### Range
 
