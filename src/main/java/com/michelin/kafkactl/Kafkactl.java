@@ -31,11 +31,11 @@ import com.michelin.kafkactl.command.Get;
 import com.michelin.kafkactl.command.Import;
 import com.michelin.kafkactl.command.ResetOffsets;
 import com.michelin.kafkactl.command.ResetPassword;
-import com.michelin.kafkactl.command.Schema;
 import com.michelin.kafkactl.command.auth.Auth;
 import com.michelin.kafkactl.command.config.Config;
 import com.michelin.kafkactl.command.connectcluster.ConnectCluster;
 import com.michelin.kafkactl.command.group.Group;
+import com.michelin.kafkactl.command.subjectconfig.SubjectConfig;
 import com.michelin.kafkactl.service.SystemService;
 import com.michelin.kafkactl.util.VersionProvider;
 import io.micronaut.configuration.picocli.PicocliRunner;
@@ -64,7 +64,7 @@ import picocli.CommandLine.Spec;
             Group.class,
             Import.class,
             ResetOffsets.class,
-            Schema.class,
+            SubjectConfig.class,
             ResetPassword.class
         },
         headerHeading = "@|bold Usage|@:",
