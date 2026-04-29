@@ -66,12 +66,15 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
             * [Inline](#inline)
     * [Administrator](#administrator)
         * [Namespace](#namespace)
-            * [Validation Constraints](#validation-constraints)
+            * [Topic Validation Constraints](#topic-validation-constraints)
+            * [Connector Validation Constraints](#connector-validation-constraints)
+            * [Validation Constraint Types](#validation-constraint-types)
                 * [Range](#range)
                 * [ValidList](#validlist)
                 * [ValidString](#validstring)
                 * [NonEmptyString](#nonemptystring)
                 * [ContainsList](#containslist)
+                * [RegexPattern](#regexpattern)
                 * [CompositeValidator](#compositevalidator)
         * [ACL Owner-Typed](#acl-owner-typed)
         * [Role Binding](#role-binding)
@@ -1189,25 +1192,56 @@ spec:
 - `spec.topicValidator` is a list of constraints for topics.
 - `spec.connectValidator` is a list of constraints for connectors.
 
-##### Validation Constraints
+##### Topic Validation Constraints
 
-Validations constraints enforce rules on the configuration of topics using `topicValidator` and connectors using
-`connectValidator`.
+Topic validation constraints define a list of topic properties that must adhere to rules specified by the `validation-type`.
+They apply to all topics using `spec.topicValidator.validationConstraints`. 
 
-For topics, the following constraints are available:
+```yml
+topicValidator:
+  validationConstraints:
+    <property>:
+      validation-type: <validation-type>
+```
 
-- `validationConstraints` applies to all topics.
+The `property` field can be any topic configuration property, or: 
+- `name` for the topic name
+- `partitions` for the number of partitions
+- `replication.factor` for the replication factor
 
-For connectors, the following constraints are available:
+##### Connector Validation Constraints
 
-- `validationConstraints` applies to all connectors.
-- `sourceValidationConstraints` applies to source connectors.
-- `sinkValidationConstraints` applies to sink connectors.
-- `classValidationConstraints` applies to connectors of a specific class.
+Connector validation constraints define a list of connector properties that must adhere to rules specified by the `validation-type`.
+They are applied using one of the following:
 
-Validation constraints define a list of properties that must adhere to specific rules set by the `validation-type`.
-Constraints can be made optional by setting the `optional` attribute to `true`.
-If the field is present, it will be validated; otherwise, it can be omitted without causing an error.
+- `spec.connectValidator.validationConstraints` applies to all connectors.
+- `spec.connectValidator.sourceValidationConstraints` applies to source connectors.
+- `spec.connectValidator.sinkValidationConstraints` applies to sink connectors.
+- `spec.connectValidator.classValidationConstraints` applies to connectors of a specific class.
+
+```yml
+connectValidator:
+  validationConstraints:
+    <property>:
+      validation-type: <validation-type>
+  sourceValidationConstraints:
+    <property>:
+      validation-type: <validation-type>
+  sinkValidationConstraints:
+    <property>:
+      validation-type: <validation-type>
+  classValidationConstraints:
+    <connector-class>:
+      <property>:
+        validation-type: <validation-type>
+```
+
+The `property` field can be any connector configuration property.
+The `connector-class` field can be any valid connector class, such as `io.confluent.connect.jdbc.JdbcSinkConnector`.
+
+##### Validation Constraint Types
+
+Multiple types of validation constraints are supported.
 
 ###### Range
 
@@ -1218,9 +1252,15 @@ topicValidator:
   validationConstraints:
     partitions:
       validation-type: Range
+      optional: false
       min: 1
       max: 6
 ```
+
+The parameters of the `Range` validation type are:
+- `min` (optional): The minimum allowed value for the property.
+- `max` (optional): The maximum allowed value for the property.
+- `optional` (default: `false`): A boolean that indicates whether the property is optional. If set to `true`, the property can be omitted without causing a validation error.
 
 ###### ValidList
 
@@ -1237,6 +1277,10 @@ topicValidator:
         - compact
 ```
 
+The parameters of the `ValidList` validation type are:
+- `validStrings`: A list of valid strings that each item in the comma-separated list must match.
+- `optional` (default: `false`): A boolean that indicates whether the property is optional. If set to `true`, the property can be omitted without causing a validation error.
+
 ###### ValidString
 
 Ensures that the property is a string that matches one of the values specified in the `validStrings` list.
@@ -1246,10 +1290,15 @@ connectValidator:
   validationConstraints:
     connector.class:
       validation-type: ValidString
+      optional: false
       validStrings:
         - io.confluent.connect.jdbc.JdbcSinkConnector
         - io.confluent.connect.jdbc.JdbcSourceConnector
 ```
+
+The parameters of the `ValidString` validation type are:
+- `validStrings`: A list of valid strings that the property must match.
+- `optional` (default: `false`): A boolean that indicates whether the property is optional. If set to `true`, the property can be omitted without causing a validation error.
 
 ###### NonEmptyString
 
@@ -1276,6 +1325,26 @@ connectValidator:
         - ns1.topic2
 ```
 
+The parameters of the `ContainsList` validation type are:
+- `mandatoryStrings`: A list of strings that must be included in the comma-separated list.
+
+###### RegexPattern
+
+Ensures that the property matches a specified regular expression pattern.
+
+```yml
+topicValidator:
+  validationConstraints:
+    name:
+      validation-type: RegexPattern
+      pattern: "^[a-zA-Z0-9._-]+$"
+      strict: false
+```
+
+The parameters of the `RegexPattern` validation type are:
+- `pattern`: A regular expression that the property must match.
+- `strict` (default: `false`): A boolean that indicates whether the regular expression should be applied strictly. If set to `true`, the validation will fail. If set to `false`, the validation will pass throwing a warning.
+
 ###### CompositeValidator
 
 Ensures that the property satisfies multiple validation rules. The property is valid only if it meets all specified
@@ -1293,6 +1362,9 @@ connectValidator:
             - io.confluent.connect.jdbc.JdbcSinkConnector
             - io.confluent.connect.jdbc.JdbcSourceConnector
 ```
+
+The parameters of the `CompositeValidator` validation type are:
+- `validators`: A list of validation rules that the property must satisfy.
 
 #### ACL Owner-typed
 

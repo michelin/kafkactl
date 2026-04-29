@@ -710,10 +710,10 @@ class ResourceServiceTest {
 
         assertEquals(HttpStatus.OK, actual.getStatus());
         assertEquals(topicResource, actual.body());
-        assertTrue(out.toString().contains("Topic \"prefix.topic\" created."));
-        assertTrue(err.toString().contains("The resource prefix.topic was applied with 2 warnings:"));
-        assertTrue(err.toString().contains("- first warning"));
-        assertTrue(err.toString().contains("- second warning"));
+        assertTrue(out.toString().contains("Topic \"prefix.topic\" created with 2 warnings:"));
+        assertTrue(out.toString().contains("- first warning"));
+        assertTrue(out.toString().contains("- second warning"));
+        assertTrue(err.toString().isBlank());
     }
 
     @Test
