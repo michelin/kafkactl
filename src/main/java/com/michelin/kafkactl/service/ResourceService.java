@@ -54,6 +54,8 @@ import picocli.CommandLine.ParameterException;
 /** Resource service. */
 @Singleton
 public class ResourceService {
+    public static final String HEADER_RESULT = "X-Ns4kafka-Result";
+    public static final String HEADER_WARNINGS = "X-Ns4kafka-Warnings";
     public static final String REFERENCES_FIELD = "references";
     public static final String SCHEMA_FIELD = "schema";
     public static final String SCHEMA_FILE_FIELD = "schemaFile";
@@ -206,7 +208,7 @@ public class ResourceService {
                     : nonNamespacedClient.apply(
                             loginService.getAuthorization(), apiResource.getPath(), resource, dryRun);
 
-            String headerWarning = response.header("X-Ns4kafka-Warnings");
+            String headerWarning = response.header(HEADER_WARNINGS);
             if (StringUtils.isNotEmpty(headerWarning)) {
                 List<String> warnings = Arrays.asList(headerWarning.split(","));
                 commandSpec
@@ -214,9 +216,7 @@ public class ResourceService {
                         .getOut()
                         .println(formatService.prettifyKind(response.body().getKind())
                                 + " \"" + response.body().getMetadata().getName() + "\""
-                                + (response.header("X-Ns4kafka-Result") != null
-                                        ? " " + response.header("X-Ns4kafka-Result")
-                                        : "")
+                                + (response.header(HEADER_RESULT) != null ? " " + response.header(HEADER_RESULT) : "")
                                 + " with " + warnings.size() + (warnings.size() > 1 ? " warnings:" : " warning:"));
                 warnings.forEach(warning -> commandSpec.commandLine().getOut().println("- " + warning));
             } else {
@@ -225,9 +225,7 @@ public class ResourceService {
                         .getOut()
                         .println(formatService.prettifyKind(response.body().getKind())
                                 + " \"" + response.body().getMetadata().getName() + "\""
-                                + (response.header("X-Ns4kafka-Result") != null
-                                        ? " " + response.header("X-Ns4kafka-Result")
-                                        : "")
+                                + (response.header(HEADER_RESULT) != null ? " " + response.header(HEADER_RESULT) : "")
                                 + ".");
             }
 
