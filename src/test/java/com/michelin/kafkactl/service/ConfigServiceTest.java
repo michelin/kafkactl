@@ -239,4 +239,49 @@ class ConfigServiceTest {
 
         assertFalse(actual);
     }
+
+    @Test
+    void shouldApplyContextByName() throws IOException {
+        KafkactlProperties.ContextsProperties contextPropertiesOne = KafkactlProperties.ContextsProperties.builder()
+                .name("context1")
+                .context(KafkactlProperties.ContextsProperties.ContextProperties.builder()
+                        .userToken("token1")
+                        .api("https://ns4kafka1.com")
+                        .namespace("namespace1")
+                        .build())
+                .build();
+
+        KafkactlProperties.ContextsProperties contextPropertiesTwo = KafkactlProperties.ContextsProperties.builder()
+                .name("context2")
+                .context(KafkactlProperties.ContextsProperties.ContextProperties.builder()
+                        .userToken("token2")
+                        .api("https://ns4kafka2.com")
+                        .namespace("namespace2")
+                        .build())
+                .build();
+
+        when(kafkactlProperties.getContexts()).thenReturn(List.of(contextPropertiesOne, contextPropertiesTwo));
+
+        boolean actual = configService.applyContextByName("context2");
+
+        assertTrue(actual);
+    }
+
+    @Test
+    void shouldNotApplyContextByNameWhenNotFound() throws IOException {
+        KafkactlProperties.ContextsProperties contextPropertiesOne = KafkactlProperties.ContextsProperties.builder()
+                .name("context1")
+                .context(KafkactlProperties.ContextsProperties.ContextProperties.builder()
+                        .userToken("token1")
+                        .api("https://ns4kafka1.com")
+                        .namespace("namespace1")
+                        .build())
+                .build();
+
+        when(kafkactlProperties.getContexts()).thenReturn(List.of(contextPropertiesOne));
+
+        boolean actual = configService.applyContextByName("notFound");
+
+        assertFalse(actual);
+    }
 }

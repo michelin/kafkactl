@@ -22,6 +22,7 @@ import static com.michelin.kafkactl.property.KafkactlProperties.KAFKACTL_CONFIG;
 
 import com.michelin.kafkactl.command.ApiResources;
 import com.michelin.kafkactl.command.Apply;
+import com.michelin.kafkactl.command.Completion;
 import com.michelin.kafkactl.command.Connector;
 import com.michelin.kafkactl.command.Delete;
 import com.michelin.kafkactl.command.DeleteRecords;
@@ -52,6 +53,7 @@ import picocli.CommandLine.Spec;
             ApiResources.class,
             Apply.class,
             Auth.class,
+            Completion.class,
             Config.class,
             ConnectCluster.class,
             Connector.class,
