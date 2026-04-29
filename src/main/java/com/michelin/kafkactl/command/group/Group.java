@@ -26,7 +26,7 @@ import picocli.CommandLine.Spec;
 /** Group subcommand. */
 @Command(
         name = "group",
-    subcommands = {GroupDelete.class, GroupList.class},
+        subcommands = {GroupDelete.class, GroupList.class},
         headerHeading = "@|bold Usage|@:",
         synopsisHeading = " ",
         synopsisSubcommandLabel = "COMMAND",

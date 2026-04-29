@@ -1269,55 +1269,55 @@ class ResourceServiceTest {
         verify(formatService).displayError(exception, "ConsumerGroup", "group", cmd.getCommandSpec());
     }
 
-        @Test
-        void shouldListGroupsSuccess() {
-                Resource groupResource = Resource.builder()
-                                .kind("ConsumerGroup")
-                                .apiVersion("v1")
-                                .metadata(Resource.Metadata.builder()
-                                                .name("group")
-                                                .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
-                                                .build())
-                                .spec(Map.of())
-                                .build();
+    @Test
+    void shouldListGroupsSuccess() {
+        Resource groupResource = Resource.builder()
+                .kind("ConsumerGroup")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder()
+                        .name("group")
+                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                        .build())
+                .spec(Map.of())
+                .build();
 
-                CommandLine cmd = new CommandLine(new Kafkactl());
+        CommandLine cmd = new CommandLine(new Kafkactl());
 
-                when(namespacedClient.listGroups(any(), any())).thenReturn(Collections.singletonList(groupResource));
+        when(namespacedClient.listGroups(any(), any())).thenReturn(Collections.singletonList(groupResource));
 
-                int actual = resourceService.listGroups("namespace", TABLE, cmd.getCommandSpec());
+        int actual = resourceService.listGroups("namespace", TABLE, cmd.getCommandSpec());
 
-                assertEquals(0, actual);
-                verify(formatService)
-                                .displayList("ConsumerGroup", Collections.singletonList(groupResource), TABLE, cmd.getCommandSpec());
-        }
+        assertEquals(0, actual);
+        verify(formatService)
+                .displayList("ConsumerGroup", Collections.singletonList(groupResource), TABLE, cmd.getCommandSpec());
+    }
 
-        @Test
-        void shouldListGroupsWhenEmpty() {
-                CommandLine cmd = new CommandLine(new Kafkactl());
-                StringWriter sw = new StringWriter();
-                cmd.setOut(new PrintWriter(sw));
+    @Test
+    void shouldListGroupsWhenEmpty() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
 
-                when(namespacedClient.listGroups(any(), any())).thenReturn(Collections.emptyList());
+        when(namespacedClient.listGroups(any(), any())).thenReturn(Collections.emptyList());
 
-                int actual = resourceService.listGroups("namespace", TABLE, cmd.getCommandSpec());
+        int actual = resourceService.listGroups("namespace", TABLE, cmd.getCommandSpec());
 
-                assertEquals(0, actual);
-                assertTrue(sw.toString().contains("No consumer group to display."));
-        }
+        assertEquals(0, actual);
+        assertTrue(sw.toString().contains("No consumer group to display."));
+    }
 
-        @Test
-        void shouldListGroupsFail() {
-                CommandLine cmd = new CommandLine(new Kafkactl());
-                HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+    @Test
+    void shouldListGroupsFail() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
 
-                when(namespacedClient.listGroups(any(), any())).thenThrow(exception);
+        when(namespacedClient.listGroups(any(), any())).thenThrow(exception);
 
-                int actual = resourceService.listGroups("namespace", TABLE, cmd.getCommandSpec());
+        int actual = resourceService.listGroups("namespace", TABLE, cmd.getCommandSpec());
 
-                assertEquals(1, actual);
-                verify(formatService).displayError(exception, cmd.getCommandSpec());
-        }
+        assertEquals(1, actual);
+        verify(formatService).displayError(exception, cmd.getCommandSpec());
+    }
 
     @Test
     void shouldChangeConnectorState() {
