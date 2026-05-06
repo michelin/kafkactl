@@ -62,7 +62,7 @@ public class ConnectClusterVault extends AuthenticatedHook {
             return resourceService.listAvailableVaultsConnectClusters(namespace, commandSpec);
         }
 
-        // if connect cluster define but no secrets to encrypt => show error no secrets to encrypt.
+        // if connect cluster defined but no secrets to encrypt => show error.
         if (secrets == null) {
             throw new ParameterException(commandSpec.commandLine(), "No secrets to encrypt.");
         }

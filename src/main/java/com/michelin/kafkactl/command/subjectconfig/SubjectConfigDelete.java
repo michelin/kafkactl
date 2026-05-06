@@ -16,27 +16,47 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.michelin.kafkactl.command.connectcluster;
+package com.michelin.kafkactl.command.subjectconfig;
 
-import com.michelin.kafkactl.hook.HelpHook;
+import com.michelin.kafkactl.hook.AuthenticatedHook;
+import com.michelin.kafkactl.service.ResourceService;
+import io.micronaut.core.annotation.ReflectiveAccess;
+import jakarta.inject.Inject;
+import java.io.IOException;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Spec;
+import picocli.CommandLine.Parameters;
 
-/** Connect clusters subcommand. */
+/** Subject config delete subcommand. */
 @Command(
-        name = "connect-cluster",
-        subcommands = {ConnectClusterVault.class},
+        name = "delete",
         headerHeading = "@|bold Usage|@:",
         synopsisHeading = " ",
-        synopsisSubcommandLabel = "COMMAND",
         descriptionHeading = "%n@|bold Description|@: ",
-        description = "Interact with connect clusters.",
+        description = "Delete subject config.",
         parameterListHeading = "%n@|bold Parameters|@:%n",
         optionListHeading = "%n@|bold Options|@:%n",
         commandListHeading = "%n@|bold Commands|@:%n",
         usageHelpAutoWidth = true)
-public class ConnectCluster extends HelpHook {
-    @Spec
-    public CommandSpec commandSpec;
+public class SubjectConfigDelete extends AuthenticatedHook {
+    @Inject
+    @ReflectiveAccess
+    private ResourceService resourceService;
+
+    @Parameters(index = "0", description = "Subject name.", arity = "1")
+    public String subject;
+
+    /**
+     * Run the "subject" command.
+     *
+     * @return The command return code
+     * @throws IOException Any exception during the run
+     */
+    @Override
+    public Integer onAuthSuccess() throws IOException {
+        return resourceService
+                        .deleteSubjectConfig(getNamespace(), subject, commandSpec)
+                        .isEmpty()
+                ? 1
+                : 0;
+    }
 }

@@ -91,7 +91,7 @@ kafkactl:
     - "VERSION:/spec/version"
     - "CONFIG:/spec/compatibility"
     - "TYPE:/spec/schemaType"
-    SchemaCompatibilityState:
+    SubjectConfigState:
     - "CONFIG:/spec/compatibility"
     - "SUBJECT:/metadata/name"
     Topic:

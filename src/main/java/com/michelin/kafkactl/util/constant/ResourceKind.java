@@ -34,6 +34,6 @@ public class ResourceKind {
     public static final String KAFKA_USER_RESET_PASSWORD = "KafkaUserResetPassword";
     public static final String RESOURCE_DEFINITION = "ResourceDefinition";
     public static final String SUBJECT = "Subject";
-    public static final String SCHEMA_COMPATIBILITY_STATE = "SchemaCompatibilityState";
+    public static final String SUBJECT_CONFIG_STATE = "SubjectConfigState";
     public static final String VAULT_RESPONSE = "VaultResponse";
 }
