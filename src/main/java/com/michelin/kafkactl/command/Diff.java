@@ -24,6 +24,7 @@ import com.github.difflib.patch.Patch;
 import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
+import com.michelin.kafkactl.model.format.NullSkippingRepresenter;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
 import io.micronaut.core.annotation.ReflectiveAccess;
@@ -145,7 +146,7 @@ public class Diff extends AuthenticatedHook {
         DumperOptions options = new DumperOptions();
         options.setExplicitStart(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        Representer representer = new Representer(new DumperOptions());
+        Representer representer = new NullSkippingRepresenter(new DumperOptions());
         representer.addClassTag(Resource.class, Tag.MAP);
         Yaml yaml = new Yaml(representer, options);
 
