@@ -391,7 +391,7 @@ class DiffTest {
         assertEquals(0, code);
         assertTrue(sw.toString().contains("--- Topic/prefix.topic-LIVE"));
         assertTrue(sw.toString().contains("+++ Topic/prefix.topic-MERGED"));
-        assertTrue(sw.toString().contains("@@ -8,6 +8,7 @@"));
+        assertTrue(sw.toString().contains("@@ -5,5 +5,6 @@"));
         assertTrue(sw.toString().contains("   name: prefix.topic"));
         assertTrue(sw.toString().contains("   namespace: namespace"));
         assertTrue(sw.toString().contains(" spec:"));
@@ -661,7 +661,7 @@ class DiffTest {
         assertEquals(0, code);
         assertTrue(sw.toString().contains("--- Topic/prefix.topic-LIVE"));
         assertTrue(sw.toString().contains("+++ Topic/prefix.topic-MERGED"));
-        assertTrue(sw.toString().contains("@@ -1,0 +1,14 @@"));
+        assertTrue(sw.toString().contains("@@ -1,0 +1,10 @@"));
         assertTrue(sw.toString().contains("+---"));
         assertTrue(sw.toString().contains("+apiVersion: v1"));
         assertTrue(sw.toString().contains("+kind: Topic"));
@@ -724,8 +724,6 @@ class DiffTest {
         assertTrue(sw.toString().contains("+apiVersion: v1"));
         assertTrue(sw.toString().contains("+kind: Schema"));
         assertTrue(sw.toString().contains("+metadata:"));
-        assertTrue(sw.toString().contains("+  cluster: null"));
-        assertTrue(sw.toString().contains("+  labels: null"));
         assertTrue(sw.toString().contains("+  name: prefix.schema"));
         assertTrue(sw.toString().contains("+  namespace: namespace"));
         assertTrue(sw.toString().contains("+  schema: "));
@@ -779,8 +777,6 @@ class DiffTest {
         assertTrue(sw.toString().contains("+apiVersion: v1"));
         assertTrue(sw.toString().contains("+kind: Schema"));
         assertTrue(sw.toString().contains("+metadata:"));
-        assertTrue(sw.toString().contains("+  cluster: null"));
-        assertTrue(sw.toString().contains("+  labels: null"));
         assertTrue(sw.toString().contains("+  name: prefix.schema"));
         assertTrue(sw.toString().contains("+  namespace: namespace"));
         assertTrue(sw.toString().contains("+spec:"));

@@ -26,6 +26,7 @@ import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.Status;
 import com.michelin.kafkactl.model.format.AgoFormat;
 import com.michelin.kafkactl.model.format.DefaultFormat;
+import com.michelin.kafkactl.model.format.NullSkippingRepresenter;
 import com.michelin.kafkactl.model.format.OutputFormatStrategy;
 import com.michelin.kafkactl.model.format.PeriodFormat;
 import com.michelin.kafkactl.property.KafkactlProperties;
@@ -111,17 +112,18 @@ public class FormatService {
                             status.getMessage().toLowerCase(),
                             exception.getStatus().getCode(),
                             causes);
-        } else {
-            commandSpec
-                    .commandLine()
-                    .getErr()
-                    .printf(
-                            "%s%s failed because %s (%s).%n",
-                            prettyKind,
-                            prettyName,
-                            exception.getMessage().toLowerCase(),
-                            exception.getStatus().getCode());
+            return;
         }
+
+        commandSpec
+                .commandLine()
+                .getErr()
+                .printf(
+                        "%s%s failed because %s (%s).%n",
+                        prettyKind,
+                        prettyName,
+                        exception.getMessage().toLowerCase(),
+                        exception.getStatus().getCode());
     }
 
     /**
@@ -145,15 +147,16 @@ public class FormatService {
                             status.getMessage().toLowerCase(),
                             exception.getStatus().getCode(),
                             causes);
-        } else {
-            commandSpec
-                    .commandLine()
-                    .getErr()
-                    .printf(
-                            "Failed because %s (%s).%n",
-                            exception.getMessage().toLowerCase(),
-                            exception.getStatus().getCode());
+            return;
         }
+
+        commandSpec
+                .commandLine()
+                .getErr()
+                .printf(
+                        "Failed because %s (%s).%n",
+                        exception.getMessage().toLowerCase(),
+                        exception.getStatus().getCode());
     }
 
     /**
@@ -228,7 +231,7 @@ public class FormatService {
         DumperOptions options = new DumperOptions();
         options.setExplicitStart(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        Representer representer = new Representer(new DumperOptions());
+        Representer representer = new NullSkippingRepresenter(new DumperOptions());
         representer.addClassTag(Resource.class, Tag.MAP);
         Yaml yaml = new Yaml(representer, options);
         commandSpec.commandLine().getOut().println(yaml.dumpAll(resources.iterator()));
