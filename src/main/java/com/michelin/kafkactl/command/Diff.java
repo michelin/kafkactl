@@ -139,9 +139,12 @@ public class Diff extends AuthenticatedHook {
         if (live != null) {
             live.setStatus(null);
             live.getMetadata().setCreationTimestamp(null);
+            live.getMetadata().setStatus(null);
         }
+
         merged.setStatus(null);
         merged.getMetadata().setCreationTimestamp(null);
+        merged.getMetadata().setStatus(null);
 
         DumperOptions options = new DumperOptions();
         options.setExplicitStart(true);
@@ -153,7 +156,6 @@ public class Diff extends AuthenticatedHook {
         String liveYaml = live != null ? yaml.dump(live) : "";
         String mergedYaml = yaml.dump(merged);
 
-        // Remove ignored fields
         if (!ignoreFields.isEmpty()) {
             liveYaml = removeIgnoredFields(liveYaml, ignoreFields, yaml);
             mergedYaml = removeIgnoredFields(mergedYaml, ignoreFields, yaml);
