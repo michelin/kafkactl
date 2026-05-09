@@ -176,6 +176,16 @@ public interface NamespacedResourceClient {
             @QueryValue boolean dryrun);
 
     /**
+     * List all consumer groups for a namespace.
+     *
+     * @param token The authentication token
+     * @param namespace The namespace
+     * @return The list of consumer groups
+     */
+    @Get("{namespace}/consumer-groups")
+    List<Resource> listGroups(@Header("Authorization") String token, String namespace);
+
+    /**
      * Change the state of a given connector.
      *
      * @param namespace The namespace
