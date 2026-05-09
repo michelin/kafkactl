@@ -26,10 +26,24 @@ import org.yaml.snakeyaml.representer.Representer;
 
 /** Custom SnakeYAML representer that skips properties with null values. */
 public class NullSkippingRepresenter extends Representer {
+    /**
+     * Constructor.
+     *
+     * @param options The dumper options
+     */
     public NullSkippingRepresenter(DumperOptions options) {
         super(options);
     }
 
+    /**
+     * Represent a Java bean property, skipping null values.
+     *
+     * @param javaBean The Java bean
+     * @param property The property
+     * @param propertyValue The property value
+     * @param customTag The custom tag
+     * @return The node tuple or null if the value is null
+     */
     @Override
     protected NodeTuple representJavaBeanProperty(
             Object javaBean, Property property, Object propertyValue, Tag customTag) {

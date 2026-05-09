@@ -31,19 +31,40 @@ import lombok.AllArgsConstructor;
 public class DefaultFormat implements OutputFormatStrategy {
     private String jsonPointer;
 
+    /**
+     * Display the first non-empty value from comma-separated JSON pointers.
+     *
+     * @param node The JSON node to extract value from
+     * @return The resolved value or empty string
+     */
     @Override
     public String display(JsonNode node) {
-        String output;
-        JsonNode cell = node.at(this.jsonPointer);
+        String[] pointers = this.jsonPointer.split(",");
+        for (String pointer : pointers) {
+            String result = resolvePointer(node, pointer.trim());
+            if (!result.isEmpty()) {
+                return result;
+            }
+        }
+        return EMPTY_STRING;
+    }
+
+    /**
+     * Resolve a single JSON pointer against a node.
+     *
+     * @param node The JSON node to query
+     * @param pointer The JSON pointer to resolve
+     * @return The resolved value or empty string
+     */
+    private String resolvePointer(JsonNode node, String pointer) {
+        JsonNode cell = node.at(pointer);
 
         if (cell.isArray()) {
             List<String> children = new ArrayList<>();
             cell.elements().forEachRemaining(jsonNode -> children.add(jsonNode.asText()));
-            output = String.join(",", children);
-        } else {
-            output = cell.getNodeType().equals(JsonNodeType.NULL) ? EMPTY_STRING : cell.asText();
+            return String.join(",", children);
         }
 
-        return output;
+        return cell.getNodeType().equals(JsonNodeType.NULL) ? EMPTY_STRING : cell.asText();
     }
 }

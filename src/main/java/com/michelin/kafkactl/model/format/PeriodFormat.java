@@ -29,6 +29,12 @@ import lombok.AllArgsConstructor;
 public class PeriodFormat implements OutputFormatStrategy {
     private String jsonPointer;
 
+    /**
+     * Display a duration in milliseconds as a human-readable period (e.g., "2d3h15m").
+     *
+     * @param node The JSON node to extract the duration from
+     * @return The formatted period string or empty string if unparseable
+     */
     @Override
     public String display(JsonNode node) {
         String output;

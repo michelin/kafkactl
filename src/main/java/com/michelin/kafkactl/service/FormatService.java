@@ -32,6 +32,7 @@ import com.michelin.kafkactl.model.format.PeriodFormat;
 import com.michelin.kafkactl.property.KafkactlProperties;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.naming.conventions.StringConvention;
+import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -40,6 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
@@ -290,18 +292,35 @@ public class FormatService {
 
         @Override
         public String toString() {
-            Help.Column[] sizedColumns = this.columns.stream()
+            // Determine which columns have at least one non-empty value
+            List<Integer> nonEmptyColumnIndices = IntStream.range(0, columns.size())
+                    .filter(i -> rows.stream().anyMatch(row -> StringUtils.isNotEmpty(row[i])))
+                    .boxed()
+                    .toList();
+
+            // If all columns are empty, fall back to showing all columns
+            if (nonEmptyColumnIndices.isEmpty()) {
+                nonEmptyColumnIndices =
+                        IntStream.range(0, columns.size()).boxed().toList();
+            }
+
+            Help.Column[] sizedColumns = nonEmptyColumnIndices.stream()
+                    .map(columns::get)
                     .map(column -> new Help.Column(column.size, column.indent, Help.Column.Overflow.SPAN))
                     .toArray(Help.Column[]::new);
 
-            Help.TextTable tt = Help.TextTable.forColumns(Help.defaultColorScheme(Help.Ansi.AUTO), sizedColumns);
+            Help.TextTable textTable = Help.TextTable.forColumns(Help.defaultColorScheme(Help.Ansi.AUTO), sizedColumns);
 
             // Create Header Row
-            tt.addRowValues(this.columns.stream().map(column -> column.header).toArray(String[]::new));
+            textTable.addRowValues(nonEmptyColumnIndices.stream()
+                    .map(i -> columns.get(i).header)
+                    .toArray(String[]::new));
             // Create Data Rows
-            this.rows.forEach(tt::addRowValues);
+            List<Integer> visibleIndices = nonEmptyColumnIndices;
+            this.rows.forEach(row -> textTable.addRowValues(
+                    visibleIndices.stream().map(i -> row[i]).toArray(String[]::new)));
 
-            return tt.toString();
+            return textTable.toString();
         }
 
         static class PrettyTextTableColumn {

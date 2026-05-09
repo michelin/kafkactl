@@ -22,5 +22,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 /** Output format strategy. */
 public interface OutputFormatStrategy {
+    /**
+     * Display a formatted value from the given node.
+     *
+     * @param node The JSON node to extract and format value from
+     * @return The formatted value
+     */
     String display(JsonNode node);
 }

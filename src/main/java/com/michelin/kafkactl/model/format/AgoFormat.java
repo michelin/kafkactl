@@ -32,6 +32,12 @@ import org.ocpsoft.prettytime.PrettyTime;
 public class AgoFormat implements OutputFormatStrategy {
     private String jsonPointer;
 
+    /**
+     * Display a date as a relative time (e.g., "3 hours ago").
+     *
+     * @param node The JSON node to extract the date from
+     * @return The relative time string or empty string if unparseable
+     */
     @Override
     public String display(JsonNode node) {
         String output;
