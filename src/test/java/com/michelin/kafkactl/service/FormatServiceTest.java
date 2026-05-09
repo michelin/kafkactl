@@ -22,6 +22,7 @@ import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.model.Output.YAML;
 import static com.michelin.kafkactl.model.Output.YML;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.michelin.kafkactl.Kafkactl;
@@ -72,7 +73,7 @@ class FormatServiceTest {
     }
 
     @Test
-    void shouldDisplayEmptyInsteadOfNull() {
+    void shouldHideEmptyColumn() {
         Resource resource = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
@@ -89,8 +90,11 @@ class FormatServiceTest {
 
         formatService.displayList("Topic", Collections.singletonList(resource), TABLE, cmd.getCommandSpec());
 
-        assertTrue(sw.toString().contains("TOPIC  RETENTION  POLICY  AGE"));
-        assertTrue(sw.toString().contains("       1m         delete"));
+        assertFalse(sw.toString().contains("TOPIC"));
+        assertTrue(sw.toString().contains("RETENTION"));
+        assertTrue(sw.toString().contains("POLICY"));
+        assertTrue(sw.toString().contains("1m"));
+        assertTrue(sw.toString().contains("delete"));
     }
 
     @Test
@@ -108,8 +112,11 @@ class FormatServiceTest {
 
         formatService.displayList("Topic", Collections.singletonList(resource), TABLE, cmd.getCommandSpec());
 
-        assertTrue(sw.toString().contains("TOPIC         RETENTION  POLICY  AGE"));
+        assertTrue(sw.toString().contains("TOPIC"));
         assertTrue(sw.toString().contains("prefix.topic"));
+        assertFalse(sw.toString().contains("RETENTION"));
+        assertFalse(sw.toString().contains("POLICY"));
+        assertFalse(sw.toString().contains("AGE"));
     }
 
     @Test
@@ -174,7 +181,7 @@ class FormatServiceTest {
 
         formatService.displayList("RoleBinding", Collections.singletonList(resource), TABLE, cmd.getCommandSpec());
 
-        assertTrue(Pattern.compile("ROLE_BINDING\\s+GROUP\\s+VERBS\\s+RESOURCES")
+        assertTrue(Pattern.compile("ROLE BINDING\\s+GROUP\\s+VERBS\\s+RESOURCES")
                 .matcher(sw.toString())
                 .find());
         assertTrue(Pattern.compile("roleBinding\\s+GROUP\\s+GET,POST,PUT,DELETE\\s+topics,acls,connectors")

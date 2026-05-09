@@ -15,8 +15,8 @@ kafkactl:
   table-format:
     AccessControlEntry:
     - "ACL:/metadata/name"
-    - "GRANTED_BY:/metadata/namespace"
-    - "GRANTED_TO:/spec/grantedTo"
+    - "GRANTED BY:/metadata/namespace"
+    - "GRANTED TO:/spec/grantedTo"
     - "TYPE:/spec/resourceType"
     - "RESOURCE:/spec/resource"
     - "PATTERN:/spec/resourcePatternType"
@@ -29,20 +29,21 @@ kafkactl:
     ChangeConnectorState:
     - "CONNECTOR:/metadata/name"
     - "STATUS:/status/code"
-    - "ERROR_MSG:/status/errorMessage"
+    - "ERROR:/status/errorMessage"
     ConnectCluster:
-    - "CONNECT CLUSTER:/metadata/name"
+    - "KAFKA CONNECT:/metadata/name"
     - "URL:/spec/url"
-    - "ERROR_MSG:/spec/statusMessage"
+    - "ERROR:/spec/statusMessage"
     - "STATUS:/spec/status"
+    - "AGE:/metadata/creationTimestamp%AGO"
     Connector:
     - "CONNECTOR:/metadata/name"
-    - "WORKERS:/spec/connectCluster"
+    - "KAFKA CONNECT:/spec/connectCluster"
     - "CLASS:/spec/config/connector.class"
-    - "TOPICS:/spec/config/topics"
+    - "TOPICS:/spec/config/topics,/spec/config/kafka.topic"
     - "AGE:/metadata/creationTimestamp%AGO"
     ConsumerGroupResetOffsetsResponse:
-    - "CONSUMER_GROUP:/spec/consumerGroup"
+    - "CONSUMER GROUP:/spec/consumerGroup"
     - "TOPIC:/spec/topic"
     - "PARTITION:/spec/partition"
     - "OFFSET:/spec/offset"
@@ -64,9 +65,10 @@ kafkactl:
     - "NAMESPACE:/metadata/name"
     - "CLUSTER:/metadata/cluster"
     - "USER:/spec/kafkaUser"
-    - "CONNECTS:/spec/connectClusters"
+    - "KAFKA CONNECTS:/spec/connectClusters"
     - "LDAP:/metadata/labels/support-group"
     - "CONTACTS:/metadata/labels/contacts"
+    - "AGE:/metadata/creationTimestamp%AGO"
     ResourceDefinition:
     - "KIND:/metadata/name"
     - "NAMES:/spec/names"
@@ -78,19 +80,21 @@ kafkactl:
     - "COUNT/PARTITIONS:/spec/countPartition"
     - "DISK/TOPICS:/spec/diskTopic"
     - "COUNT/CONNECTORS:/spec/countConnector"
-    - "USER/CONSUMER_BYTE_RATE:/spec/consumerByteRate"
-    - "USER/PRODUCER_BYTE_RATE:/spec/producerByteRate"
+    - "USER/CONSUMER BYTE RATE:/spec/consumerByteRate"
+    - "USER/PRODUCER BYTE RATE:/spec/producerByteRate"
     RoleBinding:
-    - "ROLE_BINDING:/metadata/name"
+    - "ROLE BINDING:/metadata/name"
     - "GROUP:/spec/subject/subjectName"
     - "VERBS:/spec/role/verbs"
     - "RESOURCES:/spec/role/resourceTypes"
+    - "AGE:/metadata/creationTimestamp%AGO"
     Schema:
     - "SUBJECT:/metadata/name"
     - "ID:/spec/id"
     - "VERSION:/spec/version"
     - "CONFIG:/spec/compatibility"
     - "TYPE:/spec/schemaType"
+    - "AGE:/metadata/creationTimestamp%AGO"
     SubjectConfigState:
     - "CONFIG:/spec/compatibility"
     - "SUBJECT:/metadata/name"
@@ -100,8 +104,8 @@ kafkactl:
     - "POLICY:/spec/configs/cleanup.policy"
     - "AGE:/metadata/creationTimestamp%AGO"
     VaultResponse:
-    - "CLEAR_TEXT:/spec/clearText"
-    - "ENCRYPTED_TEXT:/spec/encrypted"
+    - "CLEAR TEXT:/spec/clearText"
+    - "ENCRYPTED TEXT:/spec/encrypted"
   version: "@version@"
 logger:
   levels:

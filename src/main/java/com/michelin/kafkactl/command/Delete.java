@@ -163,7 +163,7 @@ public class Delete extends DryRunHook {
         }
 
         // Generate a single resource with minimum details from input
-        var builder = Resource.builder()
+        Resource.ResourceBuilder builder = Resource.builder()
                 .metadata(Resource.Metadata.builder()
                         .name(config.nameConfig.resourceName)
                         .namespace(namespace)
@@ -173,6 +173,7 @@ public class Delete extends DryRunHook {
         if (config.nameConfig.version.isPresent()) {
             builder = builder.spec(Map.of(VERSION, config.nameConfig.version.get()));
         }
+
         return List.of(builder.build());
     }
 
