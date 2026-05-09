@@ -181,7 +181,7 @@ class FormatServiceTest {
 
         formatService.displayList("RoleBinding", Collections.singletonList(resource), TABLE, cmd.getCommandSpec());
 
-        assertTrue(Pattern.compile("ROLE_BINDING\\s+GROUP\\s+VERBS\\s+RESOURCES")
+        assertTrue(Pattern.compile("ROLE BINDING\\s+GROUP\\s+VERBS\\s+RESOURCES")
                 .matcher(sw.toString())
                 .find());
         assertTrue(Pattern.compile("roleBinding\\s+GROUP\\s+GET,POST,PUT,DELETE\\s+topics,acls,connectors")
