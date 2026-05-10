@@ -130,6 +130,8 @@ jobs:
 
       - name: Build
         run: ./gradlew nativeCompile ${{ matrix.os == 'ubuntu-latest' && '-Pmusl' || '' }}
+        env:
+          GRADLE_OPTS: ${{ matrix.os == 'windows-latest' && format('-Djava.io.tmpdir={0}', runner.temp) || '' }}
 
       - name: Metadata
         id: metadata
