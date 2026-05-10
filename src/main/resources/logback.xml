@@ -1,5 +1,4 @@
-<configuration>
-
+<configuration debug="false">
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <withJansi>false</withJansi>
         <!-- encoders are assigned the type
