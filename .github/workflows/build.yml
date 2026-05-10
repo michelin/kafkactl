@@ -138,6 +138,10 @@ jobs:
 
       - name: Build
         run: ./gradlew nativeCompile ${{ matrix.os == 'ubuntu-latest' && '-Pmusl' || '' }}
+        env:
+          # Workaround for https://github.com/graalvm/native-build-tools/issues/754, as suggested in
+          # https://github.com/graalvm/native-build-tools/issues/754#issuecomment-3450913085
+          GRADLE_OPTS: ${{ matrix.os == 'windows-latest' && format('-Djava.io.tmpdir={0}', runner.temp) || '' }}
 
       - name: Metadata
         id: metadata
