@@ -39,6 +39,7 @@ import com.michelin.kafkactl.command.subjectconfig.SubjectConfig;
 import com.michelin.kafkactl.service.SystemService;
 import com.michelin.kafkactl.util.VersionProvider;
 import io.micronaut.configuration.picocli.PicocliRunner;
+import io.micronaut.core.annotation.TypeHint;
 import io.micronaut.core.util.StringUtils;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
@@ -47,6 +48,9 @@ import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
 
 /** Kafkactl command. */
+@TypeHint(
+        typeNames = "ch.qos.logback.core.status.NopStatusListener",
+        accessType = TypeHint.AccessType.ALL_DECLARED_CONSTRUCTORS)
 @Command(
         name = "kafkactl",
         subcommands = {
