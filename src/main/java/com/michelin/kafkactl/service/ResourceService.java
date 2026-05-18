@@ -476,9 +476,7 @@ public class ResourceService {
             CommandSpec commandSpec) {
         try {
             Map<String, String> config = new HashMap<>();
-            config.put(
-                    "compatibility",
-                    compatibility != null ? compatibility.name() : null);
+            config.put("compatibility", compatibility != null ? compatibility.name() : null);
             config.put("alias", alias);
 
             HttpResponse<Resource> response =
