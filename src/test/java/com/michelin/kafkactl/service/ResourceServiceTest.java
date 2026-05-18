@@ -1485,6 +1485,13 @@ class ResourceServiceTest {
 
         assertTrue(actual.isPresent());
         assertEquals(updateSubjectConfigResource, actual.get());
+
+        verify(namespacedClient)
+                .updateSubjectConfig(
+                        eq("namespace"),
+                        eq("subject"),
+                        argThat(config -> "FORWARD_TRANSITIVE".equals(config.get("compatibility"))),
+                        any());
     }
 
     @Test
