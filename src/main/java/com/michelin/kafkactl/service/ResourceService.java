@@ -478,7 +478,7 @@ public class ResourceService {
             Map<String, String> config = new HashMap<>();
             config.put(
                     "compatibility",
-                    compatibility != null ? compatibility.toString().toUpperCase() : null);
+                    compatibility != null ? compatibility.name() : null);
             config.put("alias", alias);
 
             HttpResponse<Resource> response =
