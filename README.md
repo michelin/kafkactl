@@ -234,8 +234,8 @@ Commands:
   group            Interact with consumer groups.
   import           Import non-synchronized resources.
   reset-offsets    Reset consumer group offsets.
-  schema           Interact with schemas.
   reset-password   Reset a Kafka password.
+  subject-config   Interact with subject config.
 ```
 
 ### Api Resources
@@ -884,35 +884,78 @@ Example(s):
 kafkactl reset-password myUser
 ```
 
-### Schema
+### Subject config
 
-The `schema` command allows you to modify the schema compatibility.
+The `subject-config` command allows you to interact with subjects config, including compatibility and alias .
 
 ```console
-Usage: kafkactl schema [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] <compatibility> <subjects>...
+Usage: kafkactl subject-config [-h] COMMAND
 
-Description: Interact with schemas.
-
-Parameters:
-      <compatibility>   Compatibility to set (global, backward, backward-transitive, forward, forward-transitive, full, full-transitive, none).
-      <subjects>...     Subject names separated by space.
+Description: Interact with subjects config.
 
 Options:
+  -h, --help   Show this help message and exit.
+
+Commands:
+  update  Update subject config.
+  delete  Delete subject config.
+```
+
+#### Update subject config
+The `update` command allows you to update a subject config.
+
+```console
+Usage: kafkactl subject-config update [-hv] [--alias=<alias>] [-c=<optionalContext>] [--compatibility=<compatibility>] [-n=<optionalNamespace>] <subject>
+
+Description: Update subject config.
+
+Parameters:
+      <subject>         Subject name.
+
+Options:
+      --alias=<alias>   Alias to set.
   -c, --context=<optionalContext>
                         Override context defined in config.
+      --compatibility=<compatibility>
+                        Compatibility to set (backward, backward-transitive, forward, forward-transitive, full, full-transitive, none).
   -h, --help            Show this help message and exit.
   -n, --namespace=<optionalNamespace>
                         Override namespace defined in config or YAML resources.
   -v, --verbose         Enable the verbose mode.
 ```
 
-- `compatibility`: This option specifies the compatibility mode to apply.
-- `subject`: This option specifies the subject to update the compatibility.
+Example(s):
+
+```console
+kafkactl subject-config update mySubject-value --compatibility forward
+kafkactl subject-config update mySubject-value --alias mySubject2-value
+kafkactl subject-config update mySubject-value --compatibility forward --alias mySubject2-value
+```
+
+#### Delete subject config
+The `delete` command allows you to delete a subject config.
+
+```console
+Usage: kafkactl subject-config delete [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] <subject>
+
+Description: Delete subject config.
+
+Parameters:
+      <subject>   Subject name.
+
+Options:
+  -c, --context=<optionalContext>
+                  Override context defined in config.
+  -h, --help      Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
+```
 
 Example(s):
 
 ```console
-kafkactl schema forward-transitive mySubject-value
+kafkactl subject-config delete mySubject-value
 ```
 
 ## Resources
