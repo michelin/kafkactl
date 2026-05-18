@@ -234,8 +234,8 @@ Commands:
   group            Interact with consumer groups.
   import           Import non-synchronized resources.
   reset-offsets    Reset consumer group offsets.
+  subject-config   Interact with subjects config.
   reset-password   Reset a Kafka password.
-  subject-config   Interact with subject config.
 ```
 
 ### Api Resources
