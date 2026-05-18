@@ -1416,12 +1416,12 @@ topicValidator:
   validationConstraints:
     name:
       validation-type: RegexPattern
-      pattern: "^[a-zA-Z0-9._-]+$"
+      regex: "^[a-zA-Z0-9._-]+$"
       strict: false
 ```
 
 The parameters of the `RegexPattern` validation type are:
-- `pattern`: A regular expression that the property must match.
+- `regex`: A regular expression that the property must match.
 - `strict` (default: `false`): A boolean that indicates whether the regular expression should be applied strictly. If set to `true`, the validation will fail. If set to `false`, the validation will pass throwing a warning.
 
 ###### CompositeValidator
