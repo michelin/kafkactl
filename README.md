@@ -53,7 +53,9 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
     * [Import](#import)
     * [Reset Offsets](#reset-offsets)
     * [Reset Password](#reset-password)
-    * [Schema](#schema)
+    * [Subject Config](#subject-config)
+      * [Update](#update)
+      * [Delete](#delete-2)
 * [Resources](#resources)
     * [User](#user)
         * [Topic](#topic)
@@ -886,7 +888,7 @@ kafkactl reset-password myUser
 
 ### Subject config
 
-The `subject-config` command allows you to interact with subjects config, including compatibility and alias .
+The `subject-config` command allows you to interact with subjects config, including compatibility and alias.
 
 ```console
 Usage: kafkactl subject-config [-h] COMMAND
@@ -901,7 +903,8 @@ Commands:
   delete  Delete subject config.
 ```
 
-#### Update subject config
+#### Update
+
 The `update` command allows you to update a subject config.
 
 ```console
@@ -932,7 +935,8 @@ kafkactl subject-config update mySubject-value --alias mySubject2-value
 kafkactl subject-config update mySubject-value --compatibility forward --alias mySubject2-value
 ```
 
-#### Delete subject config
+#### Delete
+
 The `delete` command allows you to delete a subject config.
 
 ```console
