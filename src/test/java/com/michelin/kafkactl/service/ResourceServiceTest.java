@@ -695,7 +695,7 @@ class ResourceServiceTest {
         when(namespacedClient.apply(any(), any(), any(), any(), anyBoolean()))
                 .thenReturn(HttpResponse.ok(topicResource)
                         .header("X-Ns4kafka-Result", "created")
-                        .header("X-Ns4kafka-Warnings", "first warning,second warning"));
+                        .header("X-Ns4kafka-Warnings", "first warning, second warning, third one,with a comma"));
 
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
@@ -710,9 +710,10 @@ class ResourceServiceTest {
 
         assertEquals(HttpStatus.OK, actual.getStatus());
         assertEquals(topicResource, actual.body());
-        assertTrue(out.toString().contains("Topic \"prefix.topic\" created with 2 warnings:"));
+        assertTrue(out.toString().contains("Topic \"prefix.topic\" created with 3 warnings:"));
         assertTrue(out.toString().contains("- first warning"));
         assertTrue(out.toString().contains("- second warning"));
+        assertTrue(out.toString().contains("- third one,with a comma"));
         assertTrue(err.toString().isBlank());
     }
 

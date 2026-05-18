@@ -211,7 +211,7 @@ public class ResourceService {
 
             String headerWarning = response.header(HEADER_WARNINGS);
             if (StringUtils.isNotEmpty(headerWarning)) {
-                List<String> warnings = Arrays.asList(headerWarning.split(","));
+                List<String> warnings = Arrays.asList(headerWarning.split(", "));
                 commandSpec
                         .commandLine()
                         .getOut()
