@@ -26,11 +26,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum SubjectCompatibility {
     BACKWARD("backward"),
-    BACKWARD_TRANSITIVE("backward-transitive"),
+    BACKWARD_TRANSITIVE("backward_transitive"),
     FORWARD("forward"),
-    FORWARD_TRANSITIVE("forward-transitive"),
+    FORWARD_TRANSITIVE("forward_transitive"),
     FULL("full"),
-    FULL_TRANSITIVE("full-transitive"),
+    FULL_TRANSITIVE("full_transitive"),
     NONE("none");
 
     private final String name;
