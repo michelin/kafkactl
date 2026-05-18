@@ -68,8 +68,8 @@ import picocli.CommandLine.Spec;
             Group.class,
             Import.class,
             ResetOffsets.class,
+            ResetPassword.class,
             SubjectConfig.class,
-            ResetPassword.class
         },
         headerHeading = "@|bold Usage|@:",
         synopsisHeading = " ",
