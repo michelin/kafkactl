@@ -50,12 +50,13 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
     * [Get](#get)
     * [Group](#group)
         * [Delete](#delete-1)
+        * [List](#list)
     * [Import](#import)
     * [Reset Offsets](#reset-offsets)
     * [Reset Password](#reset-password)
     * [Subject Config](#subject-config)
-      * [Update](#update)
       * [Delete](#delete-2)
+      * [Update](#update)
 * [Resources](#resources)
     * [User](#user)
         * [Topic](#topic)
@@ -723,33 +724,6 @@ Commands:
   delete  Delete a consumer group.
 ```
 
-#### List
-
-The `list` command allows you to list the consumer groups owned by the current namespace.
-
-```console
-Usage: kafkactl group list [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] [-o=<output>]
-
-Description: List all consumer groups for the current namespace.
-
-Options:
-  -c, --context=<optionalContext>
-                  Override context defined in config.
-  -h, --help      Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or YAML resources.
-  -o, --output=<output>
-                  Output format (table, yaml, yml).
-  -v, --verbose   Enable the verbose mode.
-```
-
-Example(s):
-
-```console
-kafkactl group list
-kafkactl group list -o yaml
-```
-
 #### Delete
 
 The `delete` command allows you to delete a consumer group.
@@ -776,6 +750,33 @@ Example(s):
 
 ```console
 kafkactl group delete myConsumerGroup
+```
+
+#### List
+
+The `list` command allows you to list the consumer groups owned by the current namespace.
+
+```console
+Usage: kafkactl group list [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] [-o=<output>]
+
+Description: List all consumer groups for the current namespace.
+
+Options:
+  -c, --context=<optionalContext>
+                  Override context defined in config.
+  -h, --help      Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                  Override namespace defined in config or YAML resources.
+  -o, --output=<output>
+                  Output format (table, yaml, yml).
+  -v, --verbose   Enable the verbose mode.
+```
+
+Example(s):
+
+```console
+kafkactl group list
+kafkactl group list -o yaml
 ```
 
 ### Import
@@ -886,7 +887,7 @@ Example(s):
 kafkactl reset-password myUser
 ```
 
-### Subject config
+### Subject Config
 
 The `subject-config` command allows you to interact with subjects config, including compatibility and alias.
 
@@ -899,8 +900,35 @@ Options:
   -h, --help   Show this help message and exit.
 
 Commands:
-  update  Update subject config.
   delete  Delete subject config.
+  update  Update subject config.
+```
+
+#### Delete
+
+The `delete` command allows you to delete a subject config.
+
+```console
+Usage: kafkactl subject-config delete [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] <subject>
+
+Description: Delete subject config.
+
+Parameters:
+      <subject>   Subject name.
+
+Options:
+  -c, --context=<optionalContext>
+                  Override context defined in config.
+  -h, --help      Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                  Override namespace defined in config or YAML resources.
+  -v, --verbose   Enable the verbose mode.
+```
+
+Example(s):
+
+```console
+kafkactl subject-config delete mySubject-value
 ```
 
 #### Update
@@ -933,33 +961,6 @@ Example(s):
 kafkactl subject-config update mySubject-value --compatibility forward
 kafkactl subject-config update mySubject-value --alias mySubject2-value
 kafkactl subject-config update mySubject-value --compatibility forward --alias mySubject2-value
-```
-
-#### Delete
-
-The `delete` command allows you to delete a subject config.
-
-```console
-Usage: kafkactl subject-config delete [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] <subject>
-
-Description: Delete subject config.
-
-Parameters:
-      <subject>   Subject name.
-
-Options:
-  -c, --context=<optionalContext>
-                  Override context defined in config.
-  -h, --help      Show this help message and exit.
-  -n, --namespace=<optionalNamespace>
-                  Override namespace defined in config or YAML resources.
-  -v, --verbose   Enable the verbose mode.
-```
-
-Example(s):
-
-```console
-kafkactl subject-config delete mySubject-value
 ```
 
 ## Resources

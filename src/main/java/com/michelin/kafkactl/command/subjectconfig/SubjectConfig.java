@@ -26,7 +26,7 @@ import picocli.CommandLine.Spec;
 /** Subject config subcommand. */
 @Command(
         name = "subject-config",
-        subcommands = {SubjectConfigUpdate.class, SubjectConfigDelete.class},
+        subcommands = {SubjectConfigDelete.class, SubjectConfigUpdate.class},
         headerHeading = "@|bold Usage|@:",
         synopsisHeading = " ",
         synopsisSubcommandLabel = "COMMAND",
