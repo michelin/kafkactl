@@ -20,7 +20,6 @@ package com.michelin.kafkactl.command;
 
 import com.michelin.kafkactl.hook.DryRunHook;
 import com.michelin.kafkactl.model.ApiResource;
-import com.michelin.kafkactl.model.DeleteMode;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FileService;
 import com.michelin.kafkactl.service.FormatService;
@@ -120,7 +119,8 @@ public class Delete extends DryRunHook {
                                                 ? spec.get(VERSION).toString()
                                                 : null),
                                         dryRun,
-                                        DeleteMode.of(force, cascade),
+                                        force,
+                                        cascade,
                                         commandSpec)
                                 ? 0
                                 : 1;
