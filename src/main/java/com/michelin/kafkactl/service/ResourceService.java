@@ -246,8 +246,8 @@ public class ResourceService {
      * @param name The resource name or wildcard
      * @param version The version of the resource, for schemas only
      * @param dryRun Is dry run mode or not?
-         * @param force Force resource deletion
-         * @param cascade Cascade resource deletion
+     * @param force Force resource deletion
+     * @param cascade Cascade resource deletion
      * @param commandSpec The command that triggered the action
      * @return true if deletion succeeded, false otherwise
      */
@@ -257,8 +257,8 @@ public class ResourceService {
             String name,
             @Nullable String version,
             boolean dryRun,
-             boolean force,
-             boolean cascade,
+            boolean force,
+            boolean cascade,
             CommandSpec commandSpec) {
         try {
             HttpResponse<List<Resource>> response = apiResource.isNamespaced()
@@ -269,8 +269,8 @@ public class ResourceService {
                             name,
                             version,
                             dryRun,
-                                force,
-                                cascade)
+                            force,
+                            cascade)
                     : nonNamespacedClient.delete(loginService.getAuthorization(), apiResource.getPath(), name, dryRun);
 
             // Micronaut does not throw exception on 404, so produce a 404 manually
