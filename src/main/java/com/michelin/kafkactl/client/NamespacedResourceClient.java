@@ -19,6 +19,7 @@
 package com.michelin.kafkactl.client;
 
 import com.michelin.kafkactl.model.Resource;
+import com.michelin.kafkactl.model.request.DeleteResourceRequest;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Body;
@@ -27,6 +28,7 @@ import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Header;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.QueryValue;
+import io.micronaut.http.annotation.RequestBean;
 import io.micronaut.http.client.annotation.Client;
 import io.micronaut.http.client.exceptions.ReadTimeoutException;
 import io.micronaut.retry.annotation.Retryable;
@@ -39,12 +41,7 @@ public interface NamespacedResourceClient {
     /**
      * Delete a given resource.
      *
-     * @param namespace The namespace
-     * @param kind The kind of resource
-     * @param name The name of the resource
-     * @param token The auth token
-     * @param version The version of the resource, for schemas only.
-     * @param dryrun Is dry-run mode or not?
+     * @param request The delete resource request
      * @return The delete response
      */
     @Delete("{namespace}/{kind}{?name,version,dryrun,force,cascade}")
@@ -53,15 +50,7 @@ public interface NamespacedResourceClient {
             attempts = "${kafkactl.retry.attempt}",
             multiplier = "${kafkactl.retry.multiplier}",
             includes = ReadTimeoutException.class)
-    HttpResponse<List<Resource>> delete(
-            String namespace,
-            String kind,
-            @Header("Authorization") String token,
-            @QueryValue String name,
-            @Nullable @QueryValue String version,
-            @QueryValue boolean dryrun,
-            @QueryValue boolean force,
-            @QueryValue boolean cascade);
+    HttpResponse<List<Resource>> delete(@RequestBean DeleteResourceRequest request);
 
     /**
      * Apply a given resource.

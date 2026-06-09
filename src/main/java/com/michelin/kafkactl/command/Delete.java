@@ -18,19 +18,22 @@
  */
 package com.michelin.kafkactl.command;
 
-import com.michelin.kafkactl.hook.DryRunHook;
-import com.michelin.kafkactl.model.ApiResource;
-import com.michelin.kafkactl.model.Resource;
-import com.michelin.kafkactl.service.FileService;
-import com.michelin.kafkactl.service.FormatService;
-import com.michelin.kafkactl.service.ResourceService;
-import io.micronaut.core.annotation.ReflectiveAccess;
-import io.micronaut.http.client.exceptions.HttpClientResponseException;
-import jakarta.inject.Inject;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import com.michelin.kafkactl.hook.DryRunHook;
+import com.michelin.kafkactl.model.ApiResource;
+import com.michelin.kafkactl.model.Resource;
+import com.michelin.kafkactl.model.request.DeleteResourceRequest;
+import com.michelin.kafkactl.service.FileService;
+import com.michelin.kafkactl.service.FormatService;
+import com.michelin.kafkactl.service.ResourceService;
+
+import io.micronaut.core.annotation.ReflectiveAccess;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import jakarta.inject.Inject;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -111,16 +114,20 @@ public class Delete extends DryRunHook {
                                 .getResourceDefinitionByKind(resource.getKind())
                                 .orElseThrow();
                         Map<String, Object> spec = resource.getSpec();
+                        String version = spec != null && spec.containsKey(VERSION)
+                                ? spec.get(VERSION).toString()
+                                : null;
                         return resourceService.delete(
                                         apiResource,
-                                        namespace,
-                                        resource.getMetadata().getName(),
-                                        (spec != null && spec.containsKey(VERSION)
-                                                ? spec.get(VERSION).toString()
-                                                : null),
-                                        dryRun,
-                                        force,
-                                        cascade,
+                                        new DeleteResourceRequest(
+                                                namespace,
+                                                apiResource.getPath(),
+                                                null,
+                                                resource.getMetadata().getName(),
+                                                version,
+                                                dryRun,
+                                                force,
+                                                cascade),
                                         commandSpec)
                                 ? 0
                                 : 1;
