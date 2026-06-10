@@ -18,11 +18,6 @@
  */
 package com.michelin.kafkactl.command;
 
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import com.michelin.kafkactl.hook.DryRunHook;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
@@ -30,10 +25,13 @@ import com.michelin.kafkactl.model.request.DeleteResourceRequest;
 import com.michelin.kafkactl.service.FileService;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
-
 import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
