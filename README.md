@@ -1,5 +1,7 @@
 <div align="center">
 
+Test
+
 <img src=".readme/logo.svg" alt="Kafkactl"/>
 
 # Kafkactl
