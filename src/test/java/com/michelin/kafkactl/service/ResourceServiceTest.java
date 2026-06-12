@@ -910,7 +910,7 @@ class ResourceServiceTest {
                 apiResource, deleteRequest(apiResource, "connector", null, false, true, false), cmd.getCommandSpec());
 
         assertTrue(actual);
-        verify(namespacedClient).delete(eq(deleteRequest(apiResource, "connector", null, false, true, false)));
+        verify(namespacedClient).delete(deleteRequest(apiResource, "connector", null, false, true, false));
     }
 
     @Test
@@ -939,7 +939,7 @@ class ResourceServiceTest {
                 apiResource, deleteRequest(apiResource, "cluster", null, false, true, false), cmd.getCommandSpec());
 
         assertTrue(actual);
-        verify(namespacedClient).delete(eq(deleteRequest(apiResource, "cluster", null, false, true, false)));
+        verify(namespacedClient).delete(deleteRequest(apiResource, "cluster", null, false, true, false));
     }
 
     @Test
@@ -968,7 +968,7 @@ class ResourceServiceTest {
                 apiResource, deleteRequest(apiResource, "cluster", null, false, false, true), cmd.getCommandSpec());
 
         assertTrue(actual);
-        verify(namespacedClient).delete(eq(deleteRequest(apiResource, "cluster", null, false, false, true)));
+        verify(namespacedClient).delete(deleteRequest(apiResource, "cluster", null, false, false, true));
     }
 
     @Test
@@ -997,7 +997,7 @@ class ResourceServiceTest {
                 apiResource, deleteRequest(apiResource, "cluster", null, false, true, true), cmd.getCommandSpec());
 
         assertTrue(actual);
-        verify(namespacedClient).delete(eq(deleteRequest(apiResource, "cluster", null, false, true, true)));
+        verify(namespacedClient).delete(deleteRequest(apiResource, "cluster", null, false, true, true));
     }
 
     @Test
@@ -1026,7 +1026,7 @@ class ResourceServiceTest {
                 apiResource, deleteRequest(apiResource, "topic", null, false, true, true), cmd.getCommandSpec());
 
         assertTrue(actual);
-        verify(namespacedClient).delete(eq(deleteRequest(apiResource, "topic", null, false, true, true)));
+        verify(namespacedClient).delete(deleteRequest(apiResource, "topic", null, false, true, true));
     }
 
     @Test
