@@ -459,6 +459,48 @@ public class ResourceService {
     }
 
     /**
+     * Reset offsets for a given connector.
+     *
+     * @param namespace The namespace
+     * @param connector The connector name
+     * @param commandSpec The command that triggered the action
+     * @return The resource
+     */
+    public Optional<Resource> resetConnectorOffsets(String namespace, String connector, CommandSpec commandSpec) {
+        try {
+            HttpResponse<Resource> response =
+                    namespacedClient.resetConnectorOffsets(namespace, connector, loginService.getAuthorization());
+
+            // Micronaut does not throw exception on 404, so produce a 404 manually
+            if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
+                throw new HttpClientResponseException(response.reason(), response);
+            }
+
+            Resource resource = response.getBody().orElse(null);
+            if (resource == null) {
+                return Optional.empty();
+            }
+
+            if (resource.getSpec() == null
+                    || !(resource.getSpec().get("message") instanceof String message)
+                    || StringUtils.isEmpty(message)) {
+                Object message = response.getBody(Map.class).orElse(Map.of()).get("message");
+                if (message instanceof String messageValue && StringUtils.isNotEmpty(messageValue)) {
+                    Map<String, Object> spec =
+                            resource.getSpec() != null ? new HashMap<>(resource.getSpec()) : new HashMap<>();
+                    spec.put("message", messageValue);
+                    resource.setSpec(spec);
+                }
+            }
+
+            return Optional.of(resource);
+        } catch (HttpClientResponseException exception) {
+            formatService.displayError(exception, CONNECTOR, connector, commandSpec);
+            return Optional.empty();
+        }
+    }
+
+    /**
      * Update the config of a given subject.
      *
      * @param namespace The namespace
