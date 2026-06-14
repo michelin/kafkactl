@@ -92,6 +92,7 @@ jobs:
       current_version: ${{ steps.metadata.outputs.current_version }}
       is_latest_version: ${{ steps.metadata.outputs.is_latest_version }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ 'ubuntu-latest', 'ubuntu-24.04-arm', 'windows-latest', 'macos-latest' ]
         include:
