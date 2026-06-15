@@ -89,6 +89,21 @@ public class Connector extends AuthenticatedHook {
                         .toList();
             }
 
+            if (action == ConnectorAction.RESET_OFFSETS) {
+                List<Resource> resetOffsetsResponses = connectors.stream()
+                        .map(connector -> resourceService.resetConnectorOffsets(namespace, connector, commandSpec))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .toList();
+
+                if (!resetOffsetsResponses.isEmpty()) {
+                    displayResetOffsetsMessages(resetOffsetsResponses);
+                    return 0;
+                }
+
+                return 1;
+            }
+
             List<Resource> changeConnectorResponses = connectors.stream()
                     .map(connector -> Resource.builder()
                             .metadata(Resource.Metadata.builder()
@@ -118,13 +133,30 @@ public class Connector extends AuthenticatedHook {
         }
     }
 
+    private void displayResetOffsetsMessages(List<Resource> resetOffsetsResponses) {
+        boolean singleConnector = resetOffsetsResponses.size() == 1;
+
+        resetOffsetsResponses.forEach(resource -> {
+            Object message = resource.getSpec() != null ? resource.getSpec().get("message") : null;
+            if (singleConnector) {
+                commandSpec.commandLine().getOut().println(message);
+            } else {
+                commandSpec
+                        .commandLine()
+                        .getOut()
+                        .println(resource.getMetadata().getName() + ": " + message);
+            }
+        });
+    }
+
     /** Connector actions. */
     @Getter
     @AllArgsConstructor
     public enum ConnectorAction {
         PAUSE("pause"),
         RESUME("resume"),
-        RESTART("restart");
+        RESTART("restart"),
+        RESET_OFFSETS("reset-offsets");
 
         private final String name;
 
