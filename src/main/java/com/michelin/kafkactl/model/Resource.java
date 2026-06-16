@@ -61,8 +61,13 @@ public class Resource {
         private String cluster;
         private Map<String, String> labels;
 
+        private int generation;
+
         @JsonFormat(shape = JsonFormat.Shape.STRING)
         private Date creationTimestamp;
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING)
+        private Date updateTimestamp;
 
         private Status status;
 
@@ -83,7 +88,8 @@ public class Resource {
         public enum Phase {
             PENDING("Pending"),
             FAIL("Fail"),
-            SUCCESS("Success");
+            SUCCESS("Success"),
+            DELETING("Deleting");
 
             private final String name;
 
