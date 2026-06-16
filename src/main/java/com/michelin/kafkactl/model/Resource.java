@@ -61,7 +61,8 @@ public class Resource {
         private String cluster;
         private Map<String, String> labels;
 
-        private int generation;
+        @Builder.Default
+        private int generation = 1;
 
         @JsonFormat(shape = JsonFormat.Shape.STRING)
         private Date creationTimestamp;
