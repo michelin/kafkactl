@@ -1504,7 +1504,7 @@ class ResourceServiceTest {
         CommandLine cmd = new CommandLine(new Kafkactl());
 
         when(response.getStatus()).thenReturn(HttpStatus.OK);
-        when(response.getBody(Resource.class)).thenReturn(Optional.of(resetOffsetsResource));
+        when(response.getBody()).thenReturn(Optional.of(resetOffsetsResource));
         when(response.getBody(Map.class))
                 .thenReturn(Optional.of(Map.of("message", "Offsets for connector connector reset successfully")));
         when(namespacedClient.resetConnectorOffsets(any(), any(), any())).thenReturn(response);
