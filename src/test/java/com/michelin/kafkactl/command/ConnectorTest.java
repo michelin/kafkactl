@@ -270,13 +270,18 @@ class ConnectorTest {
 
     @Test
     void shouldResetOffsetsOfAll() {
-        Resource resource = Resource.builder()
+        Resource listedConnector = Resource.builder()
                 .kind("ConnectorResetOffsetsResponse")
                 .apiVersion("v1")
                 .metadata(Resource.Metadata.builder()
                         .name("prefix.connector")
                         .namespace("namespace")
                         .build())
+                .build();
+
+        Resource resetResponse = Resource.builder()
+                .kind("ConnectorResetOffsetsResponse")
+                .apiVersion("v1")
                 .spec(Map.of("message", "Offsets for connector prefix.connector reset successfully"))
                 .build();
 
@@ -292,8 +297,8 @@ class ConnectorTest {
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.listResourcesWithType(any(), any(), any(), any()))
-                .thenReturn(Collections.singletonList(resource));
-        when(resourceService.resetConnectorOffsets(any(), any(), any())).thenReturn(Optional.of(resource));
+                .thenReturn(Collections.singletonList(listedConnector));
+        when(resourceService.resetConnectorOffsets(any(), any(), any())).thenReturn(Optional.of(resetResponse));
 
         CommandLine cmd = new CommandLine(connector);
         StringWriter sw = new StringWriter();

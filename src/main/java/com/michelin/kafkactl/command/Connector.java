@@ -30,6 +30,7 @@ import com.michelin.kafkactl.service.ResourceService;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -76,9 +77,10 @@ public class Connector extends AuthenticatedHook {
     @Override
     public Integer onAuthSuccess() {
         String namespace = getNamespace();
+        boolean allConnectors = connectors.stream().anyMatch(s -> s.equalsIgnoreCase("ALL"));
 
         try {
-            if (connectors.stream().anyMatch(s -> s.equalsIgnoreCase("ALL"))) {
+            if (allConnectors) {
                 ApiResource connectType = apiResourcesService
                         .getResourceDefinitionByKind(CONNECTOR)
                         .orElseThrow(() -> new ParameterException(
@@ -90,14 +92,16 @@ public class Connector extends AuthenticatedHook {
             }
 
             if (action == ConnectorAction.RESET_OFFSETS) {
-                List<Resource> resetOffsetsResponses = connectors.stream()
-                        .map(connector -> resourceService.resetConnectorOffsets(namespace, connector, commandSpec))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
+                List<SimpleEntry<String, Resource>> resetOffsetsResponses = connectors.stream()
+                        .map(connector -> new SimpleEntry<>(
+                                connector, resourceService.resetConnectorOffsets(namespace, connector, commandSpec)))
+                        .filter(entry -> entry.getValue().isPresent())
+                        .map(entry -> new SimpleEntry<>(
+                                entry.getKey(), entry.getValue().get()))
                         .toList();
 
                 if (!resetOffsetsResponses.isEmpty()) {
-                    displayResetOffsetsMessages(resetOffsetsResponses);
+                    displayResetOffsetsMessages(resetOffsetsResponses, allConnectors);
                     return 0;
                 }
 
@@ -133,18 +137,17 @@ public class Connector extends AuthenticatedHook {
         }
     }
 
-    private void displayResetOffsetsMessages(List<Resource> resetOffsetsResponses) {
-        boolean singleConnector = resetOffsetsResponses.size() == 1;
+    private void displayResetOffsetsMessages(
+            List<SimpleEntry<String, Resource>> resetOffsetsResponses, boolean allConnectors) {
+        boolean singleConnector = resetOffsetsResponses.size() == 1 && !allConnectors;
 
-        resetOffsetsResponses.forEach(resource -> {
+        resetOffsetsResponses.forEach(entry -> {
+            Resource resource = entry.getValue();
             Object message = resource.getSpec() != null ? resource.getSpec().get("message") : null;
             if (singleConnector) {
                 commandSpec.commandLine().getOut().println(message);
             } else {
-                commandSpec
-                        .commandLine()
-                        .getOut()
-                        .println(resource.getMetadata().getName() + ": " + message);
+                commandSpec.commandLine().getOut().println(entry.getKey() + ": " + message);
             }
         });
     }
