@@ -413,13 +413,16 @@ public class ResourceService {
      * List all consumer groups for a namespace.
      *
      * @param namespace The namespace
+     * @param external List external consumer groups consuming topics owned by the namespace
      * @param output The output format
      * @param commandSpec The command that triggered the action
      * @return 0 if the command succeeded, 1 otherwise
      */
-    public int listGroups(String namespace, Output output, CommandSpec commandSpec) {
+    public int listGroups(String namespace, boolean external, Output output, CommandSpec commandSpec) {
         try {
-            List<Resource> resources = namespacedClient.listGroups(loginService.getAuthorization(), namespace);
+            List<Resource> resources = external
+                    ? namespacedClient.listExternalGroups(loginService.getAuthorization(), namespace)
+                    : namespacedClient.listGroups(loginService.getAuthorization(), namespace);
             if (!resources.isEmpty()) {
                 formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
             } else {

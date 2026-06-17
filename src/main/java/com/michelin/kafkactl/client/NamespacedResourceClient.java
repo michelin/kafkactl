@@ -186,6 +186,16 @@ public interface NamespacedResourceClient {
     List<Resource> listGroups(@Header("Authorization") String token, String namespace);
 
     /**
+     * List all external consumer groups consuming topics owned by a namespace.
+     *
+     * @param token The authentication token
+     * @param namespace The namespace
+     * @return The list of external consumer groups
+     */
+    @Get("{namespace}/consumer-groups/external")
+    List<Resource> listExternalGroups(@Header("Authorization") String token, String namespace);
+
+    /**
      * Change the state of a given connector.
      *
      * @param namespace The namespace
