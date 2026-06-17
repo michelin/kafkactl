@@ -756,14 +756,18 @@ kafkactl group delete myConsumerGroup
 
 The `list` command allows you to list the consumer groups owned by the current namespace.
 
+Use the `--external` option to list the consumer groups consuming topics owned by the current namespace but not owned by
+it.
+
 ```console
-Usage: kafkactl group list [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] [-o=<output>]
+Usage: kafkactl group list [-ehv] [-c=<optionalContext>] [-n=<optionalNamespace>] [-o=<output>]
 
 Description: List all consumer groups for the current namespace.
 
 Options:
   -c, --context=<optionalContext>
                   Override context defined in config.
+  -e, --external  List all consumer groups consuming topics owned by the current namespace.
   -h, --help      Show this help message and exit.
   -n, --namespace=<optionalNamespace>
                   Override namespace defined in config or YAML resources.
@@ -777,6 +781,7 @@ Example(s):
 ```console
 kafkactl group list
 kafkactl group list -o yaml
+kafkactl group list --external
 ```
 
 ### Import

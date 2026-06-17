@@ -47,6 +47,11 @@ public class GroupList extends AuthenticatedHook {
             defaultValue = "table")
     public Output output;
 
+    @Option(
+            names = {"-e", "--external"},
+            description = "List all consumer groups consuming topics owned by the current namespace.")
+    public boolean external;
+
     /**
      * Run the "group list" command.
      *
@@ -54,6 +59,6 @@ public class GroupList extends AuthenticatedHook {
      */
     @Override
     public Integer onAuthSuccess() {
-        return resourceService.listGroups(getNamespace(), output, commandSpec);
+        return resourceService.listGroups(getNamespace(), external, output, commandSpec);
     }
 }
