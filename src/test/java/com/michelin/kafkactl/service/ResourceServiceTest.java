@@ -1364,7 +1364,30 @@ class ResourceServiceTest {
 
         when(namespacedClient.listGroups(any(), any())).thenReturn(Collections.singletonList(groupResource));
 
-        int actual = resourceService.listGroups("namespace", TABLE, cmd.getCommandSpec());
+        int actual = resourceService.listGroups("namespace", false, TABLE, cmd.getCommandSpec());
+
+        assertEquals(0, actual);
+        verify(formatService)
+                .displayList("ConsumerGroup", Collections.singletonList(groupResource), TABLE, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldListExternalGroupsSuccess() {
+        Resource groupResource = Resource.builder()
+                .kind("ConsumerGroup")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder()
+                        .name("group")
+                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
+                        .build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+
+        when(namespacedClient.listExternalGroups(any(), any())).thenReturn(Collections.singletonList(groupResource));
+
+        int actual = resourceService.listGroups("namespace", true, TABLE, cmd.getCommandSpec());
 
         assertEquals(0, actual);
         verify(formatService)
@@ -1379,7 +1402,21 @@ class ResourceServiceTest {
 
         when(namespacedClient.listGroups(any(), any())).thenReturn(Collections.emptyList());
 
-        int actual = resourceService.listGroups("namespace", TABLE, cmd.getCommandSpec());
+        int actual = resourceService.listGroups("namespace", false, TABLE, cmd.getCommandSpec());
+
+        assertEquals(0, actual);
+        assertTrue(sw.toString().contains("No consumer group to display."));
+    }
+
+    @Test
+    void shouldListExternalGroupsWhenEmpty() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        when(namespacedClient.listExternalGroups(any(), any())).thenReturn(Collections.emptyList());
+
+        int actual = resourceService.listGroups("namespace", true, TABLE, cmd.getCommandSpec());
 
         assertEquals(0, actual);
         assertTrue(sw.toString().contains("No consumer group to display."));
@@ -1392,7 +1429,20 @@ class ResourceServiceTest {
 
         when(namespacedClient.listGroups(any(), any())).thenThrow(exception);
 
-        int actual = resourceService.listGroups("namespace", TABLE, cmd.getCommandSpec());
+        int actual = resourceService.listGroups("namespace", false, TABLE, cmd.getCommandSpec());
+
+        assertEquals(1, actual);
+        verify(formatService).displayError(exception, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldListExternalGroupsFail() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+
+        when(namespacedClient.listExternalGroups(any(), any())).thenThrow(exception);
+
+        int actual = resourceService.listGroups("namespace", true, TABLE, cmd.getCommandSpec());
 
         assertEquals(1, actual);
         verify(formatService).displayError(exception, cmd.getCommandSpec());
