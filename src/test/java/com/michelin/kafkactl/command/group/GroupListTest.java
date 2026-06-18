@@ -103,25 +103,52 @@ class GroupListTest {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
-        when(resourceService.listGroups(any(), any(), any())).thenReturn(0);
+        when(resourceService.listGroups(any(), anyBoolean(), any(), any())).thenReturn(0);
 
         CommandLine cmd = new CommandLine(groupList);
 
         int code = cmd.execute();
         assertEquals(0, code);
-        verify(resourceService).listGroups("namespace", TABLE, cmd.getCommandSpec());
+        verify(resourceService).listGroups("namespace", false, TABLE, cmd.getCommandSpec());
     }
 
     @Test
     void shouldListGroupsWithProvidedNamespaceAndOutput() {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
-        when(resourceService.listGroups(any(), any(), any())).thenReturn(0);
+        when(resourceService.listGroups(any(), anyBoolean(), any(), any())).thenReturn(0);
 
         CommandLine cmd = new CommandLine(groupList);
 
         int code = cmd.execute("-n", "namespace", "-o", "yaml");
         assertEquals(0, code);
-        verify(resourceService).listGroups("namespace", YAML, cmd.getCommandSpec());
+        verify(resourceService).listGroups("namespace", false, YAML, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldListExternalGroupsUsingCurrentNamespace() {
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
+        when(resourceService.listGroups(any(), anyBoolean(), any(), any())).thenReturn(0);
+
+        CommandLine cmd = new CommandLine(groupList);
+
+        int code = cmd.execute("-e");
+        assertEquals(0, code);
+        verify(resourceService).listGroups("namespace", true, TABLE, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldListExternalGroupsWithProvidedNamespaceAndOutput() {
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+        when(resourceService.listGroups(any(), anyBoolean(), any(), any())).thenReturn(0);
+
+        CommandLine cmd = new CommandLine(groupList);
+
+        int code = cmd.execute("-n", "namespace", "-o", "yaml", "--external");
+        assertEquals(0, code);
+        verify(resourceService).listGroups("namespace", true, YAML, cmd.getCommandSpec());
     }
 }
