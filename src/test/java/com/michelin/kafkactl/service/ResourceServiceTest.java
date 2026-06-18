@@ -35,7 +35,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.eq;
@@ -49,6 +48,7 @@ import com.michelin.kafkactl.client.NamespacedResourceClient;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.SubjectCompatibility;
+import com.michelin.kafkactl.model.request.DeleteResourceRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
@@ -800,7 +800,7 @@ class ResourceServiceTest {
                 .metadata(Resource.Metadata.builder().name("name").build())
                 .build();
 
-        when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean(), anyBoolean()))
+        when(namespacedClient.delete(any()))
                 .thenReturn(HttpResponse.ok(List.of(deletedResource)).header("X-Ns4kafka-Result", "created"));
 
         ApiResource apiResource = ApiResource.builder()
@@ -811,8 +811,8 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "name", null, false, false, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, deleteRequest(apiResource, "name", null, false, false, false), cmd.getCommandSpec());
 
         assertTrue(actual);
         assertTrue(sw.toString().contains("Topic \"name\" deleted."));
@@ -834,7 +834,7 @@ class ResourceServiceTest {
                 .metadata(Resource.Metadata.builder().name("name2").build())
                 .build();
 
-        when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean(), anyBoolean()))
+        when(namespacedClient.delete(any()))
                 .thenReturn(HttpResponse.ok(List.of(deletedResource1, deletedResource2))
                         .header("X-Ns4kafka-Result", "created"));
 
@@ -846,8 +846,8 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "name*", null, false, false, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, deleteRequest(apiResource, "name*", null, false, false, false), cmd.getCommandSpec());
 
         assertTrue(actual);
         assertTrue(sw.toString().contains("Topic \"name1\" deleted."));
@@ -866,7 +866,7 @@ class ResourceServiceTest {
                 .metadata(Resource.Metadata.builder().name("name").build())
                 .build();
 
-        when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean(), anyBoolean()))
+        when(namespacedClient.delete(any()))
                 .thenReturn(HttpResponse.ok(List.of(deletedResource)).header("X-Ns4kafka-Result", "created"));
 
         ApiResource apiResource = ApiResource.builder()
@@ -877,8 +877,8 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "name", "latest", false, false, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, deleteRequest(apiResource, "name", "latest", false, false, false), cmd.getCommandSpec());
 
         assertTrue(actual);
         assertTrue(sw.toString().contains("Topic \"name\" version latest deleted."));
@@ -896,8 +896,7 @@ class ResourceServiceTest {
                 .metadata(Resource.Metadata.builder().name("connector").build())
                 .build();
 
-        when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean(), anyBoolean()))
-                .thenReturn(HttpResponse.ok(List.of(deletedResource)));
+        when(namespacedClient.delete(any())).thenReturn(HttpResponse.ok(List.of(deletedResource)));
 
         ApiResource apiResource = ApiResource.builder()
                 .kind(CONNECTOR)
@@ -907,12 +906,11 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "connector", null, false, true, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, deleteRequest(apiResource, "connector", null, false, true, false), cmd.getCommandSpec());
 
         assertTrue(actual);
-        verify(namespacedClient)
-                .delete(eq("namespace"), eq("connectors"), any(), eq("connector"), isNull(), eq(false), eq(true));
+        verify(namespacedClient).delete(deleteRequest(apiResource, "connector", null, false, true, false));
     }
 
     @Test
@@ -927,8 +925,7 @@ class ResourceServiceTest {
                 .metadata(Resource.Metadata.builder().name("cluster").build())
                 .build();
 
-        when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean(), anyBoolean()))
-                .thenReturn(HttpResponse.ok(List.of(deletedResource)));
+        when(namespacedClient.delete(any())).thenReturn(HttpResponse.ok(List.of(deletedResource)));
 
         ApiResource apiResource = ApiResource.builder()
                 .kind(CONNECT_CLUSTER)
@@ -938,12 +935,98 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "cluster", null, false, true, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, deleteRequest(apiResource, "cluster", null, false, true, false), cmd.getCommandSpec());
 
         assertTrue(actual);
-        verify(namespacedClient)
-                .delete(eq("namespace"), eq("connect-clusters"), any(), eq("cluster"), isNull(), eq(false), eq(true));
+        verify(namespacedClient).delete(deleteRequest(apiResource, "cluster", null, false, true, false));
+    }
+
+    @Test
+    void shouldCascadeDeleteConnectCluster() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        doCallRealMethod().when(formatService).prettifyKind(any());
+
+        Resource deletedResource = Resource.builder()
+                .metadata(Resource.Metadata.builder().name("cluster").build())
+                .build();
+
+        when(namespacedClient.delete(any())).thenReturn(HttpResponse.ok(List.of(deletedResource)));
+
+        ApiResource apiResource = ApiResource.builder()
+                .kind(CONNECT_CLUSTER)
+                .path("connect-clusters")
+                .names(List.of("connect-clusters", "connect-cluster", "cc"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        boolean actual = resourceService.delete(
+                apiResource, deleteRequest(apiResource, "cluster", null, false, false, true), cmd.getCommandSpec());
+
+        assertTrue(actual);
+        verify(namespacedClient).delete(deleteRequest(apiResource, "cluster", null, false, false, true));
+    }
+
+    @Test
+    void shouldForceCascadeDeleteConnectCluster() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        doCallRealMethod().when(formatService).prettifyKind(any());
+
+        Resource deletedResource = Resource.builder()
+                .metadata(Resource.Metadata.builder().name("cluster").build())
+                .build();
+
+        when(namespacedClient.delete(any())).thenReturn(HttpResponse.ok(List.of(deletedResource)));
+
+        ApiResource apiResource = ApiResource.builder()
+                .kind(CONNECT_CLUSTER)
+                .path("connect-clusters")
+                .names(List.of("connect-clusters", "connect-cluster", "cc"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        boolean actual = resourceService.delete(
+                apiResource, deleteRequest(apiResource, "cluster", null, false, true, true), cmd.getCommandSpec());
+
+        assertTrue(actual);
+        verify(namespacedClient).delete(deleteRequest(apiResource, "cluster", null, false, true, true));
+    }
+
+    @Test
+    void shouldPassForceCascadeForUnsupportedResource() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        doCallRealMethod().when(formatService).prettifyKind(any());
+
+        Resource deletedResource = Resource.builder()
+                .metadata(Resource.Metadata.builder().name("topic").build())
+                .build();
+
+        when(namespacedClient.delete(any())).thenReturn(HttpResponse.ok(List.of(deletedResource)));
+
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Topic")
+                .path("topics")
+                .names(List.of("topics", "topic", "to"))
+                .namespaced(true)
+                .synchronizable(true)
+                .build();
+
+        boolean actual = resourceService.delete(
+                apiResource, deleteRequest(apiResource, "topic", null, false, true, true), cmd.getCommandSpec());
+
+        assertTrue(actual);
+        verify(namespacedClient).delete(deleteRequest(apiResource, "topic", null, false, true, true));
     }
 
     @Test
@@ -969,8 +1052,8 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "name", null, false, false, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, deleteRequest(apiResource, "name", null, false, false, false), cmd.getCommandSpec());
 
         assertTrue(actual);
         assertTrue(sw.toString().contains("Topic \"name\" deleted."));
@@ -1004,8 +1087,8 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        boolean actual =
-                resourceService.delete(apiResource, "namespace", "name*", null, false, false, cmd.getCommandSpec());
+        boolean actual = resourceService.delete(
+                apiResource, deleteRequest(apiResource, "name*", null, false, false, false), cmd.getCommandSpec());
 
         assertTrue(actual);
         assertTrue(sw.toString().contains("Topic \"name1\" deleted."));
@@ -1025,11 +1108,12 @@ class ResourceServiceTest {
         CommandLine cmd = new CommandLine(new Kafkactl());
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
-        when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean(), anyBoolean()))
-                .thenThrow(exception);
+        when(namespacedClient.delete(any())).thenThrow(exception);
 
         boolean actual = resourceService.delete(
-                apiResource, "namespace", "prefix.topic", null, false, false, cmd.getCommandSpec());
+                apiResource,
+                deleteRequest(apiResource, "prefix.topic", null, false, false, false),
+                cmd.getCommandSpec());
 
         assertFalse(actual);
         verify(formatService).displayError(exception, "Topic", "prefix.topic", cmd.getCommandSpec());
@@ -1047,11 +1131,12 @@ class ResourceServiceTest {
 
         CommandLine cmd = new CommandLine(new Kafkactl());
 
-        when(namespacedClient.delete(any(), any(), any(), any(), any(), anyBoolean(), anyBoolean()))
-                .thenReturn(HttpResponse.notFound());
+        when(namespacedClient.delete(any())).thenReturn(HttpResponse.notFound());
 
         boolean actual = resourceService.delete(
-                apiResource, "namespace", "prefix.topic", null, false, false, cmd.getCommandSpec());
+                apiResource,
+                deleteRequest(apiResource, "prefix.topic", null, false, false, false),
+                cmd.getCommandSpec());
 
         assertFalse(actual);
         verify(formatService)
@@ -1078,7 +1163,9 @@ class ResourceServiceTest {
         when(nonNamespacedClient.delete(any(), any(), any(), anyBoolean())).thenReturn(HttpResponse.notFound());
 
         boolean actual = resourceService.delete(
-                apiResource, "namespace", "prefix.topic", null, false, false, cmd.getCommandSpec());
+                apiResource,
+                deleteRequest(apiResource, "prefix.topic", null, false, false, false),
+                cmd.getCommandSpec());
 
         assertFalse(actual);
         verify(formatService)
@@ -1088,6 +1175,12 @@ class ResourceServiceTest {
                         eq("Topic"),
                         eq("prefix.topic"),
                         eq(cmd.getCommandSpec()));
+    }
+
+    private static DeleteResourceRequest deleteRequest(
+            ApiResource apiResource, String name, String version, boolean dryRun, boolean force, boolean cascade) {
+        return new DeleteResourceRequest(
+                "namespace", apiResource.getPath(), null, name, version, dryRun, force, cascade);
     }
 
     @Test
