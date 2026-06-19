@@ -94,7 +94,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ 'ubuntu-latest', 'ubuntu-24.04-arm', 'windows-2025', 'macos-latest' ]
+        os: [ 'ubuntu-latest', 'ubuntu-24.04-arm', 'windows-latest', 'macos-latest' ]
         include:
           - os: 'ubuntu-latest'
             platform: 'linux-amd64'
@@ -105,7 +105,7 @@ jobs:
           - os: 'macos-latest'
             platform: 'darwin-arm64'
             extension: ''
-          - os: 'windows-2025'
+          - os: 'windows-latest'
             platform: 'windows-amd64'
             extension: '.exe'
     steps:
@@ -134,7 +134,7 @@ jobs:
         env:
           # Workaround for https://github.com/graalvm/native-build-tools/issues/754, as suggested in
           # https://github.com/graalvm/native-build-tools/issues/754#issuecomment-3450913085
-          GRADLE_OPTS: ${{ matrix.os == 'windows-2025' && format('-Djava.io.tmpdir={0}', runner.temp) || '' }}
+          GRADLE_OPTS: ${{ matrix.os == 'windows-latest' && format('-Djava.io.tmpdir={0}', runner.temp) || '' }}
 
       - name: Metadata
         id: metadata
