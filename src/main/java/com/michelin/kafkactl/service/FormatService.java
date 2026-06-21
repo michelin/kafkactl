@@ -283,11 +283,31 @@ public class FormatService {
             });
 
             // 2. Prepare rows and update column sizes
+            // A column with a wildcard array (e.g. "/status/offsets/*/topic") expands the resource
+            // into one row per array element.
             ObjectMapper mapper = new ObjectMapper();
             resources.forEach(resource -> {
                 JsonNode node = mapper.valueToTree(resource);
-                rows.add(columns.stream().map(column -> column.transform(node)).toArray(String[]::new));
+                IntStream.range(0, rowCount(node))
+                        .forEach(index -> rows.add(columns.stream()
+                                .map(column -> column.transform(node, index))
+                                .toArray(String[]::new)));
             });
+        }
+
+        // Number of rows for a resource: the size of its wildcard array, or 1 when there is none.
+        private int rowCount(JsonNode node) {
+            int rowCount = 1;
+            for (PrettyTextTableColumn column : columns) {
+                String arrayPointer = column.arrayPointer();
+                if (arrayPointer != null) {
+                    JsonNode array = node.at(arrayPointer);
+                    if (array.isArray()) {
+                        rowCount = Math.max(rowCount, array.size());
+                    }
+                }
+            }
+            return rowCount;
         }
 
         @Override
@@ -327,34 +347,44 @@ public class FormatService {
             private final String header;
             private final int indent;
             private int size = -1;
-            private OutputFormatStrategy outputFormat;
+            private final String pointer;
+            private final String transform;
 
             public PrettyTextTableColumn(int indent, String... elements) {
                 this.header = elements[0];
                 this.indent = indent;
 
                 String[] field = elements[1].split("%");
-                if (field.length > 1) {
-                    switch (field[1]) {
-                        case "AGO":
-                            this.outputFormat = new AgoFormat(field[0]);
-                            break;
-                        case "PERIOD":
-                            this.outputFormat = new PeriodFormat(field[0]);
-                            break;
-                        default:
-                            break;
-                    }
-                } else {
-                    this.outputFormat = new DefaultFormat(field[0]);
-                }
+                this.pointer = field[0];
+                this.transform = field.length > 1 ? field[1] : null;
 
                 // Size should consider headers
                 this.size = Math.max(this.size, this.header.length() + indent);
             }
 
-            public String transform(JsonNode node) {
-                String output = this.outputFormat.display(node);
+            // Base pointer of the wildcard array this column expands, or null when there is none.
+            public String arrayPointer() {
+                int wildcardIndex = pointer.indexOf("/*/");
+                return wildcardIndex >= 0 ? pointer.substring(0, wildcardIndex) : null;
+            }
+
+            public String transform(JsonNode node, int index) {
+                String field = pointer.replace("/*/", "/" + index + "/");
+
+                OutputFormatStrategy outputFormat;
+                switch (transform == null ? "" : transform) {
+                    case "AGO":
+                        outputFormat = new AgoFormat(field);
+                        break;
+                    case "PERIOD":
+                        outputFormat = new PeriodFormat(field);
+                        break;
+                    default:
+                        outputFormat = new DefaultFormat(field);
+                        break;
+                }
+
+                String output = outputFormat.display(node);
                 // Check size for later
                 size = Math.max(size, output.length() + indent);
                 return output;
