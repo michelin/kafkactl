@@ -1516,6 +1516,20 @@ class ResourceServiceTest {
     }
 
     @Test
+    void shouldListExternalGroupsWhenNull() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        when(namespacedClient.listExternalGroups(any(), any())).thenReturn(null);
+
+        int actual = resourceService.listGroups("namespace", true, TABLE, cmd.getCommandSpec());
+
+        assertEquals(0, actual);
+        assertTrue(sw.toString().contains("No consumer group to display."));
+    }
+
+    @Test
     void shouldListGroupsFail() {
         CommandLine cmd = new CommandLine(new Kafkactl());
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
