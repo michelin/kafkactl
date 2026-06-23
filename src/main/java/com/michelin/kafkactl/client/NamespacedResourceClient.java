@@ -237,6 +237,23 @@ public interface NamespacedResourceClient {
     HttpResponse<Resource> resetPassword(String namespace, String user, @Header("Authorization") String token);
 
     /**
+     * Reset offsets for a given connector.
+     *
+     * @param namespace The namespace
+     * @param connector The connector to reset offsets for
+     * @param token The auth token
+     * @return The reset offsets response
+     */
+    @Delete("{namespace}/connectors/{connector}/offsets")
+    @Retryable(
+            delay = "${kafkactl.retry.delay}",
+            attempts = "${kafkactl.retry.attempt}",
+            multiplier = "${kafkactl.retry.multiplier}",
+            includes = ReadTimeoutException.class)
+    HttpResponse<Resource> resetConnectorOffsets(
+            String namespace, String connector, @Header("Authorization") String token);
+
+    /**
      * List all available connect clusters for vaulting.
      *
      * @param namespace The namespace

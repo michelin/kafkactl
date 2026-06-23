@@ -30,6 +30,7 @@ import com.michelin.kafkactl.service.ResourceService;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -76,9 +77,10 @@ public class Connector extends AuthenticatedHook {
     @Override
     public Integer onAuthSuccess() {
         String namespace = getNamespace();
+        boolean allConnectors = connectors.stream().anyMatch(s -> s.equalsIgnoreCase("ALL"));
 
         try {
-            if (connectors.stream().anyMatch(s -> s.equalsIgnoreCase("ALL"))) {
+            if (allConnectors) {
                 ApiResource connectType = apiResourcesService
                         .getResourceDefinitionByKind(CONNECTOR)
                         .orElseThrow(() -> new ParameterException(
@@ -87,6 +89,23 @@ public class Connector extends AuthenticatedHook {
                 connectors = resourceService.listResourcesWithType(connectType, namespace, "*", null).stream()
                         .map(resource -> resource.getMetadata().getName())
                         .toList();
+            }
+
+            if (action == ConnectorAction.RESET_OFFSETS) {
+                List<SimpleEntry<String, Resource>> resetOffsetsResponses = connectors.stream()
+                        .map(connector -> new SimpleEntry<>(
+                                connector, resourceService.resetConnectorOffsets(namespace, connector, commandSpec)))
+                        .filter(entry -> entry.getValue().isPresent())
+                        .map(entry -> new SimpleEntry<>(
+                                entry.getKey(), entry.getValue().get()))
+                        .toList();
+
+                if (!resetOffsetsResponses.isEmpty()) {
+                    displayResetOffsetsMessages(resetOffsetsResponses, allConnectors);
+                    return 0;
+                }
+
+                return 1;
             }
 
             List<Resource> changeConnectorResponses = connectors.stream()
@@ -118,13 +137,29 @@ public class Connector extends AuthenticatedHook {
         }
     }
 
+    private void displayResetOffsetsMessages(
+            List<SimpleEntry<String, Resource>> resetOffsetsResponses, boolean allConnectors) {
+        boolean singleConnector = resetOffsetsResponses.size() == 1 && !allConnectors;
+
+        resetOffsetsResponses.forEach(entry -> {
+            Resource resource = entry.getValue();
+            Object message = resource.getSpec() != null ? resource.getSpec().get("message") : null;
+            if (singleConnector) {
+                commandSpec.commandLine().getOut().println(message);
+            } else {
+                commandSpec.commandLine().getOut().println(entry.getKey() + ": " + message);
+            }
+        });
+    }
+
     /** Connector actions. */
     @Getter
     @AllArgsConstructor
     public enum ConnectorAction {
         PAUSE("pause"),
         RESUME("resume"),
-        RESTART("restart");
+        RESTART("restart"),
+        RESET_OFFSETS("reset-offsets");
 
         private final String name;
 

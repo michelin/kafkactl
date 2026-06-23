@@ -66,6 +66,7 @@ public class ResourceService {
     public static final String ACL = "AccessControlEntry";
     public static final String SCHEMA = "Schema";
     public static final String OTHER = "Other";
+    public static final String MESSAGE_FIELD = "message";
 
     @Inject
     @ReflectiveAccess
@@ -441,6 +442,48 @@ public class ResourceService {
                 throw new HttpClientResponseException(response.reason(), response);
             }
             return response.getBody();
+        } catch (HttpClientResponseException exception) {
+            formatService.displayError(exception, CONNECTOR, connector, commandSpec);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Reset offsets for a given connector.
+     *
+     * @param namespace The namespace
+     * @param connector The connector name
+     * @param commandSpec The command that triggered the action
+     * @return The resource
+     */
+    public Optional<Resource> resetConnectorOffsets(String namespace, String connector, CommandSpec commandSpec) {
+        try {
+            HttpResponse<Resource> response =
+                    namespacedClient.resetConnectorOffsets(namespace, connector, loginService.getAuthorization());
+
+            // Micronaut does not throw exception on 404, so produce a 404 manually
+            if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
+                throw new HttpClientResponseException(response.reason(), response);
+            }
+
+            Resource resource = response.getBody().orElse(null);
+            if (resource == null) {
+                return Optional.empty();
+            }
+
+            if (resource.getSpec() == null
+                    || !(resource.getSpec().get(MESSAGE_FIELD) instanceof String message)
+                    || StringUtils.isEmpty(message)) {
+                Object message = response.getBody(Map.class).orElse(Map.of()).get(MESSAGE_FIELD);
+                if (message instanceof String messageValue && StringUtils.isNotEmpty(messageValue)) {
+                    Map<String, Object> spec =
+                            resource.getSpec() != null ? new HashMap<>(resource.getSpec()) : new HashMap<>();
+                    spec.put(MESSAGE_FIELD, messageValue);
+                    resource.setSpec(spec);
+                }
+            }
+
+            return Optional.of(resource);
         } catch (HttpClientResponseException exception) {
             formatService.displayError(exception, CONNECTOR, connector, commandSpec);
             return Optional.empty();

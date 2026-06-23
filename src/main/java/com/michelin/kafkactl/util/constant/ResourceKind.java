@@ -26,6 +26,7 @@ import lombok.NoArgsConstructor;
 public class ResourceKind {
     public static final String AUTH_INFO = "AuthInfo";
     public static final String CHANGE_CONNECTOR_STATE = "ChangeConnectorState";
+    public static final String CONNECTOR_RESET_OFFSETS_RESPONSE = "ConnectorResetOffsetsResponse";
     public static final String CONSUMER_GROUP_RESET_OFFSET_RESPONSE = "ConsumerGroupResetOffsetsResponse";
     public static final String CONTEXT = "Context";
     public static final String CONNECTOR = "Connector";
