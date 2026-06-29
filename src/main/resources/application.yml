@@ -42,6 +42,12 @@ kafkactl:
     - "CLASS:/spec/config/connector.class"
     - "TOPICS:/spec/config/topics,/spec/config/kafka.topic"
     - "AGE:/metadata/creationTimestamp%AGO"
+    ConsumerGroup:
+    - "CONSUMER GROUP:/metadata/name"
+    - "STATE:/status/state"
+    - "TOPIC:/status/offsets/*/topic"
+    - "PARTITION:/status/offsets/*/partition"
+    - "OFFSET:/status/offsets/*/currentOffset"
     ConsumerGroupResetOffsetsResponse:
     - "CONSUMER GROUP:/spec/consumerGroup"
     - "TOPIC:/spec/topic"

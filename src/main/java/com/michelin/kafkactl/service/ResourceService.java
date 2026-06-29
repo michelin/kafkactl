@@ -409,7 +409,7 @@ public class ResourceService {
             List<Resource> resources = external
                     ? namespacedClient.listExternalGroups(loginService.getAuthorization(), namespace)
                     : namespacedClient.listGroups(loginService.getAuthorization(), namespace);
-            if (!resources.isEmpty()) {
+            if (resources != null && !resources.isEmpty()) {
                 formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
             } else {
                 commandSpec.commandLine().getOut().println("No consumer group to display.");
