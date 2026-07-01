@@ -124,7 +124,8 @@ public class Connector extends AuthenticatedHook {
     public enum ConnectorAction {
         PAUSE("pause"),
         RESUME("resume"),
-        RESTART("restart");
+        RESTART("restart"),
+        STOP("stop");
 
         private final String name;
 
