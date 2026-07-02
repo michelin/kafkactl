@@ -140,8 +140,17 @@ class ConnectorTest {
 
         CommandLine cmd = new CommandLine(connector);
 
-        int code = cmd.execute("pause", "my-connector", "-n", "namespace");
+        int code = cmd.execute("stop", "my-connector", "-n", "namespace");
         assertEquals(0, code);
+        verify(resourceService)
+                .changeConnectorState(
+                        eq("namespace"),
+                        eq("my-connector"),
+                        argThat(changeConnectorStateRequest -> changeConnectorStateRequest
+                                .getSpec()
+                                .get("action")
+                                .equals("stop")),
+                        eq(cmd.getCommandSpec()));
         verify(formatService)
                 .displayList(
                         eq(CHANGE_CONNECTOR_STATE),
