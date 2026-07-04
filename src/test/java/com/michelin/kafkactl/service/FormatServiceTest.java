@@ -190,6 +190,92 @@ class FormatServiceTest {
     }
 
     @Test
+    void shouldDisplayConsumerGroupsWithDirectOffsetFields() {
+        Resource firstResource = Resource.builder()
+                .kind("ConsumerGroup")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("my-group").build())
+                .status(Map.of(
+                        "state",
+                        "STABLE",
+                        "topic",
+                        "my-topic",
+                        "partition",
+                        0,
+                        "currentOffset",
+                        5,
+                        "logEndOffset",
+                        12,
+                        "lag",
+                        7))
+                .build();
+
+        Resource secondResource = Resource.builder()
+                .kind("ConsumerGroup")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("my-group").build())
+                .status(Map.of(
+                        "state",
+                        "STABLE",
+                        "topic",
+                        "my-topic",
+                        "partition",
+                        1,
+                        "currentOffset",
+                        8,
+                        "logEndOffset",
+                        8,
+                        "lag",
+                        0))
+                .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        formatService.displayList("ConsumerGroup", List.of(firstResource, secondResource), TABLE, cmd.getCommandSpec());
+
+        String output = sw.toString();
+
+        assertTrue(
+                Pattern.compile("CONSUMER GROUP\\s+STATE\\s+TOPIC\\s+PARTITION\\s+CURRENT OFFSET\\s+END OFFSET\\s+LAG")
+                        .matcher(output)
+                        .find());
+        assertTrue(Pattern.compile("my-group\\s+STABLE\\s+my-topic\\s+0\\s+5\\s+12\\s+7")
+                .matcher(output)
+                .find());
+        assertTrue(Pattern.compile("my-group\\s+STABLE\\s+my-topic\\s+1\\s+8\\s+8\\s+0")
+                .matcher(output)
+                .find());
+    }
+
+    @Test
+    void shouldHideEmptyConsumerGroupOffsetColumns() {
+        Resource resource = Resource.builder()
+                .kind("ConsumerGroup")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("my-group").build())
+                .status(Map.of("state", "STABLE"))
+                .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        formatService.displayList("ConsumerGroup", Collections.singletonList(resource), TABLE, cmd.getCommandSpec());
+
+        assertTrue(Pattern.compile("CONSUMER GROUP\\s+STATE")
+                .matcher(sw.toString())
+                .find());
+        assertTrue(sw.toString().contains("my-group"));
+        assertTrue(sw.toString().contains("STABLE"));
+        assertFalse(sw.toString().contains("TOPIC"));
+        assertFalse(sw.toString().contains("CURRENT OFFSET"));
+        assertFalse(sw.toString().contains("END OFFSET"));
+        assertFalse(sw.toString().contains("LAG"));
+    }
+
+    @Test
     void shouldDisplayNoResource() {
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
