@@ -45,9 +45,9 @@ kafkactl:
     ConsumerGroup:
     - "CONSUMER GROUP:/metadata/name"
     - "STATE:/status/state"
-    - "TOPIC:/status/offsets/*/topic"
-    - "PARTITION:/status/offsets/*/partition"
-    - "OFFSET:/status/offsets/*/currentOffset"
+    - "TOPIC:/status/topic"
+    - "PARTITION:/status/partition"
+    - "OFFSET:/status/currentOffset"
     ConsumerGroupResetOffsetsResponse:
     - "CONSUMER GROUP:/spec/consumerGroup"
     - "TOPIC:/spec/topic"

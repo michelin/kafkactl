@@ -191,25 +191,33 @@ class FormatServiceTest {
 
     @Test
     void shouldDisplayConsumerGroupListWithOffsets() {
-        Resource group = Resource.builder()
+        Resource firstOffset = Resource.builder()
                 .kind("ConsumerGroup")
                 .apiVersion("v1")
                 .metadata(Resource.Metadata.builder().name("my-group").build())
-                .status(Map.of(
-                        "state",
-                        "Stable",
-                        "offsets",
-                        List.of(
-                                Map.of("topic", "my-topic", "partition", 0, "currentOffset", 1500),
-                                Map.of("topic", "my-topic", "partition", 1, "currentOffset", 3200),
-                                Map.of("topic", "my-other-topic", "partition", 0, "currentOffset", 800))))
+                .status(Map.of("state", "Stable", "topic", "my-topic", "partition", 0, "currentOffset", 1500))
+                .build();
+
+        Resource secondOffset = Resource.builder()
+                .kind("ConsumerGroup")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("my-group").build())
+                .status(Map.of("state", "Stable", "topic", "my-topic", "partition", 1, "currentOffset", 3200))
+                .build();
+
+        Resource thirdOffset = Resource.builder()
+                .kind("ConsumerGroup")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("my-group").build())
+                .status(Map.of("state", "Stable", "topic", "my-other-topic", "partition", 0, "currentOffset", 800))
                 .build();
 
         CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        formatService.displayList("ConsumerGroup", Collections.singletonList(group), TABLE, cmd.getCommandSpec());
+        formatService.displayList(
+                "ConsumerGroup", List.of(firstOffset, secondOffset, thirdOffset), TABLE, cmd.getCommandSpec());
 
         String output = sw.toString();
         assertTrue(Pattern.compile("CONSUMER GROUP\\s+STATE\\s+TOPIC\\s+PARTITION\\s+OFFSET")
@@ -232,14 +240,14 @@ class FormatServiceTest {
                 .kind("ConsumerGroup")
                 .apiVersion("v1")
                 .metadata(Resource.Metadata.builder().name("my-group").build())
-                .status(Map.of("state", "Stable", "offsets", List.of()))
+                .status(Map.of("state", "Stable"))
                 .build();
 
         Resource secondGroup = Resource.builder()
                 .kind("ConsumerGroup")
                 .apiVersion("v1")
                 .metadata(Resource.Metadata.builder().name("my-other-group").build())
-                .status(Map.of("state", "Empty", "offsets", List.of()))
+                .status(Map.of("state", "Empty"))
                 .build();
 
         CommandLine cmd = new CommandLine(new Kafkactl());

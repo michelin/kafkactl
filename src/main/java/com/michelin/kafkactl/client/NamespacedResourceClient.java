@@ -182,7 +182,7 @@ public interface NamespacedResourceClient {
      * @param namespace The namespace
      * @return The list of external consumer groups
      */
-    @Get("{namespace}/consumer-groups/external")
+    @Get("{namespace}/consumer-groups/_/external")
     List<Resource> listExternalGroups(@Header("Authorization") String token, String namespace);
 
     /**
