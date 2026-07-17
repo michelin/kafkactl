@@ -47,7 +47,9 @@ kafkactl:
     - "STATE:/status/state"
     - "TOPIC:/status/topic"
     - "PARTITION:/status/partition"
-    - "OFFSET:/status/currentOffset"
+    - "CURRENT OFFSET:/status/currentOffset"
+    - "END OFFSET:/status/logEndOffset"
+    - "LAG:/status/lag"
     ConsumerGroupResetOffsetsResponse:
     - "CONSUMER GROUP:/spec/consumerGroup"
     - "TOPIC:/spec/topic"

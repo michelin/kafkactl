@@ -195,21 +195,57 @@ class FormatServiceTest {
                 .kind("ConsumerGroup")
                 .apiVersion("v1")
                 .metadata(Resource.Metadata.builder().name("my-group").build())
-                .status(Map.of("state", "Stable", "topic", "my-topic", "partition", 0, "currentOffset", 1500))
+                .status(Map.of(
+                        "state",
+                        "Stable",
+                        "topic",
+                        "my-topic",
+                        "partition",
+                        0,
+                        "currentOffset",
+                        1500,
+                        "logEndOffset",
+                        1520,
+                        "lag",
+                        20))
                 .build();
 
         Resource secondOffset = Resource.builder()
                 .kind("ConsumerGroup")
                 .apiVersion("v1")
                 .metadata(Resource.Metadata.builder().name("my-group").build())
-                .status(Map.of("state", "Stable", "topic", "my-topic", "partition", 1, "currentOffset", 3200))
+                .status(Map.of(
+                        "state",
+                        "Stable",
+                        "topic",
+                        "my-topic",
+                        "partition",
+                        1,
+                        "currentOffset",
+                        3200,
+                        "logEndOffset",
+                        3200,
+                        "lag",
+                        0))
                 .build();
 
         Resource thirdOffset = Resource.builder()
                 .kind("ConsumerGroup")
                 .apiVersion("v1")
                 .metadata(Resource.Metadata.builder().name("my-group").build())
-                .status(Map.of("state", "Stable", "topic", "my-other-topic", "partition", 0, "currentOffset", 800))
+                .status(Map.of(
+                        "state",
+                        "Stable",
+                        "topic",
+                        "my-other-topic",
+                        "partition",
+                        0,
+                        "currentOffset",
+                        800,
+                        "logEndOffset",
+                        850,
+                        "lag",
+                        50))
                 .build();
 
         CommandLine cmd = new CommandLine(new Kafkactl());
@@ -220,16 +256,17 @@ class FormatServiceTest {
                 "ConsumerGroup", List.of(firstOffset, secondOffset, thirdOffset), TABLE, cmd.getCommandSpec());
 
         String output = sw.toString();
-        assertTrue(Pattern.compile("CONSUMER GROUP\\s+STATE\\s+TOPIC\\s+PARTITION\\s+OFFSET")
+        assertTrue(
+                Pattern.compile("CONSUMER GROUP\\s+STATE\\s+TOPIC\\s+PARTITION\\s+CURRENT OFFSET\\s+END OFFSET\\s+LAG")
+                        .matcher(output)
+                        .find());
+        assertTrue(Pattern.compile("my-group\\s+Stable\\s+my-topic\\s+0\\s+1500\\s+1520\\s+20")
                 .matcher(output)
                 .find());
-        assertTrue(Pattern.compile("my-group\\s+Stable\\s+my-topic\\s+0\\s+1500")
+        assertTrue(Pattern.compile("my-group\\s+Stable\\s+my-topic\\s+1\\s+3200\\s+3200\\s+0")
                 .matcher(output)
                 .find());
-        assertTrue(Pattern.compile("my-group\\s+Stable\\s+my-topic\\s+1\\s+3200")
-                .matcher(output)
-                .find());
-        assertTrue(Pattern.compile("my-group\\s+Stable\\s+my-other-topic\\s+0\\s+800")
+        assertTrue(Pattern.compile("my-group\\s+Stable\\s+my-other-topic\\s+0\\s+800\\s+850\\s+50")
                 .matcher(output)
                 .find());
     }
@@ -260,7 +297,9 @@ class FormatServiceTest {
         assertTrue(Pattern.compile("CONSUMER GROUP\\s+STATE").matcher(output).find());
         assertFalse(output.contains("TOPIC"));
         assertFalse(output.contains("PARTITION"));
-        assertFalse(output.contains("OFFSET"));
+        assertFalse(output.contains("CURRENT OFFSET"));
+        assertFalse(output.contains("END OFFSET"));
+        assertFalse(output.contains("LAG"));
         assertTrue(Pattern.compile("my-group\\s+Stable").matcher(output).find());
         assertTrue(Pattern.compile("my-other-group\\s+Empty").matcher(output).find());
     }
