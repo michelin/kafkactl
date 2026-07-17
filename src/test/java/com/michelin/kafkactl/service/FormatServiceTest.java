@@ -190,89 +190,118 @@ class FormatServiceTest {
     }
 
     @Test
-    void shouldDisplayConsumerGroupsWithDirectOffsetFields() {
-        Resource firstResource = Resource.builder()
+    void shouldDisplayConsumerGroupListWithOffsets() {
+        Resource firstOffset = Resource.builder()
                 .kind("ConsumerGroup")
                 .apiVersion("v1")
                 .metadata(Resource.Metadata.builder().name("my-group").build())
                 .status(Map.of(
                         "state",
-                        "STABLE",
+                        "Stable",
                         "topic",
                         "my-topic",
                         "partition",
                         0,
                         "currentOffset",
-                        5,
+                        1500,
                         "logEndOffset",
-                        12,
+                        1520,
                         "lag",
-                        7))
+                        20))
                 .build();
 
-        Resource secondResource = Resource.builder()
+        Resource secondOffset = Resource.builder()
                 .kind("ConsumerGroup")
                 .apiVersion("v1")
                 .metadata(Resource.Metadata.builder().name("my-group").build())
                 .status(Map.of(
                         "state",
-                        "STABLE",
+                        "Stable",
                         "topic",
                         "my-topic",
                         "partition",
                         1,
                         "currentOffset",
-                        8,
+                        3200,
                         "logEndOffset",
-                        8,
+                        3200,
                         "lag",
                         0))
+                .build();
+
+        Resource thirdOffset = Resource.builder()
+                .kind("ConsumerGroup")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("my-group").build())
+                .status(Map.of(
+                        "state",
+                        "Stable",
+                        "topic",
+                        "my-other-topic",
+                        "partition",
+                        0,
+                        "currentOffset",
+                        800,
+                        "logEndOffset",
+                        850,
+                        "lag",
+                        50))
                 .build();
 
         CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        formatService.displayList("ConsumerGroup", List.of(firstResource, secondResource), TABLE, cmd.getCommandSpec());
+        formatService.displayList(
+                "ConsumerGroup", List.of(firstOffset, secondOffset, thirdOffset), TABLE, cmd.getCommandSpec());
 
         String output = sw.toString();
-
         assertTrue(
                 Pattern.compile("CONSUMER GROUP\\s+STATE\\s+TOPIC\\s+PARTITION\\s+CURRENT OFFSET\\s+END OFFSET\\s+LAG")
                         .matcher(output)
                         .find());
-        assertTrue(Pattern.compile("my-group\\s+STABLE\\s+my-topic\\s+0\\s+5\\s+12\\s+7")
+        assertTrue(Pattern.compile("my-group\\s+Stable\\s+my-topic\\s+0\\s+1500\\s+1520\\s+20")
                 .matcher(output)
                 .find());
-        assertTrue(Pattern.compile("my-group\\s+STABLE\\s+my-topic\\s+1\\s+8\\s+8\\s+0")
+        assertTrue(Pattern.compile("my-group\\s+Stable\\s+my-topic\\s+1\\s+3200\\s+3200\\s+0")
+                .matcher(output)
+                .find());
+        assertTrue(Pattern.compile("my-group\\s+Stable\\s+my-other-topic\\s+0\\s+800\\s+850\\s+50")
                 .matcher(output)
                 .find());
     }
 
     @Test
-    void shouldHideEmptyConsumerGroupOffsetColumns() {
-        Resource resource = Resource.builder()
+    void shouldDisplayConsumerGroupListWithoutOffsets() {
+        Resource firstGroup = Resource.builder()
                 .kind("ConsumerGroup")
                 .apiVersion("v1")
                 .metadata(Resource.Metadata.builder().name("my-group").build())
-                .status(Map.of("state", "STABLE"))
+                .status(Map.of("state", "Stable"))
+                .build();
+
+        Resource secondGroup = Resource.builder()
+                .kind("ConsumerGroup")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("my-other-group").build())
+                .status(Map.of("state", "Empty"))
                 .build();
 
         CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        formatService.displayList("ConsumerGroup", Collections.singletonList(resource), TABLE, cmd.getCommandSpec());
+        formatService.displayList("ConsumerGroup", List.of(firstGroup, secondGroup), TABLE, cmd.getCommandSpec());
 
-        assertTrue(Pattern.compile("CONSUMER GROUP\\s+STATE")
-                .matcher(sw.toString())
-                .find());
-        assertTrue(sw.toString().contains("my-group"));
-        assertTrue(sw.toString().contains("STABLE"));
-        assertFalse(sw.toString().contains("TOPIC"));
-        assertFalse(sw.toString().contains("CURRENT OFFSET"));
-        assertFalse(sw.toString().contains("END OFFSET"));
-        assertFalse(sw.toString().contains("LAG"));
+        String output = sw.toString();
+        assertTrue(Pattern.compile("CONSUMER GROUP\\s+STATE").matcher(output).find());
+        assertFalse(output.contains("TOPIC"));
+        assertFalse(output.contains("PARTITION"));
+        assertFalse(output.contains("CURRENT OFFSET"));
+        assertFalse(output.contains("END OFFSET"));
+        assertFalse(output.contains("LAG"));
+        assertTrue(Pattern.compile("my-group\\s+Stable").matcher(output).find());
+        assertTrue(Pattern.compile("my-other-group\\s+Empty").matcher(output).find());
     }
 
     @Test
