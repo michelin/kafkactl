@@ -190,6 +190,82 @@ class FormatServiceTest {
     }
 
     @Test
+    void shouldDisplayConsumerGroupListWithOffsets() {
+        Resource firstOffset = Resource.builder()
+                .kind("ConsumerGroup")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("my-group").build())
+                .status(Map.of("state", "Stable", "topic", "my-topic", "partition", 0, "currentOffset", 1500))
+                .build();
+
+        Resource secondOffset = Resource.builder()
+                .kind("ConsumerGroup")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("my-group").build())
+                .status(Map.of("state", "Stable", "topic", "my-topic", "partition", 1, "currentOffset", 3200))
+                .build();
+
+        Resource thirdOffset = Resource.builder()
+                .kind("ConsumerGroup")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("my-group").build())
+                .status(Map.of("state", "Stable", "topic", "my-other-topic", "partition", 0, "currentOffset", 800))
+                .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        formatService.displayList(
+                "ConsumerGroup", List.of(firstOffset, secondOffset, thirdOffset), TABLE, cmd.getCommandSpec());
+
+        String output = sw.toString();
+        assertTrue(Pattern.compile("CONSUMER GROUP\\s+STATE\\s+TOPIC\\s+PARTITION\\s+OFFSET")
+                .matcher(output)
+                .find());
+        assertTrue(Pattern.compile("my-group\\s+Stable\\s+my-topic\\s+0\\s+1500")
+                .matcher(output)
+                .find());
+        assertTrue(Pattern.compile("my-group\\s+Stable\\s+my-topic\\s+1\\s+3200")
+                .matcher(output)
+                .find());
+        assertTrue(Pattern.compile("my-group\\s+Stable\\s+my-other-topic\\s+0\\s+800")
+                .matcher(output)
+                .find());
+    }
+
+    @Test
+    void shouldDisplayConsumerGroupListWithoutOffsets() {
+        Resource firstGroup = Resource.builder()
+                .kind("ConsumerGroup")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("my-group").build())
+                .status(Map.of("state", "Stable"))
+                .build();
+
+        Resource secondGroup = Resource.builder()
+                .kind("ConsumerGroup")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("my-other-group").build())
+                .status(Map.of("state", "Empty"))
+                .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        formatService.displayList("ConsumerGroup", List.of(firstGroup, secondGroup), TABLE, cmd.getCommandSpec());
+
+        String output = sw.toString();
+        assertTrue(Pattern.compile("CONSUMER GROUP\\s+STATE").matcher(output).find());
+        assertFalse(output.contains("TOPIC"));
+        assertFalse(output.contains("PARTITION"));
+        assertFalse(output.contains("OFFSET"));
+        assertTrue(Pattern.compile("my-group\\s+Stable").matcher(output).find());
+        assertTrue(Pattern.compile("my-other-group\\s+Empty").matcher(output).find());
+    }
+
+    @Test
     void shouldDisplayNoResource() {
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
