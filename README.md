@@ -529,7 +529,7 @@ Usage: kafkactl connector [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] 
 Description: Interact with connectors.
 
 Parameters:
-  <action>          Action to perform (pause, resume, restart, stop).
+      <action>          Action to perform (pause, resume, restart, stop).
       <connectors>...   Connector names separated by space or "all" for all connectors.
 
 Options:
