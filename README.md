@@ -164,8 +164,8 @@ kafkactl config current-context
 Contextual commands support the `--context` or `-c` option, which allows you to override the current context for a single command, without persisting the change to the configuration file.
 
 ```command
-kafkactl -c dev get all
-kafkactl --context prod get topics
+kafkactl get all -c dev
+kafkactl get topics --context prod
 ```
 
 ### Authentication
