@@ -33,7 +33,6 @@ import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Output;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.SubjectCompatibility;
-import com.michelin.kafkactl.model.request.DeleteResourceRequest;
 import io.confluent.kafka.schemaregistry.avro.AvroSchema;
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference;
 import io.micronaut.core.annotation.Nullable;
@@ -66,6 +65,7 @@ public class ResourceService {
     public static final String ACL = "AccessControlEntry";
     public static final String SCHEMA = "Schema";
     public static final String OTHER = "Other";
+    public static final String MESSAGE_FIELD = "message";
 
     @Inject
     @ReflectiveAccess
@@ -243,17 +243,32 @@ public class ResourceService {
      * Delete a given resource.
      *
      * @param apiResource The resource type
-     * @param request The delete resource request
+     * @param namespace The namespace
+     * @param name The resource name or wildcard
+     * @param version The version of the resource, for schemas only
+     * @param dryRun Is dry run mode or not?
      * @param commandSpec The command that triggered the action
      * @return true if deletion succeeded, false otherwise
      */
-    public boolean delete(ApiResource apiResource, DeleteResourceRequest request, CommandSpec commandSpec) {
+    public boolean delete(
+            ApiResource apiResource,
+            String namespace,
+            String name,
+            @Nullable String version,
+            boolean dryRun,
+            boolean force,
+            CommandSpec commandSpec) {
         try {
-            DeleteResourceRequest authorizedRequest = request.withToken(loginService.getAuthorization());
             HttpResponse<List<Resource>> response = apiResource.isNamespaced()
-                    ? namespacedClient.delete(authorizedRequest)
-                    : nonNamespacedClient.delete(
-                            loginService.getAuthorization(), apiResource.getPath(), request.name(), request.dryrun());
+                    ? namespacedClient.delete(
+                            namespace,
+                            apiResource.getPath(),
+                            loginService.getAuthorization(),
+                            name,
+                            version,
+                            dryRun,
+                            force)
+                    : nonNamespacedClient.delete(loginService.getAuthorization(), apiResource.getPath(), name, dryRun);
 
             // Micronaut does not throw exception on 404, so produce a 404 manually
             if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
@@ -268,11 +283,11 @@ public class ResourceService {
                     .commandLine()
                     .getOut()
                     .println(formatService.prettifyKind(apiResource.getKind()) + " \"" + resourceName + "\""
-                            + (request.version() != null ? " version " + request.version() : "") + " deleted."));
+                            + (version != null ? " version " + version : "") + " deleted."));
 
             return true;
         } catch (HttpClientResponseException exception) {
-            formatService.displayError(exception, apiResource.getKind(), request.name(), commandSpec);
+            formatService.displayError(exception, apiResource.getKind(), name, commandSpec);
             return false;
         }
     }
@@ -399,17 +414,14 @@ public class ResourceService {
      * List all consumer groups for a namespace.
      *
      * @param namespace The namespace
-     * @param external List external consumer groups consuming topics owned by the namespace
      * @param output The output format
      * @param commandSpec The command that triggered the action
      * @return 0 if the command succeeded, 1 otherwise
      */
-    public int listGroups(String namespace, boolean external, Output output, CommandSpec commandSpec) {
+    public int listGroups(String namespace, Output output, CommandSpec commandSpec) {
         try {
-            List<Resource> resources = external
-                    ? namespacedClient.listExternalGroups(loginService.getAuthorization(), namespace)
-                    : namespacedClient.listGroups(loginService.getAuthorization(), namespace);
-            if (resources != null && !resources.isEmpty()) {
+            List<Resource> resources = namespacedClient.listGroups(loginService.getAuthorization(), namespace);
+            if (!resources.isEmpty()) {
                 formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
             } else {
                 commandSpec.commandLine().getOut().println("No consumer group to display.");
@@ -441,6 +453,48 @@ public class ResourceService {
                 throw new HttpClientResponseException(response.reason(), response);
             }
             return response.getBody();
+        } catch (HttpClientResponseException exception) {
+            formatService.displayError(exception, CONNECTOR, connector, commandSpec);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Reset offsets for a given connector.
+     *
+     * @param namespace The namespace
+     * @param connector The connector name
+     * @param commandSpec The command that triggered the action
+     * @return The resource
+     */
+    public Optional<Resource> resetConnectorOffsets(String namespace, String connector, CommandSpec commandSpec) {
+        try {
+            HttpResponse<Resource> response =
+                    namespacedClient.resetConnectorOffsets(namespace, connector, loginService.getAuthorization());
+
+            // Micronaut does not throw exception on 404, so produce a 404 manually
+            if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
+                throw new HttpClientResponseException(response.reason(), response);
+            }
+
+            Resource resource = response.getBody().orElse(null);
+            if (resource == null) {
+                return Optional.empty();
+            }
+
+            if (resource.getSpec() == null
+                    || !(resource.getSpec().get(MESSAGE_FIELD) instanceof String message)
+                    || StringUtils.isEmpty(message)) {
+                Object message = response.getBody(Map.class).orElse(Map.of()).get(MESSAGE_FIELD);
+                if (message instanceof String messageValue && StringUtils.isNotEmpty(messageValue)) {
+                    Map<String, Object> spec =
+                            resource.getSpec() != null ? new HashMap<>(resource.getSpec()) : new HashMap<>();
+                    spec.put(MESSAGE_FIELD, messageValue);
+                    resource.setSpec(spec);
+                }
+            }
+
+            return Optional.of(resource);
         } catch (HttpClientResponseException exception) {
             formatService.displayError(exception, CONNECTOR, connector, commandSpec);
             return Optional.empty();
