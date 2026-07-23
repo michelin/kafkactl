@@ -21,6 +21,7 @@ package com.michelin.kafkactl.command;
 import com.michelin.kafkactl.hook.DryRunHook;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
+import com.michelin.kafkactl.model.request.DeleteResourceRequest;
 import com.michelin.kafkactl.service.FileService;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
@@ -71,6 +72,11 @@ public class Delete extends DryRunHook {
             description = "Force delete resource from Ns4Kafka. Only for connector and connect cluster.")
     public boolean force;
 
+    @Option(
+            names = {"--cascade"},
+            description = "Cascade delete related connectors from Ns4Kafka. Only for connect cluster.")
+    public boolean cascade;
+
     /**
      * Run the "delete" command.
      *
@@ -101,26 +107,32 @@ public class Delete extends DryRunHook {
 
             // Process each document individually, return 0 when all succeed
             int errors = resources.stream()
-                    .map(resource -> {
+                    .mapToInt(resource -> {
                         ApiResource apiResource = apiResourcesService
                                 .getResourceDefinitionByKind(resource.getKind())
                                 .orElseThrow();
                         Map<String, Object> spec = resource.getSpec();
+                        String version = spec != null && spec.containsKey(VERSION)
+                                ? spec.get(VERSION).toString()
+                                : null;
                         return resourceService.delete(
-                                apiResource,
-                                namespace,
-                                resource.getMetadata().getName(),
-                                (spec != null && spec.containsKey(VERSION)
-                                        ? spec.get(VERSION).toString()
-                                        : null),
-                                dryRun,
-                                force,
-                                commandSpec);
+                                        apiResource,
+                                        new DeleteResourceRequest(
+                                                namespace,
+                                                apiResource.getPath(),
+                                                null,
+                                                resource.getMetadata().getName(),
+                                                version,
+                                                dryRun,
+                                                force,
+                                                cascade),
+                                        commandSpec)
+                                ? 0
+                                : 1;
                     })
-                    .mapToInt(value -> value ? 0 : 1)
                     .sum();
 
-            return errors > 0 ? 1 : 0;
+            return errors == 0 ? 0 : 1;
         } catch (HttpClientResponseException e) {
             formatService.displayError(e, commandSpec);
             return 1;
