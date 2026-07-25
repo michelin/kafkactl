@@ -44,7 +44,7 @@ kafkactl:
     - "AGE:/metadata/creationTimestamp%AGO"
     ConnectorResetOffsetsResponse:
     - "CONNECTOR:/metadata/name"
-    - "MESSAGE:/spec/message"
+    - "STATUS:/status/code"
     ConsumerGroup:
     - "CONSUMER GROUP:/metadata/name"
     - "STATE:/status/state"
