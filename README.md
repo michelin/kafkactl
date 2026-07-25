@@ -164,8 +164,8 @@ kafkactl config current-context
 Contextual commands support the `--context` or `-c` option, which allows you to override the current context for a single command, without persisting the change to the configuration file.
 
 ```command
-kafkactl -c dev get all
-kafkactl --context prod get topics
+kafkactl get all -c dev
+kafkactl get topics --context prod
 ```
 
 ### Authentication
@@ -524,12 +524,12 @@ kafkactl connect-cluster vault myConnectCluster someClearText
 The `connector` command allows you to interact with Kafka Connect connectors.
 
 ```console
-Usage: kafkactl connector [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] <action> <connectors>...
+Usage: kafkactl connector [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] [COMMAND]
 
 Description: Interact with connectors.
 
 Parameters:
-      <action>          Action to perform (pause, resume, restart, reset-offsets).
+  <action>          Action to perform (pause, resume, restart, stop).
       <connectors>...   Connector names separated by space or "all" for all connectors.
 
 Options:
@@ -541,7 +541,7 @@ Options:
   -v, --verbose         Enable the verbose mode.
 ```
 
-- `action`: This option specifies the action to execute, which can be `pause`, `resume`, `restart`, `reset-offsets`
+- `action`: This option specifies the action to execute, which can be `pause`, `resume`, `restart`, `stop`
 - `connectors`: This option specifies the list of connector names separated by space or "all" for all connectors.
 
 Example(s):
@@ -550,11 +550,35 @@ Example(s):
 kafkactl connector pause myConnector
 kafkactl connector resume myConnector
 kafkactl connector restart myConnector
-kafkactl connector reset-offsets myConnector
+kafkactl connector stop myConnector
 ```
 
-Note: The `reset-offsets` action fully resets the offsets of a connector. The connector must be in a stopped state
+The `connector reset-offsets` command fully resets the offsets of a connector. The connector must be in a stopped state
 before offsets can be reset.
+
+```console
+Usage: kafkactl connector reset-offsets [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] <connectors>...
+
+Description: Reset connector offsets.
+
+Parameters:
+      <connectors>...   Connector names separated by space or "all" for all connectors.
+
+Options:
+  -c, --context=<optionalContext>
+                        Override context defined in config.
+  -h, --help            Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                        Override namespace defined in config or YAML resources.
+  -v, --verbose         Enable the verbose mode.
+```
+
+Example(s):
+
+```console
+kafkactl connector reset-offsets myConnector
+kafkactl connector reset-offsets all
+```
 
 ### Delete Records
 
@@ -592,7 +616,7 @@ Please note that the resources are deleted instantly and cannot be recovered onc
 with the resource is permanently lost.
 
 ```console
-Usage: kafkactl delete [-hv] [--dry-run] [--force] [-n=<optionalNamespace>] ([<resourceType> <name> [-V[=<version>]]] | [[-f=<file>] [-R]])
+Usage: kafkactl delete [-hv] [--dry-run] [--force] [--cascade] [-n=<optionalNamespace>] ([<resourceType> <name> [-V[=<version>]]] | [[-f=<file>] [-R]])
 Description: Delete a resource.
 
 Parameters:
@@ -602,6 +626,7 @@ Parameters:
 Options:
   -c, --context=<optionalContext>
                        Override context defined in config.
+      --cascade        Cascade delete related connectors from Ns4Kafka. Only for connect cluster.
       --dry-run        Does not persist resources. Validate only.
       --execute        This option is mandatory to delete resources with wildcard.
   -f, --file=<file>    YAML file or directory containing resources to delete.
@@ -623,6 +648,8 @@ kafkactl delete -f resource.yml
 kafkactl delete topic myTopic
 kafkactl delete connector myConnector --force
 kafkactl delete connect-cluster myConnectCluster --force
+kafkactl delete connect-cluster myConnectCluster --cascade
+kafkactl delete connect-cluster myConnectCluster --cascade --force
 kafkactl delete topic *-test
 kafkactl delete schema *
 kafkactl delete schema mySchema -V latest
@@ -760,14 +787,18 @@ kafkactl group delete myConsumerGroup
 
 The `list` command allows you to list the consumer groups owned by the current namespace.
 
+Use the `--external` option to list the consumer groups consuming topics owned by the current namespace but not owned by
+it.
+
 ```console
-Usage: kafkactl group list [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] [-o=<output>]
+Usage: kafkactl group list [-ehv] [-c=<optionalContext>] [-n=<optionalNamespace>] [-o=<output>]
 
 Description: List all consumer groups for the current namespace.
 
 Options:
   -c, --context=<optionalContext>
                   Override context defined in config.
+  -e, --external  List all consumer groups consuming topics owned by the current namespace.
   -h, --help      Show this help message and exit.
   -n, --namespace=<optionalNamespace>
                   Override namespace defined in config or YAML resources.
@@ -781,6 +812,7 @@ Example(s):
 ```console
 kafkactl group list
 kafkactl group list -o yaml
+kafkactl group list --external
 ```
 
 ### Import
