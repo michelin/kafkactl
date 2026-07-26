@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.michelin.kafkactl.command;
+package com.michelin.kafkactl.command.connector;
 
 import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CHANGE_CONNECTOR_STATE;
@@ -43,7 +43,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -104,6 +103,18 @@ class ConnectorTest {
     }
 
     @Test
+    void shouldDisplayResetOffsetsHelpWithoutParentParameters() {
+        CommandLine cmd = new CommandLine(connector);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("reset-offsets", "--help");
+
+        assertEquals(0, code);
+        assertTrue(sw.toString().contains("Reset connector offsets."));
+    }
+
+    @Test
     void shouldNotChangeStateWhenEmptyConnectorsList() {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
@@ -137,8 +148,17 @@ class ConnectorTest {
 
         CommandLine cmd = new CommandLine(connector);
 
-        int code = cmd.execute("pause", "my-connector", "-n", "namespace");
+        int code = cmd.execute("stop", "my-connector", "-n", "namespace");
         assertEquals(0, code);
+        verify(resourceService)
+                .changeConnectorState(
+                        eq("namespace"),
+                        eq("my-connector"),
+                        argThat(changeConnectorStateRequest -> changeConnectorStateRequest
+                                .getSpec()
+                                .get("action")
+                                .equals("stop")),
+                        eq(cmd.getCommandSpec()));
         verify(formatService)
                 .displayList(
                         eq(CHANGE_CONNECTOR_STATE),
@@ -225,88 +245,5 @@ class ConnectorTest {
         int code = cmd.execute("pause", "all", "-n", "namespace");
         assertEquals(2, code);
         assertTrue(sw.toString().contains("The server does not have resource type Connector."));
-    }
-
-    @Test
-    void shouldNotResetOffsetsWhenEmptyResponse() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
-        when(resourceService.resetConnectorOffsets(any(), any(), any())).thenReturn(Optional.empty());
-
-        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
-
-        CommandLine cmd = new CommandLine(connector);
-        StringWriter sw = new StringWriter();
-        cmd.setErr(new PrintWriter(sw));
-
-        int code = cmd.execute("reset-offsets", "my-connector");
-        assertEquals(1, code);
-    }
-
-    @Test
-    void shouldResetOffsets() {
-        Resource resource = Resource.builder()
-                .kind("ConnectorResetOffsetsResponse")
-                .apiVersion("v1")
-                .metadata(Resource.Metadata.builder()
-                        .name("my-connector")
-                        .namespace("namespace")
-                        .build())
-                .spec(Map.of("message", "Offsets for connector my-connector reset successfully"))
-                .build();
-
-        when(configService.isCurrentContextValid()).thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
-        when(resourceService.resetConnectorOffsets(any(), any(), any())).thenReturn(Optional.of(resource));
-
-        CommandLine cmd = new CommandLine(connector);
-        StringWriter sw = new StringWriter();
-        cmd.setOut(new PrintWriter(sw));
-
-        int code = cmd.execute("reset-offsets", "my-connector", "-n", "namespace");
-        assertEquals(0, code);
-        assertTrue(sw.toString().contains("Offsets for connector my-connector reset successfully"));
-    }
-
-    @Test
-    void shouldResetOffsetsOfAll() {
-        Resource listedConnector = Resource.builder()
-                .kind("ConnectorResetOffsetsResponse")
-                .apiVersion("v1")
-                .metadata(Resource.Metadata.builder()
-                        .name("prefix.connector")
-                        .namespace("namespace")
-                        .build())
-                .build();
-
-        Resource resetResponse = Resource.builder()
-                .kind("ConnectorResetOffsetsResponse")
-                .apiVersion("v1")
-                .spec(Map.of("message", "Offsets for connector prefix.connector reset successfully"))
-                .build();
-
-        ApiResource apiResource = ApiResource.builder()
-                .kind("Connector")
-                .namespaced(true)
-                .synchronizable(true)
-                .path("connectors")
-                .names(List.of("connects", "connect", "co"))
-                .build();
-
-        when(configService.isCurrentContextValid()).thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.listResourcesWithType(any(), any(), any(), any()))
-                .thenReturn(Collections.singletonList(listedConnector));
-        when(resourceService.resetConnectorOffsets(any(), any(), any())).thenReturn(Optional.of(resetResponse));
-
-        CommandLine cmd = new CommandLine(connector);
-        StringWriter sw = new StringWriter();
-        cmd.setOut(new PrintWriter(sw));
-
-        int code = cmd.execute("reset-offsets", "all", "-n", "namespace");
-        assertEquals(0, code);
-        assertTrue(
-                sw.toString().contains("prefix.connector: Offsets for connector prefix.connector reset successfully"));
     }
 }
