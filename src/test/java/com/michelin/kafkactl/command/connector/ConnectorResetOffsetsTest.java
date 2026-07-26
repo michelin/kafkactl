@@ -18,17 +18,27 @@
  */
 package com.michelin.kafkactl.command.connector;
 
-import static com.michelin.kafkactl.model.Output.TABLE;
-import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR_RESET_OFFSETS_RESPONSE;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.eq;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.michelin.kafkactl.model.ApiResource;
+import static com.michelin.kafkactl.model.Output.TABLE;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ApiResourcesService;
@@ -36,17 +46,8 @@ import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.LoginService;
 import com.michelin.kafkactl.service.ResourceService;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR_RESET_OFFSETS_RESPONSE;
+
 import picocli.CommandLine;
 
 @ExtendWith(MockitoExtension.class)
@@ -108,11 +109,7 @@ class ConnectorResetOffsetsTest {
         int code = cmd.execute("my-connector", "-n", "namespace");
         assertEquals(0, code);
         verify(formatService)
-                .displayList(
-                        eq(CONNECTOR_RESET_OFFSETS_RESPONSE),
-                        eq(List.of(resource)),
-                        eq(TABLE),
-                        eq(cmd.getCommandSpec()));
+                .displayList(CONNECTOR_RESET_OFFSETS_RESPONSE, List.of(resource), TABLE, cmd.getCommandSpec());
     }
 
     @Test
@@ -152,11 +149,7 @@ class ConnectorResetOffsetsTest {
         int code = cmd.execute("all", "-n", "namespace");
         assertEquals(0, code);
         verify(formatService)
-                .displayList(
-                        eq(CONNECTOR_RESET_OFFSETS_RESPONSE),
-                        eq(List.of(resetResponse)),
-                        eq(TABLE),
-                        eq(cmd.getCommandSpec()));
+                .displayList(CONNECTOR_RESET_OFFSETS_RESPONSE, List.of(resetResponse), TABLE, cmd.getCommandSpec());
     }
 
     @Test
