@@ -33,6 +33,7 @@ import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Output;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.SubjectCompatibility;
+import com.michelin.kafkactl.model.request.DeleteResourceRequest;
 import io.confluent.kafka.schemaregistry.avro.AvroSchema;
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference;
 import io.micronaut.core.annotation.Nullable;
@@ -243,32 +244,17 @@ public class ResourceService {
      * Delete a given resource.
      *
      * @param apiResource The resource type
-     * @param namespace The namespace
-     * @param name The resource name or wildcard
-     * @param version The version of the resource, for schemas only
-     * @param dryRun Is dry run mode or not?
+     * @param request The delete resource request
      * @param commandSpec The command that triggered the action
      * @return true if deletion succeeded, false otherwise
      */
-    public boolean delete(
-            ApiResource apiResource,
-            String namespace,
-            String name,
-            @Nullable String version,
-            boolean dryRun,
-            boolean force,
-            CommandSpec commandSpec) {
+    public boolean delete(ApiResource apiResource, DeleteResourceRequest request, CommandSpec commandSpec) {
         try {
+            DeleteResourceRequest authorizedRequest = request.withToken(loginService.getAuthorization());
             HttpResponse<List<Resource>> response = apiResource.isNamespaced()
-                    ? namespacedClient.delete(
-                            namespace,
-                            apiResource.getPath(),
-                            loginService.getAuthorization(),
-                            name,
-                            version,
-                            dryRun,
-                            force)
-                    : nonNamespacedClient.delete(loginService.getAuthorization(), apiResource.getPath(), name, dryRun);
+                    ? namespacedClient.delete(authorizedRequest)
+                    : nonNamespacedClient.delete(
+                            loginService.getAuthorization(), apiResource.getPath(), request.name(), request.dryrun());
 
             // Micronaut does not throw exception on 404, so produce a 404 manually
             if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
@@ -283,11 +269,11 @@ public class ResourceService {
                     .commandLine()
                     .getOut()
                     .println(formatService.prettifyKind(apiResource.getKind()) + " \"" + resourceName + "\""
-                            + (version != null ? " version " + version : "") + " deleted."));
+                            + (request.version() != null ? " version " + request.version() : "") + " deleted."));
 
             return true;
         } catch (HttpClientResponseException exception) {
-            formatService.displayError(exception, apiResource.getKind(), name, commandSpec);
+            formatService.displayError(exception, apiResource.getKind(), request.name(), commandSpec);
             return false;
         }
     }
@@ -414,14 +400,17 @@ public class ResourceService {
      * List all consumer groups for a namespace.
      *
      * @param namespace The namespace
+     * @param external List external consumer groups consuming topics owned by the namespace
      * @param output The output format
      * @param commandSpec The command that triggered the action
      * @return 0 if the command succeeded, 1 otherwise
      */
-    public int listGroups(String namespace, Output output, CommandSpec commandSpec) {
+    public int listGroups(String namespace, boolean external, Output output, CommandSpec commandSpec) {
         try {
-            List<Resource> resources = namespacedClient.listGroups(loginService.getAuthorization(), namespace);
-            if (!resources.isEmpty()) {
+            List<Resource> resources = external
+                    ? namespacedClient.listExternalGroups(loginService.getAuthorization(), namespace)
+                    : namespacedClient.listGroups(loginService.getAuthorization(), namespace);
+            if (resources != null && !resources.isEmpty()) {
                 formatService.displayList(resources.getFirst().getKind(), resources, output, commandSpec);
             } else {
                 commandSpec.commandLine().getOut().println("No consumer group to display.");

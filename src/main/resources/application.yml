@@ -45,6 +45,14 @@ kafkactl:
     ConnectorResetOffsetsResponse:
     - "CONNECTOR:/metadata/name"
     - "MESSAGE:/spec/message"
+    ConsumerGroup:
+    - "CONSUMER GROUP:/metadata/name"
+    - "STATE:/status/state"
+    - "TOPIC:/status/topic"
+    - "PARTITION:/status/partition"
+    - "CURRENT OFFSET:/status/currentOffset"
+    - "END OFFSET:/status/logEndOffset"
+    - "LAG:/status/lag"
     ConsumerGroupResetOffsetsResponse:
     - "CONSUMER GROUP:/spec/consumerGroup"
     - "TOPIC:/spec/topic"
