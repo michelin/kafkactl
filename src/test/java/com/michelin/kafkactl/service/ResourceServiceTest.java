@@ -1630,7 +1630,7 @@ class ResourceServiceTest {
                 .kind("ConnectorResetOffsetsResponse")
                 .apiVersion("v1")
                 .metadata(Resource.Metadata.builder().name("connector").build())
-                .spec(Map.of("message", "Offsets for connector connector reset successfully"))
+                .status(Map.of("code", "Offsets for connector connector reset successfully"))
                 .build();
 
         CommandLine cmd = new CommandLine(new Kafkactl());
