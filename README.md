@@ -44,6 +44,7 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
     * [Connect Cluster](#connect-cluster)
         * [Vault](#vault)
     * [Connector](#connector)
+        * [Reset Offsets](#reset-offsets)
     * [Delete Records](#delete-records)
     * [Delete](#delete)
     * [Diff](#diff)
@@ -553,13 +554,9 @@ kafkactl connector restart myConnector
 kafkactl connector stop myConnector
 ```
 
-The `connector reset-offsets` command fully resets the offsets of a connector. Stop the connector before resetting its
-offsets:
+#### Reset Offsets
 
-```console
-kafkactl connector stop myConnector
-kafkactl connector reset-offsets myConnector
-```
+The `reset-offsets` command allows you to fully resets the offsets of a connector.
 
 ```console
 Usage: kafkactl connector reset-offsets [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] <connectors>...
