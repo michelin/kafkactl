@@ -53,7 +53,7 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
         * [Delete](#delete-1)
         * [List](#list)
     * [Import](#import)
-    * [Reset Offsets](#reset-offsets)
+    * [Reset Offsets](#reset-offsets-1)
     * [Reset Password](#reset-password)
     * [Subject Config](#subject-config)
       * [Delete](#delete-2)
