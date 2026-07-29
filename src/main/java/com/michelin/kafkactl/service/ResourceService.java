@@ -66,7 +66,6 @@ public class ResourceService {
     public static final String ACL = "AccessControlEntry";
     public static final String SCHEMA = "Schema";
     public static final String OTHER = "Other";
-    public static final String MESSAGE_FIELD = "message";
 
     @Inject
     @ReflectiveAccess
@@ -469,18 +468,6 @@ public class ResourceService {
             Resource resource = response.getBody().orElse(null);
             if (resource == null) {
                 return Optional.empty();
-            }
-
-            if (resource.getSpec() == null
-                    || !(resource.getSpec().get(MESSAGE_FIELD) instanceof String message)
-                    || StringUtils.isEmpty(message)) {
-                Object message = response.getBody(Map.class).orElse(Map.of()).get(MESSAGE_FIELD);
-                if (message instanceof String messageValue && StringUtils.isNotEmpty(messageValue)) {
-                    Map<String, Object> spec =
-                            resource.getSpec() != null ? new HashMap<>(resource.getSpec()) : new HashMap<>();
-                    spec.put(MESSAGE_FIELD, messageValue);
-                    resource.setSpec(spec);
-                }
             }
 
             return Optional.of(resource);

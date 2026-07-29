@@ -553,8 +553,13 @@ kafkactl connector restart myConnector
 kafkactl connector stop myConnector
 ```
 
-The `connector reset-offsets` command fully resets the offsets of a connector. The connector must be in a stopped state
-before offsets can be reset.
+The `connector reset-offsets` command fully resets the offsets of a connector. Stop the connector before resetting its
+offsets:
+
+```console
+kafkactl connector stop myConnector
+kafkactl connector reset-offsets myConnector
+```
 
 ```console
 Usage: kafkactl connector reset-offsets [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] <connectors>...
