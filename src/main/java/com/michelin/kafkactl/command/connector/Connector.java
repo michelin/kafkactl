@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.michelin.kafkactl.command;
+package com.michelin.kafkactl.command.connector;
 
 import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CHANGE_CONNECTOR_STATE;
@@ -42,6 +42,7 @@ import picocli.CommandLine.Parameters;
 /** Connectors subcommand. */
 @Command(
         name = "connector",
+        subcommands = {ConnectorResetOffsets.class},
         headerHeading = "@|bold Usage|@:",
         synopsisHeading = " ",
         descriptionHeading = "%n@|bold Description|@: ",
@@ -59,13 +60,13 @@ public class Connector extends AuthenticatedHook {
     @ReflectiveAccess
     private FormatService formatService;
 
-    @Parameters(index = "0", description = "Action to perform (${COMPLETION-CANDIDATES}).", arity = "1")
+    @Parameters(index = "0", description = "Action to perform (${COMPLETION-CANDIDATES}).", arity = "0..1")
     public ConnectorAction action;
 
     @Parameters(
             index = "1..*",
             description = "Connector names separated by space or \"all\" for all connectors.",
-            arity = "1..*")
+            arity = "0..*")
     public List<String> connectors;
 
     /**
@@ -75,10 +76,16 @@ public class Connector extends AuthenticatedHook {
      */
     @Override
     public Integer onAuthSuccess() {
+        if (action == null || connectors == null || connectors.isEmpty()) {
+            throw new ParameterException(
+                    commandSpec.commandLine(), "Missing required parameters: '<action>', '<connectors>'");
+        }
+
         String namespace = getNamespace();
+        boolean allConnectors = connectors.stream().anyMatch(s -> s.equalsIgnoreCase("ALL"));
 
         try {
-            if (connectors.stream().anyMatch(s -> s.equalsIgnoreCase("ALL"))) {
+            if (allConnectors) {
                 ApiResource connectType = apiResourcesService
                         .getResourceDefinitionByKind(CONNECTOR)
                         .orElseThrow(() -> new ParameterException(

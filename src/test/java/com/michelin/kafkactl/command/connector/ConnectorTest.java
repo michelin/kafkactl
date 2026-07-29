@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.michelin.kafkactl.command;
+package com.michelin.kafkactl.command.connector;
 
 import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CHANGE_CONNECTOR_STATE;
@@ -29,7 +29,6 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.property.KafkactlProperties;
@@ -72,9 +71,6 @@ class ConnectorTest {
     @Mock
     ConfigService configService;
 
-    @Mock
-    Kafkactl kafkactl;
-
     @InjectMocks
     Connector connector;
 
@@ -104,6 +100,18 @@ class ConnectorTest {
 
         int code = cmd.execute("pause", "my-connector");
         assertEquals(1, code);
+    }
+
+    @Test
+    void shouldDisplayResetOffsetsHelpWithoutParentParameters() {
+        CommandLine cmd = new CommandLine(connector);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("reset-offsets", "--help");
+
+        assertEquals(0, code);
+        assertTrue(sw.toString().contains("Reset connector offsets."));
     }
 
     @Test

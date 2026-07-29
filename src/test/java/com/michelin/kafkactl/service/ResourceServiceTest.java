@@ -1625,6 +1625,68 @@ class ResourceServiceTest {
     }
 
     @Test
+    void shouldResetConnectorOffsets() {
+        Resource resetOffsetsResource = Resource.builder()
+                .kind("ConnectorResetOffsetsResponse")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("connector").build())
+                .status(Map.of("code", "Offsets for connector connector reset successfully"))
+                .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+
+        when(namespacedClient.resetConnectorOffsets(any(), any(), any()))
+                .thenReturn(HttpResponse.ok(resetOffsetsResource));
+
+        Optional<Resource> actual =
+                resourceService.resetConnectorOffsets("namespace", "connector", cmd.getCommandSpec());
+
+        assertTrue(actual.isPresent());
+        assertEquals(resetOffsetsResource, actual.get());
+    }
+
+    @Test
+    void shouldResetConnectorOffsetsNotFound() {
+        Resource resetOffsetsResource = Resource.builder()
+                .kind("ConnectorResetOffsetsResponse")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("connector").build())
+                .spec(Map.of())
+                .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+
+        when(namespacedClient.resetConnectorOffsets(any(), any(), any()))
+                .thenReturn(HttpResponse.notFound(resetOffsetsResource));
+
+        Optional<Resource> actual =
+                resourceService.resetConnectorOffsets("namespace", "connector", cmd.getCommandSpec());
+
+        assertTrue(actual.isEmpty());
+        verify(formatService)
+                .displayError(
+                        argThat(exception -> exception.getStatus().equals(HttpStatus.NOT_FOUND)
+                                && exception.getMessage().equals("Not Found")),
+                        eq(CONNECTOR),
+                        eq("connector"),
+                        eq(cmd.getCommandSpec()));
+    }
+
+    @Test
+    void shouldResetConnectorOffsetsFail() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        when(namespacedClient.resetConnectorOffsets(any(), any(), any())).thenThrow(exception);
+
+        Optional<Resource> actual =
+                resourceService.resetConnectorOffsets("namespace", "connector", cmd.getCommandSpec());
+
+        assertTrue(actual.isEmpty());
+        verify(formatService).displayError(exception, CONNECTOR, "connector", cmd.getCommandSpec());
+    }
+
+    @Test
     void shouldUpdateSubjectConfig() {
         Resource updateSubjectConfigResource = Resource.builder()
                 .kind(SUBJECT_CONFIG_STATE)
