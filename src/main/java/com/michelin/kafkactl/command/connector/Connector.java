@@ -42,7 +42,7 @@ import picocli.CommandLine.Parameters;
 /** Connectors subcommand. */
 @Command(
         name = "connector",
-        subcommands = {ConnectorResetOffsets.class},
+        subcommands = {ConnectorAlterOffsets.class, ConnectorResetOffsets.class},
         headerHeading = "@|bold Usage|@:",
         synopsisHeading = " ",
         descriptionHeading = "%n@|bold Description|@: ",
