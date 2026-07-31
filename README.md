@@ -554,6 +554,48 @@ kafkactl connector restart myConnector
 kafkactl connector stop myConnector
 ```
 
+#### Alter Offsets
+
+The `alter-offsets` command allows you to alter or partially reset the offsets of a connector.
+
+```console
+Usage: kafkactl connector alter-offsets [-hv] [-c=<optionalContext>] -f=<file> [-n=<optionalNamespace>]
+                                        <connector>
+
+Description: Alter or partially reset connector offsets.
+
+Parameters:
+      <connector>   Connector name.
+
+Options:
+  -c, --context=<optionalContext>
+                        Override context defined in config.
+  -f, --file=<file>     YAML file containing the connector offsets payload.
+  -h, --help            Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                        Override namespace defined in config or YAML resources.
+  -v, --verbose         Enable the verbose mode.
+```
+
+The payload uses the Kafka Connect alter offsets format. Set `offset` to `null` to reset only the selected partition, or provide an offset map to alter it.
+
+```yaml
+offsets:
+  - partition:
+      filename: /data/input.txt
+    offset:
+      position: 100
+  - partition:
+      filename: /data/other.txt
+    offset: null
+```
+
+Example:
+
+```console
+kafkactl connector alter-offsets myConnector -f offsets.yaml
+```
+
 #### Reset Offsets
 
 The `reset-offsets` command allows you to fully resets the offsets of a connector.
