@@ -19,8 +19,8 @@
 package com.michelin.kafkactl.command.connector;
 
 import static com.michelin.kafkactl.model.Output.TABLE;
-import static com.michelin.kafkactl.util.constant.ResourceKind.CHANGE_CONNECTOR_STATE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR;
+import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR_OFFSET_RESPONSE;
 
 import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.model.ApiResource;
@@ -31,27 +31,22 @@ import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 
-/** Connectors subcommand. */
+/** List connector offsets subcommand. */
 @Command(
-        name = "connector",
-        subcommands = {ConnectorListOffsets.class, ConnectorResetOffsets.class},
+        name = "list-offsets",
         headerHeading = "@|bold Usage|@:",
         synopsisHeading = " ",
         descriptionHeading = "%n@|bold Description|@: ",
-        description = "Interact with connectors.",
+        description = "List connector offsets.",
         parameterListHeading = "%n@|bold Parameters|@:%n",
         optionListHeading = "%n@|bold Options|@:%n",
         commandListHeading = "%n@|bold Commands|@:%n",
         usageHelpAutoWidth = true)
-public class Connector extends AuthenticatedHook {
+public class ConnectorListOffsets extends AuthenticatedHook {
     @Inject
     @ReflectiveAccess
     private ResourceService resourceService;
@@ -60,61 +55,41 @@ public class Connector extends AuthenticatedHook {
     @ReflectiveAccess
     private FormatService formatService;
 
-    @Parameters(index = "0", description = "Action to perform (${COMPLETION-CANDIDATES}).", arity = "0..1")
-    public ConnectorAction action;
-
     @Parameters(
-            index = "1..*",
+            index = "0..*",
             description = "Connector names separated by space or \"all\" for all connectors.",
-            arity = "0..*")
+            arity = "1..*")
     public List<String> connectors;
 
     /**
-     * Run the "connectors" command.
+     * Run the "connector list-offsets" command.
      *
      * @return The command return code
      */
     @Override
     public Integer onAuthSuccess() {
-        if (action == null || connectors == null || connectors.isEmpty()) {
-            throw new ParameterException(
-                    commandSpec.commandLine(), "Missing required parameters: '<action>', '<connectors>'");
-        }
-
         String namespace = getNamespace();
-        boolean allConnectors = connectors.stream().anyMatch(s -> s.equalsIgnoreCase("ALL"));
+        boolean allConnectors = connectors.stream().anyMatch(connector -> connector.equalsIgnoreCase("ALL"));
 
         try {
             if (allConnectors) {
-                ApiResource connectType = apiResourcesService
+                ApiResource connectorType = apiResourcesService
                         .getResourceDefinitionByKind(CONNECTOR)
                         .orElseThrow(() -> new ParameterException(
                                 commandSpec.commandLine(), "The server does not have resource type Connector."));
 
-                connectors = resourceService.listResourcesWithType(connectType, namespace, "*", null).stream()
+                connectors = resourceService.listResourcesWithType(connectorType, namespace, "*", null).stream()
                         .map(resource -> resource.getMetadata().getName())
                         .toList();
             }
 
-            List<Resource> changeConnectorResponses = connectors.stream()
-                    .map(connector -> Resource.builder()
-                            .metadata(Resource.Metadata.builder()
-                                    .namespace(namespace)
-                                    .name(connector)
-                                    .build())
-                            .spec(Map.of("action", action.toString()))
-                            .build())
-                    .map(changeConnectorStateRequest -> resourceService.changeConnectorState(
-                            namespace,
-                            changeConnectorStateRequest.getMetadata().getName(),
-                            changeConnectorStateRequest,
-                            commandSpec))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
+            List<Resource> offsets = connectors.stream()
+                    .flatMap(connector ->
+                            resourceService.listConnectorOffsets(namespace, connector, commandSpec).stream())
                     .toList();
 
-            if (!changeConnectorResponses.isEmpty()) {
-                formatService.displayList(CHANGE_CONNECTOR_STATE, changeConnectorResponses, TABLE, commandSpec);
+            if (!offsets.isEmpty()) {
+                formatService.displayList(CONNECTOR_OFFSET_RESPONSE, offsets, TABLE, commandSpec);
                 return 0;
             }
 
@@ -122,23 +97,6 @@ public class Connector extends AuthenticatedHook {
         } catch (HttpClientResponseException exception) {
             formatService.displayError(exception, commandSpec);
             return 1;
-        }
-    }
-
-    /** Connector actions. */
-    @Getter
-    @AllArgsConstructor
-    public enum ConnectorAction {
-        PAUSE("pause"),
-        RESUME("resume"),
-        RESTART("restart"),
-        STOP("stop");
-
-        private final String name;
-
-        @Override
-        public String toString() {
-            return name;
         }
     }
 }
