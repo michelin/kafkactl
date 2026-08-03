@@ -20,9 +20,14 @@ package com.michelin.kafkactl.command.connector;
 
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR_RESET_OFFSETS_RESPONSE;
 
-import com.michelin.kafkactl.model.Resource;
-import java.util.stream.Stream;
+import com.michelin.kafkactl.hook.AuthenticatedHook;
+import com.michelin.kafkactl.service.FormatService;
+import com.michelin.kafkactl.service.ResourceService;
+import io.micronaut.core.annotation.ReflectiveAccess;
+import jakarta.inject.Inject;
+import java.util.List;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Parameters;
 
 /** Reset connector offsets subcommand. */
 @Command(
@@ -35,22 +40,33 @@ import picocli.CommandLine.Command;
         optionListHeading = "%n@|bold Options|@:%n",
         commandListHeading = "%n@|bold Commands|@:%n",
         usageHelpAutoWidth = true)
-public class ConnectorResetOffsets extends ConnectorOffsetsCommand {
+public class ConnectorResetOffsets extends AuthenticatedHook {
+    @Inject
+    @ReflectiveAccess
+    private ResourceService resourceService;
 
-    /**
-     * Reset offsets for a connector.
-     *
-     * @param namespace The namespace
-     * @param connector The connector name
-     * @return The reset offsets response
-     */
-    @Override
-    protected Stream<Resource> processConnector(String namespace, String connector) {
-        return resourceService.resetConnectorOffsets(namespace, connector, commandSpec).stream();
-    }
+    @Inject
+    @ReflectiveAccess
+    private FormatService formatService;
+
+    @Parameters(
+            index = "0..*",
+            description = "Connector names separated by space or \"all\" for all connectors.",
+            arity = "1..*")
+    public List<String> connectors;
 
     @Override
-    protected String getResponseKind() {
-        return CONNECTOR_RESET_OFFSETS_RESPONSE;
+    public Integer onAuthSuccess() {
+        String namespace = getNamespace();
+
+        return ConnectorCommandSupport.executeOffsetOperation(
+                connectors,
+                namespace,
+                CONNECTOR_RESET_OFFSETS_RESPONSE,
+                apiResourcesService,
+                resourceService,
+                formatService,
+                commandSpec,
+                connector -> resourceService.resetConnectorOffsets(namespace, connector, commandSpec).stream());
     }
 }

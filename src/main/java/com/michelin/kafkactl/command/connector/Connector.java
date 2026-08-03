@@ -21,8 +21,13 @@ package com.michelin.kafkactl.command.connector;
 import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CHANGE_CONNECTOR_STATE;
 
+import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.model.Resource;
+import com.michelin.kafkactl.service.FormatService;
+import com.michelin.kafkactl.service.ResourceService;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,7 +49,14 @@ import picocli.CommandLine.Parameters;
         optionListHeading = "%n@|bold Options|@:%n",
         commandListHeading = "%n@|bold Commands|@:%n",
         usageHelpAutoWidth = true)
-public class Connector extends ConnectorCommand {
+public class Connector extends AuthenticatedHook {
+    @Inject
+    @ReflectiveAccess
+    private ResourceService resourceService;
+
+    @Inject
+    @ReflectiveAccess
+    private FormatService formatService;
 
     @Parameters(index = "0", description = "Action to perform (${COMPLETION-CANDIDATES}).", arity = "0..1")
     public ConnectorAction action;
@@ -70,7 +82,8 @@ public class Connector extends ConnectorCommand {
         String namespace = getNamespace();
 
         try {
-            connectors = resolveConnectors(connectors, namespace);
+            connectors = ConnectorCommandSupport.resolveConnectors(
+                    connectors, namespace, apiResourcesService, resourceService, commandSpec);
 
             List<Resource> changeConnectorResponses = connectors.stream()
                     .map(connector -> Resource.builder()
