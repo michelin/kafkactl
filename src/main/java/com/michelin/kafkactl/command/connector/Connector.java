@@ -20,16 +20,9 @@ package com.michelin.kafkactl.command.connector;
 
 import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CHANGE_CONNECTOR_STATE;
-import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR;
 
-import com.michelin.kafkactl.hook.AuthenticatedHook;
-import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
-import com.michelin.kafkactl.service.FormatService;
-import com.michelin.kafkactl.service.ResourceService;
-import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
-import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,14 +44,7 @@ import picocli.CommandLine.Parameters;
         optionListHeading = "%n@|bold Options|@:%n",
         commandListHeading = "%n@|bold Commands|@:%n",
         usageHelpAutoWidth = true)
-public class Connector extends AuthenticatedHook {
-    @Inject
-    @ReflectiveAccess
-    private ResourceService resourceService;
-
-    @Inject
-    @ReflectiveAccess
-    private FormatService formatService;
+public class Connector extends ConnectorCommand {
 
     @Parameters(index = "0", description = "Action to perform (${COMPLETION-CANDIDATES}).", arity = "0..1")
     public ConnectorAction action;
@@ -82,19 +68,9 @@ public class Connector extends AuthenticatedHook {
         }
 
         String namespace = getNamespace();
-        boolean allConnectors = connectors.stream().anyMatch(s -> s.equalsIgnoreCase("ALL"));
 
         try {
-            if (allConnectors) {
-                ApiResource connectType = apiResourcesService
-                        .getResourceDefinitionByKind(CONNECTOR)
-                        .orElseThrow(() -> new ParameterException(
-                                commandSpec.commandLine(), "The server does not have resource type Connector."));
-
-                connectors = resourceService.listResourcesWithType(connectType, namespace, "*", null).stream()
-                        .map(resource -> resource.getMetadata().getName())
-                        .toList();
-            }
+            connectors = resolveConnectors(connectors, namespace);
 
             List<Resource> changeConnectorResponses = connectors.stream()
                     .map(connector -> Resource.builder()

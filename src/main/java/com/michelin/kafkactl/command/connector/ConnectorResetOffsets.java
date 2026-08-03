@@ -18,23 +18,11 @@
  */
 package com.michelin.kafkactl.command.connector;
 
-import static com.michelin.kafkactl.model.Output.TABLE;
-import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR_RESET_OFFSETS_RESPONSE;
 
-import com.michelin.kafkactl.hook.AuthenticatedHook;
-import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
-import com.michelin.kafkactl.service.FormatService;
-import com.michelin.kafkactl.service.ResourceService;
-import io.micronaut.core.annotation.ReflectiveAccess;
-import io.micronaut.http.client.exceptions.HttpClientResponseException;
-import jakarta.inject.Inject;
-import java.util.List;
-import java.util.Optional;
+import java.util.stream.Stream;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.ParameterException;
-import picocli.CommandLine.Parameters;
 
 /** Reset connector offsets subcommand. */
 @Command(
@@ -47,58 +35,22 @@ import picocli.CommandLine.Parameters;
         optionListHeading = "%n@|bold Options|@:%n",
         commandListHeading = "%n@|bold Commands|@:%n",
         usageHelpAutoWidth = true)
-public class ConnectorResetOffsets extends AuthenticatedHook {
-    @Inject
-    @ReflectiveAccess
-    private ResourceService resourceService;
-
-    @Inject
-    @ReflectiveAccess
-    private FormatService formatService;
-
-    @Parameters(
-            index = "0..*",
-            description = "Connector names separated by space or \"all\" for all connectors.",
-            arity = "1..*")
-    public List<String> connectors;
+public class ConnectorResetOffsets extends ConnectorOffsetsCommand {
 
     /**
-     * Run the "connector reset-offsets" command.
+     * Reset offsets for a connector.
      *
-     * @return The command return code
+     * @param namespace The namespace
+     * @param connector The connector name
+     * @return The reset offsets response
      */
     @Override
-    public Integer onAuthSuccess() {
-        String namespace = getNamespace();
-        boolean allConnectors = connectors.stream().anyMatch(s -> s.equalsIgnoreCase("ALL"));
+    protected Stream<Resource> processConnector(String namespace, String connector) {
+        return resourceService.resetConnectorOffsets(namespace, connector, commandSpec).stream();
+    }
 
-        try {
-            if (allConnectors) {
-                ApiResource connectType = apiResourcesService
-                        .getResourceDefinitionByKind(CONNECTOR)
-                        .orElseThrow(() -> new ParameterException(
-                                commandSpec.commandLine(), "The server does not have resource type Connector."));
-
-                connectors = resourceService.listResourcesWithType(connectType, namespace, "*", null).stream()
-                        .map(resource -> resource.getMetadata().getName())
-                        .toList();
-            }
-
-            List<Resource> resetOffsetsResponses = connectors.stream()
-                    .map(connector -> resourceService.resetConnectorOffsets(namespace, connector, commandSpec))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .toList();
-
-            if (!resetOffsetsResponses.isEmpty()) {
-                formatService.displayList(CONNECTOR_RESET_OFFSETS_RESPONSE, resetOffsetsResponses, TABLE, commandSpec);
-                return 0;
-            }
-
-            return 1;
-        } catch (HttpClientResponseException exception) {
-            formatService.displayError(exception, commandSpec);
-            return 1;
-        }
+    @Override
+    protected String getResponseKind() {
+        return CONNECTOR_RESET_OFFSETS_RESPONSE;
     }
 }
