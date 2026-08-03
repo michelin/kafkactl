@@ -20,6 +20,8 @@ package com.michelin.kafkactl.command.connector;
 
 import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR;
+import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR_OFFSET_RESPONSE;
+import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR_RESET_OFFSETS_RESPONSE;
 
 import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
@@ -28,7 +30,6 @@ import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;
@@ -72,38 +73,61 @@ public final class ConnectorCommandSupport {
      *
      * @param connectors The requested connector names
      * @param namespace The namespace
-     * @param responseKind The operation response kind
      * @param apiResourcesService The API resources service
      * @param resourceService The resource service
      * @param formatService The format service
      * @param commandSpec The command that triggered the action
-     * @param connectorProcessor The operation to execute for each connector
+     * @param operation The offset operation to execute
      * @return The command return code
      */
     public static int executeOffsetOperation(
             List<String> connectors,
             String namespace,
-            String responseKind,
             ApiResourcesService apiResourcesService,
             ResourceService resourceService,
             FormatService formatService,
             CommandSpec commandSpec,
-            Function<String, Stream<Resource>> connectorProcessor) {
+            ConnectorOffsetOperation operation) {
         try {
             List<Resource> responses =
                     resolveConnectors(connectors, namespace, apiResourcesService, resourceService, commandSpec).stream()
-                            .flatMap(connectorProcessor)
+                            .flatMap(connector ->
+                                    processConnector(resourceService, namespace, connector, commandSpec, operation))
                             .toList();
 
             if (responses.isEmpty()) {
                 return 1;
             }
 
-            formatService.displayList(responseKind, responses, TABLE, commandSpec);
+            formatService.displayList(operation.responseKind, responses, TABLE, commandSpec);
             return 0;
         } catch (HttpClientResponseException exception) {
             formatService.displayError(exception, commandSpec);
             return 1;
+        }
+    }
+
+    private static Stream<Resource> processConnector(
+            ResourceService resourceService,
+            String namespace,
+            String connector,
+            CommandSpec commandSpec,
+            ConnectorOffsetOperation operation) {
+        return switch (operation) {
+            case LIST -> resourceService.listConnectorOffsets(namespace, connector, commandSpec).stream();
+            case RESET -> resourceService.resetConnectorOffsets(namespace, connector, commandSpec).stream();
+        };
+    }
+
+    /** Connector offset operations. */
+    public enum ConnectorOffsetOperation {
+        LIST(CONNECTOR_OFFSET_RESPONSE),
+        RESET(CONNECTOR_RESET_OFFSETS_RESPONSE);
+
+        private final String responseKind;
+
+        ConnectorOffsetOperation(String responseKind) {
+            this.responseKind = responseKind;
         }
     }
 }

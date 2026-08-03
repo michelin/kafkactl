@@ -18,7 +18,7 @@
  */
 package com.michelin.kafkactl.command.connector;
 
-import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR_RESET_OFFSETS_RESPONSE;
+import static com.michelin.kafkactl.command.connector.ConnectorCommandSupport.ConnectorOffsetOperation.RESET;
 
 import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.service.FormatService;
@@ -60,13 +60,6 @@ public class ConnectorResetOffsets extends AuthenticatedHook {
         String namespace = getNamespace();
 
         return ConnectorCommandSupport.executeOffsetOperation(
-                connectors,
-                namespace,
-                CONNECTOR_RESET_OFFSETS_RESPONSE,
-                apiResourcesService,
-                resourceService,
-                formatService,
-                commandSpec,
-                connector -> resourceService.resetConnectorOffsets(namespace, connector, commandSpec).stream());
+                connectors, namespace, apiResourcesService, resourceService, formatService, commandSpec, RESET);
     }
 }
