@@ -49,11 +49,15 @@ public class ConnectorListOffsets extends AuthenticatedHook {
     @ReflectiveAccess
     private FormatService formatService;
 
+    private List<String> connectors;
+
     @Parameters(
             index = "0..*",
             description = "Connector names separated by space or \"all\" for all connectors.",
             arity = "1..*")
-    public List<String> connectors;
+    public void setConnectors(List<String> connectors) {
+        this.connectors = connectors;
+    }
 
     @Override
     public Integer onAuthSuccess() {
