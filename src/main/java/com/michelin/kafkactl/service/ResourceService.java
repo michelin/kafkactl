@@ -33,6 +33,7 @@ import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Output;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.SubjectCompatibility;
+import com.michelin.kafkactl.model.request.ConnectorOffsets;
 import com.michelin.kafkactl.model.request.DeleteResourceRequest;
 import io.confluent.kafka.schemaregistry.avro.AvroSchema;
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference;
@@ -471,6 +472,32 @@ public class ResourceService {
             }
 
             return Optional.of(resource);
+        } catch (HttpClientResponseException exception) {
+            formatService.displayError(exception, CONNECTOR, connector, commandSpec);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Alter offsets for a given connector.
+     *
+     * @param namespace The namespace
+     * @param connector The connector name
+     * @param offsets The offsets payload
+     * @param commandSpec The command that triggered the action
+     * @return The resource
+     */
+    public Optional<Resource> alterConnectorOffsets(
+            String namespace, String connector, ConnectorOffsets offsets, CommandSpec commandSpec) {
+        try {
+            HttpResponse<Resource> response = namespacedClient.alterConnectorOffsets(
+                    namespace, connector, offsets, loginService.getAuthorization());
+
+            if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
+                throw new HttpClientResponseException(response.reason(), response);
+            }
+
+            return response.getBody();
         } catch (HttpClientResponseException exception) {
             formatService.displayError(exception, CONNECTOR, connector, commandSpec);
             return Optional.empty();

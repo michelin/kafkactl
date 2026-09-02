@@ -19,6 +19,7 @@
 package com.michelin.kafkactl.client;
 
 import com.michelin.kafkactl.model.Resource;
+import com.michelin.kafkactl.model.request.ConnectorOffsets;
 import com.michelin.kafkactl.model.request.DeleteResourceRequest;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.HttpResponse;
@@ -26,6 +27,7 @@ import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Delete;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Header;
+import io.micronaut.http.annotation.Patch;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.http.annotation.RequestBean;
@@ -252,6 +254,24 @@ public interface NamespacedResourceClient {
             includes = ReadTimeoutException.class)
     HttpResponse<Resource> resetConnectorOffsets(
             String namespace, String connector, @Header("Authorization") String token);
+
+    /**
+     * Alter offsets for a given connector.
+     *
+     * @param namespace The namespace
+     * @param connector The connector to alter offsets for
+     * @param offsets The offsets payload
+     * @param token The auth token
+     * @return The alter offsets response
+     */
+    @Patch("{namespace}/connectors/{connector}/offsets")
+    @Retryable(
+            delay = "${kafkactl.retry.delay}",
+            attempts = "${kafkactl.retry.attempt}",
+            multiplier = "${kafkactl.retry.multiplier}",
+            includes = ReadTimeoutException.class)
+    HttpResponse<Resource> alterConnectorOffsets(
+            String namespace, String connector, @Body ConnectorOffsets offsets, @Header("Authorization") String token);
 
     /**
      * List all available connect clusters for vaulting.

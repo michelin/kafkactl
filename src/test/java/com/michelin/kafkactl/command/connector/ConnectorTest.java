@@ -115,6 +115,18 @@ class ConnectorTest {
     }
 
     @Test
+    void shouldDisplayAlterOffsetsHelpWithoutParentParameters() {
+        CommandLine cmd = new CommandLine(connector);
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        int code = cmd.execute("alter-offsets", "--help");
+
+        assertEquals(0, code);
+        assertTrue(sw.toString().contains("Alter or partially reset connector offsets."));
+    }
+
+    @Test
     void shouldNotChangeStateWhenEmptyConnectorsList() {
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
