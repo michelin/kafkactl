@@ -19,7 +19,7 @@
 package com.michelin.kafkactl.command.connector;
 
 import static com.michelin.kafkactl.model.Output.TABLE;
-import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR_RESET_OFFSETS_RESPONSE;
+import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR_OFFSET_RESPONSE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,7 +51,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
 
 @ExtendWith(MockitoExtension.class)
-class ConnectorResetOffsetsTest {
+class ConnectorListOffsetsTest {
     @Mock
     LoginService loginService;
 
@@ -71,70 +71,62 @@ class ConnectorResetOffsetsTest {
     ConfigService configService;
 
     @InjectMocks
-    ConnectorResetOffsets connectorResetOffsets;
+    ConnectorListOffsets connectorListOffsets;
 
     @Test
-    void shouldNotResetOffsetsWhenEmptyResponse() {
+    void shouldListOffsets() {
+        Resource offset = Resource.builder()
+                .kind(CONNECTOR_OFFSET_RESPONSE)
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("my-connector").build())
+                .spec(Map.of("topic", "my-topic", "partition", 0, "offset", 42L))
+                .build();
+
         when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
-        when(resourceService.resetConnectorOffsets(any(), any(), any())).thenReturn(Optional.empty());
+        when(resourceService.listConnectorOffsets(any(), any(), any())).thenReturn(List.of(offset));
+
+        CommandLine cmd = new CommandLine(connectorListOffsets);
+
+        int code = cmd.execute("my-connector", "-n", "namespace");
+
+        assertEquals(0, code);
+        verify(formatService).displayList(CONNECTOR_OFFSET_RESPONSE, List.of(offset), TABLE, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldNotListOffsetsWhenEmptyResponse() {
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+        when(resourceService.listConnectorOffsets(any(), any(), any())).thenReturn(List.of());
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
-        CommandLine cmd = new CommandLine(connectorResetOffsets);
-        StringWriter sw = new StringWriter();
-        cmd.setErr(new PrintWriter(sw));
+        CommandLine cmd = new CommandLine(connectorListOffsets);
 
         int code = cmd.execute("my-connector");
+
         assertEquals(1, code);
     }
 
     @Test
-    void shouldResetOffsets() {
-        Resource resource = Resource.builder()
-                .kind("ConnectorResetOffsetsResponse")
-                .apiVersion("v1")
-                .metadata(Resource.Metadata.builder()
-                        .name("my-connector")
-                        .namespace("namespace")
-                        .build())
-                .status(Map.of("code", "Offsets for connector my-connector reset successfully"))
-                .build();
-
-        when(configService.isCurrentContextValid()).thenReturn(true);
-        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
-        when(resourceService.resetConnectorOffsets(any(), any(), any())).thenReturn(Optional.of(resource));
-
-        CommandLine cmd = new CommandLine(connectorResetOffsets);
-
-        int code = cmd.execute("my-connector", "-n", "namespace");
-        assertEquals(0, code);
-        verify(formatService)
-                .displayList(CONNECTOR_RESET_OFFSETS_RESPONSE, List.of(resource), TABLE, cmd.getCommandSpec());
-    }
-
-    @Test
-    void shouldResetOffsetsOfAll() {
+    void shouldListOffsetsOfAllConnectors() {
         Resource listedConnector = Resource.builder()
                 .kind("Connector")
                 .apiVersion("v1")
-                .metadata(Resource.Metadata.builder()
-                        .name("prefix.connector")
-                        .namespace("namespace")
-                        .build())
+                .metadata(Resource.Metadata.builder().name("prefix.connector").build())
                 .build();
-
-        Resource resetResponse = Resource.builder()
-                .kind("ConnectorResetOffsetsResponse")
+        Resource offset = Resource.builder()
+                .kind(CONNECTOR_OFFSET_RESPONSE)
                 .apiVersion("v1")
-                .status(Map.of("code", "Offsets for connector prefix.connector reset successfully"))
+                .metadata(Resource.Metadata.builder().name("prefix.connector").build())
+                .spec(Map.of("topic", "my-topic", "partition", 0, "offset", 42L))
                 .build();
-
         ApiResource apiResource = ApiResource.builder()
                 .kind("Connector")
                 .namespaced(true)
                 .synchronizable(true)
                 .path("connectors")
-                .names(List.of("connects", "connect", "co"))
+                .names(List.of("connectors", "connector", "co"))
                 .build();
 
         when(configService.isCurrentContextValid()).thenReturn(true);
@@ -142,18 +134,18 @@ class ConnectorResetOffsetsTest {
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.listResourcesWithType(any(), any(), any(), any()))
                 .thenReturn(Collections.singletonList(listedConnector));
-        when(resourceService.resetConnectorOffsets(any(), any(), any())).thenReturn(Optional.of(resetResponse));
+        when(resourceService.listConnectorOffsets(any(), any(), any())).thenReturn(List.of(offset));
 
-        CommandLine cmd = new CommandLine(connectorResetOffsets);
+        CommandLine cmd = new CommandLine(connectorListOffsets);
 
         int code = cmd.execute("all", "-n", "namespace");
+
         assertEquals(0, code);
-        verify(formatService)
-                .displayList(CONNECTOR_RESET_OFFSETS_RESPONSE, List.of(resetResponse), TABLE, cmd.getCommandSpec());
+        verify(formatService).displayList(CONNECTOR_OFFSET_RESPONSE, List.of(offset), TABLE, cmd.getCommandSpec());
     }
 
     @Test
-    void shouldNotResetOffsetsWhenHttpClientResponseException() {
+    void shouldNotListOffsetsWhenHttpClientResponseException() {
         ApiResource apiResource = ApiResource.builder()
                 .kind("Connector")
                 .namespaced(true)
@@ -168,7 +160,7 @@ class ConnectorResetOffsetsTest {
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.listResourcesWithType(any(), any(), any(), any())).thenThrow(exception);
 
-        CommandLine cmd = new CommandLine(connectorResetOffsets);
+        CommandLine cmd = new CommandLine(connectorListOffsets);
 
         int code = cmd.execute("all", "-n", "namespace");
 
@@ -182,7 +174,7 @@ class ConnectorResetOffsetsTest {
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.empty());
 
-        CommandLine cmd = new CommandLine(connectorResetOffsets);
+        CommandLine cmd = new CommandLine(connectorListOffsets);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
@@ -194,13 +186,14 @@ class ConnectorResetOffsetsTest {
 
     @Test
     void shouldReturnInvalidCurrentContext() {
-        CommandLine cmd = new CommandLine(connectorResetOffsets);
+        when(configService.isCurrentContextValid()).thenReturn(false);
+
+        CommandLine cmd = new CommandLine(connectorListOffsets);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(false);
-
         int code = cmd.execute("my-connector");
+
         assertEquals(1, code);
         assertTrue(sw.toString()
                 .contains("No valid current context found. "

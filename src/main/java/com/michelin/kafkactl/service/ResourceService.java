@@ -478,6 +478,23 @@ public class ResourceService {
     }
 
     /**
+     * List offsets for a given connector.
+     *
+     * @param namespace The namespace
+     * @param connector The connector name
+     * @param commandSpec The command that triggered the action
+     * @return The connector offsets
+     */
+    public List<Resource> listConnectorOffsets(String namespace, String connector, CommandSpec commandSpec) {
+        try {
+            return namespacedClient.listConnectorOffsets(namespace, connector, loginService.getAuthorization());
+        } catch (HttpClientResponseException exception) {
+            formatService.displayError(exception, CONNECTOR, connector, commandSpec);
+            return List.of();
+        }
+    }
+
+    /**
      * Update the config of a given subject.
      *
      * @param namespace The namespace

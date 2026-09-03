@@ -44,6 +44,7 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
     * [Connect Cluster](#connect-cluster)
         * [Vault](#vault)
     * [Connector](#connector)
+        * [List Offsets](#list-offsets)
         * [Reset Offsets](#reset-offsets)
     * [Delete Records](#delete-records)
     * [Delete](#delete)
@@ -540,6 +541,10 @@ Options:
   -n, --namespace=<optionalNamespace>
                         Override namespace defined in config or YAML resources.
   -v, --verbose         Enable the verbose mode.
+
+Commands:
+  list-offsets   List connector offsets.
+  reset-offsets  Reset connector offsets.
 ```
 
 - `action`: This option specifies the action to execute, which can be `pause`, `resume`, `restart`, `stop`
@@ -552,6 +557,34 @@ kafkactl connector pause myConnector
 kafkactl connector resume myConnector
 kafkactl connector restart myConnector
 kafkactl connector stop myConnector
+```
+
+#### List Offsets
+
+The `list-offsets` command allows you to list the offsets of one or more connectors.
+
+```console
+Usage: kafkactl connector list-offsets [-hv] [-c=<optionalContext>] [-n=<optionalNamespace>] <connectors>...
+
+Description: List connector offsets.
+
+Parameters:
+      <connectors>...   Connector names separated by space or "all" for all connectors.
+
+Options:
+  -c, --context=<optionalContext>
+                        Override context defined in config.
+  -h, --help            Show this help message and exit.
+  -n, --namespace=<optionalNamespace>
+                        Override namespace defined in config or YAML resources.
+  -v, --verbose         Enable the verbose mode.
+```
+
+Example(s):
+
+```console
+kafkactl connector list-offsets myConnector
+kafkactl connector list-offsets all
 ```
 
 #### Reset Offsets

@@ -1687,6 +1687,35 @@ class ResourceServiceTest {
     }
 
     @Test
+    void shouldListConnectorOffsets() {
+        Resource connectorOffset = Resource.builder()
+                .kind("ConnectorOffsetResponse")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("connector").build())
+                .spec(Map.of("topic", "topic", "partition", 0, "offset", 42L))
+                .build();
+        CommandLine cmd = new CommandLine(new Kafkactl());
+
+        when(namespacedClient.listConnectorOffsets(any(), any(), any())).thenReturn(List.of(connectorOffset));
+
+        List<Resource> actual = resourceService.listConnectorOffsets("namespace", "connector", cmd.getCommandSpec());
+
+        assertEquals(List.of(connectorOffset), actual);
+    }
+
+    @Test
+    void shouldNotListConnectorOffsets() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+        when(namespacedClient.listConnectorOffsets(any(), any(), any())).thenThrow(exception);
+
+        List<Resource> actual = resourceService.listConnectorOffsets("namespace", "connector", cmd.getCommandSpec());
+
+        assertTrue(actual.isEmpty());
+        verify(formatService).displayError(exception, CONNECTOR, "connector", cmd.getCommandSpec());
+    }
+
+    @Test
     void shouldUpdateSubjectConfig() {
         Resource updateSubjectConfigResource = Resource.builder()
                 .kind(SUBJECT_CONFIG_STATE)

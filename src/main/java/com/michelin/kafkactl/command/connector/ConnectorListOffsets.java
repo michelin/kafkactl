@@ -20,7 +20,7 @@ package com.michelin.kafkactl.command.connector;
 
 import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR;
-import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR_RESET_OFFSETS_RESPONSE;
+import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR_OFFSET_RESPONSE;
 
 import com.michelin.kafkactl.hook.AuthenticatedHook;
 import com.michelin.kafkactl.model.ApiResource;
@@ -31,23 +31,22 @@ import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.util.List;
-import java.util.Optional;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 
-/** Reset connector offsets subcommand. */
+/** List connector offsets subcommand. */
 @Command(
-        name = "reset-offsets",
+        name = "list-offsets",
         headerHeading = "@|bold Usage|@:",
         synopsisHeading = " ",
         descriptionHeading = "%n@|bold Description|@: ",
-        description = "Reset connector offsets.",
+        description = "List connector offsets.",
         parameterListHeading = "%n@|bold Parameters|@:%n",
         optionListHeading = "%n@|bold Options|@:%n",
         commandListHeading = "%n@|bold Commands|@:%n",
         usageHelpAutoWidth = true)
-public class ConnectorResetOffsets extends AuthenticatedHook {
+public class ConnectorListOffsets extends AuthenticatedHook {
     @Inject
     @ReflectiveAccess
     private ResourceService resourceService;
@@ -60,7 +59,7 @@ public class ConnectorResetOffsets extends AuthenticatedHook {
             index = "0..*",
             description = "Connector names separated by space or \"all\" for all connectors.",
             arity = "1..*")
-    public List<String> connectors;
+    private List<String> connectors;
 
     @Override
     public Integer onAuthSuccess() {
@@ -78,14 +77,13 @@ public class ConnectorResetOffsets extends AuthenticatedHook {
                         .toList();
             }
 
-            List<Resource> resetOffsetsResponses = connectors.stream()
-                    .map(connector -> resourceService.resetConnectorOffsets(namespace, connector, commandSpec))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
+            List<Resource> listOffsetsResponses = connectors.stream()
+                    .flatMap(connector ->
+                            resourceService.listConnectorOffsets(namespace, connector, commandSpec).stream())
                     .toList();
 
-            if (!resetOffsetsResponses.isEmpty()) {
-                formatService.displayList(CONNECTOR_RESET_OFFSETS_RESPONSE, resetOffsetsResponses, TABLE, commandSpec);
+            if (!listOffsetsResponses.isEmpty()) {
+                formatService.displayList(CONNECTOR_OFFSET_RESPONSE, listOffsetsResponses, TABLE, commandSpec);
                 return 0;
             }
 

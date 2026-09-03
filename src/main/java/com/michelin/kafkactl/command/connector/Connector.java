@@ -42,7 +42,7 @@ import picocli.CommandLine.Parameters;
 /** Connectors subcommand. */
 @Command(
         name = "connector",
-        subcommands = {ConnectorResetOffsets.class},
+        subcommands = {ConnectorListOffsets.class, ConnectorResetOffsets.class},
         headerHeading = "@|bold Usage|@:",
         synopsisHeading = " ",
         descriptionHeading = "%n@|bold Description|@: ",
@@ -82,16 +82,15 @@ public class Connector extends AuthenticatedHook {
         }
 
         String namespace = getNamespace();
-        boolean allConnectors = connectors.stream().anyMatch(s -> s.equalsIgnoreCase("ALL"));
 
         try {
-            if (allConnectors) {
-                ApiResource connectType = apiResourcesService
+            if (connectors.stream().anyMatch(connector -> connector.equalsIgnoreCase("ALL"))) {
+                ApiResource connectorType = apiResourcesService
                         .getResourceDefinitionByKind(CONNECTOR)
                         .orElseThrow(() -> new ParameterException(
                                 commandSpec.commandLine(), "The server does not have resource type Connector."));
 
-                connectors = resourceService.listResourcesWithType(connectType, namespace, "*", null).stream()
+                connectors = resourceService.listResourcesWithType(connectorType, namespace, "*", null).stream()
                         .map(resource -> resource.getMetadata().getName())
                         .toList();
             }
