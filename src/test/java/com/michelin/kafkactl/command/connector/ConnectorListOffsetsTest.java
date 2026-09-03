@@ -35,6 +35,8 @@ import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.LoginService;
 import com.michelin.kafkactl.service.ResourceService;
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
@@ -140,6 +142,46 @@ class ConnectorListOffsetsTest {
 
         assertEquals(0, code);
         verify(formatService).displayList(CONNECTOR_OFFSET_RESPONSE, List.of(offset), TABLE, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldNotListOffsetsWhenHttpClientResponseException() {
+        ApiResource apiResource = ApiResource.builder()
+                .kind("Connector")
+                .namespaced(true)
+                .synchronizable(true)
+                .path("connectors")
+                .names(List.of("connectors", "connector", "co"))
+                .build();
+        HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
+
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
+        when(resourceService.listResourcesWithType(any(), any(), any(), any())).thenThrow(exception);
+
+        CommandLine cmd = new CommandLine(connectorListOffsets);
+
+        int code = cmd.execute("all", "-n", "namespace");
+
+        assertEquals(1, code);
+        verify(formatService).displayError(exception, cmd.getCommandSpec());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenConnectorResourceDoesNotExist() {
+        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+        when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.empty());
+
+        CommandLine cmd = new CommandLine(connectorListOffsets);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        int code = cmd.execute("all", "-n", "namespace");
+
+        assertEquals(2, code);
+        assertTrue(sw.toString().contains("The server does not have resource type Connector."));
     }
 
     @Test
