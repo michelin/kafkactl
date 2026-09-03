@@ -20,8 +20,10 @@ package com.michelin.kafkactl.command.connector;
 
 import static com.michelin.kafkactl.model.Output.TABLE;
 import static com.michelin.kafkactl.util.constant.ResourceKind.CHANGE_CONNECTOR_STATE;
+import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR;
 
 import com.michelin.kafkactl.hook.AuthenticatedHook;
+import com.michelin.kafkactl.model.ApiResource;
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
@@ -82,8 +84,16 @@ public class Connector extends AuthenticatedHook {
         String namespace = getNamespace();
 
         try {
-            connectors = ConnectorCommandSupport.resolveConnectors(
-                    connectors, namespace, apiResourcesService, resourceService, commandSpec);
+            if (connectors.stream().anyMatch(connector -> connector.equalsIgnoreCase("ALL"))) {
+                ApiResource connectorType = apiResourcesService
+                        .getResourceDefinitionByKind(CONNECTOR)
+                        .orElseThrow(() -> new ParameterException(
+                                commandSpec.commandLine(), "The server does not have resource type Connector."));
+
+                connectors = resourceService.listResourcesWithType(connectorType, namespace, "*", null).stream()
+                        .map(resource -> resource.getMetadata().getName())
+                        .toList();
+            }
 
             List<Resource> changeConnectorResponses = connectors.stream()
                     .map(connector -> Resource.builder()

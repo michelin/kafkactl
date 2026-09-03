@@ -18,15 +18,22 @@
  */
 package com.michelin.kafkactl.command.connector;
 
-import static com.michelin.kafkactl.command.connector.ConnectorCommandSupport.ConnectorOffsetOperation.RESET;
+import static com.michelin.kafkactl.model.Output.TABLE;
+import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR;
+import static com.michelin.kafkactl.util.constant.ResourceKind.CONNECTOR_RESET_OFFSETS_RESPONSE;
 
 import com.michelin.kafkactl.hook.AuthenticatedHook;
+import com.michelin.kafkactl.model.ApiResource;
+import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.service.FormatService;
 import com.michelin.kafkactl.service.ResourceService;
 import io.micronaut.core.annotation.ReflectiveAccess;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 
 /** Reset connector offsets subcommand. */
@@ -59,7 +66,33 @@ public class ConnectorResetOffsets extends AuthenticatedHook {
     public Integer onAuthSuccess() {
         String namespace = getNamespace();
 
-        return ConnectorCommandSupport.executeOffsetOperation(
-                connectors, namespace, apiResourcesService, resourceService, formatService, commandSpec, RESET);
+        try {
+            if (connectors.stream().anyMatch(connector -> connector.equalsIgnoreCase("ALL"))) {
+                ApiResource connectorType = apiResourcesService
+                        .getResourceDefinitionByKind(CONNECTOR)
+                        .orElseThrow(() -> new ParameterException(
+                                commandSpec.commandLine(), "The server does not have resource type Connector."));
+
+                connectors = resourceService.listResourcesWithType(connectorType, namespace, "*", null).stream()
+                        .map(resource -> resource.getMetadata().getName())
+                        .toList();
+            }
+
+            List<Resource> resetOffsetsResponses = connectors.stream()
+                    .map(connector -> resourceService.resetConnectorOffsets(namespace, connector, commandSpec))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .toList();
+
+            if (!resetOffsetsResponses.isEmpty()) {
+                formatService.displayList(CONNECTOR_RESET_OFFSETS_RESPONSE, resetOffsetsResponses, TABLE, commandSpec);
+                return 0;
+            }
+
+            return 1;
+        } catch (HttpClientResponseException exception) {
+            formatService.displayError(exception, commandSpec);
+            return 1;
+        }
     }
 }
