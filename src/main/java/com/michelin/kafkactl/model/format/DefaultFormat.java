@@ -67,7 +67,9 @@ public class DefaultFormat implements OutputFormatStrategy {
 
         if (cell.isObject()) {
             List<String> children = new ArrayList<>();
-            cell.fields().forEachRemaining(entry -> children.add(entry.getKey() + "=" + entry.getValue().asText()));
+            cell.fields()
+                    .forEachRemaining(entry ->
+                            children.add(entry.getKey() + "=" + entry.getValue().asText()));
             return String.join(",", children);
         }
 

@@ -208,11 +208,11 @@ class FormatServiceTest {
 
         assertTrue(sw.toString().contains("PARTITION"));
         assertTrue(sw.toString().contains("OFFSET"));
-                assertTrue(sw.toString().contains("task.id=0"));
-                assertTrue(sw.toString().contains("task.generation=1"));
-                assertTrue(sw.toString().contains("current.iteration=450"));
-                assertFalse(sw.toString().contains("{"));
-                assertFalse(sw.toString().contains("}"));
+        assertTrue(sw.toString().contains("task.id=0"));
+        assertTrue(sw.toString().contains("task.generation=1"));
+        assertTrue(sw.toString().contains("current.iteration=450"));
+        assertFalse(sw.toString().contains("{"));
+        assertFalse(sw.toString().contains("}"));
     }
 
     @Test
