@@ -190,6 +190,32 @@ class FormatServiceTest {
     }
 
     @Test
+    void shouldDisplayConnectorOffsetsWithObjectCells() {
+        Resource resource = Resource.builder()
+                .kind("ConnectorOffsetResponse")
+                .apiVersion("v1")
+                .spec(Map.of(
+                        "partition", Map.of("task.id", 0),
+                        "offset", Map.of("task.generation", 1, "current.iteration", 450)))
+                .build();
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setOut(new PrintWriter(sw));
+
+        formatService.displayList(
+                "ConnectorOffsetResponse", Collections.singletonList(resource), TABLE, cmd.getCommandSpec());
+
+        assertTrue(sw.toString().contains("PARTITION"));
+        assertTrue(sw.toString().contains("OFFSET"));
+                assertTrue(sw.toString().contains("task.id=0"));
+                assertTrue(sw.toString().contains("task.generation=1"));
+                assertTrue(sw.toString().contains("current.iteration=450"));
+                assertFalse(sw.toString().contains("{"));
+                assertFalse(sw.toString().contains("}"));
+    }
+
+    @Test
     void shouldDisplayConsumerGroupListWithOffsets() {
         Resource firstOffset = Resource.builder()
                 .kind("ConsumerGroup")
