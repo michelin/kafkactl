@@ -1696,11 +1696,31 @@ class ResourceServiceTest {
                 .build();
         CommandLine cmd = new CommandLine(new Kafkactl());
 
-        when(namespacedClient.listConnectorOffsets(any(), any(), any())).thenReturn(List.of(connectorOffset));
+        when(namespacedClient.listConnectorOffsets(any(), any(), any()))
+                .thenReturn(HttpResponse.ok(List.of(connectorOffset)));
 
         List<Resource> actual = resourceService.listConnectorOffsets("namespace", "connector", cmd.getCommandSpec());
 
         assertEquals(List.of(connectorOffset), actual);
+    }
+
+    @Test
+    void shouldNotListConnectorOffsetsNotFound() {
+        CommandLine cmd = new CommandLine(new Kafkactl());
+
+        when(namespacedClient.listConnectorOffsets(any(), any(), any()))
+                .thenReturn(HttpResponse.notFound(List.<Resource>of()));
+
+        List<Resource> actual = resourceService.listConnectorOffsets("namespace", "connector", cmd.getCommandSpec());
+
+        assertTrue(actual.isEmpty());
+        verify(formatService)
+                .displayError(
+                        argThat(exception -> exception.getStatus().equals(HttpStatus.NOT_FOUND)
+                                && exception.getMessage().equals("Not Found")),
+                        eq(CONNECTOR),
+                        eq("connector"),
+                        eq(cmd.getCommandSpec()));
     }
 
     @Test

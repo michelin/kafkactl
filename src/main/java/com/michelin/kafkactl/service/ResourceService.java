@@ -487,7 +487,15 @@ public class ResourceService {
      */
     public List<Resource> listConnectorOffsets(String namespace, String connector, CommandSpec commandSpec) {
         try {
-            return namespacedClient.listConnectorOffsets(namespace, connector, loginService.getAuthorization());
+            HttpResponse<List<Resource>> response =
+                    namespacedClient.listConnectorOffsets(namespace, connector, loginService.getAuthorization());
+
+            // Micronaut does not throw exception on 404, so produce a 404 manually
+            if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
+                throw new HttpClientResponseException(response.reason(), response);
+            }
+
+            return response.getBody().orElse(List.of());
         } catch (HttpClientResponseException exception) {
             formatService.displayError(exception, CONNECTOR, connector, commandSpec);
             return List.of();
