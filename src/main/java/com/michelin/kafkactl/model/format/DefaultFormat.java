@@ -65,6 +65,14 @@ public class DefaultFormat implements OutputFormatStrategy {
             return String.join(",", children);
         }
 
+        if (cell.isObject()) {
+            List<String> children = new ArrayList<>();
+            cell.properties()
+                    .forEach(entry ->
+                            children.add(entry.getKey() + "=" + entry.getValue().asText()));
+            return String.join(",", children);
+        }
+
         return cell.getNodeType().equals(JsonNodeType.NULL) ? EMPTY_STRING : cell.asText();
     }
 }

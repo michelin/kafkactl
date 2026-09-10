@@ -478,6 +478,31 @@ public class ResourceService {
     }
 
     /**
+     * List offsets for a given connector.
+     *
+     * @param namespace The namespace
+     * @param connector The connector name
+     * @param commandSpec The command that triggered the action
+     * @return The connector offsets
+     */
+    public List<Resource> listConnectorOffsets(String namespace, String connector, CommandSpec commandSpec) {
+        try {
+            HttpResponse<List<Resource>> response =
+                    namespacedClient.listConnectorOffsets(namespace, connector, loginService.getAuthorization());
+
+            // Micronaut does not throw exception on 404, so produce a 404 manually
+            if (response.getStatus().equals(HttpStatus.NOT_FOUND)) {
+                throw new HttpClientResponseException(response.reason(), response);
+            }
+
+            return response.getBody().orElse(List.of());
+        } catch (HttpClientResponseException exception) {
+            formatService.displayError(exception, CONNECTOR, connector, commandSpec);
+            return List.of();
+        }
+    }
+
+    /**
      * Update the config of a given subject.
      *
      * @param namespace The namespace

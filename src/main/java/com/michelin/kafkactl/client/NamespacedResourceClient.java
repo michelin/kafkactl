@@ -254,6 +254,18 @@ public interface NamespacedResourceClient {
             String namespace, String connector, @Header("Authorization") String token);
 
     /**
+     * List offsets for a given connector.
+     *
+     * @param namespace The namespace
+     * @param connector The connector to list offsets for
+     * @param token The auth token
+     * @return The connector offsets
+     */
+    @Get("{namespace}/connectors/{connector}/offsets")
+    HttpResponse<List<Resource>> listConnectorOffsets(
+            String namespace, String connector, @Header("Authorization") String token);
+
+    /**
      * List all available connect clusters for vaulting.
      *
      * @param namespace The namespace

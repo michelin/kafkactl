@@ -70,16 +70,15 @@ public class ConnectorResetOffsets extends AuthenticatedHook {
     @Override
     public Integer onAuthSuccess() {
         String namespace = getNamespace();
-        boolean allConnectors = connectors.stream().anyMatch(s -> s.equalsIgnoreCase("ALL"));
 
         try {
-            if (allConnectors) {
-                ApiResource connectType = apiResourcesService
+            if (connectors.stream().anyMatch(connector -> connector.equalsIgnoreCase("ALL"))) {
+                ApiResource connectorType = apiResourcesService
                         .getResourceDefinitionByKind(CONNECTOR)
                         .orElseThrow(() -> new ParameterException(
                                 commandSpec.commandLine(), "The server does not have resource type Connector."));
 
-                connectors = resourceService.listResourcesWithType(connectType, namespace, "*", null).stream()
+                connectors = resourceService.listResourcesWithType(connectorType, namespace, "*", null).stream()
                         .map(resource -> resource.getMetadata().getName())
                         .toList();
             }
