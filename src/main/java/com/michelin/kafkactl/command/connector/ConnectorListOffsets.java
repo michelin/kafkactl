@@ -61,6 +61,11 @@ public class ConnectorListOffsets extends AuthenticatedHook {
             arity = "1..*")
     private List<String> connectors;
 
+    /**
+     * Run the "connector list-offsets" command.
+     *
+     * @return The command return code
+     */
     @Override
     public Integer onAuthSuccess() {
         String namespace = getNamespace();

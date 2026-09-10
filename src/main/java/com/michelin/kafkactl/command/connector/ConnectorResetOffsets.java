@@ -62,6 +62,11 @@ public class ConnectorResetOffsets extends AuthenticatedHook {
             arity = "1..*")
     public List<String> connectors;
 
+    /**
+     * Run the "connector reset-offsets" command.
+     *
+     * @return The command return code
+     */
     @Override
     public Integer onAuthSuccess() {
         String namespace = getNamespace();
