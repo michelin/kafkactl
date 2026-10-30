@@ -68,18 +68,17 @@ class SubjectConfigUpdateTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(false);
+        when(configService.getMissingCurrentContextProperty()).thenReturn(Optional.of("API"));
 
         int code = cmd.execute("mySubject", "--compatibility", "backward");
         assertEquals(1, code);
         assertTrue(sw.toString()
-                .contains("No valid current context found. "
+                .contains("No API set in the current context. "
                         + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
     @Test
     void shouldNotUpdateConfigWhenNotAuthenticated() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(subjectConfigUpdate);
@@ -100,7 +99,6 @@ class SubjectConfigUpdateTest {
                 .spec(Collections.emptyMap())
                 .build();
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.updateSubjectConfig(any(), any(), any(), any(), any()))
                 .thenReturn(Optional.of(resource));

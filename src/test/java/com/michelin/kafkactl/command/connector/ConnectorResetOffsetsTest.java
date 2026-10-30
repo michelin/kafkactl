@@ -75,7 +75,6 @@ class ConnectorResetOffsetsTest {
 
     @Test
     void shouldNotResetOffsetsWhenEmptyResponse() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.resetConnectorOffsets(any(), any(), any())).thenReturn(Optional.empty());
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
@@ -100,7 +99,6 @@ class ConnectorResetOffsetsTest {
                 .status(Map.of("code", "Offsets for connector my-connector reset successfully"))
                 .build();
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.resetConnectorOffsets(any(), any(), any())).thenReturn(Optional.of(resource));
 
@@ -137,7 +135,6 @@ class ConnectorResetOffsetsTest {
                 .names(List.of("connects", "connect", "co"))
                 .build();
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.listResourcesWithType(any(), any(), any(), any()))
@@ -163,7 +160,6 @@ class ConnectorResetOffsetsTest {
                 .build();
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.listResourcesWithType(any(), any(), any(), any())).thenThrow(exception);
@@ -178,7 +174,6 @@ class ConnectorResetOffsetsTest {
 
     @Test
     void shouldThrowExceptionWhenConnectorResourceDoesNotExist() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.empty());
 
@@ -198,12 +193,12 @@ class ConnectorResetOffsetsTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(false);
+        when(configService.getMissingCurrentContextProperty()).thenReturn(Optional.of("API"));
 
         int code = cmd.execute("my-connector");
         assertEquals(1, code);
         assertTrue(sw.toString()
-                .contains("No valid current context found. "
+                .contains("No API set in the current context. "
                         + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 }

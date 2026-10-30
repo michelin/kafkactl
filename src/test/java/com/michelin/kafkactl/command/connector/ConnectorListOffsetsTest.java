@@ -82,7 +82,6 @@ class ConnectorListOffsetsTest {
                 .spec(Map.of("topic", "my-topic", "partition", 0, "offset", 42L))
                 .build();
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.listConnectorOffsets(any(), any(), any())).thenReturn(List.of(offset));
 
@@ -96,7 +95,6 @@ class ConnectorListOffsetsTest {
 
     @Test
     void shouldNotListOffsetsWhenEmptyResponse() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.listConnectorOffsets(any(), any(), any())).thenReturn(List.of());
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
@@ -129,7 +127,6 @@ class ConnectorListOffsetsTest {
                 .names(List.of("connectors", "connector", "co"))
                 .build();
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.listResourcesWithType(any(), any(), any(), any()))
@@ -155,7 +152,6 @@ class ConnectorListOffsetsTest {
                 .build();
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.listResourcesWithType(any(), any(), any(), any())).thenThrow(exception);
@@ -170,7 +166,6 @@ class ConnectorListOffsetsTest {
 
     @Test
     void shouldThrowExceptionWhenConnectorResourceDoesNotExist() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.empty());
 
@@ -186,7 +181,7 @@ class ConnectorListOffsetsTest {
 
     @Test
     void shouldReturnInvalidCurrentContext() {
-        when(configService.isCurrentContextValid()).thenReturn(false);
+        when(configService.getMissingCurrentContextProperty()).thenReturn(Optional.of("API"));
 
         CommandLine cmd = new CommandLine(connectorListOffsets);
         StringWriter sw = new StringWriter();
@@ -196,7 +191,7 @@ class ConnectorListOffsetsTest {
 
         assertEquals(1, code);
         assertTrue(sw.toString()
-                .contains("No valid current context found. "
+                .contains("No API set in the current context. "
                         + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 }

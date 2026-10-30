@@ -77,18 +77,17 @@ class GetTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(false);
+        when(configService.getMissingCurrentContextProperty()).thenReturn(Optional.of("API"));
 
         int code = cmd.execute("topics");
         assertEquals(1, code);
         assertTrue(sw.toString()
-                .contains("No valid current context found. "
+                .contains("No API set in the current context. "
                         + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
     @Test
     void shouldNotGetWhenNotAuthenticated() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(get);
@@ -97,6 +96,29 @@ class GetTest {
 
         int code = cmd.execute("topics");
         assertEquals(1, code);
+    }
+
+    @Test
+    void shouldNotGetWhenNoNamespaceSet() {
+        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+        when(apiResourcesService.getResourceDefinitionByName(any()))
+                .thenReturn(Optional.of(ApiResource.builder()
+                        .kind("Topic")
+                        .path("topics")
+                        .names(List.of("topics", "topic", "to"))
+                        .namespaced(true)
+                        .synchronizable(true)
+                        .build()));
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn(null);
+
+        CommandLine cmd = new CommandLine(get);
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        int code = cmd.execute("topics");
+        assertEquals(2, code);
+        assertTrue(sw.toString()
+                .contains("No namespace set. Use the \"-n\" option or set a namespace in the current context."));
     }
 
     @Test
@@ -112,7 +134,6 @@ class GetTest {
 
     @Test
     void shouldNotGetWhenServerNotHaveResourceType() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.empty());
 
@@ -127,7 +148,6 @@ class GetTest {
 
     @Test
     void shouldNotGetWhenHttpClientThrowException() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -164,7 +184,6 @@ class GetTest {
 
     @Test
     void shouldGetOneResource() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -197,7 +216,6 @@ class GetTest {
 
     @Test
     void shouldGetAllTopics() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -223,7 +241,6 @@ class GetTest {
 
     @Test
     void shouldGetAll() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
@@ -256,7 +273,6 @@ class GetTest {
 
     @Test
     void shouldGetWithSearch() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -289,7 +305,6 @@ class GetTest {
 
     @Test
     void shouldGetWithMultipleSearch() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()

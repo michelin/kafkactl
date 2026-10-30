@@ -88,12 +88,12 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(false);
+        when(configService.getMissingCurrentContextProperty()).thenReturn(Optional.of("API"));
 
         int code = cmd.execute("topic", "myTopic");
         assertEquals(1, code);
         assertTrue(sw.toString()
-                .contains("No valid current context found. "
+                .contains("No API set in the current context. "
                         + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
@@ -103,7 +103,6 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         int code = cmd.execute("topic", "myTopic");
@@ -116,7 +115,6 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         int code = cmd.execute("-f", "src/test/resources/topics/unknown.yml");
@@ -125,7 +123,6 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByFileWhenYmlFileNotFound() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(fileService.computeYamlFileList(any(), anyBoolean())).thenReturn(Collections.emptyList());
@@ -145,7 +142,6 @@ class DeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -173,7 +169,6 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByNameWhenInvalidResources() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.empty());
 
@@ -188,7 +183,6 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByFileWhenNamespaceMismatch() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -218,7 +212,6 @@ class DeleteTest {
 
     @Test
     void shouldDeleteByFile() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -256,7 +249,6 @@ class DeleteTest {
 
     @Test
     void shouldDeleteOneVersionByFile() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -294,7 +286,6 @@ class DeleteTest {
 
     @Test
     void shouldDeleteByName() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -319,7 +310,6 @@ class DeleteTest {
 
     @Test
     void shouldForceDeleteConnectorByName() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -347,7 +337,6 @@ class DeleteTest {
 
     @Test
     void shouldForceDeleteConnectClusterByName() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -375,7 +364,6 @@ class DeleteTest {
 
     @Test
     void shouldCascadeDeleteConnectClusterByName() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -403,7 +391,6 @@ class DeleteTest {
 
     @Test
     void shouldCascadeForceDeleteConnectClusterByName() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -431,7 +418,6 @@ class DeleteTest {
 
     @Test
     void shouldDeleteOneVersionByName() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -456,7 +442,6 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByFileWhenInDryRunMode() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -492,7 +477,6 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByFileWhenFail() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -528,7 +512,6 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByFileWhenHttpClientResponseException() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(fileService.computeYamlFileList(any(), anyBoolean()))
                 .thenReturn(Collections.singletonList(new File("path")));
@@ -558,7 +541,6 @@ class DeleteTest {
 
     @Test
     void shouldDeleteByNameWithWildcard() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -583,7 +565,6 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByNameWithWildcardWithoutExecute() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
@@ -601,7 +582,6 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByNameWithQuestionMarkWildcardWithoutExecute() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         CommandLine cmd = new CommandLine(delete);
@@ -619,7 +599,6 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByNameWithWildcardInDryRunMode() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -645,7 +624,6 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByNameWithWildcardWithExecuteInDryRunMode() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()

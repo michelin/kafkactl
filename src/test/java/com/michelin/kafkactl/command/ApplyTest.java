@@ -84,12 +84,12 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(false);
+        when(configService.getMissingCurrentContextProperty()).thenReturn(Optional.of("API"));
 
         int code = cmd.execute();
         assertEquals(1, code);
         assertTrue(sw.toString()
-                .contains("No valid current context found. "
+                .contains("No API set in the current context. "
                         + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
@@ -99,7 +99,6 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         int code = cmd.execute();
@@ -112,7 +111,6 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         int code = cmd.execute();
@@ -126,7 +124,6 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenThrow(new ParameterException(
@@ -143,7 +140,6 @@ class ApplyTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -167,7 +163,6 @@ class ApplyTest {
 
     @Test
     void shouldNotApplyWhenNamespaceMismatch() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -206,7 +201,6 @@ class ApplyTest {
                 .spec(Collections.emptyMap())
                 .build();
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenReturn(Collections.singletonList(resource));
@@ -226,7 +220,6 @@ class ApplyTest {
 
     @Test
     void shouldApply() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -267,7 +260,6 @@ class ApplyTest {
 
     @Test
     void shouldApplyDryRun() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -309,7 +301,6 @@ class ApplyTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE_FIELD, "src/test/resources/person.avsc");
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -352,7 +343,6 @@ class ApplyTest {
 
     @Test
     void shouldApplyInlineSchema() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -399,7 +389,6 @@ class ApplyTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE_FIELD, "src/test/resources/not-exist.avsc");
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()

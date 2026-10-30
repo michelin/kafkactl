@@ -25,6 +25,7 @@ import com.michelin.kafkactl.service.ConfigService;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import jakarta.inject.Inject;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -56,17 +57,21 @@ public abstract class ValidCurrentContextHook extends HelpHook implements Callab
             }
         }
 
-        if (!configService.isCurrentContextValid()) {
+        Optional<String> missingProperty = configService.getMissingCurrentContextProperty();
+        if (missingProperty.isPresent()) {
             CommandLine configSubcommand = new CommandLine(new Config());
             CommandLine configUseContextSubcommand = new CommandLine(new ConfigUseContext());
             commandSpec
                     .commandLine()
                     .getErr()
-                    .println("No valid current context found. Use \"kafkactl "
+                    .println("No "
+                            + missingProperty.get()
+                            + " set in the current context. Use \"kafkactl "
                             + configSubcommand.getCommandName() + " "
                             + configUseContextSubcommand.getCommandName() + "\" to set a valid context.");
             return 1;
         }
+
         return onContextValid();
     }
 

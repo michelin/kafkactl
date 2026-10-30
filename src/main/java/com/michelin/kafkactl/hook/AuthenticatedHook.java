@@ -69,7 +69,14 @@ public abstract class AuthenticatedHook extends ValidCurrentContextHook {
      * @return The current namespace
      */
     protected String getNamespace() {
-        return namespaceMixin.optionalNamespace.orElse(kafkactlProperties.getCurrentNamespace());
+        String namespace = namespaceMixin.optionalNamespace.orElse(kafkactlProperties.getCurrentNamespace());
+        if (namespace == null) {
+            throw new ParameterException(
+                    commandSpec.commandLine(),
+                    "No namespace set. Use the \"-n\" option or set a namespace in the current context.");
+        }
+
+        return namespace;
     }
 
     /**

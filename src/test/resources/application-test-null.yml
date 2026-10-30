@@ -1,0 +1,10 @@
+kafkactl:
+  contexts:
+  - name: "dev"
+    context:
+      api: null
+      user-token: null
+      namespace: null
+  current-namespace: null
+  api: null
+  user-token: null
