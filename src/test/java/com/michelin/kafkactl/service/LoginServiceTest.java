@@ -190,7 +190,7 @@ class LoginServiceTest {
         incompleteResponse.setAccessToken("accessToken");
 
         when(kafkactlProperties.getConfigDirectory()).thenReturn("src/test/resources/fake-login");
-        when(clusterResourceClient.login(any())).thenReturn(null, incompleteResponse);
+        when(clusterResourceClient.login(any())).thenReturn(null).thenReturn(incompleteResponse);
 
         CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
