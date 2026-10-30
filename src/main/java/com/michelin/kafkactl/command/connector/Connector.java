@@ -108,8 +108,7 @@ public class Connector extends AuthenticatedHook {
                             changeConnectorStateRequest.getMetadata().getName(),
                             changeConnectorStateRequest,
                             commandSpec))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
+                    .flatMap(Optional::stream)
                     .toList();
 
             if (!changeConnectorResponses.isEmpty()) {

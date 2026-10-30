@@ -91,7 +91,7 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
 
 You can download Kafkactl from the [GitHub releases page](https://github.com/michelin/kafkactl/releases). It is available in the following formats:
 
-- JAR (requires Java 21)
+- JAR (requires Java 25)
 - Windows
 - Linux AMD64 (statically linked with Musl)
 - Linux ARM64

@@ -20,7 +20,6 @@ package com.michelin.kafkactl.client;
 
 import com.michelin.kafkactl.model.Resource;
 import com.michelin.kafkactl.model.request.DeleteResourceRequest;
-import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Delete;
@@ -34,6 +33,7 @@ import io.micronaut.http.client.exceptions.ReadTimeoutException;
 import io.micronaut.retry.annotation.Retryable;
 import java.util.List;
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 /** Namespaced resource client. */
 @Client("${kafkactl.api}/api/namespaces/")

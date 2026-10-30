@@ -49,7 +49,7 @@ public class PeriodFormat implements OutputFormatStrategy {
             output = days > 0 ? (days + "d") : "";
             output += hours > 0 ? (hours + "h") : "";
             output += minutes > 0 ? (minutes + "m") : "";
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException _) {
             output = EMPTY_STRING;
         }
 

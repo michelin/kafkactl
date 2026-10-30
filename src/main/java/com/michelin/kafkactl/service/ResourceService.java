@@ -36,7 +36,6 @@ import com.michelin.kafkactl.model.SubjectCompatibility;
 import com.michelin.kafkactl.model.request.DeleteResourceRequest;
 import io.confluent.kafka.schemaregistry.avro.AvroSchema;
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference;
-import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpResponse;
@@ -49,6 +48,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.jspecify.annotations.Nullable;
 import picocli.CommandLine;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ParameterException;
@@ -853,7 +853,7 @@ public class ResourceService {
         try {
             return Files.readString(
                     new File(resource.getSpec().get(SCHEMA_FILE_FIELD).toString()).toPath());
-        } catch (Exception e) {
+        } catch (Exception _) {
             throw new ParameterException(
                     commandSpec.commandLine(),
                     "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE_FIELD)

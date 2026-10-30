@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
 # Use application.jar as the name to comply with legacy Micronaut Dockerfile
 COPY build/libs/kafkactl-*.jar /home/app/application.jar

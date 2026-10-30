@@ -47,7 +47,7 @@ public class AgoFormat implements OutputFormatStrategy {
             StdDateFormat sdf = new StdDateFormat();
             Date d = sdf.parse(cell.asText());
             output = new PrettyTime().format(d);
-        } catch (ParseException e) {
+        } catch (ParseException _) {
             output = EMPTY_STRING;
         }
 

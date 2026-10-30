@@ -18,17 +18,21 @@
  */
 package com.michelin.kafkactl.model;
 
-import io.micronaut.core.annotation.Introspected;
+import io.micronaut.core.annotation.ReflectiveAccess;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /** Api resource. */
 @Getter
 @Setter
 @Builder
-@Introspected
+@ReflectiveAccess
+@NoArgsConstructor
+@AllArgsConstructor
 public class ApiResource {
     private String kind;
     private boolean namespaced;

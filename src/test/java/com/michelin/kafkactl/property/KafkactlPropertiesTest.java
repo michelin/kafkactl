@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
 
 import com.michelin.kafkactl.service.SystemService;
+import java.io.File;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
@@ -48,10 +49,7 @@ class KafkactlPropertiesTest {
             mocked.when(() -> SystemService.getEnv(KAFKACTL_CONFIG)).thenReturn("src/main/resources/config.yml");
 
             String actual = kafkactlProperties.getConfigDirectory();
-            assertEquals(
-                    "src" + System.getProperty("file.separator") + "main" + System.getProperty("file.separator")
-                            + "resources",
-                    actual);
+            assertEquals("src" + File.separator + "main" + File.separator + "resources", actual);
         }
     }
 

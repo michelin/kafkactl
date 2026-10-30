@@ -12,7 +12,7 @@ Single-module Gradle Micronaut Picocli CLI project with the base package `com.mi
 
 ## Coding Standards
 
-- Target Java 21.
+- Target Java 25.
 - Never use `var`. Always declare variables with their explicit type.
 - Use Lombok for models and loggers (`@Data`, `@Builder`, `@Slf4j`, etc.).
 - Use `@Inject` field injection in Picocli commands, and explicit constructor injection in other beans.

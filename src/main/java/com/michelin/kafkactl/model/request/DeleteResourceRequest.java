@@ -19,10 +19,10 @@
 package com.michelin.kafkactl.model.request;
 
 import io.micronaut.core.annotation.Introspected;
-import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.annotation.Header;
 import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.QueryValue;
+import org.jspecify.annotations.Nullable;
 
 /** Delete resource request. */
 @Introspected

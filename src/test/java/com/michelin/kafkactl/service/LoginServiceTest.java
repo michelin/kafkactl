@@ -43,7 +43,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -66,7 +66,7 @@ class LoginServiceTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        backUpJwt = Files.readString(Paths.get("src/test/resources/fake-login/jwt"));
+        backUpJwt = Files.readString(Path.of("src/test/resources/fake-login/jwt"));
     }
 
     @AfterEach
