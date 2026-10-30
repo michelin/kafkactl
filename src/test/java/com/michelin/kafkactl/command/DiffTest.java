@@ -661,7 +661,7 @@ class DiffTest {
         assertEquals(0, code);
         assertTrue(sw.toString().contains("--- Topic/prefix.topic-LIVE"));
         assertTrue(sw.toString().contains("+++ Topic/prefix.topic-MERGED"));
-        assertTrue(sw.toString().contains("@@ -1,0 +1,11 @@"));
+        assertTrue(sw.toString().contains("@@ -0,0 +1,11 @@"));
         assertTrue(sw.toString().contains("+---"));
         assertTrue(sw.toString().contains("+apiVersion: v1"));
         assertTrue(sw.toString().contains("+kind: Topic"));
