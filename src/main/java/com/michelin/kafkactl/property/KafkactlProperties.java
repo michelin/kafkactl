@@ -26,8 +26,10 @@ import io.micronaut.core.util.StringUtils;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /** Kafkactl properties. */
@@ -75,6 +77,8 @@ public class KafkactlProperties {
     @Getter
     @Setter
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Introspected
     public static class ContextsProperties {
         private String name;
@@ -83,6 +87,8 @@ public class KafkactlProperties {
         @Getter
         @Setter
         @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
         @Introspected
         @ConfigurationProperties("context")
         public static class ContextProperties {

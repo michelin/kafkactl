@@ -173,7 +173,7 @@ class ConfigServiceTest {
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        when(kafkactlProperties.getConfigPath()).thenReturn("src/test/resources/config.yml");
+        when(kafkactlProperties.getConfigPath()).thenReturn("src/test/resources/application-test.yml");
 
         String backUp = Files.readString(Path.of(kafkactlProperties.getConfigPath()));
 

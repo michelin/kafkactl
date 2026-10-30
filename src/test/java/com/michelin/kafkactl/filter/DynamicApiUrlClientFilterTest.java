@@ -19,25 +19,19 @@
 package com.michelin.kafkactl.filter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.property.KafkactlProperties;
 import io.micronaut.http.HttpRequest;
-import io.micronaut.http.HttpResponse;
 import io.micronaut.http.MutableHttpRequest;
 import io.micronaut.http.filter.ClientFilterChain;
-import java.net.URI;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.reactivestreams.Publisher;
 
 @ExtendWith(MockitoExtension.class)
 class DynamicApiUrlClientFilterTest {
@@ -47,131 +41,26 @@ class DynamicApiUrlClientFilterTest {
     @Mock
     private ClientFilterChain chain;
 
+    @InjectMocks
     private DynamicApiUrlClientFilter filter;
 
-    @BeforeEach
-    void setUp() {
-        filter = new DynamicApiUrlClientFilter();
-        filter.kafkactlProperties = kafkactlProperties;
-    }
-
-    @Test
-    void shouldRewriteWhenContextSwitchChangesApi() throws Exception {
-        // Given: Original config has localhost:8080, but context switched to localhost:8085
+    @ParameterizedTest
+    @CsvSource({
+        "http://localhost:8085, http://localhost:8080/api/namespaces/test/topics, http://localhost:8085/api/namespaces/test/topics",
+        "http://localhost:8080, http://localhost:8080/api/topics, http://localhost:8080/api/topics",
+        "http://localhost:8085, http://localhost:8080/api/topics?dryrun=true&name=test, http://localhost:8085/api/topics?dryrun=true&name=test",
+        "http://localhost:8085, http://localhost:8080/api/namespaces/test/topics/my-topic, http://localhost:8085/api/namespaces/test/topics/my-topic",
+        "http://api.example.com:8080, http://localhost:8080/login, http://api.example.com:8080/login"
+    })
+    void shouldRewriteRequestUriToCurrentApi(String currentApi, String requestUri, String expectedUri) {
         filter.originalApiUrl = "http://localhost:8080";
-        when(kafkactlProperties.getApi()).thenReturn("http://localhost:8085");
+        when(kafkactlProperties.getApi()).thenReturn(currentApi);
 
-        @SuppressWarnings("unchecked")
-        Publisher<HttpResponse<?>> mockPublisher = mock(Publisher.class);
-        doReturn(mockPublisher).when(chain).proceed(any(MutableHttpRequest.class));
+        MutableHttpRequest<?> request = HttpRequest.GET(requestUri);
 
-        // When: Making a request
-        MutableHttpRequest<?> request = HttpRequest.GET(new URI("http://localhost:8080/api/namespaces/test/topics"));
         filter.doFilter(request, chain);
 
-        // Then: The request URI should be rewritten to localhost:8085
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<MutableHttpRequest<?>> captor = ArgumentCaptor.forClass(MutableHttpRequest.class);
-        verify(chain).proceed(captor.capture());
-
-        URI rewrittenUri = captor.getValue().getUri();
-        assertEquals("http", rewrittenUri.getScheme());
-        assertEquals("localhost", rewrittenUri.getHost());
-        assertEquals(8085, rewrittenUri.getPort());
-        assertEquals("/api/namespaces/test/topics", rewrittenUri.getPath());
-    }
-
-    @Test
-    void shouldNotRewriteWhenNoContextSwitch() throws Exception {
-        // Given: Original and current API are the same (no context switch)
-        filter.originalApiUrl = "http://localhost:8080";
-        when(kafkactlProperties.getApi()).thenReturn("http://localhost:8080");
-
-        @SuppressWarnings("unchecked")
-        Publisher<HttpResponse<?>> mockPublisher = mock(Publisher.class);
-        doReturn(mockPublisher).when(chain).proceed(any(MutableHttpRequest.class));
-
-        // When: Making a request
-        MutableHttpRequest<?> request = HttpRequest.GET(new URI("http://localhost:8080/api/topics"));
-        filter.doFilter(request, chain);
-
-        // Then: The request should proceed unmodified
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<MutableHttpRequest<?>> captor = ArgumentCaptor.forClass(MutableHttpRequest.class);
-        verify(chain).proceed(captor.capture());
-
-        URI rewrittenUri = captor.getValue().getUri();
-        assertEquals("http://localhost:8080/api/topics", rewrittenUri.toString());
-    }
-
-    @Test
-    void shouldPreserveQueryParametersWhenRewriting() throws Exception {
-        // Given: Context switch active
-        filter.originalApiUrl = "http://localhost:8080";
-        when(kafkactlProperties.getApi()).thenReturn("http://localhost:8085");
-
-        @SuppressWarnings("unchecked")
-        Publisher<HttpResponse<?>> mockPublisher = mock(Publisher.class);
-        doReturn(mockPublisher).when(chain).proceed(any(MutableHttpRequest.class));
-
-        // When
-        MutableHttpRequest<?> request =
-                HttpRequest.GET(new URI("http://localhost:8080/api/topics?dryrun=true&name=test"));
-        filter.doFilter(request, chain);
-
-        // Then: Query params should be preserved
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<MutableHttpRequest<?>> captor = ArgumentCaptor.forClass(MutableHttpRequest.class);
-        verify(chain).proceed(captor.capture());
-
-        URI rewrittenUri = captor.getValue().getUri();
-        assertEquals("http://localhost:8085/api/topics?dryrun=true&name=test", rewrittenUri.toString());
-    }
-
-    @Test
-    void shouldHandleLoginEndpointWithContextSwitch() throws Exception {
-        // Given: Context switched to different host
-        filter.originalApiUrl = "http://localhost:8080";
-        when(kafkactlProperties.getApi()).thenReturn("http://api.example.com:8080");
-
-        @SuppressWarnings("unchecked")
-        Publisher<HttpResponse<?>> mockPublisher = mock(Publisher.class);
-        doReturn(mockPublisher).when(chain).proceed(any(MutableHttpRequest.class));
-
-        // When
-        MutableHttpRequest<?> request = HttpRequest.POST(new URI("http://localhost:8080/login"), "{\"user\":\"test\"}");
-        filter.doFilter(request, chain);
-
-        // Then
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<MutableHttpRequest<?>> captor = ArgumentCaptor.forClass(MutableHttpRequest.class);
-        verify(chain).proceed(captor.capture());
-
-        URI rewrittenUri = captor.getValue().getUri();
-        assertEquals("http://api.example.com:8080/login", rewrittenUri.toString());
-    }
-
-    @Test
-    void shouldHandleNamespacedClientPathCorrectly() throws Exception {
-        // Given: Context switch for NamespacedResourceClient (which has /api/namespaces/ in @Client)
-        filter.originalApiUrl = "http://localhost:8080";
-        when(kafkactlProperties.getApi()).thenReturn("http://localhost:8085");
-
-        @SuppressWarnings("unchecked")
-        Publisher<HttpResponse<?>> mockPublisher = mock(Publisher.class);
-        doReturn(mockPublisher).when(chain).proceed(any(MutableHttpRequest.class));
-
-        // When: Request from NamespacedResourceClient
-        MutableHttpRequest<?> request =
-                HttpRequest.GET(new URI("http://localhost:8080/api/namespaces/test/topics/my-topic"));
-        filter.doFilter(request, chain);
-
-        // Then: Should preserve full path including /api/namespaces/
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<MutableHttpRequest<?>> captor = ArgumentCaptor.forClass(MutableHttpRequest.class);
-        verify(chain).proceed(captor.capture());
-
-        URI rewrittenUri = captor.getValue().getUri();
-        assertEquals("http://localhost:8085/api/namespaces/test/topics/my-topic", rewrittenUri.toString());
+        verify(chain).proceed(request);
+        assertEquals(expectedUri, request.getUri().toString());
     }
 }
