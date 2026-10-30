@@ -56,11 +56,10 @@ public class AuthRenew extends HelpHook implements Callable<Integer> {
     public Integer call() throws IOException {
         loginService.deleteJwtFile();
         if (loginService.doAuthenticate(commandSpec, verboseMixin.verbose)) {
-            commandSpec.commandLine().getOut().println("JWT renewed successfully.");
+            commandSpec.commandLine().getOut().println("Authentication renewed successfully.");
             return 0;
         }
 
-        commandSpec.commandLine().getErr().println("Failed to renew JWT.");
         return 1;
     }
 }
