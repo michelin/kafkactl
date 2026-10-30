@@ -166,10 +166,8 @@ public class Diff extends AuthenticatedHook {
         List<String> newResourceStr = mergedYaml.lines().toList();
         Patch<String> diff = DiffUtils.diff(oldResourceStr, newResourceStr);
         return UnifiedDiffUtils.generateUnifiedDiff(
-                String.format(
-                        "%s/%s-LIVE", merged.getKind(), merged.getMetadata().getName()),
-                String.format(
-                        "%s/%s-MERGED", merged.getKind(), merged.getMetadata().getName()),
+                "%s/%s-LIVE".formatted(merged.getKind(), merged.getMetadata().getName()),
+                "%s/%s-MERGED".formatted(merged.getKind(), merged.getMetadata().getName()),
                 oldResourceStr,
                 diff,
                 3);

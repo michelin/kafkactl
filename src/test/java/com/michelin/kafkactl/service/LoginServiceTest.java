@@ -184,6 +184,26 @@ class LoginServiceTest {
     }
 
     @Test
+    void shouldNotLoginWhenResponseIsNotFromNs4Kafka() {
+        BearerAccessRefreshToken incompleteResponse = new BearerAccessRefreshToken();
+        incompleteResponse.setUsername("username");
+        incompleteResponse.setAccessToken("accessToken");
+
+        when(kafkactlProperties.getConfigDirectory()).thenReturn("src/test/resources/fake-login");
+        when(clusterResourceClient.login(any())).thenReturn(null, incompleteResponse);
+
+        CommandLine cmd = new CommandLine(new Kafkactl());
+        StringWriter sw = new StringWriter();
+        cmd.setErr(new PrintWriter(sw));
+
+        LoginService loginService = new LoginService(kafkactlProperties, clusterResourceClient);
+
+        assertFalse(loginService.login(cmd.getCommandSpec(), "username", "passwd", true));
+        assertFalse(loginService.login(cmd.getCommandSpec(), "username", "passwd", true));
+        assertTrue(sw.toString().contains("configured API is not an Ns4Kafka API"));
+    }
+
+    @Test
     void shouldLogin() {
         BearerAccessRefreshToken bearerAccessRefreshToken = new BearerAccessRefreshToken();
         bearerAccessRefreshToken.setUsername("username");

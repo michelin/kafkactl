@@ -26,6 +26,7 @@ import com.michelin.kafkactl.client.UserInfoResponse;
 import com.michelin.kafkactl.client.UsernameAndPasswordRequest;
 import com.michelin.kafkactl.model.JwtContent;
 import com.michelin.kafkactl.property.KafkactlProperties;
+import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Singleton;
@@ -112,15 +113,17 @@ public class LoginService {
             accessToken = token.getAccessToken();
             return userInfo.isActive();
         } catch (IOException e) {
-            commandSpec.commandLine().getErr().println(String.format("%s %s.", UNEXPECTED_ERROR, e.getMessage()));
+            commandSpec.commandLine().getErr().println("%s %s.".formatted(UNEXPECTED_ERROR, e.getMessage()));
         } catch (HttpClientResponseException e) {
             if (e.getStatus() != HttpStatus.UNAUTHORIZED) {
                 commandSpec
                         .commandLine()
                         .getErr()
-                        .println(String.format(
-                                "%s %s (%s).",
-                                UNEXPECTED_ERROR, e.getMessage(), e.getStatus().getCode()));
+                        .println("%s %s (%s)."
+                                .formatted(
+                                        UNEXPECTED_ERROR,
+                                        e.getMessage(),
+                                        e.getStatus().getCode()));
             }
         }
 
@@ -147,6 +150,17 @@ public class LoginService {
                     .password(password)
                     .build());
 
+            if (tokenResponse == null
+                    || !StringUtils.hasText(tokenResponse.getUsername())
+                    || !StringUtils.hasText(tokenResponse.getAccessToken())
+                    || tokenResponse.getExpiresIn() == null) {
+                commandSpec
+                        .commandLine()
+                        .getErr()
+                        .println("Authentication failed because the configured API is not an Ns4Kafka API.");
+                return false;
+            }
+
             accessToken = tokenResponse.getAccessToken();
 
             if (verbose) {
@@ -163,7 +177,7 @@ public class LoginService {
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.writeValue(jwtFile, tokenResponse);
             } catch (IOException e) {
-                commandSpec.commandLine().getErr().println(String.format("%s %s.", UNEXPECTED_ERROR, e.getMessage()));
+                commandSpec.commandLine().getErr().println("%s %s.".formatted(UNEXPECTED_ERROR, e.getMessage()));
             }
 
             return true;

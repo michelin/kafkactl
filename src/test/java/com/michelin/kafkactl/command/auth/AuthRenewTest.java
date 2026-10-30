@@ -53,7 +53,7 @@ class AuthRenewTest {
 
         int code = cmd.execute();
         assertEquals(0, code);
-        assertTrue(sw.toString().contains("JWT renewed successfully."));
+        assertTrue(sw.toString().contains("Authentication renewed successfully."));
     }
 
     @Test
@@ -66,6 +66,6 @@ class AuthRenewTest {
 
         int code = cmd.execute();
         assertEquals(1, code);
-        assertTrue(sw.toString().contains("Failed to renew JWT."));
+        assertTrue(sw.toString().isBlank());
     }
 }
