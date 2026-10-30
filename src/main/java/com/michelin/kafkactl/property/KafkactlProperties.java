@@ -78,9 +78,9 @@ public class KafkactlProperties {
     @Getter
     @Setter
     @Builder
+    @ReflectiveAccess
     @NoArgsConstructor
     @AllArgsConstructor
-    @ReflectiveAccess
     public static class ContextsProperties {
         private String name;
         private ContextProperties context;
@@ -88,9 +88,9 @@ public class KafkactlProperties {
         @Getter
         @Setter
         @Builder
+        @ReflectiveAccess
         @NoArgsConstructor
         @AllArgsConstructor
-        @ReflectiveAccess
         @ConfigurationProperties("context")
         public static class ContextProperties {
             private String api;

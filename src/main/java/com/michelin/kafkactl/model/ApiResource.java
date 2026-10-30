@@ -30,9 +30,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
+@ReflectiveAccess
 @NoArgsConstructor
 @AllArgsConstructor
-@ReflectiveAccess
 public class ApiResource {
     private String kind;
     private boolean namespaced;
