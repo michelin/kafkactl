@@ -853,7 +853,7 @@ public class ResourceService {
         try {
             return Files.readString(
                     new File(resource.getSpec().get(SCHEMA_FILE_FIELD).toString()).toPath());
-        } catch (Exception e) {
+        } catch (Exception _) {
             throw new ParameterException(
                     commandSpec.commandLine(),
                     "Cannot open schema file " + resource.getSpec().get(SCHEMA_FILE_FIELD)
