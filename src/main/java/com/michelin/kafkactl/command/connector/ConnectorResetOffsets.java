@@ -85,8 +85,7 @@ public class ConnectorResetOffsets extends AuthenticatedHook {
 
             List<Resource> resetOffsetsResponses = connectors.stream()
                     .map(connector -> resourceService.resetConnectorOffsets(namespace, connector, commandSpec))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
+                    .flatMap(Optional::stream)
                     .toList();
 
             if (!resetOffsetsResponses.isEmpty()) {

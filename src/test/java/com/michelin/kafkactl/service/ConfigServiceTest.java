@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -175,7 +175,7 @@ class ConfigServiceTest {
 
         when(kafkactlProperties.getConfigPath()).thenReturn("src/test/resources/config.yml");
 
-        String backUp = Files.readString(Paths.get(kafkactlProperties.getConfigPath()));
+        String backUp = Files.readString(Path.of(kafkactlProperties.getConfigPath()));
 
         KafkactlProperties.ContextsProperties contextPropertiesToSet = KafkactlProperties.ContextsProperties.builder()
                 .name("name")
@@ -188,7 +188,7 @@ class ConfigServiceTest {
 
         configService.updateConfigurationContext(contextPropertiesToSet);
 
-        String actual = Files.readString(Paths.get(kafkactlProperties.getConfigPath()));
+        String actual = Files.readString(Path.of(kafkactlProperties.getConfigPath()));
 
         assertTrue(actual.contains("  current-namespace: namespace"));
         assertTrue(actual.contains("  api: https://ns4kafka.com"));

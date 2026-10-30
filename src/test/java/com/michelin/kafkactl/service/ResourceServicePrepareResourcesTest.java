@@ -537,7 +537,7 @@ class ResourceServicePrepareResourcesTest {
 
         List<Resource> result = resourceService.prepareResources(input, commandSpec);
 
-        assertEquals("Namespace", result.get(0).getKind());
+        assertEquals("Namespace", result.getFirst().getKind());
         assertEquals("Schema", result.get(1).getKind());
         assertEquals("Schema", result.get(2).getKind());
     }
