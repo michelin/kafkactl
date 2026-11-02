@@ -88,18 +88,18 @@ class DiffTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(false);
+        when(configService.getMissingCurrentContextProperty()).thenReturn(Optional.of("API"));
 
         int code = cmd.execute();
         assertEquals(1, code);
         assertTrue(sw.toString()
-                .contains("No valid current context found. "
+                .contains("No API set in the current context. "
                         + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
     @Test
     void shouldNotDiffWhenNotAuthenticated() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(diff);
@@ -112,7 +112,7 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenNoFileInStdin() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         CommandLine cmd = new CommandLine(diff);
@@ -126,11 +126,11 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenYmlFileNotFound() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(diff);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.parseResources(any(), anyBoolean(), any()))
                 .thenThrow(new ParameterException(
@@ -143,11 +143,11 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenInvalidResources() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(diff);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -171,7 +171,6 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenNamespaceMismatch() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -200,7 +199,6 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenHttpClientResponseException() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -231,7 +229,6 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenHttpClientResponseExceptionDuringApply() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -283,7 +280,6 @@ class DiffTest {
 
     @Test
     void shouldNotDiffApplyHasNoBody() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -335,7 +331,6 @@ class DiffTest {
 
     @Test
     void shouldDiff() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -403,7 +398,6 @@ class DiffTest {
 
     @Test
     void shouldDiffWithIgnoreFields() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -475,7 +469,6 @@ class DiffTest {
 
     @Test
     void shouldDiffWithMultipleIgnoreFields() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -546,7 +539,6 @@ class DiffTest {
 
     @Test
     void shouldDiffWithIgnoreFieldWithSubFields() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -618,7 +610,6 @@ class DiffTest {
 
     @Test
     void shouldDiffWhenNoLive() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -678,7 +669,6 @@ class DiffTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE_FIELD, "src/test/resources/person.avsc");
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -732,7 +722,6 @@ class DiffTest {
 
     @Test
     void shouldDiffInlineSchema() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -792,7 +781,6 @@ class DiffTest {
         Map<String, Object> specs = new HashMap<>();
         specs.put(SCHEMA_FILE_FIELD, "src/test/resources/not-exist.avsc");
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -824,7 +812,6 @@ class DiffTest {
 
     @Test
     void shouldDiffWithIgnoreFlatFormatField() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()
@@ -898,7 +885,6 @@ class DiffTest {
 
     @Test
     void shouldDiffWithIgnoreNonExistentField() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         Resource resource = Resource.builder()

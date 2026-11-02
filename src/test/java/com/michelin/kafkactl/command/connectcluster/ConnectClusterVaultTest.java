@@ -33,6 +33,7 @@ import com.michelin.kafkactl.service.ResourceService;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -66,22 +67,22 @@ class ConnectClusterVaultTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(false);
+        when(configService.getMissingCurrentContextProperty()).thenReturn(Optional.of("API"));
 
         int code = cmd.execute();
         assertEquals(1, code);
         assertTrue(sw.toString()
-                .contains("No valid current context found. "
+                .contains("No API set in the current context. "
                         + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
     @Test
     void shouldNotExecuteWhenNotLoggedIn() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         int code = cmd.execute();
@@ -90,7 +91,6 @@ class ConnectClusterVaultTest {
 
     @Test
     void shouldListAvailableVaultsClustersSuccess() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
@@ -105,7 +105,6 @@ class ConnectClusterVaultTest {
 
     @Test
     void shouldListAvailableVaultsClustersFail() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
@@ -120,7 +119,6 @@ class ConnectClusterVaultTest {
 
     @Test
     void shouldDisplayErrorMessageWhenNoSecretsPassed() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
@@ -136,7 +134,6 @@ class ConnectClusterVaultTest {
 
     @Test
     void shouldVaultSuccess() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");

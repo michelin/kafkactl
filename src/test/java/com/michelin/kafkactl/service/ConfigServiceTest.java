@@ -22,25 +22,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.michelin.kafkactl.Kafkactl;
 import com.michelin.kafkactl.property.KafkactlProperties;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import picocli.CommandLine;
 
 @ExtendWith(MockitoExtension.class)
 class ConfigServiceTest {
@@ -168,14 +165,9 @@ class ConfigServiceTest {
     }
 
     @Test
-    void shouldUpdateConfigurationContext() throws IOException {
-        CommandLine cmd = new CommandLine(new Kafkactl());
-        StringWriter sw = new StringWriter();
-        cmd.setOut(new PrintWriter(sw));
-
-        when(kafkactlProperties.getConfigPath()).thenReturn("src/test/resources/application-test.yml");
-
-        String backUp = Files.readString(Path.of(kafkactlProperties.getConfigPath()));
+    void shouldUpdateConfigurationContext(@TempDir Path tempDir) throws IOException {
+        Path configPath = Files.copy(Path.of("src/test/resources/application-test.yml"), tempDir.resolve("config.yml"));
+        when(kafkactlProperties.getConfigPath()).thenReturn(configPath.toString());
 
         KafkactlProperties.ContextsProperties contextPropertiesToSet = KafkactlProperties.ContextsProperties.builder()
                 .name("name")
@@ -188,56 +180,63 @@ class ConfigServiceTest {
 
         configService.updateConfigurationContext(contextPropertiesToSet);
 
-        String actual = Files.readString(Path.of(kafkactlProperties.getConfigPath()));
+        String actual = Files.readString(configPath);
 
         assertTrue(actual.contains("  current-namespace: namespace"));
         assertTrue(actual.contains("  api: https://ns4kafka.com"));
         assertTrue(actual.contains("  user-token: userToken"));
-
-        BufferedWriter writer = new BufferedWriter(new FileWriter(kafkactlProperties.getConfigPath(), false));
-        writer.append(backUp);
-        writer.close();
+        verify(loginService).deleteJwtFile();
     }
 
     @Test
-    void shouldBeValid() {
+    void shouldUpdateConfigurationContextWithoutNamespace(@TempDir Path tempDir) throws IOException {
+        Path configPath = Files.copy(Path.of("src/test/resources/application-test.yml"), tempDir.resolve("config.yml"));
+        when(kafkactlProperties.getConfigPath()).thenReturn(configPath.toString());
+
+        KafkactlProperties.ContextsProperties contextPropertiesToSet = KafkactlProperties.ContextsProperties.builder()
+                .name("name")
+                .context(KafkactlProperties.ContextsProperties.ContextProperties.builder()
+                        .userToken("userToken")
+                        .api("https://ns4kafka.com")
+                        .build())
+                .build();
+
+        configService.updateConfigurationContext(contextPropertiesToSet);
+
+        String actual = Files.readString(configPath);
+
+        assertFalse(actual.contains("current-namespace"));
+        assertTrue(actual.contains("  api: https://ns4kafka.com"));
+        assertTrue(actual.contains("  user-token: userToken"));
+    }
+
+    @Test
+    void shouldNotGetMissingProperty() {
         when(kafkactlProperties.getApi()).thenReturn("https://ns4kafka.com");
-        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(kafkactlProperties.getUserToken()).thenReturn("userToken");
 
-        boolean actual = configService.isCurrentContextValid();
+        Optional<String> actual = configService.getMissingCurrentContextProperty();
 
-        assertTrue(actual);
+        assertEquals(Optional.empty(), actual);
     }
 
     @Test
-    void shouldBeInvalidWhenApiIsNull() {
-        when(kafkactlProperties.getApi()).thenReturn(null);
+    void shouldGetMissingApi() {
+        when(kafkactlProperties.getApi()).thenReturn(" ");
 
-        boolean actual = configService.isCurrentContextValid();
+        Optional<String> actual = configService.getMissingCurrentContextProperty();
 
-        assertFalse(actual);
+        assertEquals(Optional.of("API"), actual);
     }
 
     @Test
-    void shouldBeInvalidWhenCurrentNamespaceIsNull() {
+    void shouldGetMissingUserToken() {
         when(kafkactlProperties.getApi()).thenReturn("https://ns4kafka.com");
-        when(kafkactlProperties.getCurrentNamespace()).thenReturn(null);
+        when(kafkactlProperties.getUserToken()).thenReturn(" ");
 
-        boolean actual = configService.isCurrentContextValid();
+        Optional<String> actual = configService.getMissingCurrentContextProperty();
 
-        assertFalse(actual);
-    }
-
-    @Test
-    void shouldBeInvalidWhenUserTokenIsNull() {
-        when(kafkactlProperties.getApi()).thenReturn("https://ns4kafka.com");
-        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
-        when(kafkactlProperties.getUserToken()).thenReturn(null);
-
-        boolean actual = configService.isCurrentContextValid();
-
-        assertFalse(actual);
+        assertEquals(Optional.of("user token"), actual);
     }
 
     @Test
@@ -265,6 +264,7 @@ class ConfigServiceTest {
         boolean actual = configService.applyContextByName("context2");
 
         assertTrue(actual);
+        verify(loginService).deleteJwtFile();
     }
 
     @Test
@@ -283,5 +283,6 @@ class ConfigServiceTest {
         boolean actual = configService.applyContextByName("notFound");
 
         assertFalse(actual);
+        verify(loginService, never()).deleteJwtFile();
     }
 }

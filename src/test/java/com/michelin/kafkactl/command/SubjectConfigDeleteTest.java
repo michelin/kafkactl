@@ -68,18 +68,18 @@ class SubjectConfigDeleteTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(false);
+        when(configService.getMissingCurrentContextProperty()).thenReturn(Optional.of("API"));
 
         int code = cmd.execute("mySubject");
         assertEquals(1, code);
         assertTrue(sw.toString()
-                .contains("No valid current context found. "
+                .contains("No API set in the current context. "
                         + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
     @Test
     void shouldNotDeleteConfigWhenNotAuthenticated() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(subjectConfigDelete);
@@ -100,7 +100,6 @@ class SubjectConfigDeleteTest {
                 .spec(Collections.emptyMap())
                 .build();
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.deleteSubjectConfig(any(), any(), any())).thenReturn(Optional.of(resource));
 

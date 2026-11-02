@@ -19,9 +19,11 @@
 package com.michelin.kafkactl.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.property.KafkactlProperties.ContextsProperties;
+import io.micronaut.context.ApplicationContext;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
@@ -47,5 +49,21 @@ class ConfigIntegrationTest {
         ContextsProperties prod = kafkactlProperties.getContexts().getLast();
         assertEquals("prod", prod.getName());
         assertEquals("https://ns4kafka-prod-api.domain.com", prod.getContext().getApi());
+    }
+
+    @Test
+    void shouldBindNullValuesFromConfigFile() {
+        try (ApplicationContext context = ApplicationContext.run("test-null")) {
+            KafkactlProperties properties = context.getBean(KafkactlProperties.class);
+
+            assertNull(properties.getApi());
+            assertNull(properties.getUserToken());
+            assertNull(properties.getCurrentNamespace());
+
+            ContextsProperties dev = properties.getContexts().getFirst();
+            assertNull(dev.getContext().getApi());
+            assertNull(dev.getContext().getUserToken());
+            assertNull(dev.getContext().getNamespace());
+        }
     }
 }

@@ -21,6 +21,7 @@ package com.michelin.kafkactl.property;
 import com.michelin.kafkactl.service.SystemService;
 import io.micronaut.context.annotation.ConfigurationProperties;
 import io.micronaut.core.annotation.Introspected;
+import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.convert.format.MapFormat;
 import io.micronaut.core.util.StringUtils;
@@ -41,9 +42,12 @@ import lombok.Setter;
 public class KafkactlProperties {
     public static final String KAFKACTL_CONFIG = "KAFKACTL_CONFIG";
 
-    private String api;
-    private String userToken;
-    private String currentNamespace;
+    @Nullable private String api;
+
+    @Nullable private String userToken;
+
+    @Nullable private String currentNamespace;
+
     private List<ContextsProperties> contexts;
     private String version;
 
@@ -93,9 +97,11 @@ public class KafkactlProperties {
         @AllArgsConstructor
         @ConfigurationProperties("context")
         public static class ContextProperties {
-            private String api;
-            private String userToken;
-            private String namespace;
+            @Nullable private String api;
+
+            @Nullable private String userToken;
+
+            @Nullable private String namespace;
         }
     }
 }

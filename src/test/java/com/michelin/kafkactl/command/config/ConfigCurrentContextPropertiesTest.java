@@ -31,6 +31,7 @@ import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.service.FormatService;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -55,7 +56,6 @@ class ConfigCurrentContextPropertiesTest {
 
     @Test
     void shouldGetCurrentContextWithMaskedTokens() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(kafkactlProperties.getApi()).thenReturn("ns4kafka.com");
         when(configService.getCurrentContextName()).thenReturn("current-context");
@@ -85,7 +85,6 @@ class ConfigCurrentContextPropertiesTest {
 
     @Test
     void shouldGetCurrentContextWithUnmaskedTokens() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(kafkactlProperties.getApi()).thenReturn("ns4kafka.com");
         when(kafkactlProperties.getUserToken()).thenReturn("user-token");
@@ -116,7 +115,7 @@ class ConfigCurrentContextPropertiesTest {
 
     @Test
     void shouldNotGetCurrentContextWhenInvalid() {
-        when(configService.isCurrentContextValid()).thenReturn(false);
+        when(configService.getMissingCurrentContextProperty()).thenReturn(Optional.of("API"));
 
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();
@@ -125,7 +124,7 @@ class ConfigCurrentContextPropertiesTest {
         int code = cmd.execute();
         assertEquals(1, code);
         assertTrue(sw.toString()
-                .contains("No valid current context found. "
+                .contains("No API set in the current context. "
                         + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 }

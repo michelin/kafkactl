@@ -73,18 +73,18 @@ class ImportTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(false);
+        when(configService.getMissingCurrentContextProperty()).thenReturn(Optional.of("API"));
 
         int code = cmd.execute("topic");
         assertEquals(1, code);
         assertTrue(sw.toString()
-                .contains("No valid current context found. "
+                .contains("No API set in the current context. "
                         + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
     @Test
     void shouldNotImportWhenNotAuthenticated() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(importCmd);
@@ -97,7 +97,7 @@ class ImportTest {
 
     @Test
     void shouldNotImportWhenServerNotHaveResourceType() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.empty());
 
@@ -112,6 +112,7 @@ class ImportTest {
 
     @Test
     void shouldNotImportWhenResourceNotSynchronizable() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
                 .path("topics")
@@ -120,7 +121,6 @@ class ImportTest {
                 .synchronizable(false)
                 .build();
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.of(apiResource));
 
@@ -135,7 +135,6 @@ class ImportTest {
 
     @Test
     void shouldImportTopicResources() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -160,7 +159,6 @@ class ImportTest {
 
     @Test
     void shouldImportSpecificTopicResources() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -185,7 +183,6 @@ class ImportTest {
 
     @Test
     void shouldImportTopicResourcesDryRun() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -213,7 +210,6 @@ class ImportTest {
 
     @Test
     void shouldImportAllResources() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 

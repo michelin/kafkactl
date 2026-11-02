@@ -31,6 +31,7 @@ import com.michelin.kafkactl.service.LoginService;
 import com.michelin.kafkactl.service.ResourceService;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -64,18 +65,18 @@ class DeleteRecordsTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(false);
+        when(configService.getMissingCurrentContextProperty()).thenReturn(Optional.of("API"));
 
         int code = cmd.execute("topic");
         assertEquals(1, code);
         assertTrue(sw.toString()
-                .contains("No valid current context found. "
+                .contains("No API set in the current context. "
                         + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
     @Test
     void shouldNotDeleteWhenNotAuthenticated() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(deleteRecords);
@@ -88,7 +89,6 @@ class DeleteRecordsTest {
 
     @Test
     void shouldDeleteDryRunSuccess() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(resourceService.deleteRecords(any(), any(), anyBoolean(), any())).thenReturn(0);
@@ -104,7 +104,6 @@ class DeleteRecordsTest {
 
     @Test
     void shouldDeleteSuccess() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(resourceService.deleteRecords(any(), any(), anyBoolean(), any())).thenReturn(0);
@@ -117,7 +116,6 @@ class DeleteRecordsTest {
 
     @Test
     void shouldDeleteFail() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(resourceService.deleteRecords(any(), any(), anyBoolean(), any())).thenReturn(1);

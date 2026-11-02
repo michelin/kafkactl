@@ -20,6 +20,7 @@ package com.michelin.kafkactl.service;
 
 import com.michelin.kafkactl.property.KafkactlProperties;
 import io.micronaut.core.annotation.ReflectiveAccess;
+import io.micronaut.core.util.StringUtils;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.io.File;
@@ -29,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -51,9 +53,9 @@ public class ConfigService {
      */
     public String getCurrentContextName() {
         return kafkactlProperties.getContexts().stream()
-                .filter(context -> context.getContext().getApi().equals(kafkactlProperties.getApi())
-                        && context.getContext().getNamespace().equals(kafkactlProperties.getCurrentNamespace())
-                        && context.getContext().getUserToken().equals(kafkactlProperties.getUserToken()))
+                .filter(context -> Objects.equals(context.getContext().getApi(), kafkactlProperties.getApi())
+                        && Objects.equals(context.getContext().getNamespace(), kafkactlProperties.getCurrentNamespace())
+                        && Objects.equals(context.getContext().getUserToken(), kafkactlProperties.getUserToken()))
                 .findFirst()
                 .map(KafkactlProperties.ContextsProperties::getName)
                 .orElse(null);
@@ -84,10 +86,13 @@ public class ConfigService {
         Map<String, LinkedHashMap<String, Object>> rootNodeConfig = yaml.load(targetStream);
 
         LinkedHashMap<String, Object> kafkactlNodeConfig = rootNodeConfig.get("kafkactl");
-        kafkactlNodeConfig.put(
-                "current-namespace", contextPropertiesToSet.getContext().getNamespace());
-        kafkactlNodeConfig.put("api", contextPropertiesToSet.getContext().getApi());
-        kafkactlNodeConfig.put("user-token", contextPropertiesToSet.getContext().getUserToken());
+        kafkactlNodeConfig.compute(
+                "current-namespace",
+                (_, _) -> contextPropertiesToSet.getContext().getNamespace());
+        kafkactlNodeConfig.compute(
+                "api", (_, _) -> contextPropertiesToSet.getContext().getApi());
+        kafkactlNodeConfig.compute(
+                "user-token", (_, _) -> contextPropertiesToSet.getContext().getUserToken());
 
         DumperOptions options = new DumperOptions();
         options.setIndent(2);
@@ -102,14 +107,20 @@ public class ConfigService {
     }
 
     /**
-     * Check if the current context is valid.
+     * Get the first missing required property of the current context. The namespace is optional.
      *
-     * @return True if the current context is valid, false otherwise
+     * @return The missing property, if any
      */
-    public boolean isCurrentContextValid() {
-        return kafkactlProperties.getApi() != null
-                && kafkactlProperties.getCurrentNamespace() != null
-                && kafkactlProperties.getUserToken() != null;
+    public Optional<String> getMissingCurrentContextProperty() {
+        if (!StringUtils.hasText(kafkactlProperties.getApi())) {
+            return Optional.of("API");
+        }
+
+        if (!StringUtils.hasText(kafkactlProperties.getUserToken())) {
+            return Optional.of("user token");
+        }
+
+        return Optional.empty();
     }
 
     /**

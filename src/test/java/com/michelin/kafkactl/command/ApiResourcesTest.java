@@ -30,6 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.model.ApiResource;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ApiResourcesService;
 import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.service.FormatService;
@@ -40,6 +41,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -61,6 +63,9 @@ class ApiResourcesTest {
     @Mock
     LoginService loginService;
 
+    @Mock
+    KafkactlProperties kafkactlProperties;
+
     @InjectMocks
     private ApiResources apiResources;
 
@@ -70,22 +75,21 @@ class ApiResourcesTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(false);
+        when(configService.getMissingCurrentContextProperty()).thenReturn(Optional.of("API"));
 
         int code = cmd.execute();
         assertEquals(1, code);
         assertTrue(sw.toString()
-                .contains("No valid current context found. "
+                .contains("No API set in the current context. "
                         + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
     @Test
     void shouldNotDisplayApiResourcesWhenNotAuthenticated() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(apiResources);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
-
-        when(configService.isCurrentContextValid()).thenReturn(true);
 
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
@@ -95,11 +99,11 @@ class ApiResourcesTest {
 
     @Test
     void shouldDisplayApiResources() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(apiResources);
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -125,11 +129,11 @@ class ApiResourcesTest {
 
     @Test
     void shouldDisplayError() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(apiResources);
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         HttpClientResponseException exception = new HttpClientResponseException("error", HttpResponse.serverError());

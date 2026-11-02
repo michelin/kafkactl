@@ -80,18 +80,18 @@ class ConnectorTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(false);
+        when(configService.getMissingCurrentContextProperty()).thenReturn(Optional.of("API"));
 
         int code = cmd.execute("pause", "my-connector");
         assertEquals(1, code);
         assertTrue(sw.toString()
-                .contains("No valid current context found. "
+                .contains("No API set in the current context. "
                         + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
     @Test
     void shouldNotChangeStateWhenNotAuthenticated() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(connector);
@@ -128,7 +128,6 @@ class ConnectorTest {
 
     @Test
     void shouldNotChangeStateWhenEmptyConnectorsList() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.changeConnectorState(any(), any(), any(), any())).thenReturn(Optional.empty());
 
@@ -154,7 +153,6 @@ class ConnectorTest {
                 .spec(Collections.emptyMap())
                 .build();
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.changeConnectorState(any(), any(), any(), any())).thenReturn(Optional.of(resource));
 
@@ -199,7 +197,6 @@ class ConnectorTest {
                 .names(List.of("connects", "connect", "co"))
                 .build();
 
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.listResourcesWithType(any(), any(), any(), any()))
@@ -220,7 +217,6 @@ class ConnectorTest {
 
     @Test
     void shouldNotChangeStateWhenHttpClientResponseException() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         ApiResource apiResource = ApiResource.builder()
@@ -246,7 +242,6 @@ class ConnectorTest {
 
     @Test
     void shouldThrowExceptionWhenChangeStateOfAll() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.empty());
 

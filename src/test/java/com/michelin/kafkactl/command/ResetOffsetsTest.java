@@ -36,6 +36,7 @@ import com.michelin.kafkactl.service.LoginService;
 import com.michelin.kafkactl.service.ResourceService;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -71,18 +72,18 @@ class ResetOffsetsTest {
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
-        when(configService.isCurrentContextValid()).thenReturn(false);
+        when(configService.getMissingCurrentContextProperty()).thenReturn(Optional.of("API"));
 
         int code = cmd.execute("--group", "myGroup", "--all-topics", "--to-earliest");
         assertEquals(1, code);
         assertTrue(sw.toString()
-                .contains("No valid current context found. "
+                .contains("No API set in the current context. "
                         + "Use \"kafkactl config use-context\" to set a valid context."));
     }
 
     @Test
     void shouldNotResetWhenNotAuthenticated() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(resetOffsets);
@@ -101,7 +102,6 @@ class ResetOffsetsTest {
         "--shift-by=10,SHIFT_BY"
     })
     void shouldResetOffsetsToEarliest(String method, String expectedMethod) {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(0);
@@ -121,7 +121,6 @@ class ResetOffsetsTest {
 
     @Test
     void shouldResetOffsetsToEarliestDryRun() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(0);
@@ -145,7 +144,6 @@ class ResetOffsetsTest {
 
     @Test
     void shouldResetOffsetsByDuration() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(0);
@@ -166,7 +164,6 @@ class ResetOffsetsTest {
 
     @Test
     void shouldResetOffsetsToOffset() {
-        when(configService.isCurrentContextValid()).thenReturn(true);
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(resourceService.resetOffsets(any(), any(), any(), anyBoolean(), any()))
