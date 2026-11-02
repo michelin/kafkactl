@@ -41,9 +41,13 @@ import lombok.Setter;
 @ConfigurationProperties("kafkactl")
 public class KafkactlProperties {
     public static final String KAFKACTL_CONFIG = "KAFKACTL_CONFIG";
+
     @Nullable private String api;
+
     @Nullable private String userToken;
+
     @Nullable private String currentNamespace;
+
     private List<ContextsProperties> contexts;
     private String version;
 
@@ -94,7 +98,9 @@ public class KafkactlProperties {
         @ConfigurationProperties("context")
         public static class ContextProperties {
             @Nullable private String api;
+
             @Nullable private String userToken;
+
             @Nullable private String namespace;
         }
     }
