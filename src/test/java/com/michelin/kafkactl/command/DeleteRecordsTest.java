@@ -76,6 +76,7 @@ class DeleteRecordsTest {
 
     @Test
     void shouldNotDeleteWhenNotAuthenticated() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(deleteRecords);

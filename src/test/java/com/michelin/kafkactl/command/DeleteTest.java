@@ -99,6 +99,7 @@ class DeleteTest {
 
     @Test
     void shouldNotDeleteByNameWhenNotAuthenticated() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(delete);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
@@ -116,9 +117,11 @@ class DeleteTest {
         cmd.setErr(new PrintWriter(sw));
 
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
 
         int code = cmd.execute("-f", "src/test/resources/topics/unknown.yml");
         assertEquals(2, code);
+        assertTrue(sw.toString().contains("unknown.yml\" not found."));
     }
 
     @Test

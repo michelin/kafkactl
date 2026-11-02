@@ -25,6 +25,7 @@ import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ApiResourcesService;
 import com.michelin.kafkactl.service.LoginService;
 import io.micronaut.core.annotation.ReflectiveAccess;
+import io.micronaut.core.util.StringUtils;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.List;
@@ -54,8 +55,22 @@ public abstract class AuthenticatedHook extends ValidCurrentContextHook {
     @Mixin
     public VerboseMixin verboseMixin;
 
+    /**
+     * Check the namespace is set, authenticate the user, then run the command.
+     *
+     * @return The command return code
+     * @throws IOException Any exception during the run
+     */
     @Override
     public Integer onContextValid() throws IOException {
+        if (!StringUtils.hasText(getNamespace())) {
+            commandSpec
+                    .commandLine()
+                    .getErr()
+                    .println("No namespace set. Use the \"-n\" option or set a namespace in the current context.");
+            return 1;
+        }
+
         if (!loginService.doAuthenticate(commandSpec, verboseMixin.verbose)) {
             return 1;
         }
@@ -69,14 +84,7 @@ public abstract class AuthenticatedHook extends ValidCurrentContextHook {
      * @return The current namespace
      */
     protected String getNamespace() {
-        String namespace = namespaceMixin.optionalNamespace.orElse(kafkactlProperties.getCurrentNamespace());
-        if (namespace == null) {
-            throw new ParameterException(
-                    commandSpec.commandLine(),
-                    "No namespace set. Use the \"-n\" option or set a namespace in the current context.");
-        }
-
-        return namespace;
+        return namespaceMixin.optionalNamespace.orElse(kafkactlProperties.getCurrentNamespace());
     }
 
     /**

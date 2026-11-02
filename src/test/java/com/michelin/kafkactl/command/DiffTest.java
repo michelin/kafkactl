@@ -99,6 +99,7 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenNotAuthenticated() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(diff);
@@ -111,6 +112,7 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenNoFileInStdin() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
 
         CommandLine cmd = new CommandLine(diff);
@@ -124,6 +126,7 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenYmlFileNotFound() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(diff);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
@@ -140,6 +143,7 @@ class DiffTest {
 
     @Test
     void shouldNotDiffWhenInvalidResources() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(diff);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));

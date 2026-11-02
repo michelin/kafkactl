@@ -95,6 +95,7 @@ class ApplyTest {
 
     @Test
     void shouldNotApplyWhenNotAuthenticated() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(apply);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
@@ -107,6 +108,7 @@ class ApplyTest {
 
     @Test
     void shouldNotApplyWhenNoFileInStdin() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(apply);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
@@ -120,6 +122,7 @@ class ApplyTest {
 
     @Test
     void shouldNotApplyWhenYmlFileNotFound() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(apply);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
@@ -136,6 +139,7 @@ class ApplyTest {
 
     @Test
     void shouldNotApplyWhenInvalidResources() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(apply);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));

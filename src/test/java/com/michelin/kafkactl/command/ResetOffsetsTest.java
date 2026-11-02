@@ -83,6 +83,7 @@ class ResetOffsetsTest {
 
     @Test
     void shouldNotResetWhenNotAuthenticated() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(resetOffsets);

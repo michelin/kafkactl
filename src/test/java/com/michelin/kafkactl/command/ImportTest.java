@@ -84,6 +84,7 @@ class ImportTest {
 
     @Test
     void shouldNotImportWhenNotAuthenticated() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(importCmd);
@@ -96,6 +97,7 @@ class ImportTest {
 
     @Test
     void shouldNotImportWhenServerNotHaveResourceType() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.empty());
 
@@ -110,6 +112,7 @@ class ImportTest {
 
     @Test
     void shouldNotImportWhenResourceNotSynchronizable() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
                 .path("topics")

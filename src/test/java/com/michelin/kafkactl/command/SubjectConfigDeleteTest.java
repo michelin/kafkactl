@@ -79,6 +79,7 @@ class SubjectConfigDeleteTest {
 
     @Test
     void shouldNotDeleteConfigWhenNotAuthenticated() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(subjectConfigDelete);

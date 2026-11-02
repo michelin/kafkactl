@@ -91,6 +91,7 @@ class ConnectorTest {
 
     @Test
     void shouldNotChangeStateWhenNotAuthenticated() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(connector);

@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,6 +44,9 @@ import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -88,6 +92,7 @@ class GetTest {
 
     @Test
     void shouldNotGetWhenNotAuthenticated() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(get);
@@ -98,27 +103,22 @@ class GetTest {
         assertEquals(1, code);
     }
 
-    @Test
-    void shouldNotGetWhenNoNamespaceSet() {
-        when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
-        when(apiResourcesService.getResourceDefinitionByName(any()))
-                .thenReturn(Optional.of(ApiResource.builder()
-                        .kind("Topic")
-                        .path("topics")
-                        .names(List.of("topics", "topic", "to"))
-                        .namespaced(true)
-                        .synchronizable(true)
-                        .build()));
-        when(kafkactlProperties.getCurrentNamespace()).thenReturn(null);
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", " "})
+    void shouldNotGetWhenNoNamespaceSet(String namespace) {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn(namespace);
 
         CommandLine cmd = new CommandLine(get);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
 
         int code = cmd.execute("topics");
-        assertEquals(2, code);
-        assertTrue(sw.toString()
-                .contains("No namespace set. Use the \"-n\" option or set a namespace in the current context."));
+        assertEquals(1, code);
+        assertEquals(
+                "No namespace set. Use the \"-n\" option or set a namespace in the current context.",
+                sw.toString().trim());
+        verify(loginService, never()).doAuthenticate(any(), anyBoolean());
     }
 
     @Test
@@ -134,6 +134,7 @@ class GetTest {
 
     @Test
     void shouldNotGetWhenServerNotHaveResourceType() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(true);
         when(apiResourcesService.getResourceDefinitionByName(any())).thenReturn(Optional.empty());
 

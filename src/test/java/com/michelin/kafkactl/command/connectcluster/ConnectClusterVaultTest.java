@@ -78,6 +78,7 @@ class ConnectClusterVaultTest {
 
     @Test
     void shouldNotExecuteWhenNotLoggedIn() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(subcommand);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));

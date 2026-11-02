@@ -79,6 +79,7 @@ class GroupListTest {
 
     @Test
     void shouldNotListWhenNotAuthenticated() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         when(loginService.doAuthenticate(any(), anyBoolean())).thenReturn(false);
 
         CommandLine cmd = new CommandLine(groupList);

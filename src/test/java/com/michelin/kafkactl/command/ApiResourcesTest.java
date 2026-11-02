@@ -30,6 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.michelin.kafkactl.model.ApiResource;
+import com.michelin.kafkactl.property.KafkactlProperties;
 import com.michelin.kafkactl.service.ApiResourcesService;
 import com.michelin.kafkactl.service.ConfigService;
 import com.michelin.kafkactl.service.FormatService;
@@ -62,6 +63,9 @@ class ApiResourcesTest {
     @Mock
     LoginService loginService;
 
+    @Mock
+    KafkactlProperties kafkactlProperties;
+
     @InjectMocks
     private ApiResources apiResources;
 
@@ -82,6 +86,7 @@ class ApiResourcesTest {
 
     @Test
     void shouldNotDisplayApiResourcesWhenNotAuthenticated() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(apiResources);
         StringWriter sw = new StringWriter();
         cmd.setErr(new PrintWriter(sw));
@@ -94,6 +99,7 @@ class ApiResourcesTest {
 
     @Test
     void shouldDisplayApiResources() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(apiResources);
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
@@ -123,6 +129,7 @@ class ApiResourcesTest {
 
     @Test
     void shouldDisplayError() {
+        when(kafkactlProperties.getCurrentNamespace()).thenReturn("namespace");
         CommandLine cmd = new CommandLine(apiResources);
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
