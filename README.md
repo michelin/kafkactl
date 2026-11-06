@@ -1330,7 +1330,7 @@ spec:
   configuration.
 - `spec.kafkaUser` is the Kafka principal. It should refer to an Account ID. It will be used to create ACLs or role
   bindings on this account.
-- `spec.permissionMode` defines which kind of permissions are created for the namespace: `ACL` for [Kafka ACLs](https://kafka.apache.org/43/security/authorization-and-acls/), or `RBAC` for [Confluent Cloud role bindings](https://docs.confluent.io/cloud/current/security/access-control/rbac/overview.html).
+- `spec.permissionMode` defines which kind of permissions are created for the namespace: `ACL` for [Kafka ACLs](https://kafka.apache.org/43/security/authorization-and-acls), or `RBAC` for [Confluent Cloud role bindings](https://docs.confluent.io/cloud/current/security/access-control/rbac/overview.html).
   Public ACLs always remain Kafka ACLs. Switching mode keeps the existing permissions.
 - `spec.protectionEnabled` is a boolean that defines whether the namespace is protected. Protected namespaces cannot grant public ACLs or grant ACLs to public namespaces. 
   Protected namespaces can only consume or produce records in protected namespace resources. This field is optional; by default, namespaces are public.
