@@ -69,10 +69,12 @@ Kafkactl enables the deployment of Kafka resources to Ns4Kafka using YAML descri
         * [Schema](#schema-2)
             * [Local file](#local-file)
             * [Inline](#inline)
+        * [Tableflow Topic](#tableflow-topic)
     * [Administrator](#administrator)
         * [Namespace](#namespace)
             * [Topic Validation Constraints](#topic-validation-constraints)
             * [Connector Validation Constraints](#connector-validation-constraints)
+            * [Tableflow Topic Validation Constraints](#tableflow-topic-validation-constraints)
             * [Validation Constraint Types](#validation-constraint-types)
                 * [Range](#range)
                 * [ValidList](#validlist)
@@ -1062,12 +1064,12 @@ spec:
   description: "myDescription"
 ```
 
-- The `metadata.name` field must be part of your allowed ACLs. Visit your namespace's ACLs to understand which topics
+- `metadata.name` must be part of your allowed ACLs. Visit your namespace's ACLs to understand which topics
   you are allowed to manage.
 - The validation of `spec` properties, and especially `spec.config` properties, depends on the topic validation rules
   associated with your namespace.
 - `spec.replicationFactor` and `spec.partitions` are immutable and cannot be modified once the topic is created.
-- The `spec.tags` field represents a list of tags associated with the topic within a Confluent Cloud cluster.
+- `spec.tags` represents a list of tags associated with the topic within a Confluent Cloud cluster.
   You can learn more about using tags in
   the [Confluent Cloud documentation](https://docs.confluent.io/cloud/current/stream-governance/stream-catalog.html).
 
@@ -1246,6 +1248,29 @@ Registry.
 Your schema's ACLs are the same as your topic's ACLs. If you are allowed to create a topic `myPrefix.topic`, then you
 are automatically allowed to create the subjects `myPrefix.topic-key` and `myPrefix.topic-value`.
 
+#### Tableflow Topic
+
+The `TableflowTopic` resource enables
+[Confluent Tableflow](https://docs.confluent.io/cloud/current/topics/tableflow/overview.html) on an existing topic to
+materialize it as tables. It is only available on Confluent Cloud clusters configured for Tableflow.
+
+```yaml
+---
+apiVersion: v1
+kind: TableflowTopic
+metadata:
+  name: myPrefix.topic
+spec:
+  tableFormats:
+    - ICEBERG
+  storage:
+    kind: Managed
+```
+
+- `metadata.name` must be an existing topic owned by your namespace.
+- `spec.tableFormats` can be `ICEBERG` and/or `DELTA`.
+- `spec.storage.kind` can only be `Managed`.
+
 ### Administrator
 
 Here is the list of resources a Ns4Kafka administrator can manage.
@@ -1324,6 +1349,17 @@ spec:
       io.confluent.connect.jdbc.JdbcSinkConnector:
         db.timezone:
           validation-type: NonEmptyString
+  tableflowTopicValidator:
+    validationConstraints:
+      tableFormats:
+        validation-type: ValidList
+        validStrings:
+          - ICEBERG
+          - DELTA
+      storage.kind:
+        validation-type: ValidString
+        validStrings:
+          - Managed
 ```
 
 - `metadata.cluster` is the name of the Kafka cluster. It should refer to a cluster defined in the Ns4Kafka
@@ -1341,6 +1377,7 @@ spec:
   Ns4Kafka configuration.
 - `spec.topicValidator` is a list of constraints for topics.
 - `spec.connectValidator` is a list of constraints for connectors.
+- `spec.tableflowTopicValidator` is a list of constraints for Tableflow topics.
 
 ##### Topic Validation Constraints
 
@@ -1392,6 +1429,24 @@ The `property` field can be any connector configuration property, or:
 - `name` for the connector name
 
 The `connector-class` field can be any valid connector class, such as `io.confluent.connect.jdbc.JdbcSinkConnector`.
+
+##### Tableflow Topic Validation Constraints
+
+Tableflow topic validation constraints define a list of Tableflow topic properties that must adhere to rules specified by the `validation-type`.
+They apply to all Tableflow topics using `spec.tableflowTopicValidator.validationConstraints`.
+
+```yml
+tableflowTopicValidator:
+  validationConstraints:
+    <property>:
+      validation-type: <validation-type>
+```
+
+The `property` field can be:
+
+- `name` for the Tableflow topic name
+- `tableFormats` for the table formats
+- `storage.kind` for the storage kind
 
 ##### Validation Constraint Types
 
