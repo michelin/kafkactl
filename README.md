@@ -1270,8 +1270,6 @@ spec:
 - `metadata.name` must be an existing topic owned by your namespace.
 - `spec.tableFormats` can be `ICEBERG` and/or `DELTA`.
 - `spec.storage.kind` can only be `Managed`.
-- `spec` is immutable once the Tableflow topic is created.
-- Tableflow is enabled asynchronously after the resource is applied.
 
 ### Administrator
 
