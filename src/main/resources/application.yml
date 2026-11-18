@@ -111,6 +111,13 @@ kafkactl:
     SubjectConfigState:
     - "CONFIG:/spec/compatibility"
     - "SUBJECT:/metadata/name"
+    TableflowTopic:
+    - "TOPIC:/metadata/name"
+    - "FORMATS:/spec/tableFormats"
+    - "STORAGE:/spec/storage/kind"
+    - "PHASE:/status/state/phase"
+    - "ERROR:/status/state/errorMessage"
+    - "AGE:/metadata/creationTimestamp%AGO"
     Topic:
     - "TOPIC:/metadata/name"
     - "RETENTION:/spec/configs/retention.ms%PERIOD"
