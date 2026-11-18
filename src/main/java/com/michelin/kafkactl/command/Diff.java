@@ -96,7 +96,7 @@ public class Diff extends AuthenticatedHook {
         List<Resource> resources = resourceService.parseResources(file, recursive, commandSpec);
         try {
             resourceService.validateAllowedResources(resources, commandSpec);
-            super.validateNamespace(resources);
+            validateNamespace(resources);
             List<Resource> preparedResources = resourceService.prepareResources(resources, commandSpec);
             return diffResources(preparedResources, getNamespace());
         } catch (HttpClientResponseException e) {
@@ -117,7 +117,7 @@ public class Diff extends AuthenticatedHook {
                 .getResourceDefinitionByKind(resource.getKind())
                 .orElseThrow();
         Resource live = resourceService.getSingleResourceWithType(
-                apiResource, namespace, resource.getMetadata().getName(), false);
+                apiResource, namespace, resource.getMetadata().getName());
         HttpResponse<Resource> merged = resourceService.apply(apiResource, namespace, resource, true, commandSpec);
         if (merged != null && merged.getBody().isPresent()) {
             List<String> unifiedDiff = unifiedDiff(live, merged.body());

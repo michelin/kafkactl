@@ -431,7 +431,7 @@ class ResourceServiceTest {
     }
 
     @Test
-    void shouldGetSingleNamespacedResourceWithType() {
+    void shouldGetSingleNamespacedResourceWithTypeByExactName() {
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
                 .path("topics")
@@ -440,52 +440,55 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        Resource topicResource = Resource.builder()
+        Resource otherTopic = Resource.builder()
                 .kind("Topic")
                 .apiVersion("v1")
-                .metadata(Resource.Metadata.builder()
-                        .name("prefix.topic")
-                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
-                        .build())
+                .metadata(Resource.Metadata.builder().name("prefix_topic").build())
                 .spec(Map.of())
                 .build();
 
-        when(namespacedClient.get(any(), any(), any(), any())).thenReturn(HttpResponse.ok(topicResource));
+        Resource topicResource = Resource.builder()
+                .kind("Topic")
+                .apiVersion("v1")
+                .metadata(Resource.Metadata.builder().name("prefix.topic").build())
+                .spec(Map.of())
+                .build();
 
-        Resource actual = resourceService.getSingleResourceWithType(apiResource, "namespace", "resourceName", false);
+        when(namespacedClient.list(any(), any(), any(), any())).thenReturn(List.of(otherTopic, topicResource));
+
+        Resource actual = resourceService.getSingleResourceWithType(apiResource, "namespace", "prefix.topic");
 
         assertEquals(topicResource, actual);
+        verify(namespacedClient).list(eq("namespace"), eq("topics"), eq("prefix.topic"), any());
     }
 
     @Test
     void shouldGetSingleNonNamespacedResourceWithType() {
         ApiResource apiResource = ApiResource.builder()
-                .kind("Topic")
-                .path("topics")
-                .names(List.of("topics", "topic", "to"))
+                .kind("Namespace")
+                .path("namespaces")
+                .names(List.of("namespaces", "namespace", "ns"))
                 .namespaced(false)
-                .synchronizable(true)
+                .synchronizable(false)
                 .build();
 
-        Resource topicResource = Resource.builder()
-                .kind("Topic")
+        Resource namespaceResource = Resource.builder()
+                .kind("Namespace")
                 .apiVersion("v1")
-                .metadata(Resource.Metadata.builder()
-                        .name("prefix.topic")
-                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
-                        .build())
+                .metadata(Resource.Metadata.builder().name("myNamespace").build())
                 .spec(Map.of())
                 .build();
 
-        when(nonNamespacedClient.get(any(), any(), any())).thenReturn(HttpResponse.ok(topicResource));
+        when(nonNamespacedClient.list(any(), any(), any())).thenReturn(List.of(namespaceResource));
 
-        Resource actual = resourceService.getSingleResourceWithType(apiResource, "namespace", "resourceName", false);
+        Resource actual = resourceService.getSingleResourceWithType(apiResource, "namespace", "myNamespace");
 
-        assertEquals(topicResource, actual);
+        assertEquals(namespaceResource, actual);
+        verify(nonNamespacedClient).list(any(), eq("namespaces"), eq(Map.of("name", "myNamespace")));
     }
 
     @Test
-    void shouldThrowExceptionWhenGetSingleResourceWithTypeNotFound() {
+    void shouldReturnNullWhenGetSingleResourceWithTypeNotFound() {
         ApiResource apiResource = ApiResource.builder()
                 .kind("Topic")
                 .path("topics")
@@ -494,78 +497,9 @@ class ResourceServiceTest {
                 .synchronizable(true)
                 .build();
 
-        Resource topicResource = Resource.builder()
-                .kind("Topic")
-                .apiVersion("v1")
-                .metadata(Resource.Metadata.builder()
-                        .name("prefix.topic")
-                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
-                        .build())
-                .spec(Map.of())
-                .build();
+        when(namespacedClient.list(any(), any(), any(), any())).thenReturn(List.of());
 
-        when(namespacedClient.get(any(), any(), any(), any())).thenReturn(HttpResponse.notFound(topicResource));
-
-        HttpClientResponseException actual = assertThrows(
-                HttpClientResponseException.class,
-                () -> resourceService.getSingleResourceWithType(apiResource, "namespace", "resourceName", true));
-
-        assertEquals("Not Found", actual.getMessage());
-        assertEquals(HttpStatus.NOT_FOUND, actual.getStatus());
-    }
-
-    @Test
-    void shouldNotThrowExceptionWhenGetSingleResourceWithTypeNotFound() {
-        ApiResource apiResource = ApiResource.builder()
-                .kind("Topic")
-                .path("topics")
-                .names(List.of("topics", "topic", "to"))
-                .namespaced(true)
-                .synchronizable(true)
-                .build();
-
-        Resource topicResource = Resource.builder()
-                .kind("Topic")
-                .apiVersion("v1")
-                .metadata(Resource.Metadata.builder()
-                        .name("prefix.topic")
-                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
-                        .build())
-                .spec(Map.of())
-                .build();
-
-        when(namespacedClient.get(any(), any(), any(), any())).thenReturn(HttpResponse.notFound(topicResource));
-
-        Resource actual = resourceService.getSingleResourceWithType(apiResource, "namespace", "resourceName", false);
-
-        assertEquals(topicResource, actual);
-    }
-
-    @Test
-    void shouldThrowServerExceptionWhenGetSingleResourceWithType() {
-        ApiResource apiResource = ApiResource.builder()
-                .kind("Topic")
-                .path("topics")
-                .names(List.of("topics", "topic", "to"))
-                .namespaced(true)
-                .synchronizable(true)
-                .build();
-
-        Resource topicResource = Resource.builder()
-                .kind("Topic")
-                .apiVersion("v1")
-                .metadata(Resource.Metadata.builder()
-                        .name("prefix.topic")
-                        .creationTimestamp(Date.from(Instant.parse("2000-01-01T01:00:00.00Z")))
-                        .build())
-                .spec(Map.of())
-                .build();
-
-        when(namespacedClient.get(any(), any(), any(), any())).thenReturn(HttpResponse.serverError(topicResource));
-
-        Resource actual = resourceService.getSingleResourceWithType(apiResource, "namespace", "resourceName", false);
-
-        assertEquals(topicResource, actual);
+        assertNull(resourceService.getSingleResourceWithType(apiResource, "namespace", "prefix.topic"));
     }
 
     @Test

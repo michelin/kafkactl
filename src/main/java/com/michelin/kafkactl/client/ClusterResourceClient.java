@@ -113,15 +113,4 @@ public interface ClusterResourceClient {
      */
     @Get("/api/{kind}{?search*}")
     List<Resource> list(@Header("Authorization") String token, String kind, @QueryValue Map<String, String> search);
-
-    /**
-     * Get a resource.
-     *
-     * @param token The auth token
-     * @param kind The kind of resource
-     * @param resource The name of the resource
-     * @return The resource
-     */
-    @Get("/api/{kind}/{resource}")
-    HttpResponse<Resource> get(@Header("Authorization") String token, String kind, String resource);
 }

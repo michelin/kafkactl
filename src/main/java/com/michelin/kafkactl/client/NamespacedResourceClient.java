@@ -89,19 +89,6 @@ public interface NamespacedResourceClient {
             String namespace, String kind, @Nullable @QueryValue String name, @Header("Authorization") String token);
 
     /**
-     * Get a resource.
-     *
-     * @param namespace The namespace
-     * @param kind The kind of resource
-     * @param resourceName The name of the resource
-     * @param token The auth token
-     * @return The resource
-     */
-    @Get("{namespace}/{kind}/{resourceName}")
-    HttpResponse<Resource> get(
-            String namespace, String kind, String resourceName, @Header("Authorization") String token);
-
-    /**
      * Imports the unsynchronized given type of resource.
      *
      * @param namespace The namespace
