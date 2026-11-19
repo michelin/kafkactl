@@ -268,8 +268,7 @@ class DiffTest {
                         "partitions", 3))
                 .build();
 
-        when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
-                .thenReturn(live);
+        when(resourceService.getSingleResourceWithType(any(), any(), any())).thenReturn(live);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any())).thenReturn(null);
 
         CommandLine cmd = new CommandLine(diff);
@@ -319,8 +318,7 @@ class DiffTest {
                         "partitions", 3))
                 .build();
 
-        when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
-                .thenReturn(live);
+        when(resourceService.getSingleResourceWithType(any(), any(), any())).thenReturn(live);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any())).thenReturn(HttpResponse.ok());
 
         CommandLine cmd = new CommandLine(diff);
@@ -373,8 +371,7 @@ class DiffTest {
                         "partitions", 3))
                 .build();
 
-        when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
-                .thenReturn(live);
+        when(resourceService.getSingleResourceWithType(any(), any(), any())).thenReturn(live);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
 
@@ -440,8 +437,7 @@ class DiffTest {
                         "partitions", 3))
                 .build();
 
-        when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
-                .thenReturn(live);
+        when(resourceService.getSingleResourceWithType(any(), any(), any())).thenReturn(live);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
 
@@ -511,8 +507,7 @@ class DiffTest {
                         "partitions", 3))
                 .build();
 
-        when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
-                .thenReturn(live);
+        when(resourceService.getSingleResourceWithType(any(), any(), any())).thenReturn(live);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
 
@@ -583,8 +578,7 @@ class DiffTest {
                         "partitions", 3))
                 .build();
 
-        when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
-                .thenReturn(live);
+        when(resourceService.getSingleResourceWithType(any(), any(), any())).thenReturn(live);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
 
@@ -639,8 +633,7 @@ class DiffTest {
                 .build();
 
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
-        when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
-                .thenReturn(null);
+        when(resourceService.getSingleResourceWithType(any(), any(), any())).thenReturn(null);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
 
@@ -696,8 +689,7 @@ class DiffTest {
 
         when(apiResourcesService.getResourceDefinitionByKind(any())).thenReturn(Optional.of(apiResource));
         when(resourceService.sortSchemaReferences(any())).thenReturn(List.of());
-        when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
-                .thenReturn(null);
+        when(resourceService.getSingleResourceWithType(any(), any(), any())).thenReturn(null);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
 
@@ -855,8 +847,7 @@ class DiffTest {
                         "cleanup.policy", "compact"))
                 .build();
 
-        when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
-                .thenReturn(live);
+        when(resourceService.getSingleResourceWithType(any(), any(), any())).thenReturn(live);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
 
@@ -926,8 +917,7 @@ class DiffTest {
                         "partitions", 3))
                 .build();
 
-        when(resourceService.getSingleResourceWithType(any(), any(), any(), anyBoolean()))
-                .thenReturn(live);
+        when(resourceService.getSingleResourceWithType(any(), any(), any())).thenReturn(live);
         when(resourceService.apply(any(), any(), any(), anyBoolean(), any()))
                 .thenReturn(HttpResponse.ok(resource).header("X-Ns4kafka-Result", "Created"));
 

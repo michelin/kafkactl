@@ -169,26 +169,24 @@ public class ResourceService {
     }
 
     /**
-     * Get a resource by type and name.
+     * Get a resource by type and exact name.
      *
      * @param apiResource The resource type
      * @param namespace The namespace
      * @param resourceName The resource name
-     * @param throwError true if error should be thrown
-     * @return A resource
+     * @return The resource, or null if not found
      */
-    public Resource getSingleResourceWithType(
-            ApiResource apiResource, String namespace, String resourceName, boolean throwError) {
-        HttpResponse<Resource> response = apiResource.isNamespaced()
-                ? namespacedClient.get(namespace, apiResource.getPath(), resourceName, loginService.getAuthorization())
-                : nonNamespacedClient.get(loginService.getAuthorization(), apiResource.getPath(), resourceName);
-
-        // Micronaut does not throw exception on 404, so produce a 404 manually
-        if (response.getStatus().equals(HttpStatus.NOT_FOUND) && throwError) {
-            throw new HttpClientResponseException(response.reason(), response);
+    public @Nullable Resource getSingleResourceWithType(
+            ApiResource apiResource, String namespace, String resourceName) {
+        List<Resource> resources = listResourcesWithType(apiResource, namespace, resourceName, null);
+        if (resources == null) {
+            return null;
         }
 
-        return response.body();
+        return resources.stream()
+                .filter(resource -> resourceName.equals(resource.getMetadata().getName()))
+                .findFirst()
+                .orElse(null);
     }
 
     /**
