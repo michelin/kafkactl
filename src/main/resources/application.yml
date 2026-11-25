@@ -115,6 +115,7 @@ kafkactl:
     - "TOPIC:/metadata/name"
     - "FORMATS:/spec/tableFormats"
     - "STORAGE:/spec/storage/kind"
+    - "SNAPSHOT RETENTION:/spec/snapshotRetentionMs%PERIOD"
     - "PHASE:/status/state/phase"
     - "ERROR:/status/state/errorMessage"
     - "AGE:/metadata/creationTimestamp%AGO"

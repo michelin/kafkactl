@@ -1265,11 +1265,17 @@ spec:
     - ICEBERG
   storage:
     kind: Managed
+  snapshotRetentionMs: 604800000
 ```
 
 - `metadata.name` must be an existing topic owned by your namespace.
 - `spec.tableFormats` can be `ICEBERG` and/or `DELTA`.
 - `spec.storage.kind` can only be `Managed`.
+- `spec.snapshotRetentionMs` is the maximum age of table snapshots or versions in milliseconds. It is optional
+  and must be at least 86400000 (one day). Confluent defaults to seven days if omitted at creation.
+
+To update retention on an existing Tableflow topic, edit `spec.snapshotRetentionMs` in its manifest.
+Keep the existing table formats and storage kind. Omitting retention on a later apply preserves the stored value.
 
 ### Administrator
 
@@ -1360,6 +1366,11 @@ spec:
         validation-type: ValidString
         validStrings:
           - Managed
+      snapshotRetentionMs:
+        validation-type: Range
+        optional: true
+        min: 86400000
+        max: 604800000
 ```
 
 - `metadata.cluster` is the name of the Kafka cluster. It should refer to a cluster defined in the Ns4Kafka
@@ -1447,6 +1458,7 @@ The `property` field can be:
 - `name` for the Tableflow topic name
 - `tableFormats` for the table formats
 - `storage.kind` for the storage kind
+- `snapshotRetentionMs` for the snapshot retention in milliseconds
 
 ##### Validation Constraint Types
 
