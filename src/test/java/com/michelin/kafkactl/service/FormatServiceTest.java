@@ -62,14 +62,29 @@ class FormatServiceTest {
                 .spec(Map.of("configs", Map.of("retention.ms", "60000", "cleanup.policy", "delete")))
                 .build();
 
+        String output = displayTable(resource);
+        assertTrue(output.contains("TOPIC         RETENTION  POLICY  AGE"));
+        assertTrue(output.contains("prefix.topic  1m         delete"));
+    }
+
+    @Test
+    void shouldDisplayTableflowSnapshotRetention() {
+        Resource resource = Resource.builder()
+                .kind("TableflowTopic")
+                .spec(Map.of("snapshotRetentionMs", 172_800_000L))
+                .metadata(Resource.Metadata.builder().name("orders").build())
+                .build();
+        String output = displayTable(resource);
+        assertTrue(output.contains("SNAPSHOT RETENTION"));
+        assertTrue(output.contains("2d"));
+    }
+
+    private String displayTable(Resource resource) {
         CommandLine cmd = new CommandLine(new Kafkactl());
         StringWriter sw = new StringWriter();
         cmd.setOut(new PrintWriter(sw));
-
-        formatService.displayList("Topic", Collections.singletonList(resource), TABLE, cmd.getCommandSpec());
-
-        assertTrue(sw.toString().contains("TOPIC         RETENTION  POLICY  AGE"));
-        assertTrue(sw.toString().contains("prefix.topic  1m         delete"));
+        formatService.displayList(resource.getKind(), List.of(resource), TABLE, cmd.getCommandSpec());
+        return sw.toString();
     }
 
     @Test
